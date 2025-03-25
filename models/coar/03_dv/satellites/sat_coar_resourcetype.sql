@@ -1,7 +1,7 @@
 {{ config(materialized='incremental') }}
 
 {%- set yaml_metadata -%}
-source_model: "stg_resourcetype_coar"
+source_model: "stg_coar_resourcetype"
 src_pk: "coar_hk"
 src_hashdiff:
   source_column: "resourcetype_hashdiff"
