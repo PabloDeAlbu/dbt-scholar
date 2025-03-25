@@ -1,20 +1,19 @@
-{{ config(materialized='view') }}
+{{ config(materialized='table') }}
 
 {%- set yaml_metadata -%}
-source_model: 'raw_resourcetype_coar'
+source_model: 'map_coar_openalex'
 derived_columns:
   source: "!SEED"
   load_datetime: load_datetime
 hashed_columns:
   coar_hk: coar_uri
-  resourcetype_hashdiff:
-    is_hashdiff: true
+  worktype_hk: work_type
+  link_coar_openalex_hk:
+    - coar_uri
+    - work_type
+  map_coar_openalex_hashdiff:
+    is_hashdiff: false
     columns:
-      - coar_uri
-      - label
-      - parent_label_1
-      - parent_label_2
-      - parent_label_3
       - label_es
 {%- endset -%}
 

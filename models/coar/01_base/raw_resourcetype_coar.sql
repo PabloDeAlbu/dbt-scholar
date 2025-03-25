@@ -1,6 +1,6 @@
 WITH base as (
     SELECT 
-        resourcetype_id,
+        resourcetype_id as coar_uri,
         label,
         parent_label_1,
         parent_label_2,
