@@ -44,6 +44,7 @@ hashed_columns:
       - referenced_works_count
       - countries_distinct_count
       - publication_year
+      - publication_date
       - oa_status
       - oa_url
       - any_repository_has_fulltext
