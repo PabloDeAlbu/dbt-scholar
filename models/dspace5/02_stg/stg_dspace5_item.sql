@@ -13,13 +13,13 @@ hashed_columns:
   doi_hk: doi
   handle_hk: handle
   type_hk: type
-  item2doi_hk:
+  item_doi_hk:
     - item_id
     - doi
-  item2handle_hk:
+  item_handle_hk:
     - item_id
     - handle
-  item2type_hk:
+  item_type_hk:
     - item_id
     - type
   item_hashdiff:

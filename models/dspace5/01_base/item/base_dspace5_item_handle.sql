@@ -3,8 +3,8 @@
 WITH base AS (
     SELECT 
         i.item_id,
-        text_value as handle
-    FROM {{ref('base_dspace5_item2metadatavalue')}} i 
+        split_part(text_value, 'handle/', 2) as handle
+    FROM {{ref('base_dspace5_item_metadatavalue')}} i 
     WHERE 
         i.short_id = 'dc' AND 
         i.element = 'identifier' AND 

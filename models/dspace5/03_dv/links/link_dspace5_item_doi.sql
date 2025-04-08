@@ -1,8 +1,8 @@
 {{ config(materialized='incremental') }}
 
 {%- set source_model = "stg_dspace5_item" -%}
-{%- set src_pk = "item2type_hk" -%}
-{%- set src_fk = ["item_hk","type_hk"] -%}
+{%- set src_pk = "item_doi_hk" -%}
+{%- set src_fk = ["item_hk","doi_hk"] -%}
 {%- set src_ldts = "load_datetime" -%}
 {%- set src_source = "source" -%}
 
