@@ -28,6 +28,8 @@ hashed_columns:
       - item_id
       - title
       - title_lang
+      - dateavailable
+      - dateissued
       - type
       - doi
       - handle

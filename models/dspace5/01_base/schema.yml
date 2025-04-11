@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: dspace5
     description: 'DSpace 5 database'
-    schema: ldg_dspacedb
+    schema: ldg_dspacedb_5
     tables:
       - name: item
       - name: metadatafieldregistry

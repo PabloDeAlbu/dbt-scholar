@@ -3,13 +3,12 @@
 WITH base AS (
     SELECT 
         i.item_id,
-        CONCAT('10.', split_part(text_value, '10.', 2))  as doi
+        {{ dbt_date.convert_timezone(str_to_date("text_value")) }} as datecreated
     FROM {{ref('base_dspace5_item_metadatavalue')}} i 
     WHERE 
         i.short_id = 'dc' AND 
-        i.element = 'identifier' AND 
-        i.qualifier = 'uri' AND
-        i.text_value like '%10.%'
+        i.element = 'date' AND 
+        i.qualifier = 'created'
 )
 
 SELECT * FROM base

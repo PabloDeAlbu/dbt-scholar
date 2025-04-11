@@ -9,9 +9,7 @@ renamed as (
     {{ adapter.quote("withdrawn") }},
     {{ adapter.quote("last_modified") }},
     {{ adapter.quote("owning_collection") }},
-    {{ adapter.quote("discoverable") }},
-    {{ adapter.quote("load_datetime") }}
-    --        {{ adapter.quote("item_pk") }}
+    {{ adapter.quote("discoverable") }}
   from source
 ),
 
@@ -24,7 +22,7 @@ casted as (
     in_archive::boolean,
     discoverable::boolean,
     {{ dbt_date.convert_timezone("last_modified") }} as last_modified,
-    {{ dbt_date.convert_timezone("load_datetime") }} as load_datetime
+    {{ dbt_date.now() }} as load_datetime
   from renamed
 ),
 

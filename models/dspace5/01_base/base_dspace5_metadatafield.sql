@@ -8,8 +8,7 @@ renamed as (
     {{ adapter.quote("metadata_schema_id") }},
     {{ adapter.quote("element") }},
     {{ adapter.quote("qualifier") }},
-    {{ adapter.quote("scope_note") }},
-    {{ adapter.quote("load_datetime") }}
+    {{ adapter.quote("scope_note") }}
 
   from source
 ),
@@ -20,9 +19,7 @@ casted as (
     metadata_schema_id::varchar,
     element::varchar,
     qualifier::varchar,
-    scope_note::varchar,
-    {{ dbt_date.convert_timezone("load_datetime") }} as load_datetime
-
+    scope_note::varchar
   from renamed
 )
 

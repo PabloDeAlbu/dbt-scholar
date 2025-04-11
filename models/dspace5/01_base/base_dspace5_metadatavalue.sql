@@ -12,9 +12,7 @@ renamed as (
     {{ adapter.quote("place") }},
     {{ adapter.quote("authority") }},
     {{ adapter.quote("confidence") }},
-    {{ adapter.quote("resource_type_id") }},
-    {{ adapter.quote("load_datetime") }}
-
+    {{ adapter.quote("resource_type_id") }}
   from source
 ),
 
@@ -28,9 +26,7 @@ casted as (
     resource_type_id::varchar,
     authority::varchar,
     place::int,
-    confidence::int,
-    {{ dbt_date.convert_timezone("load_datetime") }} as load_datetime
-
+    confidence::int
   from renamed
 ),
 
@@ -44,9 +40,7 @@ fillna as (
     COALESCE(resource_type_id, 'NO DATA') as resource_type_id,
     COALESCE(authority, 'NO DATA') as authority,
     COALESCE(place, 0) as place,
-    COALESCE(confidence, 0) as confidence,
-    {{ dbt_date.convert_timezone("load_datetime") }} as load_datetime
-
+    COALESCE(confidence, 0) as confidence
   from casted
 )
 

@@ -10,6 +10,8 @@ src_payload:
   - item_id
   - title
   - title_lang
+  - dateavailable
+  - dateissued
   - type
   - handle
   - doi
