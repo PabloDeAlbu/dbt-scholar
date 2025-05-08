@@ -1,5 +1,5 @@
 with source as (
-  select * from {{ source('openaire', 'map_researchproduct_author') }}
+  select * from {{ source('openaire', 'rel_researchproduct_authors') }}
 ),
 renamed as (
   select
@@ -12,7 +12,7 @@ renamed as (
     {{ adapter.quote("pid.id.scheme") }} as pid_scheme,
     {{ adapter.quote("pid.id.value") }} as orcid,
     {{ adapter.quote("pid.provenance") }} as pid_provenance,
-    {{ dbt_date.convert_timezone("load_datetime") }} as load_datetime
+    load_datetime
   from source
 ),
 
@@ -26,7 +26,7 @@ casted as (
     pid_scheme::varchar,
     orcid::varchar,
     pid_provenance::varchar,
-    {{ dbt_date.convert_timezone("load_datetime") }} as load_datetime
+    load_datetime::timestamp as load_datetime
   from renamed
 ),
 
@@ -40,7 +40,7 @@ fillna as (
     COALESCE(pid_scheme, 'NO DATA') as pid_scheme,
     COALESCE(orcid, 'NO DATA') as orcid,
     COALESCE(pid_provenance, 'NO DATA') as pid_provenance,
-    {{ dbt_date.convert_timezone("load_datetime") }} as load_datetime
+    load_datetime
   from casted
 )
 

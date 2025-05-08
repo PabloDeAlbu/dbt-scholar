@@ -4,7 +4,7 @@ with source as (
     scheme,
     value,
     load_datetime
-  from {{ source('openaire', 'map_researchproduct_pid')}}
+  from {{ source('openaire', 'rel_researchproduct_pids')}}
 ),
 
 casted as (

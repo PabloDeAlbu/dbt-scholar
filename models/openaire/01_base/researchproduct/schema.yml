@@ -6,8 +6,9 @@ sources:
     schema: ldg_openaire
     tables:
       - name: researchproduct
-      - name: map_researchproduct_author
-      - name: map_researchproduct_originalid
-      - name: map_researchproduct_subject
-      - name: map_researchproduct_pid
-      - name: map_researchproduct_url
+      - name: rel_researchproduct_alternateidentifiers
+      - name: rel_researchproduct_authors
+      - name: rel_researchproduct_instances
+      - name: rel_researchproduct_originalid
+      - name: rel_researchproduct_pids
+      - name: rel_researchproduct_subjects

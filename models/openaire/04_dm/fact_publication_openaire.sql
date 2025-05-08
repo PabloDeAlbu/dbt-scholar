@@ -25,8 +25,6 @@ WITH base as (
         hub_researchproduct.researchproduct_hk
     FROM {{ref('hub_openaire_researchproduct')}} hub_researchproduct
     INNER JOIN {{ref('sat_openaire_researchproduct')}} sat_researchproduct ON hub_researchproduct.researchproduct_hk = sat_researchproduct.researchproduct_hk
-    INNER JOIN {{ref('link_openaire_researchproduct_handle')}} link_researchproduct_handle ON link_researchproduct_handle.researchproduct_hk = hub_researchproduct.researchproduct_hk 
-    INNER JOIN {{ref('hub_openaire_handle')}} hub_handle ON link_researchproduct_handle.handle_hk = hub_handle.handle_hk
 )
 
 SELECT * FROM base

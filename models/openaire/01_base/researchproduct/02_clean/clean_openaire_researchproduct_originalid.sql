@@ -3,7 +3,7 @@ with base as (
     researchproduct_id,
     original_id,
     load_datetime
-  from {{ ref('map_openaire_researchproduct_originalid')}}
+  from {{ ref('rel_openaire_researchproduct_originalid')}}
 )
 
 select * from base

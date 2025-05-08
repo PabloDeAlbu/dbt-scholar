@@ -1,14 +1,14 @@
 with source as (
-  select * from {{ source('openaire', 'map_researchproduct_url') }}
+  select * from {{ source('openaire', 'rel_researchproduct_instances') }}
 ),
 
 filtered as (
   select 
     id,
-    url,
+    urls as url,
     load_datetime
   from source
-  where url is not null
+  where urls is not null
 ),
 
 renamed as (
