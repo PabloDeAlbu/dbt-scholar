@@ -34,6 +34,9 @@ hashed_columns:
       - doi
       - handle
       - last_modified
+      - withdrawn
+      - in_archive
+      - discoverable
       - load_datetime
 {%- endset -%}
 

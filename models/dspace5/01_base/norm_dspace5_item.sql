@@ -8,6 +8,10 @@ with source as (
     item_dateissued.dateissued,
     item_handle.handle,
     COALESCE(i2doi.doi, 'NO DATA') as doi,
+    i.submitter_id,
+    i.withdrawn,
+    i.in_archive,
+    i.discoverable,
     i.last_modified,
     i.load_datetime
   from {{ ref('base_dspace5_item') }} i
