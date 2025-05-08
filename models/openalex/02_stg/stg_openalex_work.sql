@@ -18,11 +18,15 @@ hashed_columns:
   work_type_hk:
     - work_id
     - type
-  work_ids_hk:
+  work_doi_hk:
     - work_id
     - doi
+  work_mag_hk:
+    - work_id
     - mag
+  work_pmcid_hk:
     - pmcid
+  work_pmid_hk:
     - pmid
   work_hashdiff:
     is_hashdiff: true
