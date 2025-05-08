@@ -1,6 +1,6 @@
 WITH base as (
     SELECT 
-        work_type::varchar,
+        type::varchar,
         label::varchar,
         label_es::varchar,
         coar_uri::varchar,

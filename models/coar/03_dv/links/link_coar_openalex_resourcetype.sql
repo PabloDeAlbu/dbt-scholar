@@ -1,7 +1,7 @@
 {{ config(materialized='incremental') }}
 
-{%- set source_model = "stg_coar_openaire" -%}
-{%- set src_pk = "link_coar_openaire_hk" -%}
+{%- set source_model = "stg_coar_openalex_resourcetype" -%}
+{%- set src_pk = "link_coar_openalex_hk" -%}
 {%- set src_fk = ["coar_hk", "type_hk"] -%}
 {%- set src_ldts = "load_datetime" -%}
 {%- set src_source = "source" -%}

@@ -1,17 +1,17 @@
 {{ config(materialized='table') }}
 
 {%- set yaml_metadata -%}
-source_model: 'map_coar_openalex'
+source_model: 'map_coar_openaire_resourcetype'
 derived_columns:
   source: "!SEED"
   load_datetime: load_datetime
 hashed_columns:
   coar_hk: coar_uri
-  worktype_hk: work_type
-  link_coar_openalex_hk:
+  type_hk: type
+  link_coar_openaire_hk:
     - coar_uri
-    - work_type
-  map_coar_openalex_hashdiff:
+    - type
+  map_coar_openaire_hashdiff:
     is_hashdiff: false
     columns:
       - label_es
