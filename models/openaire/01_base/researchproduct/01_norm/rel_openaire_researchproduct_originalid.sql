@@ -3,9 +3,9 @@ with source as (
   ),
   renamed as (
       select
-        COALESCE(id::varchar, 'NO DATA') as researchproduct_id,
-        COALESCE({{ adapter.quote("originalIds") }}::varchar, 'NO DATA') as original_id,
-        load_datetime::timestamp as load_datetime
+        id::varchar as researchproduct_id,
+        {{ adapter.quote("originalIds") }}::varchar as original_id,
+        {{ dbt_date.convert_timezone("load_datetime") }} as load_datetime
       from source
   )
   select * from renamed

@@ -30,19 +30,6 @@ casted as (
     from renamed
 ),
 
-fillna as (
-    select
-        author_id,
-        COALESCE(orcid, 'NO DATA') as orcid,
-        COALESCE(display_name, 'NO DATA') as display_name,
-        works_count,
-        cited_by_count,
-        updated_date,
-        created_date,
-        load_datetime
-    from casted
-),
-
 transformed as (
     select
         author_id,
@@ -53,7 +40,7 @@ transformed as (
         updated_date,
         created_date,
         load_datetime
-    from fillna
+    from casted
 )
 
 select * from transformed

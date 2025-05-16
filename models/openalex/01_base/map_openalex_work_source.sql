@@ -47,31 +47,7 @@ casted as (
         source_is_oa::boolean,
         {{ dbt_date.convert_timezone("load_datetime") }} as load_datetime
     from renamed
-),
-
-fillna as (
-    select
-        COALESCE(work_id, 'NO DATA') as work_id,
-        COALESCE(source_id, 'NO DATA') as source_id,
-        COALESCE(source_display_name, 'NO DATA') as source_display_name,
-        COALESCE(source_type, 'NO DATA') as source_type,
-        COALESCE(source_host_organization, 'NO DATA') as source_host_organization,
-        COALESCE(source_host_organization_name, 'NO DATA') as source_host_organization_name,
-        COALESCE(source_is_core, 'NO DATA') as source_is_core,
-        COALESCE(source_issn_l, 'NO DATA') as source_issn_l,
-        COALESCE(landing_page_url, 'NO DATA') as landing_page_url,
-        COALESCE(license, 'NO DATA') as license,
-        COALESCE(license_id, 'NO DATA') as license_id,
-        COALESCE(pdf_url, 'NO DATA') as pdf_url,
-        COALESCE(version, 'NO DATA') as version,
-        COALESCE(is_accepted, False) as is_accepted,
-        COALESCE(is_oa, False) as is_oa,
-        COALESCE(is_published, False) as is_published,
-        COALESCE(source_is_in_doaj, False) as source_is_in_doaj,
-        COALESCE(source_is_oa, False) as source_is_oa,
-        load_datetime
-    from casted
 )
 
-select * from fillna
+select * from casted
   

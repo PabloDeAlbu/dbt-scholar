@@ -7,7 +7,7 @@ with source as (
     item_dateavailable.dateavailable,
     item_dateissued.dateissued,
     item_handle.handle,
-    COALESCE(i2doi.doi, 'NO DATA') as doi,
+    i2doi.doi as doi,
     i.submitter_id,
     i.withdrawn,
     i.in_archive,
@@ -21,6 +21,19 @@ with source as (
   inner join {{ ref('map_dspace5_item_dateissued') }} item_dateissued ON item_dateissued.item_id = i.item_id
   inner join {{ ref('map_dspace5_item_handle') }} item_handle ON item_handle.item_id = i.item_id
   left join {{ ref('map_dspace5_item_doi') }} i2doi ON i2doi.item_id = i.item_id
+  WHERE item_dateissued.text_lang IS NULL
+),
+
+repetead_item as (
+  select item_id, count(*)
+  from source
+  group by 1
+  having count(*) > 1
 )
 
-select * from source
+SELECT * FROM source
+WHERE
+  source.item_id NOT IN (SELECT item_id FROM repetead_item) AND
+  withdrawn = 'false' AND
+  in_archive = 'true' AND
+  discoverable = 'true'

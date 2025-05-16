@@ -14,7 +14,7 @@ renamed as (
     {{ adapter.quote("articleProcessingCharge.currency") }} as apc_currency,
     scheme,
     value,
-    load_datetime::timestamp as load_datetime
+    {{ dbt_date.convert_timezone("load_datetime") }} as load_datetime
   from source
 )
 select * from renamed

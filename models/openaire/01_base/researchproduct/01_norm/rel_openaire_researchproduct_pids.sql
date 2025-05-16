@@ -12,15 +12,16 @@ casted as (
     id::varchar as researchproduct_id,
     scheme::varchar as scheme,
     value::varchar as value,
-    load_datetime::timestamp as load_datetime
+    
+    {{ dbt_date.convert_timezone("load_datetime") }} as load_datetime
   from source
 ),
 
 renamed as (
   select
-    COALESCE({{ adapter.quote("researchproduct_id") }}, 'NO DATA') as researchproduct_id,
-    COALESCE({{ adapter.quote("scheme") }}, 'NO DATA') as scheme,
-    COALESCE({{ adapter.quote("value") }}, 'NO DATA') as value,
+    {{ adapter.quote("researchproduct_id") }} as researchproduct_id,
+    {{ adapter.quote("scheme") }} as scheme,
+    {{ adapter.quote("value") }} as value,
     load_datetime
   from casted
 )

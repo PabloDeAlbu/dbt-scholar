@@ -1,0 +1,10 @@
+version: 2
+
+models:
+    - name: fact_publication_dspace5
+      description: "DSpace 5 Item"
+      columns:
+        - name: item_hk
+          tests:
+            - unique
+            - not_null

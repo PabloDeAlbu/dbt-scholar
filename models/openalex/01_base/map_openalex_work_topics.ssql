@@ -31,23 +31,7 @@ casted as (
         score::int,
         {{ dbt_date.convert_timezone("load_datetime") }} as load_datetime
     from renamed
-),
-
-fillna as (
-    select
-        COALESCE(work_id, 'NO DATA') as work_id,
-        COALESCE(display_name, 'NO DATA') as display_name,
-        COALESCE(topic_id, 'NO DATA') as topic_id,
-        COALESCE(domain_display_name, 'NO DATA') as domain_display_name,
-        COALESCE(domain_id, 'NO DATA') as domain_id,
-        COALESCE(field_display_name, 'NO DATA') as field_display_name,
-        COALESCE(field_id, 'NO DATA') as field_id,
-        COALESCE(subfield_display_name, 'NO DATA') as subfield_display_name,
-        COALESCE(subfield_id, 'NO DATA') as subfield_id,
-        COALESCE(score, 0) as score,
-        load_datetime
-    from casted
 )
 
-select * from fillna
+select * from casted
   

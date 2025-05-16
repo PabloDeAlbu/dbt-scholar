@@ -30,18 +30,4 @@ casted as (
   from renamed
 ),
 
-fillna as (
-  select
-    COALESCE(metadata_value_id, 'NO DATA') as metadata_value_id,
-    COALESCE(resource_id, 'NO DATA') as resource_id,
-    COALESCE(metadata_field_id, 'NO DATA') as metadata_field_id,
-    COALESCE(text_value, 'NO DATA') as text_value,
-    COALESCE(text_lang, 'NO DATA') as text_lang,
-    COALESCE(resource_type_id, 'NO DATA') as resource_type_id,
-    COALESCE(authority, 'NO DATA') as authority,
-    COALESCE(place, 0) as place,
-    COALESCE(confidence, 0) as confidence
-  from casted
-)
-
-select * from fillna
+select * from casted

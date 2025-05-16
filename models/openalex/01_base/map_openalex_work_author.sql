@@ -21,9 +21,9 @@ casted as (
 
 fillna as (
     select
-        COALESCE(work_id, 'NO DATA') as work_id,
-        COALESCE(author_id, 'NO DATA') as author_id,
-        COALESCE(author_position, 'NO DATA') as author_position,
+        work_id,
+        author_id,
+        author_position,
         load_datetime
     from casted
 )

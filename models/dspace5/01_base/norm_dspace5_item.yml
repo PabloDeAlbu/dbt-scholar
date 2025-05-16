@@ -1,0 +1,10 @@
+version: 2
+
+models:
+    - name: norm_dspace5_item
+      description: "DSpace 5 Item"
+      columns:
+        - name: item_id
+          tests:
+            - unique
+            - not_null

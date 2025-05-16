@@ -4,10 +4,10 @@ with source as (
   renamed as (
       select
         id::varchar,
-        COALESCE(provenance::varchar, 'NO DATA' ) as provenance,
-        COALESCE({{ adapter.quote("subject.scheme") }}::varchar, 'NO DATA') as subject_scheme,
-        COALESCE({{ adapter.quote("subject.value") }}::varchar, 'NO DATA') as subject_value,
-        load_datetime::timestamp as load_datetime
+        provenance::varchar as provenance,
+        {{ adapter.quote("subject.scheme") }}::varchar as subject_scheme,
+        {{ adapter.quote("subject.value") }}::varchar as subject_value,
+        {{ dbt_date.convert_timezone("load_datetime") }} as load_datetime
       from source
   )
   select * from renamed
