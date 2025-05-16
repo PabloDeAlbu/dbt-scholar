@@ -3,12 +3,12 @@
 WITH base AS (
     SELECT 
         i.uuid,
-        COALESCE(doi.doi, 'NOT_SET') as doi,
-        COALESCE(handle.handle, 'NOT_SET') as handle,
+        doi.doi,
+        handle.handle,
         dateissued.dateissued,
-        COALESCE(type.type, 'NOT_SET') as type,
-        COALESCE(title.title, 'NOT_SET') as title,
-        COALESCE(title_lang, 'NOT_SET') as title_lang,
+        type.type,
+        title.title,
+        title_lang,
         i.discoverable,
         i.in_archive,
         i.last_modified,
