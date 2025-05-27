@@ -1,3 +1,5 @@
+
+
 WITH base as (
     SELECT 
         hub_item.item_hk,
