@@ -6,12 +6,124 @@ sources:
     schema: ldg_dspace
     tables:
       - name: collection
+        columns:
+          - name: collection_id
+            tests:
+            - unique
+          - name: uuid
+            tests:
+            - unique
+            - not_null
       - name: collection2item
+        columns:
+          - name: collection_id
+            tests:
+            - not_null
+          - name: item_id
+            tests:
+            - not_null
       - name: community
+        columns:
+          - name: collection_id
+          - name: uuid
+            tests:
+              - not_null
+          - name: submitter
+          - name: template_item_id
+          - name: logo_bitstream_id
+          - name: admin
       - name: community2collection
+        columns:
+          - name: collection_id 
+            tests:
+            - not_null
+          - name: community_id
+            tests:
+            - not_null
       - name: community2community
+        columns:
+          - name: parent_comm_id 
+            tests:
+            - not_null
+          - name: child_comm_id
+            tests:
+            - not_null
       - name: dspaceobject
+        columns:
+          - name: uuid
+            tests:
+            - unique
+            - not_null
       - name: item
+        columns:
+          - name: item_id
+          - name: in_archive
+            tests:
+              - not_null
+          - name: withdrawn
+            tests:
+              - not_null
+          - name: last_modified
+            tests:
+              - not_null
+          - name: discoverable
+            tests:
+              - not_null
+          - name: uuid
+            tests:
+              - not_null
+          - name: submitter_id
+#            tests:
+#              - not_null
+          - name: owning_collection
+#            tests:
+#              - not_null
       - name: metadatafieldregistry
+        columns:
+          - name: metadata_field_id
+            tests:
+              - unique
+              - not_null
+          - name: metadata_schema_id
+            tests:
+              - not_null
+          - name: element
+            tests:
+              - not_null
+          - name: qualifier
+          - name: scope_note
       - name: metadataschemaregistry
+        columns:
+          - name: metadata_schema_id
+            tests:
+              - unique
+              - not_null
+          - name: namespace
+            tests:
+              - unique
+              - not_null
+          - name: short_id
+            tests:
+              - unique
+              - not_null
       - name: metadatavalue
+        columns:
+          - name: metadata_value_id
+            tests:
+            - not_null
+          - name: metadata_field_id
+            tests:
+            - not_null
+            - relationships:
+                to: ref('ldg_dspace_metadatafieldregistry')
+                field: metadata_field_id
+          - name: text_value
+            tests:
+            - not_null
+          - name: text_lang
+          - name: place
+          - name: authority
+          - name: confidence
+          - name: dspace_object_id
+            tests:
+            - not_null
