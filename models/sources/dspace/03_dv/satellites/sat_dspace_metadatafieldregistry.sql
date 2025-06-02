@@ -2,7 +2,7 @@
 
 {%- set yaml_metadata -%}
 source_model: "stg_dspace_metadatafieldregistry"
-src_pk: "metadata_field_hk"
+src_pk: "metadatafield_hk"
 src_hashdiff:
   source_column: "metadatafieldregistry_hashdiff"
   alias: "hashdiff"

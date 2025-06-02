@@ -5,7 +5,7 @@ WITH base AS (
         withdrawn,
         last_modified,
         discoverable,
-        uuid,
+        uuid as item_uuid,
         submitter_id,
         owning_collection,
         {{ dbt_date.today() }} as load_datetime

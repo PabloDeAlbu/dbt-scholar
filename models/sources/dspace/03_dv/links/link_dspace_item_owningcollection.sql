@@ -1,8 +1,8 @@
 {{ config(materialized='incremental') }}
 
-{%- set source_model = "stg_dspace_metadatafieldregistry" -%}
-{%- set src_pk = "metadatafield_metadataschema_hk" -%}
-{%- set src_fk = ["metadatafield_hk", "metadataschema_hk"] -%}
+{%- set source_model = "stg_dspace_item" -%}
+{%- set src_pk = "item_owningcollection_hk" -%}
+{%- set src_fk = ["uuid_hk", "owningcollection_hk"] -%}
 {%- set src_ldts = "load_datetime" -%}
 {%- set src_source = "source" -%}
 

@@ -8,18 +8,20 @@ derived_columns:
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
   item_hk: item_id
-  uuid_hk: uuid
+  uuid_hk: item_uuid
   submitter_hk: submitter_id
-  owning_collection_hk: owning_collection
+  owningcollection_hk: owning_collection
+  item_owningcollection_hk:
+    - item_uuid
+    - owning_collection
   item_hashdiff:
     is_hashdiff: true
     columns:
-      - item_id
+      - item_uuid
       - in_archive
       - withdrawn
       - last_modified
       - discoverable
-      - uuid
       - submitter_id
       - owning_collection
 {%- endset -%}

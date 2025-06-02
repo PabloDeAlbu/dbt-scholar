@@ -7,13 +7,11 @@ derived_columns:
   start_date: load_datetime
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
-  community_hk: community_id
-  uuid_hk: uuid
+  community_hk: community_uuid
   community_hashdiff:
     is_hashdiff: true
     columns:
-      - community_id
-      - uuid
+      - community_uuid
       - admin
       - logo_bitstream_id
 {%- endset -%}

@@ -3,7 +3,7 @@
 {%- set yaml_metadata -%}
 source_model: 'stg_dspace_collection'
 src_pk: collection_hk
-src_nk: collection_id
+src_nk: collection_uuid
 src_ldts: load_datetime
 src_source: source
 {%- endset -%}

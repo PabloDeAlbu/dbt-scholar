@@ -2,7 +2,7 @@
 
 {%- set yaml_metadata -%}
 source_model: 'stg_dspace_metadataschemaregistry'
-src_pk: metadata_schema_hk
+src_pk: metadataschema_hk
 src_nk: metadata_schema_id
 src_ldts: load_datetime
 src_source: source

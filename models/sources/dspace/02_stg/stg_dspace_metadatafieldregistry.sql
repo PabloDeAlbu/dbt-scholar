@@ -7,8 +7,8 @@ derived_columns:
   start_date: load_datetime
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
-  metadata_field_hk: metadata_field_id
-  metadata_schema_hk: metadata_schema_id
+  metadatafield_hk: metadata_field_id
+  metadataschema_hk: metadata_schema_id
   metadatafield_metadataschema_hk:
     - metadata_field_id
     - metadata_schema_id

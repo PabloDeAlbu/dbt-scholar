@@ -2,7 +2,7 @@
 
 {%- set source_model = "stg_dspace_metadatavalue" -%}
 {%- set src_pk = "metadatavalue_dspaceobject_hk" -%}
-{%- set src_fk = ["metadatavalue_hk", "metadatavalue_hk"] -%}
+{%- set src_fk = ["metadatavalue_hk", "metadatafield_hk"] -%}
 {%- set src_ldts = "load_datetime" -%}
 {%- set src_source = "source" -%}
 

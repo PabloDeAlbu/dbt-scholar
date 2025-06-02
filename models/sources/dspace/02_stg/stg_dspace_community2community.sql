@@ -7,16 +7,16 @@ derived_columns:
   start_date: load_datetime
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
-  parent_comm_hk: parent_comm_id
-  child_comm_hk: child_comm_id
+  parent_comm_hk: parent_comm_uuid
+  child_comm_hk: child_comm_uuid
   community_community_hk:
-    - parent_comm_id
-    - child_comm_id
+    - parent_comm_uuid
+    - child_comm_uuid
   community2community_hashdiff:
     is_hashdiff: true
     columns:
-      - parent_comm_id
-      - child_comm_id
+      - parent_comm_uuid
+      - child_comm_uuid
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

@@ -1,7 +1,7 @@
 WITH base AS (
     SELECT 
         collection_id,
-        uuid,
+        uuid AS collection_uuid,
         submitter,
         template_item_id,
         logo_bitstream_id,

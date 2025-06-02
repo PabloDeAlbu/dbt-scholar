@@ -7,17 +7,15 @@ derived_columns:
   start_date: load_datetime
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
-  collection_hk: collection_id
-  uuid_hk: uuid
+  collection_hk: collection_uuid
   submitter_hk: submitter
-  uuid_submitter_hk:
-    - uuid
+  collection_submitter_hk:
+    - collection_uuid
     - submitter
   collection_hashdiff:
     is_hashdiff: true
     columns:
-      - collection_id
-      - uuid
+      - collection_uuid
       - submitter
       - template_item_id
       - logo_bitstream_id

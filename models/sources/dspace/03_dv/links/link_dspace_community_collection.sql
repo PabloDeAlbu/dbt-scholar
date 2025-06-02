@@ -2,7 +2,7 @@
 
 {%- set source_model = "stg_dspace_community2collection" -%}
 {%- set src_pk = "community_collection_hk" -%}
-{%- set src_fk = ["community_id", "collection_hk"] -%}
+{%- set src_fk = ["community_hk", "collection_hk"] -%}
 {%- set src_ldts = "load_datetime" -%}
 {%- set src_source = "source" -%}
 
