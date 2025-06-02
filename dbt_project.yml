@@ -6,7 +6,8 @@ version: '1.0.0'
 config-version: 2
 
 # This setting configures which "profile" dbt uses for this project.
-profile: 'staging-cic'
+#profile: 'staging-cic'
+profile: 'localhost-dspace'
 
 # These configurations specify where dbt should look for different types of files.
 # The `model-paths` config, for example, states that models in this project can be
@@ -35,10 +36,10 @@ models:
     sources:
       coar:
         +schema: coar
+      dspace:
+        +schema: dspace
       dspace5:
         +schema: dspace5
-      dspace7:
-        +schema: dspace
       dspacedb:
         +schema: dspacedb
       oai:

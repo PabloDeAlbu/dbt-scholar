@@ -53,11 +53,9 @@ renamed as (
     {{ adapter.quote("oa_status") }},
     {{ adapter.quote("oa_url") }},
     {{ adapter.quote("apc_list.currency") }} as apc_list_currency,
-    {{ adapter.quote("apc_list.provenance") }} as apc_list_provenance,
     {{ adapter.quote("apc_list.value") }} as apc_list_value,
     {{ adapter.quote("apc_list.value_usd") }} as apc_list_value_usd,
     {{ adapter.quote("apc_paid.currency") }} as apc_paid_currency,
-    {{ adapter.quote("apc_paid.provenance") }} as apc_paid_provenance,
     {{ adapter.quote("apc_paid.value") }} as apc_paid_value,
     {{ adapter.quote("apc_paid.value_usd") }} as apc_paid_value_usd,
     {{ adapter.quote("citation_normalized_percentile.is_in_top_10_percent") }} as citation_normalized_percentile_is_in_top_10_percent,
@@ -149,7 +147,6 @@ casted as (
     -- apc_list
     ---- varchar
     apc_list_currency::varchar,
-    apc_list_provenance::varchar,
     ---- bool
     ---- int
     apc_list_value::int,
@@ -159,7 +156,6 @@ casted as (
     -- apc_paid
     ---- varchar
     apc_paid_currency::varchar,
-    apc_paid_provenance::varchar,
     ---- bool
     ---- int
     apc_paid_value::int,
@@ -326,7 +322,6 @@ transformed as (
     -- apc_list
     ---- varchar
     apc_list_currency,
-    apc_list_provenance,
     ---- bool
     ---- int
     apc_list_value,
@@ -336,7 +331,6 @@ transformed as (
     -- apc_paid
     ---- varchar
     apc_paid_currency,
-    apc_paid_provenance,
     ---- bool
     ---- int
     apc_paid_value,
