@@ -2,7 +2,7 @@
 
 {%- set source_model = "stg_dspace_item" -%}
 {%- set src_pk = "item_owningcollection_hk" -%}
-{%- set src_fk = ["uuid_hk", "owningcollection_hk"] -%}
+{%- set src_fk = ["item_hk", "owningcollection_hk"] -%}
 {%- set src_ldts = "load_datetime" -%}
 {%- set src_source = "source" -%}
 

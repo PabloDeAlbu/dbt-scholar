@@ -8,7 +8,6 @@ derived_columns:
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
   authority_hk: authority
-  dspace_object_hk: dspace_object_id
   metadatavalue_hk: metadata_value_id
   metadatafield_hk: metadata_field_id
   dspaceobject_hk: dspace_object_id

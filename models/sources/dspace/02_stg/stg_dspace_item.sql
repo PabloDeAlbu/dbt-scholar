@@ -7,8 +7,7 @@ derived_columns:
   start_date: last_modified
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
-  item_hk: item_id
-  uuid_hk: item_uuid
+  item_hk: item_uuid
   submitter_hk: submitter_id
   owningcollection_hk: owning_collection
   item_owningcollection_hk:

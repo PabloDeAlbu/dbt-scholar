@@ -1,18 +1,18 @@
 {{ config(materialized='incremental') }}
 
 {%- set yaml_metadata -%}
-source_model: "stg_dspace_item"
-src_pk: "uuid_hk"
+source_model: stg_dspace_item
+src_pk: item_hk
 src_hashdiff:
-  source_column: "item_hashdiff"
-  alias: "hashdiff"
+  source_column: item_hashdiff
+  alias: hashdiff
 src_payload:
   - in_archive
   - withdrawn
   - discoverable
-src_eff: "load_datetime"
-src_ldts: "load_datetime"
-src_source: "source"
+src_eff: load_datetime
+src_ldts: load_datetime
+src_source: source
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}
