@@ -1,0 +1,45 @@
+version: 2
+
+sources:
+  - name: oai
+    description: 'oai 7 database'
+    schema: ldg_oai
+    tables:
+      - name: item_by_set
+        columns:
+          - name: item_id
+          - name: handle
+          - name: col_id
+          - name: title
+          - name: date_issued
+          - name: type_openaire
+          - name: type_snrd
+          - name: version
+          - name: access_right
+          - name: license_condition
+          - name: load_datetime
+      - name: item_creator
+        columns:
+          - name: handle
+          - name: creator
+          - name: load_datetime
+      - name: item_language
+        columns:
+          - name: handle
+          - name: language_iso
+          - name: load_datetime
+      - name: item_publisher
+        columns:
+          - name: handle
+          - name: publisher
+          - name: load_datetime
+      - name: item_relation
+        columns:
+          - name: handle
+          - name: relation
+          - name: load_datetime
+      - name: item_subject
+        columns:
+          - name: handle
+          - name: relation
+          - name: load_datetime
