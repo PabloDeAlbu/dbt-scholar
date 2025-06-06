@@ -7,7 +7,7 @@
   {%- if path.startswith('models/sources/') -%}
     dv_{{ trimmed_name }}
 
-  {%- elif path.startswith('models/data_mart/') and trimmed_name != '' -%}
+  {%- elif path.startswith('models/marts/') and trimmed_name != '' -%}
     dm_{{ trimmed_name }}
 
   {%- else -%}
