@@ -68,6 +68,12 @@ sources:
           - name: child_comm_id
             tests:
             - not_null
+      - name: handle
+        columns:
+          - name: handle
+          - name: handle_id
+          - name: resource_type_id
+          - name: resource_id
       - name: item
         columns:
           - name: item_id
