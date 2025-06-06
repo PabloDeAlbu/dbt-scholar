@@ -8,7 +8,7 @@ derived_columns:
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
   bitstream_hk: bitstream_id
-  item_hashdiff:
+  bitstream_hashdiff:
     is_hashdiff: true
     columns:
       - bitstream_id
