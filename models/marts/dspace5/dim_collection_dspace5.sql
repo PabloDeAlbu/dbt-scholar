@@ -24,7 +24,6 @@ metadata_fields AS (
     WHERE 
         ms.short_id = 'dc'
         AND (
-            (mf.element = 'identifier' AND mf.qualifier = 'uri') OR
             (mf.element = 'title' AND mf.qualifier IS NULL)
         )
 ),
@@ -50,7 +49,6 @@ metadatavalues AS (
 col_metadata AS (
     SELECT 
         collection_hk,
-        MAX(CASE WHEN element = 'identifier' AND qualifier = 'uri' THEN text_value END) AS uri,
         MAX(CASE WHEN element = 'title' AND qualifier IS NULL THEN text_value END) AS title
     FROM metadatavalues
     GROUP BY collection_hk
@@ -60,11 +58,17 @@ dim_collection AS (
     -- Unión final
     SELECT 
         c.collection_id,
-        m.uri,
         m.title,
+        sat_h.handle,
         c.collection_hk
     FROM col c
     LEFT JOIN col_metadata m 
         ON c.collection_hk = m.collection_hk
+    INNER JOIN {{ref('link_dspace5_handle_resource')}} lnk_h_r ON
+        lnk_h_r.resource_hk = c.collection_hk
+    INNER JOIN {{ref('sat_dspace5_handle')}} sat_h ON
+        sat_h.handle_hk = lnk_h_r.handle_hk
+    WHERE sat_h.resource_type_id = 3
 )
+
 SELECT * FROM dim_collection
