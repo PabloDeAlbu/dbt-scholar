@@ -1,18 +1,17 @@
 {{ config(materialized='incremental') }}
 
 {%- set yaml_metadata -%}
-source_model: stg_dspace5_item
-src_pk: item_hk
+source_model: "stg_dspace5_metadataschemaregistry"
+src_pk: "metadataschema_hk"
 src_hashdiff:
-  source_column: item_hashdiff
-  alias: hashdiff
+  source_column: "metadataschemaregistry_hashdiff"
+  alias: "hashdiff"
 src_payload:
-  - in_archive
-  - withdrawn
-  - discoverable
-src_eff: load_datetime
-src_ldts: load_datetime
-src_source: source
+  - namespace
+  - short_id
+src_eff: "load_datetime"
+src_ldts: "load_datetime"
+src_source: "source"
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

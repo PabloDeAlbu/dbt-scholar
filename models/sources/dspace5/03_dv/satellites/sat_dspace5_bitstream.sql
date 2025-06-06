@@ -1,15 +1,21 @@
 {{ config(materialized='incremental') }}
 
 {%- set yaml_metadata -%}
-source_model: stg_dspace5_item
-src_pk: item_hk
+source_model: stg_dspace5_bitstream
+src_pk: bitstream_hk
 src_hashdiff:
-  source_column: item_hashdiff
+  source_column: bitstream_hashdiff
   alias: hashdiff
 src_payload:
-  - in_archive
-  - withdrawn
-  - discoverable
+  - bitstream_id
+  - bitstream_format_id
+  - size_bytes
+  - checksum
+  - checksum_algorithm
+  - internal_id
+  - deleted
+  - store_number
+  - sequence_id
 src_eff: load_datetime
 src_ldts: load_datetime
 src_source: source

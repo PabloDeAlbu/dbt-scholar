@@ -1,28 +1,19 @@
 {%- set yaml_metadata -%}
-source_model: "ldg_dspace5_item"
+source_model: "ldg_dspace5_metadataschemaregistry"
 derived_columns:
   source: "!DSPACEDB"
   load_datetime: load_datetime
-  effective_from: last_modified
-  start_date: last_modified
+  effective_from: load_datetime
+  start_date: load_datetime
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
-  item_hk: item_id
-  submitter_hk: submitter_id
-  owningcollection_hk: owning_collection
-  item_owningcollection_hk:
-    - item_id
-    - owning_collection
-  item_hashdiff:
+  metadataschema_hk: metadata_schema_id
+  metadataschemaregistry_hashdiff:
     is_hashdiff: true
     columns:
-      - item_id
-      - submitter_id
-      - in_archive
-      - withdrawn
-      - last_modified
-      - owning_collection
-      - discoverable      
+      - metadata_schema_id
+      - namespace
+      - short_id
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}
