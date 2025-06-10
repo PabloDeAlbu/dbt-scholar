@@ -1,3 +1,5 @@
+{{ config(materialized = 'table') }}
+
 with source as (
         select * from {{ source('oai', 'item_by_set') }}
   ),
