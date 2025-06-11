@@ -1,6 +1,6 @@
 {{ config(materialized = 'table')}}
 
-WITH item_metadata AS (
+WITH collection_metadata AS (
     SELECT
         sat_mv.text_value,
         sat_mv.text_lang,
@@ -8,14 +8,14 @@ WITH item_metadata AS (
         sat_mv.authority,
         sat_mv.confidence,
         sat_mv.metadatavalue_hk,
-        lnk_mv_r.resource_hk as item_hk
+        lnk_mv_r.resource_hk as collection_hk
     FROM {{ref('sat_dspace5_metadatavalue')}} sat_mv
     INNER JOIN {{ref('link_dspace5_metadatavalue_resource')}} lnk_mv_r ON
         lnk_mv_r.metadatavalue_hk = sat_mv.metadatavalue_hk
     WHERE sat_mv.resource_type_id = 3
 ),
 
-item_metadatafield AS (
+collection_metadatafield AS (
     SELECT 
         mv.text_value,
         mv.text_lang,
@@ -25,8 +25,8 @@ item_metadatafield AS (
         sat_ms.short_id,
         sat_mf.element,
         sat_mf.qualifier,
-        mv.item_hk
-    FROM item_metadata mv
+        mv.collection_hk
+    FROM collection_metadata mv
     INNER JOIN {{ref('link_dspace5_metadatavalue_metadatafield')}} lnk_mv_mf ON
         lnk_mv_mf.metadatavalue_hk = mv.metadatavalue_hk
     INNER JOIN {{ref('sat_dspace5_metadatafieldregistry')}} sat_mf ON
@@ -37,4 +37,4 @@ item_metadatafield AS (
         sat_ms.metadataschema_hk = lnk_mf_ms.metadataschema_hk
 )
 
-SELECT * FROM item_metadatafield
+SELECT * FROM collection_metadatafield
