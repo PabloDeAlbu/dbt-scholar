@@ -7,16 +7,14 @@ derived_columns:
   start_date: load_datetime
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
-  handle_hk: handle_id
+  handle_hk: handle
   resource_hk: resource_id
   handle_resource_hk:
-    - handle_id
+    - handle
     - resource_id
   handle_hashdiff:
-    is_hashdiff: true
+    is_hashdiff: false
     columns:
-      - handle_id
-      - handle
       - resource_type_id
       - resource_id
 {%- endset -%}

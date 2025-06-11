@@ -3,7 +3,7 @@
 {%- set yaml_metadata -%}
 source_model: 'stg_dspace5_handle'
 src_pk: handle_hk
-src_nk: handle_id
+src_nk: handle
 src_ldts: load_datetime
 src_source: source
 {%- endset -%}
