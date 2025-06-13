@@ -10,6 +10,9 @@
   {%- elif path.startswith('models/marts/') and trimmed_name != '' -%}
     dm_{{ trimmed_name }}
 
+  {%- elif path.startswith('seeds/') and trimmed_name != '' -%}
+    dv_{{ trimmed_name }}
+
   {%- else -%}
     {{ default_schema }}
   {%- endif -%}
