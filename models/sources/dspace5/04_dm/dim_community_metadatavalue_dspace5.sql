@@ -10,7 +10,7 @@ WITH item_metadata AS (
         sat_mv.metadatavalue_hk,
         lnk_mv_r.resource_hk as community_hk
     FROM {{ref('sat_dspace5_metadatavalue')}} sat_mv
-    INNER JOIN {{ref('link_dspace5_metadatavalue_resource')}} lnk_mv_r ON
+    INNER JOIN {{ref('tlink_dspace5_metadatavalue_resource')}} lnk_mv_r ON
         lnk_mv_r.metadatavalue_hk = sat_mv.metadatavalue_hk
     WHERE sat_mv.resource_type_id = 4
 ),

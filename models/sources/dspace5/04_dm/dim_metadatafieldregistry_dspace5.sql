@@ -6,6 +6,11 @@ WITH base as (
         sat_ms.short_id,
         sat_mf.element,
         sat_mf.qualifier,
+        CASE
+            WHEN sat_mf.qualifier IS NOT NULL
+                THEN sat_ms.short_id || '.' || sat_mf.element || '.' || sat_mf.qualifier
+            ELSE sat_ms.short_id || '.' || sat_mf.element
+        END AS metadatafield_fullname,
         sat_mf.metadatafield_hk
     FROM {{ ref('hub_dspace5_metadatafieldregistry') }} hub_mf
     INNER JOIN {{ ref('sat_dspace5_metadatafieldregistry') }} sat_mf ON
@@ -14,21 +19,6 @@ WITH base as (
         sat_mf.metadatafield_hk = lnk_mf_ms.metadatafield_hk
     INNER JOIN {{ ref('sat_dspace5_metadataschemaregistry' )}} sat_ms ON
         lnk_mf_ms.metadataschema_hk = sat_ms.metadataschema_hk
-),
-
-final as (
-    SELECT 
-        base.metadata_field_id,
-        base.short_id,
-        base.element,
-        base.qualifier,
-        base.metadatafield_hk,
-        COUNT(*)
-    FROM base
-    INNER JOIN {{ref('link_dspace5_metadatavalue_metadatafield')}} lnk_mv_mf ON
-        lnk_mv_mf.metadatafield_hk = base.metadatafield_hk
-    GROUP BY 1, 2, 3, 4, 5
-
 )
 
-SELECT * FROM final
+SELECT * FROM base

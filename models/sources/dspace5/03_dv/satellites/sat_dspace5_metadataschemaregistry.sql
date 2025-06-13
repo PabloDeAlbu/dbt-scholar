@@ -9,7 +9,7 @@ src_hashdiff:
 src_payload:
   - namespace
   - short_id
-src_eff: "load_datetime"
+src_eff: effective_from
 src_ldts: "load_datetime"
 src_source: "source"
 {%- endset -%}

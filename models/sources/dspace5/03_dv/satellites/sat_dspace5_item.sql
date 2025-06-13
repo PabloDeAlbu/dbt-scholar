@@ -10,7 +10,7 @@ src_payload:
   - in_archive
   - withdrawn
   - discoverable
-src_eff: load_datetime
+src_eff: effective_from
 src_ldts: load_datetime
 src_source: source
 {%- endset -%}

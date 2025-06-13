@@ -8,7 +8,7 @@ src_hashdiff:
   alias: hashdiff
 src_payload:
   - resource_type_id
-src_eff: load_datetime
+src_eff: effective_from
 src_ldts: load_datetime
 src_source: source
 {%- endset -%}

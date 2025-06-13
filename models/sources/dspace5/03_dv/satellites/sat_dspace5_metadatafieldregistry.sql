@@ -1,18 +1,18 @@
 {{ config(materialized='incremental') }}
 
 {%- set yaml_metadata -%}
-source_model: "stg_dspace5_metadatafieldregistry"
-src_pk: "metadatafield_hk"
+source_model: stg_dspace5_metadatafieldregistry
+src_pk: metadatafield_hk
 src_hashdiff:
-  source_column: "metadatafieldregistry_hashdiff"
-  alias: "hashdiff"
+  source_column: metadatafieldregistry_hashdiff
+  alias: hashdiff
 src_payload:
   - element
   - qualifier
   - scope_note
-src_eff: "load_datetime"
-src_ldts: "load_datetime"
-src_source: "source"
+src_eff: effective_from
+src_ldts: load_datetime
+src_source: source
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

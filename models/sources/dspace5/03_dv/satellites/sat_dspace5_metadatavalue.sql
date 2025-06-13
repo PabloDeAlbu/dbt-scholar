@@ -1,11 +1,11 @@
 {{ config(materialized='incremental') }}
 
 {%- set yaml_metadata -%}
-source_model: "stg_dspace5_metadatavalue"
-src_pk: "metadatavalue_hk"
+source_model: stg_dspace5_metadatavalue
+src_pk: metadatavalue_hk
 src_hashdiff:
-  source_column: "metadatavalue_hashdiff"
-  alias: "hashdiff"
+  source_column: metadatavalue_hashdiff
+  alias: hashdiff
 src_payload:
   - text_value
   - text_lang
@@ -13,9 +13,9 @@ src_payload:
   - place
   - authority
   - confidence
-src_eff: "load_datetime"
-src_ldts: "load_datetime"
-src_source: "source"
+src_eff: effective_from
+src_ldts: load_datetime
+src_source: source
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}
