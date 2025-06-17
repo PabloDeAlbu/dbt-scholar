@@ -1,3 +1,5 @@
+{{ config(materialized = 'table') }}
+
 WITH base AS (
     SELECT 
         link_author_institution.author_institution_hk,

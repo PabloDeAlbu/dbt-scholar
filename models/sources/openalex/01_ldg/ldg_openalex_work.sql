@@ -262,7 +262,7 @@ transformed as (
     type_crossref,
     fulltext_origin,
     cited_by_api_url,
-    split_part(doi, 'https://doi.org/', 2) as doi,
+    doi,
     mag,
     openalex,
     pmcid,

@@ -7,7 +7,7 @@ WITH base as (
         dim.element,
         dim.qualifier,
         COUNT(*)
-    FROM {{ref('dim_metadatafieldregistry_dspace5')}} dim
+    FROM {{ref('dim_dspace5_metadatafieldregistry')}} dim
     INNER JOIN {{ref('link_dspace5_metadatavalue_metadatafield')}} lnk_mv_mf ON
         lnk_mv_mf.metadatafield_hk = dim.metadatafield_hk
     GROUP BY 1, 2, 3, 4

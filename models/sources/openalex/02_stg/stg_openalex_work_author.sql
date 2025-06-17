@@ -1,7 +1,7 @@
 {{ config(materialized='table') }}
 
 {%- set yaml_metadata -%}
-source_model: 'map_openalex_work_author'
+source_model: 'ldg_openalex_work_author'
 derived_columns:
   source: "!OPENALEX"
   load_datetime: load_datetime

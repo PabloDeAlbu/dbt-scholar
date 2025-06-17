@@ -1,7 +1,8 @@
 {{ config(materialized='table')}}
 
 with source as (
-      select * from {{ source('openalex', 'author') }}
+      select * 
+      from {{ source('openalex', 'author') }}
 ),
 
 renamed as (
@@ -33,7 +34,7 @@ casted as (
 transformed as (
     select
         author_id,
-        split_part(orcid, 'https://orcid.org/', 2) as orcid,
+        orcid,
         display_name,
         works_count,
         cited_by_count,

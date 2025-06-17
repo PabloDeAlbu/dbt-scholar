@@ -6,7 +6,7 @@ WITH col AS (
         dim_c.text_value as title,
         hub_c.collection_hk
     FROM {{ref('hub_dspace5_collection')}} hub_c
-	INNER JOIN {{ref('dim_collection_metadatavalue_dspace5')}} dim_c ON 
+	INNER JOIN {{ref('dim_dspace5_collection_metadatavalue')}} dim_c ON 
 		dim_c.collection_hk = hub_c.collection_hk AND dim_c.short_id = 'dc' AND dim_c.element = 'title' AND dim_c.qualifier is null
 ),
 

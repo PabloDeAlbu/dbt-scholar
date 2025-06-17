@@ -16,6 +16,6 @@ SELECT
     u.total_uses,
     u.metadatafield_hk
 FROM usage_count u
-LEFT JOIN {{ ref('dim_metadatafield_dspace') }} d
+LEFT JOIN {{ ref('dim_dspace_metadatafield') }} d
     ON d.metadatafield_hk = u.metadatafield_hk
 ORDER BY 1, 2, 3 DESC

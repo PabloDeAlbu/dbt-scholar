@@ -1,3 +1,5 @@
+{{ config(materialized = 'table') }}
+
 WITH base as (
     SELECT
         hub_work.work_id,

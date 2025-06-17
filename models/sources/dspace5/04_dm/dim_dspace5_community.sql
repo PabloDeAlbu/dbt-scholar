@@ -35,17 +35,17 @@ final AS (
         mv_com_2.text_value as com_2, 
         mv_com_1.text_value as com_1
     FROM base
-    INNER JOIN {{ ref('dim_community_metadatavalue_dspace5')}} mv_com_6 ON
+    INNER JOIN {{ ref('dim_dspace5_community_metadatavalue')}} mv_com_6 ON
         base.com_6_hk = mv_com_6.community_hk AND mv_com_6.short_id = 'dc' AND mv_com_6.element = 'title' AND mv_com_6.qualifier is null
-    LEFT JOIN {{ ref('dim_community_metadatavalue_dspace5')}} mv_com_5 ON
+    LEFT JOIN {{ ref('dim_dspace5_community_metadatavalue')}} mv_com_5 ON
         base.com_5_hk = mv_com_5.community_hk AND mv_com_5.short_id = 'dc' AND mv_com_5.element = 'title' AND mv_com_5.qualifier is null
-    LEFT JOIN {{ ref('dim_community_metadatavalue_dspace5')}} mv_com_4 ON
+    LEFT JOIN {{ ref('dim_dspace5_community_metadatavalue')}} mv_com_4 ON
         base.com_4_hk = mv_com_4.community_hk AND mv_com_4.short_id = 'dc' AND mv_com_4.element = 'title' AND mv_com_4.qualifier is null
-    LEFT JOIN {{ ref('dim_community_metadatavalue_dspace5')}} mv_com_3 ON
+    LEFT JOIN {{ ref('dim_dspace5_community_metadatavalue')}} mv_com_3 ON
         base.com_3_hk = mv_com_3.community_hk AND mv_com_3.short_id = 'dc' AND mv_com_3.element = 'title' AND mv_com_3.qualifier is null
-    LEFT JOIN {{ ref('dim_community_metadatavalue_dspace5')}} mv_com_2 ON
+    LEFT JOIN {{ ref('dim_dspace5_community_metadatavalue')}} mv_com_2 ON
         base.com_2_hk = mv_com_2.community_hk AND mv_com_2.short_id = 'dc' AND mv_com_2.element = 'title' AND mv_com_2.qualifier is null
-    LEFT JOIN {{ ref('dim_community_metadatavalue_dspace5')}} mv_com_1 ON
+    LEFT JOIN {{ ref('dim_dspace5_community_metadatavalue')}} mv_com_1 ON
         base.com_1_hk = mv_com_1.community_hk AND mv_com_1.short_id = 'dc' AND mv_com_1.element = 'title' AND mv_com_1.qualifier is null
 )
 

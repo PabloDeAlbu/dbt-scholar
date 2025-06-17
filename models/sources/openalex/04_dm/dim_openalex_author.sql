@@ -1,3 +1,5 @@
+{{ config(materialized = 'table') }}
+
 WITH base AS (
     SELECT 
         hub_author.author_hk,
