@@ -1,7 +1,7 @@
 {{ config(materialized='view') }}
 
 {%- set yaml_metadata -%}
-source_model: "base_openaire_researchproduct"
+source_model: "ldg_openaire_researchproduct"
 derived_columns:
   source: "!OPENAIRE"
   load_datetime: load_datetime
@@ -10,10 +10,6 @@ derived_columns:
 --  end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
   researchproduct_hk: researchproduct_id
-  type_hk: type
-  researchproduct_type_hk:
-    - researchproduct_id
-    - type
   accessright_hk: best_access_right
   researchproduct_accessright_hk:
     - researchproduct_id
@@ -23,6 +19,7 @@ hashed_columns:
     columns:
       - open_access_color
       - publicly_funded
+      - type
       - main_title
       - publication_date
       - researchproduct_id

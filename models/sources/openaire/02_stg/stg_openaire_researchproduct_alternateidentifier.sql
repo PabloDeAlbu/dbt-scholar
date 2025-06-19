@@ -1,16 +1,34 @@
 {{ config(materialized='view') }}
 
 {%- set yaml_metadata -%}
-source_model: "clean_openaire_researchproduct_mag"
+source_model: "ldg_openaire_researchproduct_author"
 derived_columns:
   source: "!OPENAIRE"
   load_datetime: load_datetime
 hashed_columns:
   researchproduct_hk: researchproduct_id
-  mag_hk: mag
-  researchproduct_mag_hk:
+  orcid_hk: orcid
+  researchproduct_orcid_hk:
     - researchproduct_id
-    - mag
+    - orcid
+  author_hk:
+    - full_name
+    - name
+    - orcid
+    - surname
+  researchproduct_author_hk:
+    - researchproduct_id
+    - full_name
+    - name
+    - orcid
+    - surname
+  author_hashdiff:
+    is_hashdiff: true
+    columns:
+      - full_name
+      - name
+      - surname
+
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

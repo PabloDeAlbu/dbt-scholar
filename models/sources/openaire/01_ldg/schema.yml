@@ -2,13 +2,14 @@ version: 2
 
 sources:
   - name: openaire
-    description: 'Research product collected from OpenAIRE Graph'
+    description: 'OpenAIRE Research Graph'
     schema: ldg_openaire
     tables:
-      - name: researchproduct
       - name: rel_researchproduct_alternateidentifiers
       - name: rel_researchproduct_authors
       - name: rel_researchproduct_instances
       - name: rel_researchproduct_originalid
       - name: rel_researchproduct_pids
       - name: rel_researchproduct_subjects
+      - name: researchproduct
+      
