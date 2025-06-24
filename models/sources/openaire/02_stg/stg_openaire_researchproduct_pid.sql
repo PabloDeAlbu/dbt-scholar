@@ -1,7 +1,7 @@
 {{ config(materialized='view') }}
 
 {%- set yaml_metadata -%}
-source_model: "ldg_openaire_researchproduct"
+source_model: "ldg_openaire_researchproduct_pids"
 derived_columns:
   source: "!OPENAIRE"
   load_datetime: load_datetime
@@ -10,37 +10,18 @@ derived_columns:
 --  end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
   researchproduct_hk: researchproduct_id
-  accessright_hk: best_access_right
-  researchproduct_accessright_hk:
+  pid_hk:    
+    - scheme
+    - value
+  researchproduct_pid_hk:
     - researchproduct_id
-    - best_access_right
+    - scheme
+    - value
   researchproduct_hashdiff:
     is_hashdiff: true
     columns:
-      - open_access_color
-      - publicly_funded
-      - type
-      - main_title
-      - publication_date
-      - is_green
-      - is_in_diamond_journal
-      - language_code
-      - language_label
-      - best_access_right
-      - best_access_right_uri
-      - citation_class
-      - citation_count
-      - impulse
-      - impulse_class
-      - influence
-      - influence_class
-      - popularity
-      - popularity_class
-      - load_datetime
-      - downloads
-      - views
-      - publisher
-      - embargo_end_date
+      - scheme
+      - value 
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

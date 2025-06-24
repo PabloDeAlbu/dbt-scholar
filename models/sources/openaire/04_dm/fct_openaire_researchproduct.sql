@@ -1,3 +1,5 @@
+{{ config(materialized = 'table') }}
+
 WITH base as (
     SELECT 
         hub_researchproduct.researchproduct_id,
