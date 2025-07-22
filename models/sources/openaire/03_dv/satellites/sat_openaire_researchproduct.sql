@@ -10,6 +10,7 @@ src_payload:
   - publicly_funded
   - main_title
   - publication_date
+  - type
   - is_green
   - is_in_diamond_journal
   - language_code

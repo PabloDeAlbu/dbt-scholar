@@ -2,10 +2,10 @@
 
 WITH ranked AS (
   SELECT *,
-         ROW_NUMBER() OVER (
-           PARTITION BY researchproduct_hk
-           ORDER BY load_datetime DESC  -- también equivale a src_eff en tu caso
-         ) AS rn
+    ROW_NUMBER() OVER (
+      PARTITION BY researchproduct_hk
+      ORDER BY load_datetime DESC
+    ) AS rn
   FROM {{ ref('sat_openaire_researchproduct') }}
 )
 SELECT *

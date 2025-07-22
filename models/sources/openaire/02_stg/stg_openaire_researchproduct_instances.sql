@@ -1,34 +1,25 @@
 {{ config(materialized='view') }}
 
 {%- set yaml_metadata -%}
-source_model: "ldg_openaire_researchproduct_author"
+source_model: "ldg_openaire_researchproduct_instances"
 derived_columns:
   source: "!OPENAIRE"
   load_datetime: load_datetime
 hashed_columns:
   researchproduct_hk: researchproduct_id
-  orcid_hk: orcid
-  researchproduct_orcid_hk:
-    - researchproduct_id
-    - orcid
-  author_hk:
-    - full_name
-    - name
-    - orcid
-    - surname
-  researchproduct_author_hk:
-    - researchproduct_id
-    - full_name
-    - name
-    - orcid
-    - surname
-  author_hashdiff:
+  researchproduct_instances_hashdiff:
     is_hashdiff: true
     columns:
-      - full_name
-      - name
-      - surname
-
+      - apc
+      - license
+      - publication_date
+      - refereed
+      - type
+      - urls
+      - apc_amount
+      - apc_currency
+      - scheme
+      - value
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

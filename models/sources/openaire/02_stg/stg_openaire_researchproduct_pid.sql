@@ -17,7 +17,7 @@ hashed_columns:
     - researchproduct_id
     - scheme
     - value
-  researchproduct_hashdiff:
+  researchproduct_pid_hashdiff:
     is_hashdiff: true
     columns:
       - scheme
