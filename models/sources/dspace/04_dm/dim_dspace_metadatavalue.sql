@@ -8,6 +8,7 @@ WITH base AS (
         sat_mfr.qualifier,
         sat_mv.text_value,
         sat_mv.authority,
+        sat_mv.text_lang,
         sat_mv.metadatavalue_hk
     FROM {{ref('hub_dspace_metadatafieldregistry')}} hub_mfr
     INNER JOIN {{ref('sat_dspace_metadatafieldregistry')}} sat_mfr ON sat_mfr.metadatafield_hk = hub_mfr.metadatafield_hk
