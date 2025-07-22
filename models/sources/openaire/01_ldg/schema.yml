@@ -11,5 +11,6 @@ sources:
       - name: rel_researchproduct_originalid
       - name: rel_researchproduct_pids
       - name: rel_researchproduct_subjects
+      - name: rel_researchproduct_sources
       - name: researchproduct
       

@@ -26,7 +26,7 @@ WITH base as (
         sat_researchproduct.embargo_end_date,
         hub_researchproduct.researchproduct_hk
     FROM {{ref('hub_openaire_researchproduct')}} hub_researchproduct
-    INNER JOIN {{ref('sat_openaire_researchproduct')}} sat_researchproduct ON hub_researchproduct.researchproduct_hk = sat_researchproduct.researchproduct_hk
+    INNER JOIN {{ref('latest_sat_openaire_researchproduct')}} sat_researchproduct ON hub_researchproduct.researchproduct_hk = sat_researchproduct.researchproduct_hk
 )
 
 SELECT * FROM base
