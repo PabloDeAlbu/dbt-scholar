@@ -24,49 +24,49 @@ sources:
       - name: collection
         columns:
           - name: collection_id
-            tests:
+            data_tests:
             - unique
           - name: submitter
           - name: admin
       - name: collection2item
         columns:
           - name: id
-            tests:
+            data_tests:
             - unique
             - not_null
           - name: collection_id
-            tests:
+            data_tests:
             - not_null
           - name: item_id
-            tests:
+            data_tests:
             - not_null
       - name: community
         columns:
           - name: community_id
-            tests:
+            data_tests:
               - not_null
           - name: admin
       - name: community2collection
         columns:
           - name: id
-            tests:
+            data_tests:
             - not_null
           - name: collection_id 
-            tests:
+            data_tests:
             - not_null
           - name: community_id
-            tests:
+            data_tests:
             - not_null
       - name: community2community
         columns:
           - name: id 
-            tests:
+            data_tests:
             - not_null
           - name: parent_comm_id 
-            tests:
+            data_tests:
             - not_null
           - name: child_comm_id
-            tests:
+            data_tests:
             - not_null
       - name: handle
         columns:
@@ -78,79 +78,79 @@ sources:
         columns:
           - name: item_id
           - name: in_archive
-            tests:
+            data_tests:
               - not_null
           - name: withdrawn
-            tests:
+            data_tests:
               - not_null
           - name: last_modified
-            tests:
+            data_tests:
               - not_null
           - name: discoverable
-            tests:
+            data_tests:
               - not_null
           - name: submitter_id
           - name: owning_collection
       - name: item2bundle
         columns:
           - name: id
-            tests:
+            data_tests:
               - not_null
           - name: item_id
-            tests:
+            data_tests:
               - not_null
           - name: bundle_id
-            tests:
+            data_tests:
               - not_null
       - name: metadatafieldregistry
         columns:
           - name: metadata_field_id
-            tests:
+            data_tests:
               - unique
               - not_null
           - name: metadata_schema_id
-            tests:
+            data_tests:
               - not_null
           - name: element
-            tests:
+            data_tests:
               - not_null
           - name: qualifier
           - name: scope_note
       - name: metadataschemaregistry
         columns:
           - name: metadata_schema_id
-            tests:
+            data_tests:
               - unique
               - not_null
           - name: namespace
-            tests:
+            data_tests:
               - unique
               - not_null
           - name: short_id
-            tests:
+            data_tests:
               - unique
               - not_null
       - name: metadatavalue
         columns:
           - name: metadata_value_id
-            tests:
+            data_tests:
             - not_null
           - name: resource_id
-            tests:
+            data_tests:
             - not_null
           - name: resource_type_id
-            tests:
+            data_tests:
             - not_null
           - name: metadata_field_id
-            tests:
+            data_tests:
             - not_null
           - name: text_value
-            tests:
+            data_tests:
             - not_null
           - name: text_lang
           - name: place
           - name: authority
           - name: confidence
           - name: dspace_object_id
-            tests:
+            data_tests:
             - not_null
