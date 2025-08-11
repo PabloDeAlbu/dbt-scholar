@@ -3,7 +3,7 @@ with source as (
 ),
 renamed as (
   select
-    id,
+    id as researchproduct_id,
     {{ adapter.quote("articleProcessingCharge") }} as apc,
     license,
     {{ adapter.quote("publicationDate") }} as publication_date,

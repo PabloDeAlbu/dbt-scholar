@@ -16,12 +16,19 @@ hashed_columns:
     - name
     - orcid
     - surname
+  author_orcid_hk:
+    - full_name
+    - name
+    - orcid
+    - surname
+    - orcid
   researchproduct_author_hk:
     - researchproduct_id
     - full_name
     - name
     - orcid
     - surname
+    - rank
   author_hashdiff:
     is_hashdiff: true
     columns:
