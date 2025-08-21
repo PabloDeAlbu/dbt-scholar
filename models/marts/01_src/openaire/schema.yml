@@ -1,0 +1,21 @@
+version: 2
+
+sources:
+  - name: openaire
+    description: 'OpenAIRE Research Graph'
+    schema: dv_openaire
+    tables:
+      - name: fct_openaire_researchproduct
+        columns:
+          - name: researchproduct_hk
+            data_tests:
+            - unique
+  - name: openalex
+    description: 'OpenAlex'
+    schema: dv_openalex
+    tables:
+      - name: fct_openalex_work
+        columns:
+          - name: work_hk
+            data_tests:
+            - unique
