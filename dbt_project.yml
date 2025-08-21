@@ -6,8 +6,7 @@ version: '1.0.0'
 config-version: 2
 
 # This setting configures which "profile" dbt uses for this project.
-#profile: 'staging-cic'
-profile: 'localhost-dspace'
+profile: 'dw_unlp'
 
 # These configurations specify where dbt should look for different types of files.
 # The `model-paths` config, for example, states that models in this project can be
@@ -40,16 +39,26 @@ models:
         +schema: dspace
       dspace5:
         +schema: dspace5
-      dspacedb:
-        +schema: dspacedb
       oai:
         +schema: oai
       openaire:
         +schema: openaire
-      openaire_graph:
-        +schema: openaire_graph
       openalex:
         +schema: openalex
+    marts:
+      +materialized: table
+      01_src:
+        openaire:
+          +schema: openaire
+        openalex:
+          +schema: openalex
+      03_org:
+        cic:
+          +schema: cic
+        conicet:
+          +schema: conicet
+        unlp:
+          +schema: unlp
 
 seeds:
   dbt_unlp:
