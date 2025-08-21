@@ -1,8 +1,8 @@
 packages:
-- package: calogica/dbt_date
-  version: 0.10.1
-- package: dbt-labs/dbt_utils
-  version: 1.1.1
-- package: Datavault-UK/automate_dv
-  version: 0.10.1
-sha1_hash: f0945c73e631f1d5e1440cb093e23d5539a3e777
+  - package: godatadriven/dbt_date
+    version: 0.14.2
+  - package: dbt-labs/dbt_utils
+    version: 1.1.1
+  - package: Datavault-UK/automate_dv
+    version: 0.11.2
+sha1_hash: 2c745371b0ba0ed9bf829e8bf7963a08d4945aa7
