@@ -2,7 +2,6 @@
 
 WITH base AS (
     SELECT 
-        hub_author.author_id,
         hub_orcid.orcid,
         sat_author.full_name,
         sat_author.name,
