@@ -14,9 +14,8 @@ hashed_columns:
   author_hk:
     - full_name
     - name
-    - orcid
     - surname
-    - rank
+    - orcid
   author_orcid_hk:
     - full_name
     - name

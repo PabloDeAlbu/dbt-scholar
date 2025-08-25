@@ -7,6 +7,11 @@ derived_columns:
   load_datetime: load_datetime
 hashed_columns:
   researchproduct_hk: researchproduct_id
+  instances_type_hk:
+    - type
+  researchproduct_instances_type_hk:
+    - researchproduct_id
+    - type
   researchproduct_instances_hashdiff:
     is_hashdiff: true
     columns:
