@@ -2,11 +2,10 @@
 
 WITH base AS (
     SELECT 
-        hub_institution.institution_hk,
         hub_institution.institution_id,
-        hub_openalex_ror.ror,
-        sat_institution.country_code,
-        sat_institution.display_name
+        COALESCE(hub_openalex_ror.ror, '-') as ror,
+        sat_institution.display_name as institution_display_name
+        COALESCE(sat_institution.country_code, '-') as country_code
     FROM {{ref('hub_openalex_institution')}} hub_institution
     INNER JOIN {{ref('sat_openalex_institution')}} sat_institution ON sat_institution.institution_hk = hub_institution.institution_hk
     LEFT JOIN {{ref('link_openalex_institution_ror')}} link_institution_ror ON link_institution_ror.institution_hk = hub_institution.institution_hk
