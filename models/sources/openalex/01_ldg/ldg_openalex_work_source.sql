@@ -1,28 +1,25 @@
 with source as (
-      select * from {{ source('openalex', 'map_work_location') }}
-),
-renamed as (
     select
-        {{ adapter.quote("id") }} as work_id,
-        {{ adapter.quote("source_id") }},
-        {{ adapter.quote("source_display_name") }},
-        {{ adapter.quote("source_is_core") }},
-        {{ adapter.quote("source_type") }},
-        {{ adapter.quote("source_host_organization") }},
-        {{ adapter.quote("source_host_organization_name") }},
-        {{ adapter.quote("is_accepted") }},
-        {{ adapter.quote("is_oa") }},
-        {{ adapter.quote("is_published") }},
-        {{ adapter.quote("landing_page_url") }},
-        {{ adapter.quote("license") }},
-        {{ adapter.quote("license_id") }},
-        {{ adapter.quote("pdf_url") }},
-        {{ adapter.quote("version") }},
-        {{ adapter.quote("source_is_in_doaj") }},
-        {{ adapter.quote("source_is_oa") }},
-        {{ adapter.quote("source_issn_l") }},
-        {{ adapter.quote("load_datetime") }}
-    from source
+        id as work_id,
+        source_id,
+        source_display_name,
+        source_is_core,
+        source_type,
+        source_host_organization,
+        source_host_organization_name,
+        is_accepted,
+        is_oa,
+        is_published,
+        landing_page_url,
+        license,
+        license_id,
+        pdf_url,
+        version,
+        source_is_in_doaj,
+        source_is_oa,
+        source_issn_l,
+        load_datetime
+    from {{ source('openalex', 'map_work_location') }}
 ),
 
 casted as (
@@ -45,8 +42,8 @@ casted as (
         is_published::boolean,
         source_is_in_doaj::boolean,
         source_is_oa::boolean,
-        {{ dbt_date.convert_timezone("load_datetime") }} as load_datetime
-    from renamed
+        load_datetime::timestamp
+    from source
 )
 
 select * from casted

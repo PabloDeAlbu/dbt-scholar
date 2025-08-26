@@ -1,7 +1,7 @@
 {{ config(materialized='incremental') }}
 
 {%- set yaml_metadata -%}
-source_model: 'stg_openalex_author_institution'
+source_model: 'stg_openalex_institution'
 src_pk: ror_hk
 src_nk: ror
 src_ldts: load_datetime

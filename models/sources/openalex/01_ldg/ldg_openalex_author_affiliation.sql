@@ -1,22 +1,19 @@
 with source as (
-      select * from {{ source('openalex', 'map_author_affiliation') }}
-),
-renamed as (
-    select  
+    select 
         id as author_id,
         institution_id,
         years, 
         load_datetime
-    from source
-)
-,
+      from {{ source('openalex', 'map_author_affiliation') }}
+),
+
 casted as (
     select  
         author_id::varchar,
         institution_id::varchar,
         years::int,
-        {{ dbt_date.convert_timezone("load_datetime") }} as load_datetime
-    from renamed
+        load_datetime::timestamp
+    from source
 )
 select * from casted
   

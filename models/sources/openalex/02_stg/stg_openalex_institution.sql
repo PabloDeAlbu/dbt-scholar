@@ -1,16 +1,23 @@
 {{ config(materialized='table') }}
 
 {%- set yaml_metadata -%}
-source_model: 'ldg_openalex_author_institution'
+source_model: 'ldg_openalex_institution'
 derived_columns:
   source: "!OPENALEX"
   load_datetime: load_datetime
 hashed_columns:
-  author_hk: author_id
   institution_hk: institution_id
-  author_institution_hk:
-    - author_id
+  ror_hk: ror
+  institution_ror_hk:
     - institution_id
+    - ror
+  institution_hashdiff:
+    is_hashdiff: true
+    columns:
+      - country_code
+      - display_name
+      - ror
+      - institution_type
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

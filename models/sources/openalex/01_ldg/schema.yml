@@ -11,6 +11,7 @@ sources:
       - name: map_author_institution
       - name: map_author_topic
 #      - name: institution
+      - name: map_work_institution
       - name: language
       - name: license
       - name: map_work_author

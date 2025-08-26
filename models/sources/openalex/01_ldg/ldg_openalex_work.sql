@@ -1,7 +1,4 @@
 with source as (
-        select * from {{ source('openalex', 'work') }}
-),
-renamed as (
   select
     {{ adapter.quote("id") }} as work_id,
     {{ adapter.quote("title") }},
@@ -96,7 +93,7 @@ renamed as (
     {{ adapter.quote("best_oa_location.source.issn_l") }} as best_oa_location_source_issn_l,
     {{ adapter.quote("best_oa_location.source.type") }} as best_oa_location_source_type,
     {{ adapter.quote("load_datetime") }}
-  from source
+  from {{ source('openalex', 'work') }}
 ),
 
 casted as (
@@ -128,11 +125,12 @@ casted as (
     referenced_works_count::int,
     countries_distinct_count::int,
     publication_year::int,
+
     ---- date
-    {{ dbt_date.convert_timezone("publication_date") }} as publication_date,
-    {{ dbt_date.convert_timezone("updated_date") }} as updated_date,
-    {{ dbt_date.convert_timezone("created_date") }} as created_date,
-    {{ dbt_date.convert_timezone("load_datetime") }} as load_datetime,
+    publication_date::timestamp,
+    updated_date::timestamp,
+    created_date::timestamp,
+    load_datetime::timestamp,
 
     -- openaeccess
     ---- varchar
@@ -248,155 +246,7 @@ casted as (
     primary_topic_score::int
     ---- date
 
-
-  from renamed
-),
-
-transformed as (
-  select  
-    work_id,
-    title,
-    display_name,
-    language,
-    type,
-    type_crossref,
-    fulltext_origin,
-    cited_by_api_url,
-    doi,
-    mag,
-    openalex,
-    pmcid,
-    pmid,
-    ---- bool
-    has_fulltext,
-    is_retracted,
-    is_paratext,
-    ---- int
-    institutions_distinct_count,
-    fwci,
-    cited_by_count,
-    locations_count,
-    referenced_works_count,
-    countries_distinct_count,
-    publication_year,
-    ---- date
-    publication_date,
-    updated_date,
-    created_date,
-
-    -- openaeccess
-    ---- varchar
-    oa_status,
-    oa_url,
-    ---- bool
-    any_repository_has_fulltext,
-    is_oa,
-    ---- int
-    ---- date
-
-    -- primary location
-    ---- varchar
-    primary_location_source,
-    primary_location_source_id,
-    primary_location_source_type,
-    primary_location_source_display_name,
-    primary_location_source_host_organization,
-    primary_location_source_host_organization_name,
-    primary_location_landing_page_url,
-    primary_location_license,
-    primary_location_license_id,
-    primary_location_pdf_url,
-    primary_location_version,
-    primary_location_source_issn_l,
-    ---- bool
-    primary_location_is_accepted,
-    primary_location_is_oa,
-    primary_location_is_published,
-    primary_location_source_is_core,
-    primary_location_source_is_in_doaj,
-    primary_location_source_is_indexed_in_scopus,
-    primary_location_source_is_oa,
-    ---- int
-    ---- date
-
-    -- apc_list
-    ---- varchar
-    apc_list_currency,
-    ---- bool
-    ---- int
-    apc_list_value,
-    apc_list_value_usd,
-    ---- date
-
-    -- apc_paid
-    ---- varchar
-    apc_paid_currency,
-    ---- bool
-    ---- int
-    apc_paid_value,
-    apc_paid_value_usd,
-    ---- date
-
-    -- citation_normalized_percentile
-    ---- varchar
-    ---- bool
-    citation_normalized_percentile_is_in_top_10_percent,
-    citation_normalized_percentile_is_in_top_1_percent,
-    ---- int
-    citation_normalized_percentile_value,
-    cited_by_percentile_year_max,
-    cited_by_percentile_year_min,
-    ---- date
-
-    -- biblio
-    ---- varchar
-    biblio_first_page,
-    biblio_issue,
-    biblio_last_page,
-    biblio_volume,
-    ---- bool
-    ---- int
-    ---- date
-
-    -- primary_topic
-    ---- varchar
-    primary_topic_display_name,
-    primary_topic_id,
-    primary_topic_domain_display_name,
-    primary_topic_domain_id,
-    primary_topic_field_display_name,
-    primary_topic_field_id,
-    primary_topic_subfield_display_name,
-    primary_topic_subfield_id,
-    ---- bool
-    ---- int
-    primary_topic_score,
-    ---- date
-
-    -- best_oa_location
-    ---- varchar
-    best_oa_location_source,
-    best_oa_location_source_id,
-    best_oa_location_source_display_name,
-    best_oa_location_source_type,
-    best_oa_location_source_host_organization,
-    best_oa_location_source_host_organization_name,
-    best_oa_location_landing_page_url,
-    best_oa_location_license,
-    best_oa_location_license_id,
-    best_oa_location_pdf_url,
-    best_oa_location_version,
-    best_oa_location_source_issn_l,
-    ---- bool
-    best_oa_location_is_accepted,
-    best_oa_location_is_oa,
-    best_oa_location_is_published,
-    best_oa_location_source_is_core,
-    best_oa_location_source_is_in_doaj,
-    best_oa_location_source_is_indexed_in_scopus,
-    best_oa_location_source_is_oa,
-    load_datetime
-  from casted
+  from source
 )
 
-select * from transformed
+select * from casted

@@ -1,18 +1,25 @@
 with source as (
-      select * from {{ source('openalex', 'map_author_topic') }}
+    select 
+        id as author_id,
+        count,
+        id_topic as topic_id,
+        domain_id,
+        field_id,
+        subfield_id,
+        load_datetime
+    from {{ source('openalex', 'map_author_topic') }}
 ),
-renamed as (
+casted as (
     select
-        {{ adapter.quote("id") }},
-        {{ adapter.quote("count") }},
-        {{ adapter.quote("id_topic") }},
-        {{ adapter.quote("domain_id") }},
-        {{ adapter.quote("field_id") }},
-        {{ adapter.quote("subfield_id") }},
-        {{ adapter.quote("load_datetime") }}
+        author_id::varchar,
+        count::varchar,
+        topic_id::varchar,
+        domain_id::varchar,
+        field_id::varchar,
+        subfield_id::varchar,
+        load_datetime::timestamp
     from source
 )
 
 
-select * from renamed
-  
+select * from casted
