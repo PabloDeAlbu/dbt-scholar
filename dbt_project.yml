@@ -33,6 +33,7 @@ models:
   # Config indicated by + and applies to all files under models/example/
   dbt_unlp:
     sources:
+      +materialized: table
       coar:
         +schema: coar
       dspace:
