@@ -12,6 +12,7 @@ with source as (
 casted as (
     select
         work_id::varchar,
+        institution_id::varchar,
         country_code::varchar,
         display_name::varchar,
         ror::varchar,
