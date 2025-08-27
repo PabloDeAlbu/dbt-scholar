@@ -1,6 +1,6 @@
 WITH work as (
     SELECT
-        hub_work.work_id,
+        REPLACE(hub_work.work_id, 'https://openalex.org/','') as work_id,
         sat_work.title,
         sat_work.type,
         sat_work.publication_year as publication_year,
@@ -37,11 +37,10 @@ WITH work as (
 
 work_pid AS (
     SELECT
-        hub_work.work_id,
-        REPLACE(hub_doi.doi, 'https://doi.org/', '') AS doi,
-        hub_mag.mag,
-        hub_pmcid.pmcid,
-        hub_pmid.pmid,
+        COALESCE(REPLACE(hub_doi.doi, 'https://doi.org/', ''), '-') as doi,
+        COALESCE(hub_mag.mag, '-') as mag,
+        COALESCE(hub_pmcid.pmcid, '-') as pmcid,
+        COALESCE(hub_pmid.pmid, '-') as pmid,
         hub_work.work_hk
     FROM {{ref('hub_openalex_work')}} hub_work
     LEFT JOIN {{ref('link_openalex_work_doi')}} link_work_doi ON link_work_doi.work_hk = hub_work.work_hk
@@ -54,27 +53,15 @@ work_pid AS (
     LEFT JOIN {{ref('hub_openalex_pmid')}} hub_pmid ON hub_pmid.pmid_hk = link_work_pmid.pmid_hk
 ),
 
-work_author AS (
-    SELECT
-        COUNT(*)
-        {# hub_work.work_id,
-        brg_author.display_name,
-        hub_work.work_hk #}
-    FROM {{ref('hub_openalex_work')}} hub_work
-    LEFT JOIN {{ref('brg_openalex_work_author')}} brg_author ON hub_work.work_hk = brg_author.work_hk
-),
-
 openalex_work AS (
     SELECT 
         work.*,
         work_pid.doi,
         work_pid.mag,
         work_pid.pmcid,
-        work_pid.pmid,
-        work_author.
+        work_pid.pmid
     FROM work
     LEFT JOIN work_pid ON work.work_hk = work_pid.work_hk
-    LEFT JOIN work_author ON work.work_hk = work_author.work_hk
 )
 
 SELECT * FROM openalex_work

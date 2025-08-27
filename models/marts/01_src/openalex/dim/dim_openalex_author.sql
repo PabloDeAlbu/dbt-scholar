@@ -2,8 +2,8 @@
 
 WITH base AS (
     SELECT 
-        hub_author.author_id,
-        COALESCE(hub_orcid.orcid, '-') as orcid,
+        REPLACE(hub_author.author_id, 'https://openalex.org/', '') as author_id,
+        COALESCE(REPLACE(hub_orcid.orcid, 'https://orcid.org/', ''), '-') as orcid,
         sat_author.display_name as author_display_name,
         sat_author.works_count,
         sat_author.cited_by_count 

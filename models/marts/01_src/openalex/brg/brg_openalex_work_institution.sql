@@ -1,11 +1,11 @@
 {{ config(materialized = 'table') }}
 
 WITH base AS (
-    SELECT 
-        hub_work.work_id,        
-        hub_institution.institution_id,
+    SELECT
+        REPLACE(hub_work.work_id, 'https://openalex.org/', '') as work_id,
+        REPLACE(hub_institution.institution_id, 'https://openalex.org/', '') as institution_id,
         COALESCE(sat_institution.display_name, '-') as institution_display_name,
-        COALESCE(hub_ror.ror, '-') as ror
+        COALESCE(REPLACE(hub_ror.ror, 'https://ror.org/', ''), '-') as ror
     FROM {{ref('link_openalex_work_institution')}} link_work_institution
     INNER JOIN {{ref('hub_openalex_work')}} hub_work ON link_work_institution.work_hk = hub_work.work_hk
     INNER JOIN {{ref('hub_openalex_institution')}} hub_institution ON link_work_institution.institution_hk = hub_institution.institution_hk

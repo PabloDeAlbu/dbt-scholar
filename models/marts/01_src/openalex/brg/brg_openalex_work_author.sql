@@ -2,10 +2,10 @@
 
 WITH base AS (
     SELECT 
-        hub_work.work_id,        
-        hub_author.author_id,
+        REPLACE(hub_work.work_id, 'https://openalex.org/','') as work_id,
+        REPLACE(hub_author.author_id, 'https://openalex.org/', '') as author_id,
         COALESCE(sat_author.display_name, '-') as author_display_name,
-        COALESCE(hub_orcid.orcid, '-') as orcid
+        COALESCE(REPLACE(hub_orcid.orcid, 'https://orcid.org/', ''), '-') as orcid
     FROM {{ref('link_openalex_work_author')}} link_work_author
     INNER JOIN {{ref('hub_openalex_work')}} hub_work ON link_work_author.work_hk = hub_work.work_hk
     INNER JOIN {{ref('hub_openalex_author')}} hub_author ON link_work_author.author_hk = hub_author.author_hk
