@@ -12,19 +12,19 @@ hashed_columns:
   work_hk: work_id
   work_primarytopic_hk:
     - work_id
-    - primary_topic_id
-  work_hashdiff:
+    - topic_id
+  topic_hk: topic_id
+  topic_hashdiff:
     is_hashdiff: true
     columns:
-      - primary_topic_display_name
-      - primary_topic_id
-      - primary_topic_domain_display_name
-      - primary_topic_domain_id
-      - primary_topic_field_display_name
-      - primary_topic_field_id
-      - primary_topic_subfield_display_name
-      - primary_topic_subfield_id
-      - primary_topic_score
+      - topic_display_name
+      - topic_id
+      - topic_domain_display_name
+      - topic_domain_id
+      - topic_field_display_name
+      - topic_field_id
+      - topic_subfield_display_name
+      - topic_subfield_id
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}
