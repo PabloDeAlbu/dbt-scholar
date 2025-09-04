@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: openalex
+    description: 'OpenAlex'
+    schema: dv_openalex
+    tables:
+      - name: fct_openalex_work_publication
+        columns:
+          - name: work_hk
+            data_tests:
+            - unique

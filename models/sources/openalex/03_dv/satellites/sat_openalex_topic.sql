@@ -8,7 +8,6 @@ src_hashdiff:
   alias: "hashdiff"
 src_payload:
   - topic_display_name
-  - topic_id
   - topic_domain_display_name
   - topic_domain_id
   - topic_field_display_name
