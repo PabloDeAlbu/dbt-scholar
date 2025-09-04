@@ -2,15 +2,17 @@
 
 {%- set yaml_metadata -%}
 source_model: "stg_openaire_researchproduct_author"
-src_pk: "author_hk"
+src_pk: "researchproduct_hk"
 src_hashdiff:
-  source_column: "author_hashdiff"
+  source_column: "researchproduct_author_hashdiff"
   alias: "hashdiff"
 src_payload:
-  - orcid
+  - researchproduct_id
   - full_name
   - name
+  - orcid
   - surname
+  - rank
 src_eff: "load_datetime"
 src_ldts: "load_datetime"
 src_source: "source"
