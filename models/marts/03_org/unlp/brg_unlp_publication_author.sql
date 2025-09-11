@@ -5,7 +5,7 @@
         brg.work_hk,
         brg.author_hk
     FROM {{ref('brg_openalex_publication_author')}} brg
-    INNER JOIN {{ref('fct_openalex_work')}} fct ON 
+    INNER JOIN {{ref('fct_openalex_work_publication')}} fct ON 
         fct.work_hk = brg.work_hk
 ), 
 

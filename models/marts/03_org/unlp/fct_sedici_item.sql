@@ -58,7 +58,8 @@ subject AS (
 author AS (
     SELECT 
         bridge_i_mv.item_hk,
-        STRING_AGG(mv.text_value, '|' ORDER BY mv.text_value) as text_value
+        STRING_AGG(mv.text_value, '|' ORDER BY mv.text_value) as text_value,
+        COUNT(DISTINCT NULLIF(TRIM(mv.text_value), ''))::int AS author_count
     FROM {{ref('brg_dspace5_item_metadatavalue')}} bridge_i_mv
     INNER JOIN {{ref('dim_dspace5_metadatavalue')}} mv ON 
         mv.metadatavalue_hk = bridge_i_mv.metadatavalue_hk
@@ -141,6 +142,7 @@ final as (
         type.text_value as type,
         subtype.text_value as subtype,
         author.text_value as author,
+        author.author_count,
         issn.text_value as issn,
         isbn.text_value as isbn,
         doi.text_value as doi

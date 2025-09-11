@@ -1,7 +1,7 @@
 WITH base AS 
     (
         SELECT *
-        FROM {{ref('fct_openaire_researchproduct')}}
+        FROM {{ref('fct_openaire_researchproduct_publication')}}
 ),
 
 url AS (

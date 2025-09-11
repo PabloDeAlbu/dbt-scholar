@@ -5,7 +5,7 @@
 
 openalex AS (
     SELECT * 
-    FROM {{ref('fct_openalex_work')}}
+    FROM {{ref('fct_openalex_work_publication')}}
 ),
 
 final as (

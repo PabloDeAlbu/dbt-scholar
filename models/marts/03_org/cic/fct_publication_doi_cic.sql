@@ -71,7 +71,7 @@ openalex_works AS (
     SELECT 
         CONCAT('10.', split_part(doi, '10.', 2)) as doi,
         type 
-    FROM {{ ref('fct_openalex_work') }} 
+    FROM {{ ref('fct_openalex_work_publication') }} 
 )
 
 SELECT 

@@ -2,7 +2,7 @@ WITH base as (
     SELECT 
         doi,
         type 
-    FROM {{ref('fct_openalex_work')}} 
+    FROM {{ref('fct_openalex_work_publication')}} 
 ),
 
 coar AS (
