@@ -15,10 +15,10 @@ with source as (
 
 casted as (
     select
-        author_id::varchar,
-        orcid::varchar,
-        display_name::varchar,
-        works_count::varchar,
+        author_id::text,
+        orcid::text,
+        display_name::text,
+        works_count::text,
         cited_by_count::int,
         updated_date::timestamp,
         created_date::timestamp,

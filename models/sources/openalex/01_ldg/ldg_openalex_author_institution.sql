@@ -7,8 +7,8 @@ with source as (
 ),
 casted as (
     select  
-        author_id::varchar,
-        institution_id::varchar,
+        author_id::text,
+        institution_id::text,
         load_datetime::timestamp
     from source
 )

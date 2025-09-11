@@ -100,19 +100,19 @@ casted as (
   select
     -- work
     ---- varchar
-    work_id::varchar,
-    title::varchar,
-    display_name::varchar,
-    language::varchar,
-    type::varchar,
-    type_crossref::varchar,
-    fulltext_origin::varchar,
-    cited_by_api_url::varchar,
-    doi::varchar,
-    mag::varchar,
-    openalex::varchar,
-    pmcid::varchar,
-    pmid::varchar,
+    work_id::text,
+    title::text,
+    display_name::text,
+    language::text,
+    type::text,
+    type_crossref::text,
+    fulltext_origin::text,
+    cited_by_api_url::text,
+    doi::text,
+    mag::text,
+    openalex::text,
+    pmcid::text,
+    pmid::text,
     ---- bool
     has_fulltext::boolean,
     is_retracted::boolean,
@@ -134,8 +134,8 @@ casted as (
 
     -- openaeccess
     ---- varchar
-    oa_status::varchar,
-    oa_url::varchar,
+    oa_status::text,
+    oa_url::text,
     ---- bool
     any_repository_has_fulltext::boolean,
     is_oa::boolean,
@@ -144,7 +144,7 @@ casted as (
 
     -- apc_list
     ---- varchar
-    apc_list_currency::varchar,
+    apc_list_currency::text,
     ---- bool
     ---- int
     apc_list_value::int,
@@ -153,7 +153,7 @@ casted as (
 
     -- apc_paid
     ---- varchar
-    apc_paid_currency::varchar,
+    apc_paid_currency::text,
     ---- bool
     ---- int
     apc_paid_value::int,
@@ -173,10 +173,10 @@ casted as (
 
     -- biblio
     ---- varchar
-    biblio_first_page::varchar,
-    biblio_issue::varchar,
-    biblio_last_page::varchar,
-    biblio_volume::varchar,
+    biblio_first_page::text,
+    biblio_issue::text,
+    biblio_last_page::text,
+    biblio_volume::text,
     ---- bool
     ---- int
     ---- date
@@ -185,18 +185,18 @@ casted as (
 
     -- primary location
     ---- varchar
-    location_source::varchar,
-    location_source_id::varchar,
-    location_source_type::varchar,
-    location_source_display_name::varchar,
-    location_source_host_organization::varchar,
-    location_source_host_organization_name::varchar,
-    location_landing_page_url::varchar,
-    location_license::varchar,
-    location_license_id::varchar,
-    location_pdf_url::varchar,
-    location_version::varchar,
-    location_source_issn_l::varchar,
+    location_source::text,
+    location_source_id::text,
+    location_source_type::text,
+    location_source_display_name::text,
+    location_source_host_organization::text,
+    location_source_host_organization_name::text,
+    location_landing_page_url::text,
+    location_license::text,
+    location_license_id::text,
+    location_pdf_url::text,
+    location_version::text,
+    location_source_issn_l::text,
     ---- bool
     location_is_accepted::boolean,
     location_is_oa::boolean,
@@ -210,18 +210,18 @@ casted as (
 
     -- best_oa_location
     ---- varchar
-    best_oa_location_source::varchar,
-    best_oa_location_source_id::varchar,
-    best_oa_location_source_display_name::varchar,
-    best_oa_location_source_type::varchar,
-    best_oa_location_source_host_organization::varchar,
-    best_oa_location_source_host_organization_name::varchar,
-    best_oa_location_landing_page_url::varchar,
-    best_oa_location_license::varchar,
-    best_oa_location_license_id::varchar,
-    best_oa_location_pdf_url::varchar,
-    best_oa_location_version::varchar,
-    best_oa_location_source_issn_l::varchar,
+    best_oa_location_source::text,
+    best_oa_location_source_id::text,
+    best_oa_location_source_display_name::text,
+    best_oa_location_source_type::text,
+    best_oa_location_source_host_organization::text,
+    best_oa_location_source_host_organization_name::text,
+    best_oa_location_landing_page_url::text,
+    best_oa_location_license::text,
+    best_oa_location_license_id::text,
+    best_oa_location_pdf_url::text,
+    best_oa_location_version::text,
+    best_oa_location_source_issn_l::text,
     ---- bool
     best_oa_location_is_accepted::boolean,
     best_oa_location_is_oa::boolean,
@@ -233,14 +233,14 @@ casted as (
 
     -- topic
     ---- varchar
-    topic_display_name::varchar,
-    topic_id::varchar,
-    topic_domain_display_name::varchar,
-    topic_domain_id::varchar,
-    topic_field_display_name::varchar,
-    topic_field_id::varchar,
-    topic_subfield_display_name::varchar,
-    topic_subfield_id::varchar,
+    topic_display_name::text,
+    topic_id::text,
+    topic_domain_display_name::text,
+    topic_domain_id::text,
+    topic_field_display_name::text,
+    topic_field_id::text,
+    topic_subfield_display_name::text,
+    topic_subfield_id::text,
     ---- bool
     ---- int
     primary_topic_score::int

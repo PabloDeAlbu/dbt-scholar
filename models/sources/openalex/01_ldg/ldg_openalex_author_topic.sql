@@ -11,12 +11,12 @@ with source as (
 ),
 casted as (
     select
-        author_id::varchar,
-        count::varchar,
-        topic_id::varchar,
-        domain_id::varchar,
-        field_id::varchar,
-        subfield_id::varchar,
+        author_id::text,
+        count::text,
+        topic_id::text,
+        domain_id::text,
+        field_id::text,
+        subfield_id::text,
         load_datetime::timestamp
     from source
 )

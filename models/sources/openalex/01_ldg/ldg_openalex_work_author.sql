@@ -9,9 +9,9 @@ with source as (
 
 casted as (
     select
-        work_id::varchar,
-        author_id::varchar,
-        author_position::varchar,
+        work_id::text,
+        author_id::text,
+        author_position::text,
         load_datetime::timestamp
     from source
 )

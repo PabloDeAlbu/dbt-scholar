@@ -11,12 +11,12 @@ with source as (
 ),
 casted as (
     select
-        work_id::varchar,
-        institution_id::varchar,
-        country_code::varchar,
-        display_name::varchar,
-        ror::varchar,
-        institution_type::varchar,
+        work_id::text,
+        institution_id::text,
+        country_code::text,
+        display_name::text,
+        ror::text,
+        institution_type::text,
        load_datetime::timestamp
     from source
 )

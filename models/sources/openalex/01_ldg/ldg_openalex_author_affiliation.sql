@@ -9,8 +9,8 @@ with source as (
 
 casted as (
     select  
-        author_id::varchar,
-        institution_id::varchar,
+        author_id::text,
+        institution_id::text,
         years::int,
         load_datetime::timestamp
     from source
