@@ -4,14 +4,14 @@ with source as (
     scheme,
     value,
     load_datetime
-  from {{ source('openaire', 'rel_researchproduct_pids')}}
+  from {{ source('openaire', 'researchproduct_pids')}}
 ),
 
 casted as (
   select
-    id::varchar as researchproduct_id,
-    scheme::varchar as scheme,
-    value::varchar as value,
+    id::text as researchproduct_id,
+    scheme::text as scheme,
+    value::text as value,
     {{ dbt_date.convert_timezone("load_datetime") }} as load_datetime
   from source
 )

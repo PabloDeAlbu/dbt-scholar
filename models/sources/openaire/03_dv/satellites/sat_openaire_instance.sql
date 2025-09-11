@@ -7,7 +7,6 @@ src_hashdiff:
   source_column: "researchproduct_instances_hashdiff"
   alias: "hashdiff"
 src_payload:
-  - apc
   - license
   - publication_date
   - refereed

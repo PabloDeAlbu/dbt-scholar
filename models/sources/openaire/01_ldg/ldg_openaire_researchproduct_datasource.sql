@@ -6,8 +6,8 @@ with source as (
   renamed as (
       select
         {% if 'relCollectedFromDatasourceId' in columns -%}
-          {{ adapter.quote("id") }}::varchar as researchproduct_id,
-          {{ adapter.quote("relCollectedFromDatasourceId") }}::varchar as datasource_id,
+          {{ adapter.quote("id") }}::text as researchproduct_id,
+          {{ adapter.quote("relCollectedFromDatasourceId") }}::text as datasource_id,
           {{ dbt_date.convert_timezone("load_datetime") }} as load_datetime
         {% else %}
           null as researchproduct_id,

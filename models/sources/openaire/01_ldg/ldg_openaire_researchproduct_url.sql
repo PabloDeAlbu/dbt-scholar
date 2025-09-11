@@ -1,5 +1,5 @@
 with source as (
-  select * from {{ source('openaire', 'rel_researchproduct_instances') }}
+  select * from {{ source('openaire', 'researchproduct_instances') }}
 ),
 
 filtered as (
@@ -21,8 +21,8 @@ renamed as (
 
 casted as (
   select 
-  researchproduct_id::varchar,
-  url::varchar,
+  researchproduct_id::text,
+  url::text,
   {{ dbt_date.convert_timezone("load_datetime") }} as load_datetime
   from renamed
 )

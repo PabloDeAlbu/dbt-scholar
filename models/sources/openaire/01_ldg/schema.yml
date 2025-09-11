@@ -5,12 +5,14 @@ sources:
     description: 'OpenAIRE Research Graph'
     schema: ldg_openaire
     tables:
-      - name: rel_researchproduct_alternateidentifiers
-      - name: rel_researchproduct_authors
-      - name: rel_researchproduct_instances
-      - name: rel_researchproduct_originalid
-      - name: rel_researchproduct_pids
-      - name: rel_researchproduct_subjects
-      - name: rel_researchproduct_sources
+      - name: researchproduct_alternateidentifiers
+      - name: researchproduct_authors
+      - name: researchproduct_instances
+      - name: researchproduct_originalid
+      - name: researchproduct_organizations
+      - name: researchproduct_pids
+      - name: researchproduct_subjects
+      - name: researchproduct_sources
       - name: researchproduct
+      - name: organization
       

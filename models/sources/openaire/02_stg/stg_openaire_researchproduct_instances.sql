@@ -15,7 +15,6 @@ hashed_columns:
   researchproduct_instances_hashdiff:
     is_hashdiff: true
     columns:
-      - apc
       - license
       - publication_date
       - refereed

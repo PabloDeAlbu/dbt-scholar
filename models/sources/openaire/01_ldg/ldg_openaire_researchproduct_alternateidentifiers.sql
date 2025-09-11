@@ -1,12 +1,14 @@
-with source as (
-        select * from {{ source('openaire', 'rel_researchproduct_alternateidentifiers') }}
-  ),
-  renamed as (
-      select
-        id::varchar,
-        scheme::varchar,
-        value::varchar
-      from source
-  )
-  select * from renamed
-    
+WITH source AS (
+  SELECT * FROM {{ source('openaire', 'researchproduct_alternateidentifiers') }}
+),
+
+renamed AS (
+  SELECT
+    id::text,
+    scheme::text,
+    value::text,
+    load_datetime::timestamp
+  FROM source
+)
+
+SELECT * FROM renamed

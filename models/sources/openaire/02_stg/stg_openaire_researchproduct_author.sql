@@ -11,22 +11,24 @@ hashed_columns:
   researchproduct_orcid_hk:
     - researchproduct_id
     - orcid
-  researchproduct_author_hk:
+  researchproduct_author_rank_hk:
     - researchproduct_id
     - full_name
     - name
-    - orcid
     - surname
     - rank
-  researchproduct_author_hashdiff:
+  author_rank_hk:
+    - full_name
+    - name
+    - surname
+    - rank
+  author_rank_hashdiff:
     is_hashdiff: true
     columns:
       - full_name
       - name
-      - orcid
       - surname
       - rank
-
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}
