@@ -48,11 +48,8 @@ models:
         +schema: openalex
     marts:
       +materialized: table
-      01_src:
-        openaire:
-          +schema: openaire
-        openalex:
-          +schema: openalex
+      01_base:
+        +schema: base
       03_org:
         cic:
           +schema: cic
