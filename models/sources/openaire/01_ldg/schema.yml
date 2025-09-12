@@ -7,6 +7,7 @@ sources:
     tables:
       - name: researchproduct_alternateidentifiers
       - name: researchproduct_authors
+      - name: researchproduct_collectedfrom
       - name: researchproduct_instances
       - name: researchproduct_originalid
       - name: researchproduct_organizations

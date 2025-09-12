@@ -11,6 +11,10 @@ hashed_columns:
   researchproduct_datasource_hk:
     - researchproduct_id
     - datasource_id
+  datasource_hashdiff:
+    is_hashdiff: true
+    columns:
+      - value
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}
