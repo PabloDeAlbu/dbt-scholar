@@ -14,15 +14,9 @@ hashed_columns:
   work_locations_hk:
     - work_id
     - source_id
-  work_hashdiff:
+  location_hashdiff:
     is_hashdiff: true
     columns:
-      - source_display_name
-      - source_type
-      - source_host_organization
-      - source_host_organization_name
-      - source_is_core
-      - source_issn_l
       - landing_page_url
       - license
       - license_id
@@ -31,6 +25,15 @@ hashed_columns:
       - is_accepted
       - is_oa
       - is_published
+  source_hashdiff:
+    is_hashdiff: true
+    columns:
+      - source_display_name
+      - source_type
+      - source_host_organization
+      - source_host_organization_name
+      - source_is_core
+      - source_issn_l
       - source_is_in_doaj
       - source_is_oa
 {%- endset -%}

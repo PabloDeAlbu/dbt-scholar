@@ -2,7 +2,7 @@
 
 {%- set source_model = "stg_openalex_work_bestoalocation" -%}
 {%- set src_pk = "work_bestoalocation_hk" -%}
-{%- set src_fk = ["work_hk", "work_bestoalocation_hk"] -%}
+{%- set src_fk = ["work_hk", "source_hk"] -%}
 {%- set src_ldts = "load_datetime" -%}
 {%- set src_source = "source" -%}
 
