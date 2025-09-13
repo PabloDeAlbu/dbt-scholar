@@ -31,6 +31,8 @@ WITH base as (
         sat_rp.popularity,
         sat_rp.popularity_class,
 
+        CASE WHEN sat_rp.publication_date IS NOT NULL THEN TRUE ELSE FALSE END AS has_publication_date,
+
         dim_rp.researchproduct_hk
     FROM {{ref('dim_openaire_researchproduct')}} dim_rp
     INNER JOIN {{ref('latest_sat_openaire_researchproduct')}} sat_rp USING (researchproduct_hk)
