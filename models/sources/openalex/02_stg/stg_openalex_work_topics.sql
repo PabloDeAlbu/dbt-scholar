@@ -1,30 +1,31 @@
 {{ config(materialized='table') }}
 
 {%- set yaml_metadata -%}
-source_model: "ldg_openalex_work"
+source_model: "ldg_openalex_work_topics"
 derived_columns:
   source: "!OPENALEX"
   load_datetime: load_datetime
-  effective_from: publication_date
-  start_date: publication_date
-  end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
   work_hk: work_id
-  work_primarytopic_hk:
+  topic_hk: topic_id
+  work_topic_hk:
     - work_id
     - topic_id
-  topic_hk: topic_id
   topic_hashdiff:
     is_hashdiff: true
     columns:
-      - primarytopic_display_name
-      - primarytopic_id
-      - primarytopic_domain_display_name
-      - primarytopic_domain_id
-      - primarytopic_field_display_name
-      - primarytopic_field_id
-      - primarytopic_subfield_display_name
-      - primarytopic_subfield_id
+      - display_name
+      - topic_id
+      - domain_display_name
+      - domain_id
+      - field_display_name
+      - field_id
+      - subfield_display_name
+      - subfield_id
+  work_topic_hashdiff:
+    is_hashdiff: true
+    columns:
+      - score
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

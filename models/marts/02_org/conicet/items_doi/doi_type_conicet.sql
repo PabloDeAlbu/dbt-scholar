@@ -2,8 +2,7 @@ WITH base as (
     SELECT 
         doi,
         type 
-    FROM {{ref('fct_openalex_work_publication')}} 
-    WHERE doi is not null AND doi != 'NO DATA'
+    FROM {{ref('openalex_work')}} 
 ),
 
 coar AS (

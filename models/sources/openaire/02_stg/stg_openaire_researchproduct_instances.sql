@@ -7,12 +7,19 @@ derived_columns:
   load_datetime: load_datetime
 hashed_columns:
   researchproduct_hk: researchproduct_id
-  instances_type_hk:
-    - type
+  collectedfrom_hk: collectedfrom_key
+  hostedby_hk: hostedby_key
+  instancetype_hk: type
+  researchproduct_collectedfrom_hk: 
+    - researchproduct_id
+    - collectedfrom_key
+  researchproduct_hostedby_hk: 
+    - researchproduct_id
+    - hostedby_key
   researchproduct_instances_type_hk:
     - researchproduct_id
     - type
-  researchproduct_instances_hashdiff:
+  researchproduct_collectedfrom_hashdiff:
     is_hashdiff: true
     columns:
       - license
@@ -20,6 +27,10 @@ hashed_columns:
       - refereed
       - type
       - urls
+      - accessright_code
+      - accessright_label
+      - accessright_openaccessroute
+      - accessright_scheme
       - apc_amount
       - apc_currency
       - scheme

@@ -2,7 +2,7 @@
 
 {%- set source_model = "stg_openaire_researchproduct_instances" -%}
 {%- set src_pk = "researchproduct_instances_type_hk" -%}
-{%- set src_fk = ["researchproduct_hk","instances_type_hk"] -%}
+{%- set src_fk = ["researchproduct_hk","instancetype_hk"] -%}
 {%- set src_ldts = "load_datetime" -%}
 {%- set src_source = "source" -%}
 

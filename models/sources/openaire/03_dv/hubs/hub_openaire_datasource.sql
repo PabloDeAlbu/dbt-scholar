@@ -1,7 +1,7 @@
 {{ config(materialized='incremental') }}
 
 {%- set yaml_metadata -%}
-source_model: 'stg_openaire_researchproduct_datasource'
+source_model: 'stg_openaire_researchproduct_collectedfrom'
 src_pk: datasource_hk
 src_nk: datasource_id
 src_ldts: load_datetime

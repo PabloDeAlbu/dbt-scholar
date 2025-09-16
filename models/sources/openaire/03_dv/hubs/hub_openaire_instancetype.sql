@@ -2,7 +2,7 @@
 
 {%- set yaml_metadata -%}
 source_model: 'stg_openaire_researchproduct_instances'
-src_pk: instances_type_hk
+src_pk: instancetype_hk
 src_nk: type
 src_ldts: load_datetime
 src_source: source

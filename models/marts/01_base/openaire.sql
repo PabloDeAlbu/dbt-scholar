@@ -16,12 +16,23 @@ rp_with_doi AS (
         base.type,
         base.date,
         hub_pid.value as doi,
-        base.researchproduct_hk
+        base.researchproduct_hk,
+        ROW_NUMBER() OVER (
+            PARTITION BY base.id 
+            ORDER BY hub_pid.value -- o por otro criterio
+        ) AS rn
     FROM base
-    INNER JOIN {{ref('link_openaire_researchproduct_pid')}} link_rp_pid USING (researchproduct_hk)
-    LEFT JOIN {{ref('hub_openaire_pid')}} hub_pid USING (pid_hk)
+    INNER JOIN {{ref('link_openaire_researchproduct_pid')}} link_rp_pid 
+        USING (researchproduct_hk)
+    LEFT JOIN {{ref('hub_openaire_pid')}} hub_pid 
+        USING (pid_hk)
     WHERE hub_pid.scheme = 'doi'
-    GROUP BY 1,2,3,4,5,6
+),
+
+rp_with_one_doi as (
+    SELECT *
+    FROM rp_with_doi
+    WHERE rn = 1
 ),
 
 rp_without_doi AS (
@@ -33,13 +44,13 @@ rp_without_doi AS (
         NULL as doi,
         base.researchproduct_hk
     FROM base
-    WHERE base.id NOT IN (SELECT id FROM rp_with_doi)
+    WHERE base.id NOT IN (SELECT id FROM rp_with_one_doi)
 ),
 
 openaire_rp AS (
     SELECT DISTINCT * FROM (
         SELECT id, title, type, date, doi, researchproduct_hk
-        FROM rp_with_doi
+        FROM rp_with_one_doi
         UNION 
         SELECT id, title, type, date, doi, researchproduct_hk
         FROM rp_without_doi

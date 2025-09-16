@@ -18,7 +18,7 @@ id AS (
         mv.metadatavalue_hk = bridge_i_mv.metadatavalue_hk
     WHERE
         bridge_i_mv.metadatafield_fullname = 'dc.identifier.uri' AND
-        mv.text_value LIKE '%10915%'
+        mv.text_value LIKE 'http://sedici.unlp.edu.ar/handle/10915%'
 ),
 
 type AS (
@@ -146,7 +146,7 @@ final as (
         issn.text_value as issn,
         isbn.text_value as isbn,
         doi.text_value as doi
-    FROM {{ref('hub_dspace5_item')}} item
+    FROM {{ref('fct_dspace5_item')}} item
     INNER JOIN title ON title.item_hk = item.item_hk
     INNER JOIN id ON id.item_hk = item.item_hk
     INNER JOIN type ON type.item_hk = item.item_hk

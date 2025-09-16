@@ -4,6 +4,6 @@
 SELECT
     bm.materia::text,
     COUNT(DISTINCT bm.item_hk)::int AS items_count
-FROM {{ ref('brg_unlp_item_materia') }} bm
+FROM {{ ref('brg_sedici_item_materia') }} bm
 GROUP BY 1
 ORDER BY items_count DESC

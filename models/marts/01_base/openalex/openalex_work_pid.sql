@@ -5,7 +5,11 @@ WITH base AS (
         hub_doi.doi,
         hub_mag.mag,
         hub_pmcid.pmcid,
-        hub_pmid.pmid
+        hub_pmid.pmid,
+        CASE WHEN hub_doi.doi <> '-' THEN TRUE ELSE FALSE END AS has_doi,
+        CASE WHEN hub_mag.mag <> '-' THEN TRUE ELSE FALSE END AS has_mag,
+        CASE WHEN hub_pmcid.pmcid <> '-' THEN TRUE ELSE FALSE END AS has_pmcid,
+        CASE WHEN hub_pmid.pmid <> '-' THEN TRUE ELSE FALSE END AS has_pmid
     FROM {{ref('openalex_work')}} work 
     LEFT JOIN {{ref('link_openalex_work_doi')}} link_work_doi USING (work_hk)
     LEFT JOIN {{ref('hub_openalex_doi')}} hub_doi USING (doi_hk)

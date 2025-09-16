@@ -16,4 +16,4 @@ sources:
       - name: researchproduct_sources
       - name: researchproduct
       - name: organization
-      
+      - name: organization_pids

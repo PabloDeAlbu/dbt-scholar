@@ -5,7 +5,7 @@ WITH base AS (
         {# as subtitle, #}
         sat_work.type,
         sat_work.publication_date as date,
-        hub_doi.doi,
+        REPLACE(hub_doi.doi,'https://doi.org/','') as doi,
         STRING_AGG(sat_author.display_name, '|') AS author
     FROM {{ref('hub_openalex_work')}} hub_work 
     INNER JOIN {{ref('sat_openalex_work')}} sat_work USING (work_hk)
