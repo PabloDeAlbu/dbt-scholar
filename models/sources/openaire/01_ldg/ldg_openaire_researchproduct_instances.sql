@@ -4,13 +4,11 @@ with source as (
 renamed as (
   select
     id::text as researchproduct_id,
---    {{ adapter.quote("articleProcessingCharge") }}::text as apc,
     license::text,
     {{ adapter.quote("publicationDate") }}::text as publication_date,
     refereed::text,
     type::text,
     urls::text,
---    {{ adapter.quote("accessRight") }}::text as accessright,
     {{ adapter.quote("accessRight.code") }}::text as accessright_code,
     {{ adapter.quote("accessRight.label") }}::text as accessright_label,
     {{ adapter.quote("accessRight.openAccessRoute") }}::text as accessright_openaccessroute,

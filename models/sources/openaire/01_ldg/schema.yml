@@ -6,14 +6,190 @@ sources:
     schema: ldg_openaire
     tables:
       - name: researchproduct_alternateidentifiers
+        columns:
+          - name: id
+            tests: [not_null]
+          - name: scheme
+            tests: [not_null]
+          - name: value
+            tests: [not_null]
+          - name: load_datetime
+            tests: [not_null]
       - name: researchproduct_authors
+        columns: 
+          - name: id
+            tests: [not_null]
+          - name: fullName
+            quote: true
+          - name: name
+          - name: rank
+          - name: surname
+          - name: pid.id.scheme
+            quote: true
+          - name: pid.id.value
+            quote: true
+          - name: pid.provenance
+            quote: true
+          - name: load_datetime
+            tests: [not_null]
+
       - name: researchproduct_collectedfrom
+        columns:
+          - name: researchproduct_id
+            tests: [not_null]
+          - name: datasource_id
+            tests: [not_null]
+          - name: value
+            tests: [not_null]
+          - name: load_datetime
+            tests: [not_null]
       - name: researchproduct_instances
+        columns:
+          - name: id
+            tests: [not_null]
+          - name: license
+          - name: publicationDate
+          - name: refereed
+          - name: type
+          - name: urls
+          - name: scheme
+          - name: value
+          - name: load_datetime
+            tests: [not_null]
+          - name: accessRight.code
+            quote: true
+          - name: accessRight.label
+            quote: true
+          - name: accessRight.openAccessRoute
+            quote: true
+          - name: accessRight.scheme
+            quote: true
+          - name: collectedFrom.key
+            quote: true
+          - name: collectedFrom.value
+            quote: true
+          - name: hostedBy.key
+            quote: true
+          - name: hostedBy.value
+            quote: true
+          - name: articleProcessingCharge.amount
+            quote: true
+          - name: articleProcessingCharge.currency
+            quote: true
       - name: researchproduct_originalid
+        columns:
+          - name: id
+            tests: [not_null]
+          - name: originalIds
+            quote: true
+            tests: [not_null]
+          - name: load_datetime
+            tests: [not_null]
       - name: researchproduct_organizations
+        columns:
+          - name: researchproduct_id
+            tests: [not_null]
+          - name: organization_id
+            tests: [not_null]
+          - name: load_datetime
+            tests: [not_null]
       - name: researchproduct_pids
+        columns:
+          - name: id
+            tests: [not_null]
+          - name: scheme
+            tests: [not_null]
+          - name: value
+            tests: [not_null]
+          - name: load_datetime
+            tests: [not_null]
       - name: researchproduct_subjects
+        columns:
+          - name: id
+            tests: [not_null]
+          - name: provenance
+          - name: subject.scheme
+            quote: true
+            tests: [not_null]
+          - name: subject.value
+            quote: true
+            tests: [not_null]
+          - name: load_datetime
+            tests: [not_null]
       - name: researchproduct_sources
+        columns:
+          - name: id
+            tests: [not_null]
+          - name: sources
+            tests: [not_null]
+          - name: load_datetime
+            tests: [not_null]
       - name: researchproduct
+        columns:
+        - name: id
+          tests: [not_null, unique]
+        - name: type
+          tests: [not_null]
+        - name: language_code
+        - name: language_label
+        - name: load_datetime
+          tests: [not_null]
+        - name: openAccessColor
+          quote: true
+        - name: publiclyFunded
+          quote: true
+        - name: mainTitle
+          tests: [not_null]
+          quote: true
+        - name: publicationDate
+          quote: true
+        - name: publisher
+        - name: embargoEndDate
+          quote: true
+        - name: isGreen
+          quote: true
+        - name: isInDiamondJournal
+          quote: true
+        - name: bestAccessRight_label
+          quote: true
+        - name: bestAccessRight_scheme
+          quote: true
+        - name: citationImpact.citationClass
+          quote: true
+        - name: citationImpact.citationCount
+          quote: true
+        - name: citationImpact.impulse
+          quote: true
+        - name: citationImpact.impulseClass
+          quote: true
+        - name: citationImpact.influence
+          quote: true
+        - name: citationImpact.influenceClass
+          quote: true
+        - name: citationImpact.popularity
+          quote: true
+        - name: citationImpact.popularityClass
+          quote: true
+        - name: usageCounts.downloads
+          quote: true
+        - name: usageCounts.views
+          quote: true
       - name: organization
+        columns:
+          - name: organization_id
+            tests: [not_null, unique]
+          - name: acronym
+          - name: legalName
+            quote: true
+          - name: load_datetime
+            tests: [not_null]
       - name: organization_pids
+        columns:
+          - name: organization_id
+            tests: [not_null]
+          - name: pid_scheme
+            tests: [not_null]
+          - name: pid_value
+            tests: [not_null]
+          - name: load_datetime
+            tests: [not_null]

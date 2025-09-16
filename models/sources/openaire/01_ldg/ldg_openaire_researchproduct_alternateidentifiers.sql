@@ -4,7 +4,7 @@ WITH source AS (
 
 renamed AS (
   SELECT
-    id::text,
+    id::text as researchproduct_id,
     scheme::text,
     value::text,
     load_datetime::timestamp
