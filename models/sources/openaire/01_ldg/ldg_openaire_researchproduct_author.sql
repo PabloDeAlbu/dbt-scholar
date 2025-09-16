@@ -6,7 +6,7 @@ casted as (
     id::text as researchproduct_id,
     name::text,
     rank::int,
-    surname:text,
+    surname::text,
     {{ adapter.quote("fullName") }}::text as full_name,
     {{ adapter.quote("pid.id.scheme") }}::text as pid_scheme,
     {{ adapter.quote("pid.id.value") }}::text as orcid,

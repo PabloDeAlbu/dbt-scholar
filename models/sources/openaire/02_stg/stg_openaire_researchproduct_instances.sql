@@ -10,6 +10,7 @@ hashed_columns:
   collectedfrom_hk: collectedfrom_key
   hostedby_hk: hostedby_key
   instancetype_hk: type
+  url_hk: url
   researchproduct_collectedfrom_hk: 
     - researchproduct_id
     - collectedfrom_key
@@ -19,6 +20,9 @@ hashed_columns:
   researchproduct_instances_type_hk:
     - researchproduct_id
     - type
+  researchproduct_url_hk:
+    - researchproduct_id
+    - url
   researchproduct_collectedfrom_hashdiff:
     is_hashdiff: true
     columns:
@@ -26,7 +30,7 @@ hashed_columns:
       - publication_date
       - refereed
       - type
-      - urls
+      - url
       - accessright_code
       - accessright_label
       - accessright_openaccessroute

@@ -1,19 +1,23 @@
+
+    
 {{ config(materialized='view') }}
 
 {%- set yaml_metadata -%}
-source_model: "ldg_openaire_researchproduct_url"
+source_model: "ldg_openaire_researchproduct_subjects"
 derived_columns:
   source: "!OPENAIRE"
   load_datetime: load_datetime
---  effective_from: date_acceptance
---  start_date: date_acceptance
---  end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
   researchproduct_hk: researchproduct_id
-  url_hk: url
-  researchproduct_url_hk:
-    - researchproduct_id
-    - url
+  researchproduct_subject_hk:
+      - researchproduct_id
+      - subject_scheme
+      - subject_value
+  researchproduct_pid_hashdiff:
+    is_hashdiff: true
+    columns:
+      - subject_scheme
+      - subject_value
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

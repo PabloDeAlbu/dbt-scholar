@@ -1,24 +1,19 @@
 {{ config(materialized='view') }}
 
 {%- set yaml_metadata -%}
-source_model: "ldg_openaire_researchproduct_pids"
+source_model: "ldg_openaire_organization_pids"
 derived_columns:
   source: "!OPENAIRE"
   load_datetime: load_datetime
 hashed_columns:
-  researchproduct_hk: researchproduct_id
-  pid_hk:    
-    - scheme
-    - value
-  researchproduct_pid_hk:
-    - researchproduct_id
-    - scheme
-    - value
-  researchproduct_pid_hashdiff:
-    is_hashdiff: true
-    columns:
-      - scheme
-      - value 
+  organization_hk: organization_id
+  pid_hk:
+    - pid_scheme
+    - pid_value
+  organization_pid_hk:
+    - organization_id
+    - pid_scheme
+    - pid_value  
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

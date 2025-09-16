@@ -3,7 +3,7 @@ with source as (
   ),
   renamed as (
       select
-        id::text,
+        id::text as researchproduct_id,
         provenance::text as provenance,
         {{ adapter.quote("subject.scheme") }}::text as subject_scheme,
         {{ adapter.quote("subject.value") }}::text as subject_value,

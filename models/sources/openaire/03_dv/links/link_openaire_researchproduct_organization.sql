@@ -1,6 +1,6 @@
 {{ config(materialized='incremental') }}
 
-{%- set source_model = "stg_openaire_researchproduct_organization" -%}
+{%- set source_model = "stg_openaire_researchproduct_organizations" -%}
 {%- set src_pk = "researchproduct_organization_hk" -%}
 {%- set src_fk = ["researchproduct_hk","organization_hk"] -%}
 {%- set src_ldts = "load_datetime" -%}

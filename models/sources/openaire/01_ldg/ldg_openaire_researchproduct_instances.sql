@@ -8,7 +8,7 @@ renamed as (
     {{ adapter.quote("publicationDate") }}::text as publication_date,
     refereed::text,
     type::text,
-    urls::text,
+    urls::text as url,
     {{ adapter.quote("accessRight.code") }}::text as accessright_code,
     {{ adapter.quote("accessRight.label") }}::text as accessright_label,
     {{ adapter.quote("accessRight.openAccessRoute") }}::text as accessright_openaccessroute,
