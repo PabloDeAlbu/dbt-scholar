@@ -1,6 +1,21 @@
 {{ config(materialized = 'table') }}
 
-WITH base as (
+WITH ranked AS (
+  SELECT *,
+    ROW_NUMBER() OVER (
+      PARTITION BY researchproduct_hk
+      ORDER BY load_datetime DESC
+    ) AS rn
+  FROM {{ ref('sat_openaire_researchproduct') }}
+),
+
+latest_sat AS (
+    SELECT *
+    FROM ranked
+    WHERE rn = 1
+),
+
+base as (
     SELECT DISTINCT
         dim_rp.researchproduct_id,
 
@@ -35,7 +50,7 @@ WITH base as (
 
         dim_rp.researchproduct_hk
     FROM {{ref('dim_openaire_researchproduct')}} dim_rp
-    INNER JOIN {{ref('latest_sat_openaire_researchproduct')}} sat_rp USING (researchproduct_hk)
+    INNER JOIN latest_sat sat_rp USING (researchproduct_hk)
     {# LEFT JOIN {{ref('brg_openaire_researchproduct_pid')}} brg USING(researchproduct_hk)
     LEFT JOIN {{ref('dim_openaire_pid')}} dim_doi USING (pid_hk)
     WHERE dim_doi.scheme = 'doi' OR dim_doi.scheme is null #}
