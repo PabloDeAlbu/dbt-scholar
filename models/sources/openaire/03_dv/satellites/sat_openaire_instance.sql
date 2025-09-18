@@ -4,14 +4,14 @@
 source_model: "stg_openaire_researchproduct_instances"
 src_pk: "researchproduct_hk"
 src_hashdiff:
-  source_column: "researchproduct_instances_hashdiff"
+  source_column: "researchproduct_collectedfrom_hashdiff"
   alias: "hashdiff"
 src_payload:
   - license
   - publication_date
   - refereed
   - type
-  - urls
+  - url
   - apc_amount
   - apc_currency
   - scheme
