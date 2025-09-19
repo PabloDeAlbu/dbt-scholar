@@ -3,10 +3,20 @@ version: 2
 sources:
   - name: openaire
     description: 'OpenAIRE Research Graph'
-    schema: dv_openaire
+    schema: dm_openaire
     tables:
+      - name: dim_openaire_datasource  # o el nombre que tenga este modelo
+        columns:
+          - name: datasource_hk
+            tests:
+              - not_null
+              - unique
+          - name: datasource_name
+            tests:
+              - not_null
       - name: fct_openaire_researchproduct_publication
         columns:
           - name: researchproduct_hk
             data_tests:
             - unique
+
