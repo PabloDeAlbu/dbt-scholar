@@ -9,15 +9,13 @@ derived_columns:
   load_datetime: load_datetime
 hashed_columns:
   researchproduct_hk: researchproduct_id
+  subject_hk:
+    - subject_scheme
+    - subject_value
   researchproduct_subject_hk:
-      - researchproduct_id
-      - subject_scheme
-      - subject_value
-  researchproduct_pid_hashdiff:
-    is_hashdiff: true
-    columns:
-      - subject_scheme
-      - subject_value
+    - researchproduct_id
+    - subject_scheme
+    - subject_value
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

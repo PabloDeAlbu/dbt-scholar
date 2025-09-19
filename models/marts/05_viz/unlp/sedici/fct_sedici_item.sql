@@ -1,3 +1,5 @@
+{{ config(materialized='table') }}
+
 WITH title AS (
     SELECT
         bridge_i_mv.item_hk,
