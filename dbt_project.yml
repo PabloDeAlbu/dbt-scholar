@@ -47,10 +47,22 @@ models:
       openalex:
         +schema: openalex
     marts:
-      +materialized: table
-      01_base:
-        +schema: base
-      03_org:
+      04_dm:
+        +materialized: table
+        openalex:
+          +schema: openalex
+        openaire:
+          +schema: openaire
+        dspace:
+          +schema: dspace
+        dspace5:
+          +schema: dspace5
+      05_viz:
+        +materialized: table
+        openaire:
+          +schema: openaire
+        openalex:
+          +schema: openalex
         cic:
           +schema: cic
         conicet:
@@ -70,6 +82,10 @@ seeds:
       +schema: openalex
     oai:
       +schema: oai
+
+tests:
+  +store_failures: true
+  +schema: test_failures
 
 vars:
     "dbt_date:time_zone": "America/Argentina/Buenos_Aires"

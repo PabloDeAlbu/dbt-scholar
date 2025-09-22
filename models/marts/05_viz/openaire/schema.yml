@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: openaire
+    description: 'OpenAIRE Research Graph'
+    schema: dm_openaire
+    tables:
+      - name: viz_openaire_researchproduct_instancetype
+        columns:
+          - name: researchproduct_id
+            data_tests:
+            - unique
+

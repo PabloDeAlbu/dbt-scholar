@@ -1,19 +1,21 @@
-{{ config(materialized = 'view') }}
 
 WITH pmb_per_rp AS (
     SELECT 
         hub_rp.researchproduct_id,
-        COUNT(*) AS pmb_count
+        hub_rp.researchproduct_hk,
+        COUNT(*) AS pmb_count,
+        hub_rp.researchproduct_hk
     FROM {{ ref('hub_openaire_researchproduct') }} hub_rp
     LEFT JOIN {{ ref('brg_openaire_researchproduct_pid') }} brg USING (researchproduct_hk)
     LEFT JOIN {{ ref('dim_openaire_pid') }} pid USING (pid_hk)
     WHERE pid.scheme = 'pmb'
-    GROUP BY hub_rp.researchproduct_id
+    GROUP BY 1, 2
 ),
 
 base AS (
     SELECT 
         rp.researchproduct_id,
+        rp.researchproduct_hk,
         COALESCE(dprp.pmb_count, 0) AS pmb_count,
         CASE
             WHEN COALESCE(dprp.pmb_count, 0) > 0 THEN TRUE 
