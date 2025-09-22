@@ -2,10 +2,10 @@
 
 WITH base as (
     SELECT 
-        researchproduct_collectedfrom_hk,
+        researchproduct_instances_type_hk,
         researchproduct_hk,
-        collectedfrom_hk
-    FROM {{ref('link_openaire_researchproduct_instances_collectedfrom')}} 
+        instancetype_hk
+    FROM {{ref('link_openaire_researchproduct_instancetype')}} 
 )
 
 SELECT * FROM base
