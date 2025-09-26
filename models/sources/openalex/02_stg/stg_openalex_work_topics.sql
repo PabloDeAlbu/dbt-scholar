@@ -15,7 +15,6 @@ hashed_columns:
     is_hashdiff: true
     columns:
       - display_name
-      - topic_id
       - domain_display_name
       - domain_id
       - field_display_name

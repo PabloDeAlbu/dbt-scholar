@@ -10,21 +10,10 @@ derived_columns:
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
   work_hk: work_id
+  topic_hk: primarytopic_id
   work_primarytopic_hk:
     - work_id
-    - topic_id
-  topic_hk: topic_id
-  topic_hashdiff:
-    is_hashdiff: true
-    columns:
-      - primarytopic_display_name
-      - primarytopic_id
-      - primarytopic_domain_display_name
-      - primarytopic_domain_id
-      - primarytopic_field_display_name
-      - primarytopic_field_id
-      - primarytopic_subfield_display_name
-      - primarytopic_subfield_id
+    - primarytopic_id
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}
