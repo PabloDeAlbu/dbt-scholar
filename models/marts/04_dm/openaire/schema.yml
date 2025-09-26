@@ -5,7 +5,7 @@ sources:
     description: 'OpenAIRE Research Graph'
     schema: dm_openaire
     tables:
-      - name: dim_openaire_datasource  # o el nombre que tenga este modelo
+      - name: dim_openaire_datasource
         columns:
           - name: datasource_hk
             tests:
