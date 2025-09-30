@@ -9,13 +9,12 @@ WITH usage_count AS (
 )
 
 SELECT
-    d.schema,
+    d.scheme,
     d.element,
     d.qualifier,
     d.metadatafield_fullname,
     u.total_uses,
     u.metadatafield_hk
 FROM usage_count u
-LEFT JOIN {{ ref('dim_dspace_metadatafield') }} d
-    ON d.metadatafield_hk = u.metadatafield_hk
+LEFT JOIN {{ ref('dim_dspace_metadatafield') }} d USING (metadatafield_hk)
 ORDER BY 1, 2, 3 DESC

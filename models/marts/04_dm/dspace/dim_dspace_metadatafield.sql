@@ -1,7 +1,7 @@
 {{ config(materialized='table') }}
 
 SELECT
-    sat_ms.short_id AS schema,
+    sat_ms.short_id AS scheme,
     sat_mf.element,
     sat_mf.qualifier,
     CASE
