@@ -6,15 +6,14 @@ src_pk: "topic_hk"
 src_hashdiff:
   source_column: "topic_hashdiff"
   alias: "hashdiff"
-  src_payload:
-    - display_name
-    - topic_id
-    - domain_display_name
-    - domain_id
-    - field_display_name
-    - field_id
-    - subfield_display_name
-    - subfield_id
+src_payload:
+  - display_name
+  - domain_display_name
+  - domain_id
+  - field_display_name
+  - field_id
+  - subfield_display_name
+  - subfield_id
 src_eff: "load_datetime"
 src_ldts: "load_datetime"
 src_source: "source"

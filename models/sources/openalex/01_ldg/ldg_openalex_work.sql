@@ -70,7 +70,7 @@ with base as (
     
     {{ adapter.quote("primary_topic.display_name") }} as primarytopic_display_name,
     {{ adapter.quote("primary_topic.id") }} as primarytopic_id,
-    {{ adapter.quote("primary_topic.score") }} as primaryopic_score,
+    {{ adapter.quote("primary_topic.score") }} as primarytopic_score,
     {{ adapter.quote("primary_topic.domain.display_name") }} as primarytopic_domain_display_name,
     {{ adapter.quote("primary_topic.domain.id") }} as primarytopic_domain_id,
     {{ adapter.quote("primary_topic.field.display_name") }} as primarytopic_field_display_name,

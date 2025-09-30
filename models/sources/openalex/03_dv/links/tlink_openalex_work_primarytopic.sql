@@ -6,7 +6,7 @@ src_pk: 'work_primarytopic_hk'
 src_fk: 
     - 'work_hk'
     - 'topic_hk'
-src_payload: 'primaryopic_score'
+src_payload: 'primarytopic_score'
 src_eff: 'updated_date'
 src_ldts: 'load_datetime'
 src_source: 'source'

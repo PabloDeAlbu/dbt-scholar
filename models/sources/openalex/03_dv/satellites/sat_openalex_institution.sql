@@ -7,8 +7,18 @@ src_hashdiff:
   source_column: "institution_hashdiff"
   alias: "hashdiff"
 src_payload:
-  - country_code
   - display_name
+  - country_code
+  - type
+  - type_id
+  - homepage_url
+  - image_url
+  - image_thumbnail_url
+  - works_count
+  - is_super_system
+  - works_api_url
+  - updated_date
+  - created_date
 src_eff: "load_datetime"
 src_ldts: "load_datetime"
 src_source: "source"

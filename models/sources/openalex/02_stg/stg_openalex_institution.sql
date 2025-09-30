@@ -14,10 +14,18 @@ hashed_columns:
   institution_hashdiff:
     is_hashdiff: true
     columns:
-      - country_code
       - display_name
-      - ror
-      - institution_type
+      - country_code
+      - type
+      - type_id
+      - homepage_url
+      - image_url
+      - image_thumbnail_url
+      - works_count
+      - is_super_system
+      - works_api_url
+      - updated_date
+      - created_date
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

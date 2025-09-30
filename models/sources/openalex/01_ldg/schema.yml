@@ -6,6 +6,7 @@ sources:
     schema: ldg_openalex
     tables:
       - name: author
+      - name: institution
       - name: work
       - name: map_author_affiliation
       - name: map_author_institution
