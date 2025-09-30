@@ -1,16 +1,34 @@
 {{ config(materialized = 'table') }}
 
-WITH base AS (
-    SELECT DISTINCT
+WITH institution AS (
+    SELECT
         hub_institution.institution_id,
-        COALESCE(hub_ror.ror, '-') as ror,
-        sat_institution.display_name as institution_display_name,
-        COALESCE(sat_institution.country_code, '-') as country_code,
-        hub_institution.institution_hk
+        hub_institution.institution_hk,
+        sat_institution.display_name AS institution_display_name,
+        COALESCE(sat_institution.country_code, '-') AS country_code
     FROM {{ref('hub_openalex_institution')}} hub_institution
-    INNER JOIN {{ref('sat_openalex_institution')}} sat_institution ON sat_institution.institution_hk = hub_institution.institution_hk
-    LEFT JOIN {{ref('link_openalex_institution_ror')}} link_institution_ror ON link_institution_ror.institution_hk = hub_institution.institution_hk
-    LEFT JOIN {{ref('hub_openalex_ror')}} hub_ror ON hub_ror.ror_hk = link_institution_ror.ror_hk
+    INNER JOIN {{ref('sat_openalex_institution')}} sat_institution USING (institution_hk)
+),
+
+institution_ror AS (
+    SELECT
+        link_institution_ror.institution_hk,
+        MAX(REPLACE(hub_ror.ror, 'https://ror.org/', '')) AS ror
+    FROM {{ref('link_openalex_institution_ror')}} link_institution_ror
+    LEFT JOIN {{ref('hub_openalex_ror')}} hub_ror USING (ror_hk)
+    GROUP BY link_institution_ror.institution_hk
+),
+
+dim AS (
+    SELECT
+        institution.institution_id,
+        institution.institution_hk,
+        institution.institution_display_name,
+        institution.country_code,
+        COALESCE(institution_ror.ror, '-') AS ror,
+        CASE WHEN COALESCE(institution_ror.ror, '-') <> '-' THEN TRUE ELSE FALSE END AS has_ror
+    FROM institution
+    LEFT JOIN institution_ror USING (institution_hk)
 )
 
-SELECT * FROM base
+SELECT * FROM dim
