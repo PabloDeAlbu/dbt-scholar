@@ -2,8 +2,8 @@
 
 WITH base AS (
     SELECT DISTINCT
-        REPLACE(hub_institution.institution_id, 'https://openalex.org/', '') as institution_id,
-        COALESCE(REPLACE(hub_ror.ror, 'https://ror.org/', ''), '-') as ror,
+        hub_institution.institution_id,
+        COALESCE(hub_ror.ror, '-') as ror,
         sat_institution.display_name as institution_display_name,
         COALESCE(sat_institution.country_code, '-') as country_code,
         hub_institution.institution_hk
