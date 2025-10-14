@@ -11,6 +11,12 @@ hashed_columns:
   work_institution_hk:
   - work_id
   - institution_id
+  institution_hashdiff:
+    is_hashdiff: true
+    columns:
+      - country_code
+      - display_name
+      - type
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

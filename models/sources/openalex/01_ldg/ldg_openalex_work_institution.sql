@@ -5,7 +5,7 @@ with source as (
         country_code,
         display_name,
         ror,
-        type as institution_type,
+        type,
         load_datetime
     from {{ source('openalex', 'map_work_institution') }}
 ),
@@ -16,7 +16,7 @@ casted as (
         country_code::text,
         display_name::text,
         ror::text,
-        institution_type::text,
+        type::text,
        load_datetime::timestamp
     from source
 )
