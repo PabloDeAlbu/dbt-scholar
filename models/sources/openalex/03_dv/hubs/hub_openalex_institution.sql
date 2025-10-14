@@ -1,7 +1,9 @@
 {{ config(materialized='incremental') }}
 
 {%- set yaml_metadata -%}
-source_model: 'stg_openalex_institution'
+source_model:
+  - stg_openalex_institution
+  - stg_openalex_work_institution
 src_pk: institution_hk
 src_nk: institution_id
 src_ldts: load_datetime
