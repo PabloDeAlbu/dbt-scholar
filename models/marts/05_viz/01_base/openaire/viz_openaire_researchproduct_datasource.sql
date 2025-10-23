@@ -5,8 +5,8 @@ WITH base AS (
         datasource_name,
         CASE
             WHEN datasource_name IS NULL THEN NULL
-            WHEN char_length(datasource_name) > 40
-                THEN left(datasource_name, 40) || '...'
+            WHEN char_length(datasource_name) > 30
+                THEN left(datasource_name, 30) || '...'
             ELSE datasource_name
         END AS datasource_displayname,
         researchproduct_hk
