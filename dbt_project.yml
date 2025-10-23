@@ -59,17 +59,18 @@ models:
           +schema: dspace5
       05_viz:
         +materialized: table
-        openaire:
-          +schema: openaire
-        openalex:
-          +schema: openalex
-        cic:
-          +schema: cic
-        conicet:
-          +schema: conicet
-        unlp:
-          +schema: unlp
-
+        01_base:
+          openaire:
+            +schema: openaire
+          openalex:
+            +schema: openalex
+        02_org:
+          cic:
+            +schema: cic
+          conicet:
+            +schema: conicet
+          unlp:
+            +schema: unlp
 seeds:
   dbt_scholar:
     coar:
