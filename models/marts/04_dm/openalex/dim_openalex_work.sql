@@ -1,4 +1,18 @@
-WITH work AS (
+WITH ranked AS (
+  SELECT *,
+    ROW_NUMBER() OVER (
+      PARTITION BY work_hk
+      ORDER BY load_datetime DESC
+    ) AS rn
+  FROM {{ ref('sat_openalex_work') }}
+),
+
+sat_work AS (
+    SELECT *
+    FROM ranked
+    WHERE rn = 1
+),
+ work AS (
     SELECT
         hub_work.work_id,
         hub_work.work_hk,
@@ -17,7 +31,7 @@ WITH work AS (
         sat_work.oa_status,
         sat_work.oa_url
     FROM {{ref('hub_openalex_work')}} hub_work
-    INNER JOIN {{ref('sat_openalex_work')}} sat_work USING (work_hk)
+    INNER JOIN sat_work USING (work_hk)
 ),
 
 work_pid AS (
