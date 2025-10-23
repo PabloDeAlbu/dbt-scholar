@@ -1,19 +1,6 @@
 {{ config(materialized = 'table') }}
 
-WITH ranked AS (
-  SELECT *,
-    ROW_NUMBER() OVER (
-      PARTITION BY researchproduct_hk
-      ORDER BY load_datetime DESC
-    ) AS rn
-  FROM {{ ref('sat_openaire_researchproduct') }}
-),
-
-latest_sat AS (
-    SELECT *
-    FROM ranked
-    WHERE rn = 1
-),
+WITH latest_sat AS {{ latest_satellite(ref('sat_openaire_researchproduct'), 'researchproduct_hk') }},
 
 base as (
     SELECT DISTINCT

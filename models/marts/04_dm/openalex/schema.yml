@@ -1,6 +1,22 @@
 version: 2
 
 models:
+  - name: dim_openalex_author
+    columns:
+      - name: author_id
+        tests:
+          - not_null
+          - unique
+      - name: author_hk
+        tests:
+          - not_null
+          - unique
+      - name: display_name
+      - name: works_count
+      - name: cited_by_count
+      - name: orcid
+      - name: has_orcid
+
   - name: fct_openalex_work_publication
     description: >
       Hecho de obras de OpenAlex con metadatos principales, métricas y

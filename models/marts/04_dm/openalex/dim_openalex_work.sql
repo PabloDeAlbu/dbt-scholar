@@ -1,18 +1,6 @@
-WITH ranked AS (
-  SELECT *,
-    ROW_NUMBER() OVER (
-      PARTITION BY work_hk
-      ORDER BY load_datetime DESC
-    ) AS rn
-  FROM {{ ref('sat_openalex_work') }}
-),
+WITH sat_work AS {{ latest_satellite(ref('sat_openalex_work'), 'work_hk') }},
 
-sat_work AS (
-    SELECT *
-    FROM ranked
-    WHERE rn = 1
-),
- work AS (
+work AS (
     SELECT
         hub_work.work_id,
         hub_work.work_hk,
