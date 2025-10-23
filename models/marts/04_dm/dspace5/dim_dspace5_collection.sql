@@ -19,7 +19,7 @@ final AS (
         lnk_h_r.resource_hk = col.collection_hk
     INNER JOIN {{ref('hub_dspace5_handle')}} hub_h ON
         hub_h.handle_hk = lnk_h_r.handle_hk
-    INNER JOIN {{ref('sat_dspace5_handle')}} sat_h ON
+    INNER JOIN {{ latest_satellite(ref('sat_dspace5_handle'), 'handle_hk') }} AS sat_h ON
         sat_h.handle_hk = lnk_h_r.handle_hk
     WHERE sat_h.resource_type_id = 3
 )

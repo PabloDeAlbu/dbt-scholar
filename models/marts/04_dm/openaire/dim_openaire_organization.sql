@@ -5,7 +5,7 @@ with base AS (
         sat_org.legalname,
         hub_org.organization_hk
     FROM {{ref('hub_openaire_organization')}} hub_org
-    INNER JOIN {{ref('sat_openaire_organization')}} sat_org USING (organization_hk)
+    INNER JOIN {{ latest_satellite(ref('sat_openaire_organization'), 'organization_hk') }} AS sat_org USING (organization_hk)
 )
 
 SELECT * FROM base

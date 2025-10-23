@@ -10,7 +10,7 @@ WITH topic AS (
         sat_topic.subfield_display_name,
         sat_topic.subfield_id
     FROM {{ref('hub_openalex_topic')}} hub_topic
-    INNER JOIN {{ref('sat_openalex_topic')}} sat_topic USING (topic_hk)
+    INNER JOIN {{ latest_satellite(ref('sat_openalex_topic'), 'topic_hk') }} AS sat_topic USING (topic_hk)
 ),
 
 dim AS (

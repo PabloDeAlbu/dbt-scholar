@@ -8,7 +8,7 @@ WITH author AS (
         sat_author.works_count,
         sat_author.cited_by_count
     FROM {{ref('hub_openalex_author')}} hub_author
-    INNER JOIN {{ref('sat_openalex_author')}} sat_author USING (author_hk)
+    INNER JOIN {{ latest_satellite(ref('sat_openalex_author'), 'author_hk') }} AS sat_author USING (author_hk)
 ),
 
 author_orcid AS (

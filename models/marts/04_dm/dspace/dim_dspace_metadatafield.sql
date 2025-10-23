@@ -11,10 +11,10 @@ SELECT
     END AS metadatafield_fullname,
     hub_mf.metadatafield_hk
 FROM {{ ref('hub_dspace_metadatafieldregistry') }} hub_mf
-INNER JOIN {{ ref('sat_dspace_metadatafieldregistry') }} sat_mf
+INNER JOIN {{ latest_satellite(ref('sat_dspace_metadatafieldregistry'), 'metadatafield_hk') }} AS sat_mf
     ON sat_mf.metadatafield_hk = hub_mf.metadatafield_hk
 INNER JOIN {{ ref('link_dspace_metadatafield_metadataschema') }} lnk_mf_ms
     ON lnk_mf_ms.metadatafield_hk = hub_mf.metadatafield_hk
-INNER JOIN {{ ref('sat_dspace_metadataschemaregistry') }} sat_ms
+INNER JOIN {{ latest_satellite(ref('sat_dspace_metadataschemaregistry'), 'metadataschema_hk') }} AS sat_ms
     ON sat_ms.metadataschema_hk = lnk_mf_ms.metadataschema_hk
 ORDER BY 1, 2, 3 DESC

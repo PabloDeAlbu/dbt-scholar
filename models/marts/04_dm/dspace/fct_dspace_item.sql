@@ -8,7 +8,7 @@ WITH base AS (
         sat_i.discoverable,
         sat_i.item_hk,
         lnk_i_oc.owningcollection_hk
-    FROM {{ ref('sat_dspace_item') }} sat_i
+    FROM {{ latest_satellite(ref('sat_dspace_item'), 'item_hk') }} AS sat_i
     INNER JOIN {{ref('hub_dspace_item')}} hub_i ON
         hub_i.item_hk = sat_i.item_hk
     LEFT JOIN {{ref('link_dspace_item_owningcollection')}} lnk_i_oc ON

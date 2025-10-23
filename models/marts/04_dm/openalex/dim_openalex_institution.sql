@@ -7,8 +7,8 @@ WITH institution AS (
         COALESCE(sat_institution.display_name, sat_institution_dehydrated.display_name) AS institution_display_name,
         COALESCE(sat_institution.country_code, '-') AS country_code
     FROM {{ref('hub_openalex_institution')}} hub_institution
-    LEFT JOIN {{ref('sat_openalex_institution')}} sat_institution USING (institution_hk)
-    LEFT JOIN {{ref('sat_openalex_institution_dehydrated')}} sat_institution_dehydrated USING (institution_hk)
+    LEFT JOIN {{ latest_satellite(ref('sat_openalex_institution'), 'institution_hk') }} AS sat_institution USING (institution_hk)
+    LEFT JOIN {{ latest_satellite(ref('sat_openalex_institution_dehydrated'), 'institution_hk') }} AS sat_institution_dehydrated USING (institution_hk)
 ),
 
 institution_ror AS (

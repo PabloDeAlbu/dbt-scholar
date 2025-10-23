@@ -9,7 +9,7 @@ WITH collection_metadata AS (
         sat_mv.confidence,
         sat_mv.metadatavalue_hk,
         lnk_mv_r.resource_hk as collection_hk
-    FROM {{ref('sat_dspace5_metadatavalue')}} sat_mv
+    FROM {{ latest_satellite(ref('sat_dspace5_metadatavalue'), 'metadatavalue_hk') }} AS sat_mv
     INNER JOIN {{ref('tlink_dspace5_metadatavalue_resource')}} lnk_mv_r ON
         lnk_mv_r.metadatavalue_hk = sat_mv.metadatavalue_hk
     WHERE sat_mv.resource_type_id = 3
@@ -29,11 +29,11 @@ collection_metadatafield AS (
     FROM collection_metadata mv
     INNER JOIN {{ref('link_dspace5_metadatavalue_metadatafield')}} lnk_mv_mf ON
         lnk_mv_mf.metadatavalue_hk = mv.metadatavalue_hk
-    INNER JOIN {{ref('sat_dspace5_metadatafieldregistry')}} sat_mf ON
+    INNER JOIN {{ latest_satellite(ref('sat_dspace5_metadatafieldregistry'), 'metadatafield_hk') }} AS sat_mf ON
         sat_mf.metadatafield_hk = lnk_mv_mf.metadatafield_hk
     INNER JOIN {{ref('link_dspace5_metadatafield_metadataschema')}} lnk_mf_ms ON
         lnk_mf_ms.metadatafield_hk = sat_mf.metadatafield_hk
-    INNER JOIN {{ref('sat_dspace5_metadataschemaregistry')}} sat_ms ON
+    INNER JOIN {{ latest_satellite(ref('sat_dspace5_metadataschemaregistry'), 'metadataschema_hk') }} AS sat_ms ON
         sat_ms.metadataschema_hk = lnk_mf_ms.metadataschema_hk
 )
 
