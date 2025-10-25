@@ -20,17 +20,17 @@ WITH base AS (
 SELECT
   COUNT(*)                            AS n_total,
   SUM(arxiv)                          AS n_arxiv,
-  SUM(arxiv)::numeric / COUNT(*)      AS pct_arxiv,
+  ROUND(SUM(arxiv)::numeric / COUNT(*), 2)      AS pct_arxiv,
   SUM(doi)                            AS n_doi,
-  SUM(doi)::numeric   / COUNT(*)      AS pct_doi,
+  ROUND(SUM(doi)::numeric   / COUNT(*), 2)      AS pct_doi,
   SUM(handle)                         AS n_handle,
-  SUM(handle)::numeric/ COUNT(*)      AS pct_handle,
+  ROUND(SUM(handle)::numeric/ COUNT(*), 2)      AS pct_handle,
   SUM(mag)                            AS n_mag,
-  SUM(mag)::numeric   / COUNT(*)      AS pct_mag,
+  ROUND(SUM(mag)::numeric   / COUNT(*), 2)      AS pct_mag,
   SUM(pmb)                            AS n_pmb,
-  SUM(pmb)::numeric   / COUNT(*)      AS pct_pmb,
+  ROUND(SUM(pmb)::numeric   / COUNT(*), 2)      AS pct_pmb,
   SUM(pmc)                            AS n_pmc,
-  SUM(pmc)::numeric   / COUNT(*)      AS pct_pmc,
+  ROUND(SUM(pmc)::numeric   / COUNT(*), 2)      AS pct_pmc,
   SUM(pmid)                           AS n_pmid,
-  SUM(pmid)::numeric  / COUNT(*)      AS pct_pmid
+  ROUND(SUM(pmid)::numeric  / COUNT(*), 2)      AS pct_pmid
 FROM base
