@@ -59,13 +59,13 @@ WITH base AS (
         pmid_count
 
     FROM {{ref('fct_openaire_researchproduct_publication')}} fct
-    LEFT JOIN {{ref('viz_openaire_researchproduct_pid_doi')}} USING (researchproduct_hk)
-    LEFT JOIN {{ref('viz_openaire_researchproduct_pid_handle')}} USING (researchproduct_hk)
-    LEFT JOIN {{ref('viz_openaire_researchproduct_pid_arxiv')}} USING (researchproduct_hk)
-    LEFT JOIN {{ref('viz_openaire_researchproduct_pid_mag')}} USING (researchproduct_hk)
-    LEFT JOIN {{ref('viz_openaire_researchproduct_pid_pmb')}} USING (researchproduct_hk)
-    LEFT JOIN {{ref('viz_openaire_researchproduct_pid_pmc')}} USING (researchproduct_hk)
-    LEFT JOIN {{ref('viz_openaire_researchproduct_pid_pmid')}} USING (researchproduct_hk)
+    INNER JOIN {{ref('viz_openaire_researchproduct_pid_doi')}} USING (researchproduct_hk)
+    INNER JOIN {{ref('viz_openaire_researchproduct_pid_handle')}} USING (researchproduct_hk)
+    INNER JOIN {{ref('viz_openaire_researchproduct_pid_arxiv')}} USING (researchproduct_hk)
+    INNER JOIN {{ref('viz_openaire_researchproduct_pid_mag')}} USING (researchproduct_hk)
+    INNER JOIN {{ref('viz_openaire_researchproduct_pid_pmb')}} USING (researchproduct_hk)
+    INNER JOIN {{ref('viz_openaire_researchproduct_pid_pmc')}} USING (researchproduct_hk)
+    INNER JOIN {{ref('viz_openaire_researchproduct_pid_pmid')}} USING (researchproduct_hk)
 )
 
 SELECT * FROM base
