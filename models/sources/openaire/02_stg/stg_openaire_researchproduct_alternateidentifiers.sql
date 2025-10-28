@@ -7,10 +7,10 @@ derived_columns:
   load_datetime: load_datetime
 hashed_columns:
   researchproduct_hk: researchproduct_id
-  pid_hk:    
+  alternateidentifier_hk:    
     - scheme
     - value
-  researchproduct_pid_hk:
+  researchproduct_alternateidentifier_hk:
     - researchproduct_id
     - scheme
     - value
