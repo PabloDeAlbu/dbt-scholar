@@ -1,5 +1,5 @@
 WITH
-sat_work AS {{ latest_satellite(ref('sat_openalex_work'), 'work_hk') }},
+latest_sat_work AS {{ latest_satellite(ref('sat_openalex_work'), 'work_hk') }},
 
 final AS (
     SELECT
@@ -23,7 +23,7 @@ final AS (
         sat_work.apc_paid_value,
         sat_work.apc_paid_value_usd
     FROM {{ref('dim_openalex_work')}} dim_work
-    INNER JOIN sat_work USING (work_hk)
+    INNER JOIN latest_sat_work USING (work_hk)
 )
 
 SELECT * FROM final 
