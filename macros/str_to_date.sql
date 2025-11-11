@@ -28,6 +28,12 @@
          AND (CAST(SUBSTRING({{str_date}}, 9, 2) AS INTEGER) BETWEEN 1 AND 31) -- Día válido
     THEN {{str_date}}
 
+    -- Se maneja formato ISO con componente horaria, ej: '2019-10-30T11:38:41Z'
+    WHEN ({{str_date}} ~ '^\d{4}-\d{1,2}-\d{1,2}T.*$')
+         AND (CAST(SUBSTRING({{str_date}}, 6, 2) AS INTEGER) BETWEEN 1 AND 12)
+         AND (CAST(SUBSTRING({{str_date}}, 9, 2) AS INTEGER) BETWEEN 1 AND 31)
+    THEN SUBSTRING({{str_date}}, 1, 10)
+
     -- Se devuelve una "fecha de error" si el formato es incorrecto o tiene valores inválidos
     ELSE '9999-12-31'
 END)::date
