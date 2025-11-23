@@ -1,7 +1,7 @@
 {{ config(materialized='incremental') }}
 
 {%- set yaml_metadata -%}
-source_model: "stg_openalex_author_affiliation"
+source_model: "stg_openalex_author_institution_year"
 src_pk: "author_institution_hk"
 src_hashdiff:
   source_column: "affiliation_hashdiff"

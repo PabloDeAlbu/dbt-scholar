@@ -4,7 +4,7 @@ with source as (
         institution_id,
         years, 
         load_datetime
-      from {{ source('openalex', 'map_author_affiliation') }}
+      from {{ source('openalex', 'author_institution_year') }}
 ),
 
 casted as (
