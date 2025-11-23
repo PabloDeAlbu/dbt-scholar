@@ -5,6 +5,7 @@ sources:
     description: 'oai 7 database'
     schema: ldg_oai
     tables:
+      - name: set
       - name: item_by_set
         columns:
           - name: item_id
