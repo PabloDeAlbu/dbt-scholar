@@ -8,6 +8,9 @@ derived_columns:
 hashed_columns:
   item_hk: item_id
   col_hk: col_id
+  item_col_hk:
+    - item_id
+    - col_id
   item_hashdiff:
     is_hashdiff: true
     columns:

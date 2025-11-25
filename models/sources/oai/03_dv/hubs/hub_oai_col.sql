@@ -1,7 +1,7 @@
 {{ config(materialized='incremental') }}
 
 {%- set yaml_metadata -%}
-source_model: 'stg_oai_item_by_set'
+source_model: 'stg_oai_item'
 src_pk: col_hk
 src_nk: col_id
 src_ldts: load_datetime

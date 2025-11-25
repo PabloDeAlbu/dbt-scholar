@@ -11,6 +11,7 @@ renamed AS (
     "extract_datetime",
     "load_datetime"
   FROM source
+  WHERE NOT(identifiers = 'CONICET Digital' OR identifiers = 'CONICET')
 )
 
 SELECT * FROM renamed

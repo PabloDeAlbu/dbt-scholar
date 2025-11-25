@@ -1,5 +1,5 @@
 {%- set yaml_metadata -%}
-source_model: "ldg_oai_item"
+source_model: "ldg_oai_item_identifiers"
 derived_columns:
   source: "!OAI"
   load_datetime: load_datetime
@@ -8,12 +8,10 @@ derived_columns:
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
   item_hk: item_id
-  col_hk: col_id
-  item_hashdiff:
-    is_hashdiff: true
-    columns:
-      - title
-      - date_issued
+  identifier_hk: identifiers
+  item_identifier_hk:
+    - item_id
+    - identifiers
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

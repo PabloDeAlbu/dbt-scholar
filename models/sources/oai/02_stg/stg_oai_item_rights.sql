@@ -1,16 +1,24 @@
-{{ config(materialized = 'table') }}
+{%- set yaml_metadata -%}
+source_model: "ldg_oai_item_rights"
+derived_columns:
+  source: "!OAI"
+  load_datetime: load_datetime
+  effective_from: load_datetime
+  start_date: load_datetime
+  end_date: to_date('9999-12-31', 'YYYY-MM-DD')
+hashed_columns:
+  item_hk: item_id
+  right_hk: rights
+  item_right_hk:
+    - item_id
+    - rights
+{%- endset -%}
 
-WITH source AS (
-  SELECT * FROM {{ source('oai', 'item_rights') }}
-),
+{% set metadata_dict = fromyaml(yaml_metadata) %}
 
-renamed AS (
-  SELECT
-    "item_id",
-    "rights",
-    "extract_datetime",
-    "load_datetime"
-  FROM source
-)
-
-SELECT * FROM renamed
+{{ automate_dv.stage(include_source_columns=true,
+                     source_model=metadata_dict['source_model'],
+                     derived_columns=metadata_dict['derived_columns'],
+                     null_columns=none,
+                     hashed_columns=metadata_dict['hashed_columns'],
+                     ranked_columns=none) }}

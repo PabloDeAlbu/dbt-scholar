@@ -1,7 +1,7 @@
 {{ config(materialized='incremental') }}
 
 {%- set yaml_metadata -%}
-source_model: stg_oai_item_by_set
+source_model: stg_oai_item
 src_pk: item_hk
 src_hashdiff:
   source_column: item_hashdiff
@@ -9,12 +9,6 @@ src_hashdiff:
 src_payload:
   - title
   - date_issued
-  - type_openaire
-  - type_snrd
-  - version
-  - access_right
-  - license_condition
-  - load_datetime
 src_eff: load_datetime
 src_ldts: load_datetime
 src_source: source
