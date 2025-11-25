@@ -2,10 +2,18 @@ version: 2
 
 sources:
   - name: oai
-    description: 'oai 7 database'
+    description: 'oai'
     schema: ldg_oai
     tables:
       - name: set
+      - name: item
+      - name: item_identifiers
+      - name: item_languages
+      - name: item_publishers
+      - name: item_relations
+      - name: item_rights
+      - name: item_subjects
+      - name: item_types
       - name: item_by_set
         columns:
           - name: item_id
