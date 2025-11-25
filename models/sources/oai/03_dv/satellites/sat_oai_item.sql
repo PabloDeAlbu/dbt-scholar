@@ -7,6 +7,7 @@ src_hashdiff:
   source_column: item_hashdiff
   alias: hashdiff
 src_payload:
+  - item_id
   - title
   - date_issued
 src_eff: load_datetime
