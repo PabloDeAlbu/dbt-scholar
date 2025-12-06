@@ -1,8 +1,8 @@
 {{ config(materialized='incremental') }}
 
-{%- set source_model = "stg_oai_item_identifiers" -%}
-{%- set src_pk = "item_identifier_hk" -%}
-{%- set src_fk = ["item_hk", "identifier_hk"] -%}
+{%- set source_model = "stg_oai_record_relations" -%}
+{%- set src_pk = "record_relation_hk" -%}
+{%- set src_fk = ["record_hk", "relation_hk"] -%}
 {%- set src_ldts = "load_datetime" -%}
 {%- set src_source = "source" -%}
 

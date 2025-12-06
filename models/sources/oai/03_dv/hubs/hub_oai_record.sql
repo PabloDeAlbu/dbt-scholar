@@ -1,9 +1,9 @@
 {{ config(materialized='incremental') }}
 
 {%- set yaml_metadata -%}
-source_model: 'stg_oai_item'
-src_pk: item_hk
-src_nk: item_id
+source_model: 'stg_oai_records'
+src_pk: record_hk
+src_nk: record_id
 src_ldts: load_datetime
 src_source: source
 {%- endset -%}

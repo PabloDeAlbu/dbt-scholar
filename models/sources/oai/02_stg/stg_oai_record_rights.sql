@@ -1,21 +1,17 @@
 {%- set yaml_metadata -%}
-source_model: "ldg_oai_item"
+source_model: "ldg_oai_record_rights"
 derived_columns:
   source: "!OAI"
   load_datetime: load_datetime
+  effective_from: load_datetime
   start_date: load_datetime
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
-  item_hk: item_id
-  col_hk: col_id
-  item_col_hk:
-    - item_id
-    - col_id
-  item_hashdiff:
-    is_hashdiff: true
-    columns:
-      - title
-      - date_issued
+  record_hk: record_id
+  right_hk: rights
+  record_right_hk:
+    - record_id
+    - rights
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

@@ -1,5 +1,5 @@
 {%- set yaml_metadata -%}
-source_model: "ldg_oai_item_subjects"
+source_model: "ldg_oai_sets"
 derived_columns:
   source: "!OAI"
   load_datetime: load_datetime
@@ -7,11 +7,12 @@ derived_columns:
   start_date: load_datetime
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
-  item_hk: item_id
-  subject_hk: subjects
-  item_subject_hk:
-   - item_id
-   - subjects
+  set_hk: set_id
+  set_hashdiff:
+    is_hashdiff: true
+    columns:
+      - set_id
+      - name
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

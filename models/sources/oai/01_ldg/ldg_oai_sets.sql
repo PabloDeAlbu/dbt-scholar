@@ -2,7 +2,7 @@
 
 WITH source AS (
     SELECT * 
-    FROM {{ source('oai', 'set') }}
+    FROM {{ source('oai', 'sets') }}
 ),
 
 renamed AS (

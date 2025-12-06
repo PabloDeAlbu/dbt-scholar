@@ -5,18 +5,18 @@ sources:
     description: 'oai'
     schema: ldg_oai
     tables:
-      - name: set
-      - name: item
-      - name: item_identifiers
-      - name: item_languages
-      - name: item_publishers
-      - name: item_relations
-      - name: item_rights
-      - name: item_subjects
-      - name: item_types
-      - name: item_by_set
+      - name: sets
+      - name: records
+      - name: record_identifiers
+      - name: record_languages
+      - name: record_publishers
+      - name: record_relations
+      - name: record_rights
+      - name: record_subjects
+      - name: record_types
+      - name: record_by_set
         columns:
-          - name: item_id
+          - name: record_id
           - name: handle
           - name: col_id
           - name: title
@@ -27,27 +27,27 @@ sources:
           - name: access_right
           - name: license_condition
           - name: load_datetime
-      - name: item_creator
+      - name: record_creator
         columns:
           - name: handle
           - name: creator
           - name: load_datetime
-      - name: item_language
+      - name: record_language
         columns:
           - name: handle
           - name: language_iso
           - name: load_datetime
-      - name: item_publisher
+      - name: record_publisher
         columns:
           - name: handle
           - name: publisher
           - name: load_datetime
-      - name: item_relation
+      - name: record_relation
         columns:
           - name: handle
           - name: relation
           - name: load_datetime
-      - name: item_subject
+      - name: record_subject
         columns:
           - name: handle
           - name: relation

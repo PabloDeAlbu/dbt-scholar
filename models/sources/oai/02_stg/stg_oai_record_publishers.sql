@@ -1,5 +1,5 @@
 {%- set yaml_metadata -%}
-source_model: "ldg_oai_item_rights"
+source_model: "ldg_oai_record_publishers"
 derived_columns:
   source: "!OAI"
   load_datetime: load_datetime
@@ -7,11 +7,11 @@ derived_columns:
   start_date: load_datetime
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
-  item_hk: item_id
-  right_hk: rights
-  item_right_hk:
-    - item_id
-    - rights
+  record_hk: record_id
+  publisher_hk: publishers
+  record_publisher_hk: 
+    - record_id
+    - publishers
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

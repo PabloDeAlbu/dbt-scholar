@@ -1,13 +1,13 @@
 {{ config(materialized = 'table') }}
 
 WITH source AS (
-  SELECT * FROM {{ source('oai', 'item_rights') }}
+  SELECT * FROM {{ source('oai', 'record_subjects') }}
 ),
 
 renamed AS (
   SELECT
-    "item_id",
-    "rights",
+    "record_id",
+    "subjects",
     "extract_datetime",
     "load_datetime"
   FROM source

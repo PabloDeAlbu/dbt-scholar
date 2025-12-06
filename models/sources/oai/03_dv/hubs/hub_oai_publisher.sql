@@ -1,7 +1,7 @@
 {{ config(materialized='incremental') }}
 
 {%- set yaml_metadata -%}
-source_model: 'stg_oai_item_publishers'
+source_model: 'stg_oai_record_publishers'
 src_pk: publisher_hk
 src_nk: publishers
 src_ldts: load_datetime

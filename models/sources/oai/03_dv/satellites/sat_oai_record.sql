@@ -1,13 +1,13 @@
 {{ config(materialized='incremental') }}
 
 {%- set yaml_metadata -%}
-source_model: stg_oai_item
-src_pk: item_hk
+source_model: stg_oai_records
+src_pk: record_hk
 src_hashdiff:
-  source_column: item_hashdiff
+  source_column: record_hashdiff
   alias: hashdiff
 src_payload:
-  - item_id
+  - record_id
   - title
   - date_issued
 src_eff: load_datetime

@@ -1,10 +1,11 @@
-WITH base AS (
+{# WITH base AS (
     SELECT 
-        item_col_hk,
-        item_hk,
+        record_col_hk,
+        record_hk,
         col_hk,
         load_datetime
-    FROM {{ ref('link_oai_item_col') }} 
+    FROM {{ ref('link_oai_record_col') }} 
 )
-
-SELECT * FROM base
+ #}
+SELECT 2
+ {# * FROM base #}

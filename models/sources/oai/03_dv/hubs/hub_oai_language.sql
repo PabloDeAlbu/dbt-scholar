@@ -1,7 +1,7 @@
 {{ config(materialized='incremental') }}
 
 {%- set yaml_metadata -%}
-source_model: 'stg_oai_item_languages'
+source_model: 'stg_oai_record_languages'
 src_pk: language_hk
 src_nk: languages
 src_ldts: load_datetime

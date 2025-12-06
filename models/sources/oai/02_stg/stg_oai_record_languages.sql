@@ -1,5 +1,5 @@
 {%- set yaml_metadata -%}
-source_model: "ldg_oai_set"
+source_model: "ldg_oai_record_languages"
 derived_columns:
   source: "!OAI"
   load_datetime: load_datetime
@@ -7,12 +7,12 @@ derived_columns:
   start_date: load_datetime
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
-  set_hk: set_id
-  set_hashdiff:
-    is_hashdiff: true
-    columns:
-      - set_id
-      - name
+  record_hk: record_id
+  language_hk: languages
+  record_language_hk: 
+    - record_id
+    - languages
+
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}
