@@ -49,6 +49,8 @@ models:
     marts:
       04_dm:
         +materialized: table
+        oai:
+          +schema: oai
         openalex:
           +schema: openalex
         openaire:

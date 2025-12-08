@@ -30,8 +30,12 @@ isbn AS (
     {{ join_dspace_item_metadatavalue('dcterms.identifier.other', filter="mv.text_value ILIKE '%isbn%'") }}
 ),
 
-date AS (
+date_issued AS (
     {{ join_dspace_item_metadatavalue('dcterms.issued') }}
+),
+
+date_available AS (
+    {{ join_dspace_item_metadatavalue('dc.date.available') }}
 ),
 
 doi_in_dcterms_identifier_other AS (
@@ -56,7 +60,8 @@ final as (
         item.in_archive,
         title.text_value as title,
         id.text_value as id,
-        {{ str_to_date("date.text_value") }} as date_issued,
+        {{ str_to_date("date_issued.text_value") }} as date_issued,
+        {{ str_to_date("date_available.text_value") }} as date_available,
         subject.text_value as subject,
         type.text_value as type,
         subtype.text_value as subtype,
@@ -67,16 +72,17 @@ final as (
         doi.text_value as doi,
         COALESCE(doi.has_value, false) as has_doi
     FROM {{ref('fct_dspace_item')}} item
-    INNER JOIN title ON title.item_hk = item.item_hk
-    INNER JOIN id ON id.item_hk = item.item_hk
-    LEFT JOIN type ON type.item_hk = item.item_hk
-    LEFT JOIN subtype ON subtype.item_hk = item.item_hk
-    INNER JOIN date ON date.item_hk = item.item_hk
-    LEFT JOIN subject ON subject.item_hk = item.item_hk
-    LEFT JOIN author ON author.item_hk = item.item_hk
-    LEFT JOIN issn ON issn.item_hk = item.item_hk
-    LEFT JOIN isbn ON isbn.item_hk = item.item_hk
-    LEFT JOIN doi ON doi.item_hk = item.item_hk
+    INNER JOIN title USING (item_hk)
+    INNER JOIN id USING (item_hk)
+    LEFT JOIN type USING (item_hk)
+    LEFT JOIN subtype USING (item_hk)
+    INNER JOIN date_issued USING (item_hk)
+    LEFT JOIN date_available USING (item_hk)
+    LEFT JOIN subject USING (item_hk)
+    LEFT JOIN author USING (item_hk)
+    LEFT JOIN issn USING (item_hk)
+    LEFT JOIN isbn USING (item_hk)
+    LEFT JOIN doi USING (item_hk)
 )
 
 SELECT * FROM final

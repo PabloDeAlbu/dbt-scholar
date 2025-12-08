@@ -6,19 +6,12 @@ WITH source AS (
 
 renamed AS (
   SELECT
-    "record_id",
-    "col_id",
-    "title",
-    "date_issued",
-    {# "types",
-    "identifiers",
-    "languages",
-    "subjects",
-    "publishers",
-    "relations",
-    "rights", #}
-    "extract_datetime",
-    "load_datetime"
+    "record_id"::text,
+    "col_id"::text,
+    "title"::text,
+    {{ str_to_date("date_issued") }}::timestamp AS date_issued,
+    "extract_datetime"::timestamp,
+    "load_datetime"::timestamp
   FROM source
 )
 

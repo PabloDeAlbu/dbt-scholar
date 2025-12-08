@@ -12,6 +12,7 @@ sources:
       - name: record_publishers
       - name: record_relations
       - name: record_rights
+      - name: record_sets
       - name: record_subjects
       - name: record_types
       - name: record_by_set

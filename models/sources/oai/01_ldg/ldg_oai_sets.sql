@@ -8,7 +8,7 @@ WITH source AS (
 renamed AS (
     SELECT 
         "setSpec"::text as set_id,
-        "setName"::text as name,
+        "setName"::text as set_name,
         load_datetime::timestamp
     FROM source
 )

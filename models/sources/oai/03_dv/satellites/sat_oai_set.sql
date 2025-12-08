@@ -7,7 +7,7 @@ src_hashdiff:
   source_column: set_hashdiff
   alias: hashdiff
 src_payload:
-  - name
+  - set_name
 src_eff: load_datetime
 src_ldts: load_datetime
 src_source: source

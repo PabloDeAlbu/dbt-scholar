@@ -23,7 +23,7 @@ final AS (
         sat_work.apc_paid_value,
         sat_work.apc_paid_value_usd
     FROM {{ref('dim_openalex_work')}} dim_work
-    INNER JOIN latest_sat_work USING (work_hk)
+    INNER JOIN latest_sat_work sat_work USING (work_hk)
 )
 
 SELECT * FROM final 

@@ -6,10 +6,10 @@ WITH source AS (
 
 renamed AS (
   SELECT
-    "record_id",
-    "types",
-    "extract_datetime",
-    "load_datetime"
+    "record_id"::text,
+    "types"::text,
+    "extract_datetime"::timestamp,
+    "load_datetime"::timestamp
   FROM source
 )
 
