@@ -49,16 +49,24 @@ models:
     marts:
       04_dm:
         +materialized: table
-        oai:
-          +schema: oai
-        openalex:
-          +schema: openalex
-        openaire:
-          +schema: openaire
-        dspace:
-          +schema: dspace
-        dspace5:
-          +schema: dspace5
+        core:
+          oai:
+            +schema: oai
+          openalex:
+            +schema: openalex
+          openaire:
+            +schema: openaire
+          dspace:
+            +schema: dspace
+          dspace5:
+            +schema: dspace5
+        custom:
+          cic:
+            +schema: cic
+          conicet:
+            +schema: conicet
+          unlp:
+            +schema: unlp
       05_viz:
         +materialized: table
         01_base:
