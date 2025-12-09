@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: fct_oai_record_publication
+    config:
+      materialized: table
+    tests:
+      - unique:
+          column_name: record_hk
+          config:
+            store_failures: true  # <--- ESTO ES LA CLAVE
+            schema: "dbt_test_failures" # (Opcional) Para guardar los errores en un esquema separado y no ensuciar el public
+      - not_null:
+          column_name: record_hk
