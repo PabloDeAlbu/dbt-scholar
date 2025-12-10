@@ -2,8 +2,8 @@
 
 {%- set yaml_metadata -%}
 source_model: 'stg_oai_record_languages'
-src_pk: language_hk
-src_nk: languages
+src_pk: dc_language_hk
+src_nk: dc_language
 src_ldts: load_datetime
 src_source: source
 {%- endset -%}

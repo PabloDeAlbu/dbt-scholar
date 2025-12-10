@@ -2,8 +2,8 @@
 
 {%- set yaml_metadata -%}
 source_model: 'stg_oai_record_subjects'
-src_pk: subject_hk
-src_nk: subjects
+src_pk: dc_subject_hk
+src_nk: dc_subject
 src_ldts: load_datetime
 src_source: source
 {%- endset -%}

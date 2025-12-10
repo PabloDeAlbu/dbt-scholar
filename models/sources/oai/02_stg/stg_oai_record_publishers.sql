@@ -1,3 +1,5 @@
+{{ config(materialized='view') }}
+
 {%- set yaml_metadata -%}
 source_model: "ldg_oai_record_publishers"
 derived_columns:
@@ -8,10 +10,10 @@ derived_columns:
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
   record_hk: record_id
-  publisher_hk: publishers
+  dc_publisher_hk: dc_publisher
   record_publisher_hk: 
     - record_id
-    - publishers
+    - dc_publisher
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

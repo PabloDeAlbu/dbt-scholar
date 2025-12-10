@@ -2,7 +2,7 @@
 
 {%- set source_model = "stg_oai_record_relations" -%}
 {%- set src_pk = "record_relation_hk" -%}
-{%- set src_fk = ["record_hk", "relation_hk"] -%}
+{%- set src_fk = ["record_hk", "dc_relation_hk"] -%}
 {%- set src_ldts = "load_datetime" -%}
 {%- set src_source = "source" -%}
 

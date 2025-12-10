@@ -2,7 +2,7 @@
 
 {%- set source_model = "stg_oai_record_publishers" -%}
 {%- set src_pk = "record_publisher_hk" -%}
-{%- set src_fk = ["record_hk", "publisher_hk"] -%}
+{%- set src_fk = ["record_hk", "dc_publisher_hk"] -%}
 {%- set src_ldts = "load_datetime" -%}
 {%- set src_source = "source" -%}
 

@@ -1,3 +1,5 @@
+{{ config(materialized='view') }}
+
 {%- set yaml_metadata -%}
 source_model: "ldg_oai_record_sets"
 derived_columns:

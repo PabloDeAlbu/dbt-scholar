@@ -1,3 +1,5 @@
+{{ config(materialized='view') }}
+
 {%- set yaml_metadata -%}
 source_model: "ldg_oai_record_subjects"
 derived_columns:
@@ -8,10 +10,10 @@ derived_columns:
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
   record_hk: record_id
-  subject_hk: subjects
+  dc_subject_hk: dc_subject
   record_subject_hk:
    - record_id
-   - subjects
+   - dc_subject
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

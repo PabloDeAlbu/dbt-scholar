@@ -7,7 +7,7 @@ WITH source AS (
 renamed AS (
   SELECT
     "record_id"::text,
-    "subjects"::text,
+    "subjects"::text as dc_subject,
     "extract_datetime"::timestamp,
     "load_datetime"::timestamp
   FROM source

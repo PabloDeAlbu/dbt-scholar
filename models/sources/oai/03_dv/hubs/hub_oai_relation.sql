@@ -2,8 +2,8 @@
 
 {%- set yaml_metadata -%}
 source_model: 'stg_oai_record_relations'
-src_pk: relation_hk
-src_nk: relations
+src_pk: dc_relation_hk
+src_nk: dc_relation
 src_ldts: load_datetime
 src_source: source
 {%- endset -%}

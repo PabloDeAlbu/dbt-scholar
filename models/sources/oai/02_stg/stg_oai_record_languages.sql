@@ -1,3 +1,5 @@
+{{ config(materialized='view') }}
+
 {%- set yaml_metadata -%}
 source_model: "ldg_oai_record_languages"
 derived_columns:
@@ -8,10 +10,10 @@ derived_columns:
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
   record_hk: record_id
-  language_hk: languages
+  dc_language_hk: dc_language
   record_language_hk: 
     - record_id
-    - languages
+    - dc_language
 
 {%- endset -%}
 

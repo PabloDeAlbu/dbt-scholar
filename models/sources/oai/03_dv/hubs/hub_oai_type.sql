@@ -2,8 +2,8 @@
 
 {%- set yaml_metadata -%}
 source_model: 'stg_oai_record_types'
-src_pk: type_hk
-src_nk: types
+src_pk: dc_type_hk
+src_nk: dc_type
 src_ldts: load_datetime
 src_source: source
 {%- endset -%}

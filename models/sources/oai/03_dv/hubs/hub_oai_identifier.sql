@@ -2,8 +2,8 @@
 
 {%- set yaml_metadata -%}
 source_model: 'stg_oai_record_identifiers'
-src_pk: identifier_hk
-src_nk: identifiers
+src_pk: dc_identifier_hk
+src_nk: dc_identifier
 src_ldts: load_datetime
 src_source: source
 {%- endset -%}

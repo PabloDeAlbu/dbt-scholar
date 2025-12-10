@@ -7,7 +7,7 @@ WITH source AS (
 renamed AS (
   SELECT
     "record_id"::text,
-    "publishers"::text,
+    "publishers"::text as dc_publisher,
     "extract_datetime"::timestamp,
     "load_datetime"::timestamp
   FROM source

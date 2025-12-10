@@ -2,8 +2,8 @@
 
 {%- set yaml_metadata -%}
 source_model: 'stg_oai_record_publishers'
-src_pk: publisher_hk
-src_nk: publishers
+src_pk: dc_publisher_hk
+src_nk: dc_publisher
 src_ldts: load_datetime
 src_source: source
 {%- endset -%}
