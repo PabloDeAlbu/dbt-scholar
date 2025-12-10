@@ -36,16 +36,26 @@ models:
     01_ldg:
       oai:
         +schema: oai
+      openaire:
+        +schema: openaire
     02_dv:
       oai:
         +schema: oai
+      openaire:
+        +schema: openaire
     03_dm:
       core:
         oai:
           +schema: oai
+        openaire:
+          +schema: openaire
       custom:
         conicet:
           +schema: conicet
+    04_viz:
+      core:
+        openaire:
+          +schema: openaire
     sources:
       +materialized: table
       coar:
@@ -54,8 +64,6 @@ models:
         +schema: dspace
       dspace5:
         +schema: dspace5
-      openaire:
-        +schema: openaire
       openalex:
         +schema: openalex
     marts:
@@ -82,8 +90,6 @@ models:
       05_viz:
         +materialized: table
         01_base:
-          openaire:
-            +schema: openaire
           openalex:
             +schema: openalex
         02_org:
