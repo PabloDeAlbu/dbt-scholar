@@ -34,55 +34,108 @@ models:
   dbt_scholar:
     +materialized: table
     01_ldg:
+      coar:
+        +schema: coar
+        +tags: [coar]
+      dspace:
+        +schema: dspace
+        +tags: [dspace]
+      dspace5:
+        +schema: dspace5
+        +tags: [dspace5]
       oai:
         +schema: oai
+        +tags: [oai]
       openaire:
         +schema: openaire
+        +tags: [openaire]
       openalex:
         +schema: openalex
+        +tags: [openalex]
     02_dv:
+      coar:
+        +schema: coar
+        +tags: [coar]
+      dspace:
+        +schema: dspace
+        +tags: [dspace]
+      dspace5:
+        +schema: dspace5
+        +tags: [dspace5]
       oai:
         +schema: oai
+        +tags: [oai]
       openaire:
         +schema: openaire
+        +tags: [openaire]
       openalex:
         +schema: openalex
+        +tags: [openalex]
     03_dm:
       core:
+        coar:
+          +schema: coar
+          +tags: [coar]
+        dspace:
+          +schema: dspace
+          +tags: [dspace]
+        dspace5:
+          +schema: dspace5
+          +tags: [dspace5]
         oai:
           +schema: oai
+          +tags: [oai]
         openaire:
           +schema: openaire
+          +tags: [openaire]
         openalex:
           +schema: openalex
+          +tags: [openalex]
       custom:
+        cic:
+          +schema: cic
+          +tags: [cic]
         conicet:
           +schema: conicet
+          +tags: [conicet]
+        unlp:
+          +schema: unlp
+          +tags: [unlp]
     04_viz:
       core:
         openaire:
           +schema: openaire
+          +tags: [openaire]
         openalex:
           +schema: openalex
+          +tags: [openalex]
       custom:
         cic:
           +schema: cic
+          +tags: [cic]
         conicet:
           +schema: conicet
+          +tags: [conicet]
         unlp:
           +schema: unlp
+          +tags: [unlp]
 seeds:
   dbt_scholar:
     coar:
       +schema: coar
+      +tags: [coar]
     dspacedb:
       +schema: dspacedb
+      +tags: [dspacedb]
     openaire:
       +schema: openaire
+      +tags: [openaire]
     openalex:
       +schema: openalex
+      +tags: [openalex]
     oai:
       +schema: oai
+      +tags: [oai]
 
 tests:
   +store_failures: true
