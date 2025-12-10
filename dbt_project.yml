@@ -32,6 +32,20 @@ clean-targets:         # directories to be removed by `dbt clean`
 models:
   # Config indicated by + and applies to all files under models/example/
   dbt_scholar:
+    +materialized: table
+    01_ldg:
+      oai:
+        +schema: oai
+    02_dv:
+      oai:
+        +schema: oai
+    03_dm:
+      core:
+        oai:
+          +schema: oai
+      custom:
+        conicet:
+          +schema: conicet
     sources:
       +materialized: table
       coar:
@@ -40,8 +54,6 @@ models:
         +schema: dspace
       dspace5:
         +schema: dspace5
-      oai:
-        +schema: oai
       openaire:
         +schema: openaire
       openalex:

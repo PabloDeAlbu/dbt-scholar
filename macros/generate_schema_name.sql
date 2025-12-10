@@ -4,9 +4,14 @@
   {%- set path = node.original_file_path -%}
   {%- set trimmed_name = custom_schema_name | trim if custom_schema_name else '' -%}
 
-  {%- if path.startswith('models/sources/') -%}
+  {%- if path.startswith('models/01_ldg/') -%}
+    ldg_{{ trimmed_name }}
+  {%- elif path.startswith('models/02_dv/') -%}
     dv_{{ trimmed_name }}
-
+  {%- elif path.startswith('models/03_dm/') -%}
+    dm_{{ trimmed_name }}
+  {%- elif path.startswith('models/sources/') -%}
+    dv_{{ trimmed_name }}
   {%- elif path.startswith('models/marts/') and trimmed_name != '' -%}
     dm_{{ trimmed_name }}
 
