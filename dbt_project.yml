@@ -38,17 +38,23 @@ models:
         +schema: oai
       openaire:
         +schema: openaire
+      openalex:
+        +schema: openalex
     02_dv:
       oai:
         +schema: oai
       openaire:
         +schema: openaire
+      openalex:
+        +schema: openalex
     03_dm:
       core:
         oai:
           +schema: oai
         openaire:
           +schema: openaire
+        openalex:
+          +schema: openalex
       custom:
         conicet:
           +schema: conicet
@@ -56,6 +62,8 @@ models:
       core:
         openaire:
           +schema: openaire
+        openalex:
+          +schema: openalex
     sources:
       +materialized: table
       coar:
@@ -64,18 +72,12 @@ models:
         +schema: dspace
       dspace5:
         +schema: dspace5
-      openalex:
-        +schema: openalex
     marts:
       04_dm:
         +materialized: table
         core:
           oai:
             +schema: oai
-          openalex:
-            +schema: openalex
-          openaire:
-            +schema: openaire
           dspace:
             +schema: dspace
           dspace5:
@@ -89,9 +91,6 @@ models:
             +schema: unlp
       05_viz:
         +materialized: table
-        01_base:
-          openalex:
-            +schema: openalex
         02_org:
           cic:
             +schema: cic
