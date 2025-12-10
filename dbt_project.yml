@@ -64,40 +64,13 @@ models:
           +schema: openaire
         openalex:
           +schema: openalex
-    sources:
-      +materialized: table
-      coar:
-        +schema: coar
-      dspace:
-        +schema: dspace
-      dspace5:
-        +schema: dspace5
-    marts:
-      04_dm:
-        +materialized: table
-        core:
-          oai:
-            +schema: oai
-          dspace:
-            +schema: dspace
-          dspace5:
-            +schema: dspace5
-        custom:
-          cic:
-            +schema: cic
-          conicet:
-            +schema: conicet
-          unlp:
-            +schema: unlp
-      05_viz:
-        +materialized: table
-        02_org:
-          cic:
-            +schema: cic
-          conicet:
-            +schema: conicet
-          unlp:
-            +schema: unlp
+      custom:
+        cic:
+          +schema: cic
+        conicet:
+          +schema: conicet
+        unlp:
+          +schema: unlp
 seeds:
   dbt_scholar:
     coar:
