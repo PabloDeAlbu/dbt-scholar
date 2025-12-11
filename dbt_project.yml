@@ -139,7 +139,7 @@ seeds:
 
 tests:
   +store_failures: true
-  +schema: test_failures
+  +schema: dbt_test_failures
 
 vars:
     "dbt_date:time_zone": "America/Argentina/Buenos_Aires"

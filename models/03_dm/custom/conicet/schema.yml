@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: fct_conicet_item_publication
+    description: "Tabla de hechos principal de publicaciones de CONICET enriquecida con identificadores normalizados."
+    config:
+      materialized: table
+    tests:
+      - unique:
+          column_name: record_hk
+      
+      - unique:
+          column_name: dc_relation_doi
+          # Descripción: Se configura como 'warn' porque es posible encontrar 
+          # duplicados legítimos (pre/post print) o errores históricos. 
+          # Queremos auditar sin detener el pipeline.
+          config:
+            severity: warn
+            
+      - unique:
+          column_name: dc_identifier_uri
+          # El Handle debe ser único.
+      
+      - not_null:
+          column_name: record_hk
+      
+      - not_null:
+          column_name: dc_identifier_uri
+          # Garantiza que solo entren registros con Handle válido (filtro INNER JOIN).

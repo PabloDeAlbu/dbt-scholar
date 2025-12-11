@@ -1,0 +1,5 @@
+coar_uri,coar_label,coar_label_es,dc_right
+http://purl.org/coar/access_right/c_f1cf,EMBARGOED ACCESS,ACCESO EMBARGADO,info:eu-repo/semantics/embargoedAccess
+http://purl.org/coar/access_right/c_16ec,RESTRICTED ACCESS,ACCESO RESTRINGIDO,info:eu-repo/semantics/closedAccess
+http://purl.org/coar/access_right/c_abf2,OPEN ACCESS,ACCESO ABIERTO,info:eu-repo/semantics/openAccess
+http://purl.org/coar/access_right/c_14cb,METADATA ONLY ACCESS,REGISTRO BIBLIOGRÁFICO,info:eu-repo/semantics/restrictedAccess
