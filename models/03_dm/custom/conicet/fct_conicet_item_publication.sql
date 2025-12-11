@@ -34,12 +34,22 @@ final AS (
         CASE WHEN doi.count_doi > 0 THEN true ELSE false END as has_doi,
         CASE WHEN doi.count_doi > 1 THEN true ELSE false END as has_multiple_doi,        
         
-        -- Número exacto por si quieres hacer un histograma de duplicados
-        COALESCE(doi.count_doi, 0) as doi_count_check
+        -- Número exacto para duplicados
+        COALESCE(doi.count_doi, 0) as doi_count_check,
+
+        fos.fos_label_level_1 as subject_area,      -- Nombre amigable para BI
+        fos.fos_label_level_2 as subject_subarea,   -- Nombre amigable para BI
+        fos.fos_code_level_1,
+        
+        -- Auditoría de FOS (Opcional)
+        COALESCE(fos.has_multiple_fos_assignments, false) as mult_fos_flag
 
     FROM base
     INNER JOIN {{ref('brg_conicet_item_identifier_uri')}} uri USING (record_hk)
     LEFT JOIN {{ref('brg_conicet_item_relation_doi')}} doi USING (record_hk)
+    
+    -- AQUÍ AGREGAMOS EL FOS APLANADO
+    LEFT JOIN {{ref('brg_conicet_item_fos_flattened')}} fos USING (record_hk)
 )
 
 SELECT * FROM final
