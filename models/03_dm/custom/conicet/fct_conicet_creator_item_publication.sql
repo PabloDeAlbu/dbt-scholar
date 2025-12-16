@@ -29,7 +29,7 @@ papers_context AS (
 -- 3. Tabla Final: Centrada en la actividad del Autor
 SELECT 
     -- Dimensiones de Autor
-    c.author,
+    upper(replace(c.author, '.', '')) as author,
     c.filliation,
     c.institution_count,
 
