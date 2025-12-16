@@ -4,9 +4,12 @@ WITH
 -- 1. Base: La relación Autor-Paper (Un autor aparece tantas veces como papers tenga)
 creators_base AS (
     SELECT 
-        dc_creator, -- Tu protagonista
+        dc_creator,
+        fil.filliation,
+        fil.institution_count,
         record_hk
     FROM {{ ref('brg_oai_record_creator') }}
+    LEFT JOIN {{ ref('brg_conicet_record_fil') }} fil USING (record_hk)
     -- Opcional: Filtra nulos o nombres vacíos si ensucian el ranking
     WHERE dc_creator IS NOT NULL AND dc_creator != ''
 ),
@@ -27,6 +30,8 @@ papers_context AS (
 SELECT 
     -- Dimensiones de Autor
     c.dc_creator,
+    c.filliation,
+    c.institution_count,
 
     -- Dimensiones de Tiempo y Contexto (para filtros)
     p.date_issued,

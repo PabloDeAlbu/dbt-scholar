@@ -8,6 +8,7 @@ sources:
       - name: sets
       - name: records
       - name: record_creators
+      - name: record_descriptions
       - name: record_identifiers
       - name: record_languages
       - name: record_publishers
