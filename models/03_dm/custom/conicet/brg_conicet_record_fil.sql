@@ -14,7 +14,7 @@ WITH cleaned AS (
 base AS (
     SELECT 
         dc_description,
-        trim(split_part(description_no_prefix, '. ', 1)) AS author,
+        replace(trim(split_part(description_no_prefix, '. ', 1)),'Fil: ','') AS author,
         CASE 
             WHEN position('. ' IN description_no_prefix) > 0 
             THEN ltrim(substr(description_no_prefix, position('. ' IN description_no_prefix) + 2))

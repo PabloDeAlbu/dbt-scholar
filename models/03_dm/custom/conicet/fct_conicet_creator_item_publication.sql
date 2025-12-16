@@ -4,20 +4,20 @@ WITH
 -- 1. Base: La relación Autor-Paper (Un autor aparece tantas veces como papers tenga)
 creators_base AS (
     SELECT 
-        dc_creator,
-        fil.filliation,
-        fil.institution_count,
+        author,
+        filliation,
+        institution_count,
         record_hk
-    FROM {{ ref('brg_oai_record_creator') }}
-    LEFT JOIN {{ ref('brg_conicet_record_fil') }} fil USING (record_hk)
-    -- Opcional: Filtra nulos o nombres vacíos si ensucian el ranking
-    WHERE dc_creator IS NOT NULL AND dc_creator != ''
+    FROM {{ ref('brg_conicet_record_fil') }}
+    WHERE author IS NOT NULL AND author != ''
 ),
 
 -- 2. Contexto: Datos del paper para poder filtrar luego
 papers_context AS (
     SELECT 
         record_hk,
+        record_id,
+        title,
         date_issued,
         subject_area,      -- FOS Nivel 1
         subject_subarea,   -- FOS Nivel 2
@@ -29,11 +29,13 @@ papers_context AS (
 -- 3. Tabla Final: Centrada en la actividad del Autor
 SELECT 
     -- Dimensiones de Autor
-    c.dc_creator,
+    c.author,
     c.filliation,
     c.institution_count,
 
     -- Dimensiones de Tiempo y Contexto (para filtros)
+    p.record_id,
+    p.title,
     p.date_issued,
     p.subject_area,
     p.subject_subarea,
