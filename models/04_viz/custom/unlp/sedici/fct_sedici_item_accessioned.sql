@@ -36,7 +36,7 @@ final as (
         id.text_value as id,
         to_timestamp(date_accessioned.text_value,'YYYY-MM-DD') as date_accessioned,
         dc_type.text_value as type
-    FROM {{ref('fct_dspace5_item')}} item
+    FROM {{ref('fct_dspace5_item_publication')}} item
     INNER JOIN id USING (item_hk)
     INNER JOIN dc_type USING (item_hk)
     INNER JOIN date_accessioned USING (item_hk)
