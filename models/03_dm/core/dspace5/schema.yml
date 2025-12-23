@@ -1,0 +1,179 @@
+version: 2
+
+models:
+  - name: er_dspace5_collection
+    description: Entidad colección con título y handle.
+    columns:
+      - name: collection_hk
+        tests:
+          - unique
+          - not_null
+      - name: title
+        tests:
+          - not_null
+      - name: handle
+        tests:
+          - not_null
+
+  - name: er_dspace5_collection_metadatavalue
+    description: Relación de colección con valores de metadatos y su campo.
+    columns:
+      - name: metadatavalue_hk
+        tests:
+          - unique
+          - not_null
+      - name: collection_hk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('er_dspace5_collection')
+              field: collection_hk
+      - name: metadatafield_fullname
+        tests:
+          - not_null
+          - relationships:
+              to: ref('er_dspace5_metadatafield')
+              field: metadatafield_fullname
+      - name: metadatafield_hk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('er_dspace5_metadatafield')
+              field: metadatafield_hk
+      - name: short_id
+        tests:
+          - not_null
+      - name: element
+        tests:
+          - not_null
+
+  - name: er_dspace5_community
+    description: Comunidades con su padre inmediato (si existe).
+    columns:
+      - name: community_hk
+        tests:
+          - not_null
+      - name: parent_comm_hk
+
+  - name: er_dspace5_community_metadatavalue
+    description: Relación de comunidad con valores de metadatos y su campo.
+    columns:
+      - name: metadatavalue_hk
+        tests:
+          - unique
+          - not_null
+      - name: community_hk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('hub_dspace5_community')
+              field: community_hk
+      - name: metadatafield_fullname
+        tests:
+          - not_null
+          - relationships:
+              to: ref('er_dspace5_metadatafield')
+              field: metadatafield_fullname
+      - name: metadatafield_hk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('er_dspace5_metadatafield')
+              field: metadatafield_hk
+      - name: short_id
+        tests:
+          - not_null
+      - name: element
+        tests:
+          - not_null
+
+  - name: er_dspace5_item
+    description: Entidad item DSpace 5 con flags de publicación, colección dueña y recuento de colecciones asociadas.
+    columns:
+      - name: item_id
+        description: ID original del item en DSpace 5.
+        tests:
+          - not_null
+      - name: in_archive
+        description: Flag que indica si el item está en el archivo.
+      - name: withdrawn
+        description: Flag que indica si el item fue retirado.
+      - name: discoverable
+        description: Flag que indica si el item es descubrible.
+      - name: owningcollection_hk
+        description: Hash key de la colección dueña (si existe).
+      - name: collections_count
+        description: Cantidad de colecciones a las que está asociado el item (incluida la dueña).
+        tests:
+          - not_null
+      - name: item_hk
+        description: Hash key única del item.
+        tests:
+          - unique
+          - not_null
+
+  - name: er_dspace5_item_bitstream
+    description: Relación item-bundle-bitstream.
+    columns:
+      - name: item_bundle_hk
+        tests:
+          - unique
+          - not_null
+      - name: item_hk
+        tests:
+          - not_null
+      - name: bundle_hk
+        tests:
+          - not_null
+
+  - name: er_dspace5_item_metadatavalue
+    description: Relación de item con valores de metadatos y su campo estándar en DSpace 5.
+    columns:
+      - name: metadatavalue_hk
+        tests:
+          - unique
+          - not_null
+      - name: item_hk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('er_dspace5_item')
+              field: item_hk
+      - name: metadatafield_fullname
+        tests:
+          - not_null
+          - relationships:
+              to: ref('er_dspace5_metadatafield')
+              field: metadatafield_fullname
+      - name: metadatafield_hk
+        tests:
+          - not_null
+          - relationships:
+              to: ref('er_dspace5_metadatafield')
+              field: metadatafield_hk
+      - name: short_id
+        tests:
+          - not_null
+      - name: element
+        tests:
+          - not_null
+
+  - name: er_dspace5_metadatafield
+    description: Entidad catálogo de campos de metadatos en DSpace 5.
+    columns:
+      - name: metadatafield_hk
+        tests:
+          - unique
+          - not_null
+      - name: metadatafield_fullname
+        tests:
+          - unique
+          - not_null
+
+  - name: er_dspace5_metadatavalue
+    description: Entidad de valores crudos de metadatos.
+    columns:
+      - name: metadatavalue_hk
+        tests:
+          - unique
+          - not_null

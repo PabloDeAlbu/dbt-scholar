@@ -9,7 +9,7 @@ WITH collection AS (
         lnk_mv_dso.dspaceobject_hk = hub_col.collection_hk
     INNER JOIN {{ref('link_dspace_metadatavalue_metadatafield')}} lnk_mv_mf ON 
         lnk_mv_mf.metadatavalue_hk = lnk_mv_dso.metadatavalue_hk
-    INNER JOIN {{ref('dim_dspace_metadatafield')}} dim_mf ON
+    INNER JOIN {{ref('er_dspace_metadatafield')}} dim_mf ON
         dim_mf.metadatafield_hk = lnk_mv_mf.metadatafield_hk
     INNER JOIN {{ latest_satellite(ref('sat_dspace_metadatavalue'), 'metadatavalue_hk') }} AS sat_mv ON 
         sat_mv.metadatavalue_hk = lnk_mv_mf.metadatavalue_hk
@@ -28,7 +28,7 @@ com_1 AS (
         lnk_mv_dso.dspaceobject_hk = lnk_col_com.community_hk
     INNER JOIN {{ref('link_dspace_metadatavalue_metadatafield')}} lnk_mv_mf ON 
         lnk_mv_mf.metadatavalue_hk = lnk_mv_dso.metadatavalue_hk
-    INNER JOIN {{ref('dim_dspace_metadatafield')}} dim_mf ON
+    INNER JOIN {{ref('er_dspace_metadatafield')}} dim_mf ON
         dim_mf.metadatafield_hk = lnk_mv_mf.metadatafield_hk
     INNER JOIN {{ latest_satellite(ref('sat_dspace_metadatavalue'), 'metadatavalue_hk') }} AS sat_mv ON 
         sat_mv.metadatavalue_hk = lnk_mv_mf.metadatavalue_hk

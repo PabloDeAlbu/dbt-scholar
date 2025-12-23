@@ -2,8 +2,8 @@ WITH materias AS (
     SELECT
         mv.text_value::text as text_value,
         COUNT(*)::int as count
-    FROM {{ref('brg_dspace5_item_metadatavalue')}} bridge_i_mv
-    INNER JOIN {{ref('dim_dspace5_metadatavalue')}} mv ON 
+    FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
+    INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv ON 
         mv.metadatavalue_hk = bridge_i_mv.metadatavalue_hk
     WHERE
         bridge_i_mv.metadatafield_fullname = 'sedici.subject.materias'

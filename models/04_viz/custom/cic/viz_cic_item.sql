@@ -71,7 +71,7 @@ final as (
         isbn.text_value as isbn,
         doi.text_value as doi,
         COALESCE(doi.has_value, false) as has_doi
-    FROM {{ref('fct_dspace_item')}} item
+    FROM {{ref('er_dspace_item')}} item
     INNER JOIN title USING (item_hk)
     INNER JOIN id USING (item_hk)
     LEFT JOIN type USING (item_hk)

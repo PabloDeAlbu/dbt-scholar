@@ -13,8 +13,8 @@
         {% if has_value %}
             , CASE WHEN (COUNT(*) > 0) THEN True ELSE FALSE END AS has_value
         {% endif %}
-    FROM {{ ref('brg_dspace_item_metadatavalue') }} bridge_i_mv
-    INNER JOIN {{ ref('dim_dspace_metadatavalue') }} mv USING (metadatavalue_hk)
+    FROM {{ ref('er_dspace_item_metadatavalue') }} bridge_i_mv
+    INNER JOIN {{ ref('er_dspace_metadatavalue') }} mv USING (metadatavalue_hk)
     WHERE bridge_i_mv.metadatafield_fullname = '{{ fieldname }}'
     {% if filter %}
         AND {{ filter }}

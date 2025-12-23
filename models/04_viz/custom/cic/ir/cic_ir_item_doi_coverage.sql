@@ -4,9 +4,9 @@ WITH base AS (
     SELECT
         item_uuid,
         COUNT(*)
-    FROM {{ ref('fct_dspace_item') }} fct
-    LEFT JOIN {{ref('brg_dspace_item_metadatavalue')}} USING (item_hk)
-    LEFT JOIN {{ref('dim_dspace_metadatavalue')}} USING (metadatavalue_hk)
+    FROM {{ ref('er_dspace_item') }} fct
+    LEFT JOIN {{ref('er_dspace_item_metadatavalue')}} USING (item_hk)
+    LEFT JOIN {{ref('er_dspace_metadatavalue')}} USING (metadatavalue_hk)
     WHERE 
         (metadatafield_fullname = 'dcterms.identifier.other' OR 
         metadatafield_fullname is null) AND 

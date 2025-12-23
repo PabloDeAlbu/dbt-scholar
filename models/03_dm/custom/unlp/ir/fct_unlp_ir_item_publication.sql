@@ -4,7 +4,7 @@ WITH
 base as (
     SELECT DISTINCT
         *
-    FROM {{ref('fct_dspace5_item_publication')}} fct
+    FROM {{ref('er_dspace5_item')}} fct
 ),
 final AS (
     SELECT 

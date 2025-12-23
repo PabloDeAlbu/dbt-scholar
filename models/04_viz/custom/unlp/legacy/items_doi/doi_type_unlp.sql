@@ -5,13 +5,13 @@ WITH dc_identifier_uri AS (
         bridge_i_doi.item_hk,
         mv_doi.text_value as doi,
         mv_type.text_value as type
-    FROM {{ref('brg_dspace5_item_metadatavalue')}} bridge_i_doi 
-    INNER JOIN {{ref('dim_dspace5_metadatavalue')}} mv_doi ON 
+    FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_doi 
+    INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv_doi ON 
         mv_doi.metadatavalue_hk = bridge_i_doi.metadatavalue_hk
 
-    INNER JOIN {{ref('brg_dspace5_item_metadatavalue')}} bridge_i_type ON
+    INNER JOIN {{ref('er_dspace5_item_metadatavalue')}} bridge_i_type ON
         bridge_i_doi.item_hk = bridge_i_type.item_hk
-    INNER JOIN {{ref('dim_dspace5_metadatavalue')}} mv_type ON 
+    INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv_type ON 
         mv_type.metadatavalue_hk = bridge_i_type.metadatavalue_hk
 
     WHERE
@@ -25,13 +25,13 @@ sedici_identifier_other AS (
         bridge_i_doi.item_hk,
         CONCAT('https://doi.org/10.', split_part(mv_doi.text_value, '10.', 2)) as doi,
         mv_type.text_value as type
-        FROM {{ref('brg_dspace5_item_metadatavalue')}} bridge_i_doi 
-        INNER JOIN {{ref('dim_dspace5_metadatavalue')}} mv_doi ON 
+        FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_doi 
+        INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv_doi ON 
             mv_doi.metadatavalue_hk = bridge_i_doi.metadatavalue_hk
 
-        INNER JOIN {{ref('brg_dspace5_item_metadatavalue')}} bridge_i_type ON
+        INNER JOIN {{ref('er_dspace5_item_metadatavalue')}} bridge_i_type ON
             bridge_i_doi.item_hk = bridge_i_type.item_hk
-        INNER JOIN {{ref('dim_dspace5_metadatavalue')}} mv_type ON 
+        INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv_type ON 
             mv_type.metadatavalue_hk = bridge_i_type.metadatavalue_hk
         WHERE 
             bridge_i_doi.metadatafield_fullname = 'sedici.identifier.other' AND 

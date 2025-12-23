@@ -2,8 +2,8 @@ WITH title AS (
     SELECT
         bridge_i_mv.item_hk,
         mv.text_value
-    FROM {{ref('brg_dspace5_item_metadatavalue')}} bridge_i_mv
-    INNER JOIN {{ref('dim_dspace5_metadatavalue')}} mv ON 
+    FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
+    INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv ON 
         mv.metadatavalue_hk = bridge_i_mv.metadatavalue_hk
     WHERE
         bridge_i_mv.metadatafield_fullname = 'dc.title'
@@ -13,8 +13,8 @@ id AS (
     SELECT
         bridge_i_mv.item_hk,
         mv.text_value
-    FROM {{ref('brg_dspace5_item_metadatavalue')}} bridge_i_mv
-    INNER JOIN {{ref('dim_dspace5_metadatavalue')}} mv ON 
+    FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
+    INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv ON 
         mv.metadatavalue_hk = bridge_i_mv.metadatavalue_hk
     WHERE
         bridge_i_mv.metadatafield_fullname = 'dc.identifier.uri' AND
@@ -25,8 +25,8 @@ type AS (
     SELECT
         bridge_i_mv.item_hk,
         mv.text_value
-    FROM {{ref('brg_dspace5_item_metadatavalue')}} bridge_i_mv
-    INNER JOIN {{ref('dim_dspace5_metadatavalue')}} mv ON 
+    FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
+    INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv ON 
         mv.metadatavalue_hk = bridge_i_mv.metadatavalue_hk
     WHERE
         bridge_i_mv.metadatafield_fullname = 'dc.type'
@@ -36,8 +36,8 @@ subject AS (
     SELECT
         bridge_i_mv.item_hk,
         STRING_AGG(mv.text_value, '|' ORDER BY mv.text_value) as text_value
-    FROM {{ref('brg_dspace5_item_metadatavalue')}} bridge_i_mv
-    INNER JOIN {{ref('dim_dspace5_metadatavalue')}} mv ON 
+    FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
+    INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv ON 
         mv.metadatavalue_hk = bridge_i_mv.metadatavalue_hk
     WHERE
         bridge_i_mv.metadatafield_fullname = 'dc.subject'
@@ -48,8 +48,8 @@ author AS (
     SELECT 
         bridge_i_mv.item_hk,
         STRING_AGG(mv.text_value, '|' ORDER BY mv.text_value) as text_value
-    FROM {{ref('brg_dspace5_item_metadatavalue')}} bridge_i_mv
-    INNER JOIN {{ref('dim_dspace5_metadatavalue')}} mv ON 
+    FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
+    INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv ON 
         mv.metadatavalue_hk = bridge_i_mv.metadatavalue_hk
     WHERE bridge_i_mv.metadatafield_fullname = 'sedici.creator.person'
     GROUP BY bridge_i_mv.item_hk
@@ -59,8 +59,8 @@ issn AS (
   SELECT 
     bridge_i_mv.item_hk,
     STRING_AGG(mv.text_value, '|' ORDER BY mv.text_value) as text_value
-  FROM {{ref('brg_dspace5_item_metadatavalue')}} bridge_i_mv
-  JOIN {{ref('dim_dspace5_metadatavalue')}} mv 
+  FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
+  JOIN {{ref('er_dspace5_metadatavalue')}} mv 
     ON mv.metadatavalue_hk = bridge_i_mv.metadatavalue_hk
   WHERE bridge_i_mv.metadatafield_fullname = 'sedici.identifier.issn'
   GROUP BY bridge_i_mv.item_hk
@@ -70,8 +70,8 @@ isbn AS (
   SELECT 
     bridge_i_mv.item_hk,
     STRING_AGG(mv.text_value, '|' ORDER BY mv.text_value) as text_value
-  FROM {{ref('brg_dspace5_item_metadatavalue')}} bridge_i_mv
-  JOIN {{ref('dim_dspace5_metadatavalue')}} mv 
+  FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
+  JOIN {{ref('er_dspace5_metadatavalue')}} mv 
     ON mv.metadatavalue_hk = bridge_i_mv.metadatavalue_hk
   WHERE bridge_i_mv.metadatafield_fullname = 'sedici.identifier.isbn'
   GROUP BY bridge_i_mv.item_hk
@@ -81,8 +81,8 @@ date AS (
   SELECT 
     bridge_i_mv.item_hk,
     STRING_AGG(mv.text_value, '|' ORDER BY mv.text_value) as text_value
-  FROM {{ref('brg_dspace5_item_metadatavalue')}} bridge_i_mv
-  JOIN {{ref('dim_dspace5_metadatavalue')}} mv 
+  FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
+  JOIN {{ref('er_dspace5_metadatavalue')}} mv 
     ON mv.metadatavalue_hk = bridge_i_mv.metadatavalue_hk
   WHERE bridge_i_mv.metadatafield_fullname = 'dc.date.issued'
   GROUP BY bridge_i_mv.item_hk
@@ -92,8 +92,8 @@ doi_in_dc_identifier_uri AS (
     SELECT
         bridge_i_mv.item_hk,
         mv.text_value
-    FROM {{ref('brg_dspace5_item_metadatavalue')}} bridge_i_mv
-    INNER JOIN {{ref('dim_dspace5_metadatavalue')}} mv ON 
+    FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
+    INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv ON 
         mv.metadatavalue_hk = bridge_i_mv.metadatavalue_hk
     WHERE
         bridge_i_mv.metadatafield_fullname = 'dc.identifier.uri' AND
@@ -104,8 +104,8 @@ doi_in_sedici_identifier_other AS (
     SELECT
         bridge_i_mv.item_hk,
         mv.text_value
-    FROM {{ref('brg_dspace5_item_metadatavalue')}} bridge_i_mv
-    INNER JOIN {{ref('dim_dspace5_metadatavalue')}} mv ON 
+    FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
+    INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv ON 
         mv.metadatavalue_hk = bridge_i_mv.metadatavalue_hk
     WHERE
         bridge_i_mv.metadatafield_fullname = 'sedici.identifier.other' AND

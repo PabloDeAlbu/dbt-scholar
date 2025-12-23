@@ -3,7 +3,7 @@
 WITH base AS (
     SELECT
         *
-    FROM {{ ref('fct_dspace_metadatafield_usage') }}
+    FROM {{ ref('er_dspace_metadatafield_usage') }}
     WHERE scheme != 'eperson' AND scheme != 'dspace'
 )
 
