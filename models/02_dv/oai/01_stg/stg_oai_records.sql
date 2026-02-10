@@ -18,6 +18,7 @@ hashed_columns:
     columns:
       - title
       - date_issued
+      - _context
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

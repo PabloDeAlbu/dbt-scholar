@@ -10,6 +10,7 @@ src_payload:
   - record_id
   - title
   - date_issued
+  - _context
 src_eff: load_datetime
 src_ldts: load_datetime
 src_source: source

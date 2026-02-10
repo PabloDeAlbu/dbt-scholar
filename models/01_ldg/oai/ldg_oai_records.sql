@@ -10,6 +10,7 @@ renamed AS (
     "col_id"::text,
     "title"::text,
     {{ str_to_date("date_issued") }}::timestamp AS date_issued,
+    "_context",
     "extract_datetime"::timestamp,
     "load_datetime"::timestamp
   FROM source
