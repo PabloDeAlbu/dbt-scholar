@@ -23,5 +23,29 @@ renamed as (
     value::text,
     load_datetime::timestamp
   from source
+),
+ghost_record as (
+  select
+    '!UNKNOWN'::text as researchproduct_id,
+    '!UNKNOWN'::text as license,
+    '!UNKNOWN'::text as publication_date,
+    '!UNKNOWN'::text as refereed,
+    '!UNKNOWN'::text as type,
+    '!UNKNOWN'::text as url,
+    '!UNKNOWN'::text as accessright_code,
+    '!UNKNOWN'::text as accessright_label,
+    '!UNKNOWN'::text as accessright_openaccessroute,
+    '!UNKNOWN'::text as accessright_scheme,
+    '!UNKNOWN'::text as collectedfrom_key,
+    '!UNKNOWN'::text as collectedfrom_value,
+    '!UNKNOWN'::text as hostedby_key,
+    '!UNKNOWN'::text as hostedby_value,
+    '!UNKNOWN'::text as apc_amount,
+    '!UNKNOWN'::text as apc_currency,
+    '!UNKNOWN'::text as scheme,
+    '!UNKNOWN'::text as value,
+    {{ dbt_date.today() }} as load_datetime
 )
 select * from renamed
+union all
+select * from ghost_record

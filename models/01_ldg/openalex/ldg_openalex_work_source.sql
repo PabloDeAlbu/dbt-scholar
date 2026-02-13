@@ -20,6 +20,30 @@ with source as (
         source_is_oa::boolean,
         load_datetime::timestamp
     from {{ source('openalex', 'map_work_location') }}
+),
+ghost_record as (
+    select
+        '!UNKNOWN'::text as work_id,
+        '!UNKNOWN'::text as source_id,
+        '!UNKNOWN'::text as source_display_name,
+        '!UNKNOWN'::text as source_type,
+        '!UNKNOWN'::text as source_host_organization,
+        '!UNKNOWN'::text as source_host_organization_name,
+        '!UNKNOWN'::text as source_is_core,
+        '!UNKNOWN'::text as source_issn_l,
+        '!UNKNOWN'::text as landing_page_url,
+        '!UNKNOWN'::text as license,
+        '!UNKNOWN'::text as license_id,
+        '!UNKNOWN'::text as pdf_url,
+        '!UNKNOWN'::text as version,
+        false as is_accepted,
+        false as is_oa,
+        false as is_published,
+        false as source_is_in_doaj,
+        false as source_is_oa,
+        {{ dbt_date.today() }} as load_datetime
 )
 
 select * from source
+union all
+select * from ghost_record

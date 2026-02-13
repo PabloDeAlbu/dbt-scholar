@@ -1,12 +1,28 @@
-WITH base AS (
-    SELECT 
+with source as (
+    select 
+        * 
+    from {{ source('dspace', 'metadatafieldregistry') }}
+),
+renamed as (
+    select 
         metadata_field_id,
         metadata_schema_id,
         element,
         qualifier,
         scope_note,
         {{ dbt_date.today() }} as load_datetime
-    FROM {{ source('dspace', 'metadatafieldregistry') }}
+    from source
+),
+ghost_record as (
+    select
+        -1 as metadata_field_id,
+        -1 as metadata_schema_id,
+        '!UNKNOWN' as element,
+        '!UNKNOWN' as qualifier,
+        '!UNKNOWN' as scope_note,
+        {{ dbt_date.today() }} as load_datetime
 )
 
-SELECT * FROM base
+select * from renamed
+union all
+select * from ghost_record

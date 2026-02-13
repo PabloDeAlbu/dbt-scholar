@@ -1,4 +1,7 @@
-with base as (
+with source as (
+    select * from {{ source('openalex', 'map_work_topics') }}
+),
+base as (
     select
         id::text as work_id,
         display_name::text,
@@ -11,6 +14,22 @@ with base as (
         {{ adapter.quote("subfield.display_name") }}::text as subfield_display_name,
         {{ adapter.quote("subfield.id")}}::text as subfield_id,
         load_datetime::timestamp
-    from {{ source('openalex', 'map_work_topics') }}
+    from source
+),
+ghost_record as (
+    select
+        '!UNKNOWN'::text as work_id,
+        '!UNKNOWN'::text as display_name,
+        '!UNKNOWN'::text as topic_id,
+        -1.0::double precision as score,
+        '!UNKNOWN'::text as domain_display_name,
+        '!UNKNOWN'::text as domain_id,
+        '!UNKNOWN'::text as field_display_name,
+        '!UNKNOWN'::text as field_id,
+        '!UNKNOWN'::text as subfield_display_name,
+        '!UNKNOWN'::text as subfield_id,
+        {{ dbt_date.today() }} as load_datetime
 )
 select * from base
+union all
+select * from ghost_record

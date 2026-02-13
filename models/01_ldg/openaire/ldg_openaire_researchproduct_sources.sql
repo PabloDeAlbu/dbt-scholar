@@ -7,6 +7,14 @@ renamed as (
         sources::text,
         load_datetime::timestamp
     from source
+),
+ghost_record as (
+    select
+        '!UNKNOWN'::text as researchproduct_id,
+        '!UNKNOWN'::text as sources,
+        {{ dbt_date.today() }} as load_datetime
 )
 
 select * from renamed
+union all
+select * from ghost_record

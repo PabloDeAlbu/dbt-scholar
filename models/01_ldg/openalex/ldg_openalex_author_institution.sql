@@ -11,6 +11,14 @@ casted as (
         institution_id::text,
         load_datetime::timestamp
     from source
+),
+ghost_record as (
+    select
+        '!UNKNOWN'::text as author_id,
+        '!UNKNOWN'::text as institution_id,
+        {{ dbt_date.today() }} as load_datetime
 )
 select * from casted
+union all
+select * from ghost_record
   

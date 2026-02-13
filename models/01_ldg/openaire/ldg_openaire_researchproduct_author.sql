@@ -13,6 +13,20 @@ casted as (
     {{ adapter.quote("pid.provenance") }}::text as pid_provenance,
     load_datetime::timestamp
   from source
+),
+ghost_record as (
+  select
+    '!UNKNOWN'::text as researchproduct_id,
+    '!UNKNOWN'::text as name,
+    -1::int as rank,
+    '!UNKNOWN'::text as surname,
+    '!UNKNOWN'::text as full_name,
+    '!UNKNOWN'::text as pid_scheme,
+    '!UNKNOWN'::text as orcid,
+    '!UNKNOWN'::text as pid_provenance,
+    {{ dbt_date.today() }} as load_datetime
 )
 
 SELECT * FROM casted
+union all
+select * from ghost_record

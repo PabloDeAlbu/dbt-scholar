@@ -8,6 +8,18 @@ WITH base as (
         label_es,
         {{ dbt_date.today() }} as load_datetime
     FROM {{ref('seed_resourcetype_coar')}}
+),
+ghost_record as (
+    SELECT
+        '!UNKNOWN' as coar_uri,
+        '!UNKNOWN' as label,
+        '!UNKNOWN' as parent_label_1,
+        '!UNKNOWN' as parent_label_2,
+        '!UNKNOWN' as parent_label_3,
+        '!UNKNOWN' as label_es,
+        {{ dbt_date.today() }} as load_datetime
 )
 
 SELECT * FROM base
+UNION ALL
+SELECT * FROM ghost_record

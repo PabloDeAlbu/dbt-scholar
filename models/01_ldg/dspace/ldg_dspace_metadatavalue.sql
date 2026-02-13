@@ -1,5 +1,10 @@
-WITH base AS (
-    SELECT 
+with source as (
+    select 
+        * 
+    from {{ source('dspace', 'metadatavalue') }}
+),
+renamed as (
+    select 
         metadata_value_id,
         metadata_field_id,
         text_value,
@@ -9,7 +14,21 @@ WITH base AS (
         confidence,
         dspace_object_id,
         {{ dbt_date.today() }} as load_datetime
-    FROM {{ source('dspace', 'metadatavalue') }}
+    from source
+),
+ghost_record as (
+    select
+        -1 as metadata_value_id,
+        -1 as metadata_field_id,
+        '!UNKNOWN' as text_value,
+        '!UNKNOWN' as text_lang,
+        -1 as place,
+        '!UNKNOWN' as authority,
+        -1 as confidence,
+        -1 as dspace_object_id,
+        {{ dbt_date.today() }} as load_datetime
 )
 
-SELECT * FROM base
+select * from renamed
+union all
+select * from ghost_record

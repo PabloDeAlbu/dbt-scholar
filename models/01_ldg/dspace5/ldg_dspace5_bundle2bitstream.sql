@@ -1,7 +1,6 @@
 with source as (
   select * from {{ source('dspace5', 'bundle2bitstream') }}
 ),
-
 renamed as (
   select
     id,
@@ -10,6 +9,16 @@ renamed as (
     bitstream_order,
     {{ dbt_date.today() }} as load_datetime
   from source
+),
+ghost_record as (
+  select
+    -1 as id,
+    -1 as bundle_id,
+    -1 as bitstream_id,
+    -1 as bitstream_order,
+    {{ dbt_date.today() }} as load_datetime
 )
 
 select * from renamed
+union all
+select * from ghost_record

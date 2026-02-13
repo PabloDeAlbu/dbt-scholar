@@ -1,9 +1,22 @@
-WITH base AS (
-    SELECT 
+with source as (
+    select 
+        * 
+    from {{ source('dspace', 'community2collection') }}
+),
+renamed as (
+    select 
         community_id as community_uuid,
         collection_id as collection_uuid,
         {{ dbt_date.today() }} as load_datetime
-    FROM {{ source('dspace', 'community2collection') }}
+    from source
+),
+ghost_record as (
+    select
+        -1 as community_uuid,
+        -1 as collection_uuid,
+        {{ dbt_date.today() }} as load_datetime
 )
 
-SELECT * FROM base
+select * from renamed
+union all
+select * from ghost_record

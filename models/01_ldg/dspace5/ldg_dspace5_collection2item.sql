@@ -8,5 +8,14 @@ renamed as (
     item_id,
     {{ dbt_date.today() }} as load_datetime
   from source
+),
+ghost_record as (
+  select
+    -1 as collection_item_id,
+    -1 as collection_id,
+    -1 as item_id,
+    {{ dbt_date.today() }} as load_datetime
 )
 select * from renamed
+union all
+select * from ghost_record

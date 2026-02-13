@@ -9,6 +9,16 @@ renamed AS (
     value::text,
     load_datetime::timestamp
   FROM source
+),
+
+ghost_record AS (
+  SELECT
+    '!UNKNOWN'::text as researchproduct_id,
+    '!UNKNOWN'::text as scheme,
+    '!UNKNOWN'::text as value,
+    {{ dbt_date.today() }} as load_datetime
 )
 
 SELECT * FROM renamed
+union all
+SELECT * FROM ghost_record

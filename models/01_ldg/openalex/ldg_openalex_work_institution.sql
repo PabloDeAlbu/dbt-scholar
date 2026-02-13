@@ -19,7 +19,19 @@ casted as (
         type::text,
        load_datetime::timestamp
     from source
+),
+ghost_record as (
+    select
+        '!UNKNOWN'::text as work_id,
+        '!UNKNOWN'::text as institution_id,
+        '!UNKNOWN'::text as country_code,
+        '!UNKNOWN'::text as display_name,
+        '!UNKNOWN'::text as ror,
+        '!UNKNOWN'::text as type,
+        {{ dbt_date.today() }} as load_datetime
 )
 
 select * from casted
+union all
+select * from ghost_record
   

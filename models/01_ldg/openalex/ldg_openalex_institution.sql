@@ -1,4 +1,7 @@
-with base as (
+with source as (
+    select * from {{ source('openalex', 'institution') }}
+),
+renamed as (
     select distinct
         id as institution_id,
         ror::text,
@@ -31,7 +34,28 @@ with base as (
         created_date::text,
         extract_datetime::timestamp,
         load_datetime::timestamp
-    from {{ source('openalex', 'institution') }}
+    from source
+),
+ghost_record as (
+    select
+        '!UNKNOWN' as institution_id,
+        '!UNKNOWN' as ror,
+        '!UNKNOWN' as display_name,
+        '!UNKNOWN' as country_code,
+        '!UNKNOWN' as type,
+        '!UNKNOWN' as type_id,
+        '!UNKNOWN' as homepage_url,
+        '!UNKNOWN' as image_url,
+        '!UNKNOWN' as image_thumbnail_url,
+        -1 as works_count,
+        '!UNKNOWN' as is_super_system,
+        '!UNKNOWN' as works_api_url,
+        '!UNKNOWN' as updated_date,
+        '!UNKNOWN' as created_date,
+        '1900-01-01'::timestamp as extract_datetime,
+        {{ dbt_date.today() }} as load_datetime
 )
 
-select * from base
+select * from renamed
+union all
+select * from ghost_record
