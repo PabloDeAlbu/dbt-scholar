@@ -19,13 +19,13 @@ renamed as (
 ghost_record as (
     select
         -1 as item_id,
-        '!UNKNOWN' as item_uuid,
+        '00000000-0000-0000-0000-000000000000'::uuid as item_uuid,
         false as in_archive,
         false as withdrawn,
         '1900-01-01'::timestamp as last_modified,
         false as discoverable,
-        -1 as submitter_id,
-        -1 as owning_collection,
+        '00000000-0000-0000-0000-000000000000'::uuid as submitter_id,
+        '00000000-0000-0000-0000-000000000000'::uuid as owning_collection,
         {{ dbt_date.today() }} as load_datetime
 )
 

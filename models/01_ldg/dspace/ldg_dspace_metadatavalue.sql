@@ -25,7 +25,7 @@ ghost_record as (
         -1 as place,
         '!UNKNOWN' as authority,
         -1 as confidence,
-        -1 as dspace_object_id,
+        '00000000-0000-0000-0000-000000000000'::uuid as dspace_object_id,
         {{ dbt_date.today() }} as load_datetime
 )
 

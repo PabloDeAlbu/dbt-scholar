@@ -12,7 +12,7 @@ WITH base as (
 		c.handle as col_handle,
 		c.title as col_title,
 		mv_com.text_value as com_title
-	FROM {{ref('er_dspace5_item')}} i
+	FROM {{ref('fct_dspace5_item')}} i
 
 	INNER JOIN {{ref('er_dspace5_item_metadatavalue')}} bridge_dc_identifier_uri ON 
 		bridge_dc_identifier_uri.item_hk = i.item_hk AND 

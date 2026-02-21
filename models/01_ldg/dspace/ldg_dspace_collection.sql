@@ -17,11 +17,11 @@ renamed as (
 ghost_record as (
     select
         -1 as collection_id,
-        '!UNKNOWN' as collection_uuid,
-        false as submitter,
-        -1 as template_item_id,
-        -1 as logo_bitstream_id,
-        false as admin,
+        '00000000-0000-0000-0000-000000000000'::uuid as collection_uuid,
+        '00000000-0000-0000-0000-000000000000'::uuid as submitter,
+        '00000000-0000-0000-0000-000000000000'::uuid as template_item_id,
+        '00000000-0000-0000-0000-000000000000'::uuid as logo_bitstream_id,
+        '00000000-0000-0000-0000-000000000000'::uuid as admin,
         {{ dbt_date.today() }} as load_datetime
 )
 

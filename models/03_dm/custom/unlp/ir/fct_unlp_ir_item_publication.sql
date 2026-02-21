@@ -50,7 +50,7 @@ final as (
         in_archive,
         withdrawn,
         discoverable
-    FROM {{ref('er_dspace5_item')}} item
+    FROM {{ref('fct_dspace5_item')}} item
     JOIN id USING (item_hk)
     JOIN dc_type USING (item_hk)
     JOIN date_accessioned USING (item_hk)

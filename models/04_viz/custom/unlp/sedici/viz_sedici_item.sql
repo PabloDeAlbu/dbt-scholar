@@ -151,7 +151,7 @@ final as (
         issn.text_value as issn,
         isbn.text_value as isbn,
         doi.text_value as doi
-    FROM {{ref('er_dspace5_item')}} item
+    FROM {{ref('fct_dspace5_item')}} item
     INNER JOIN title USING (item_hk)
     INNER JOIN id USING (item_hk)
     INNER JOIN type USING (item_hk)

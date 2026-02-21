@@ -4,7 +4,7 @@ WITH base AS (
     SELECT
         item_uuid,
         COUNT(*)
-    FROM {{ ref('er_dspace_item') }} fct
+    FROM {{ ref('fct_dspace_item') }} fct
     LEFT JOIN {{ref('er_dspace_item_metadatavalue')}} USING (item_hk)
     LEFT JOIN {{ref('er_dspace_metadatavalue')}} USING (metadatavalue_hk)
     WHERE 

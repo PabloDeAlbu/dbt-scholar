@@ -12,7 +12,7 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('er_dspace_item')
+              to: ref('fct_dspace_item')
               field: item_hk
       - name: metadatafield_fullname
         tests:
@@ -33,7 +33,7 @@ models:
         tests:
           - not_null
 
-  - name: er_dspace_item
+  - name: fct_dspace_item
     description: Entidad item de DSpace con flags de publicación y colección dueña.
     columns:
       - name: item_hk

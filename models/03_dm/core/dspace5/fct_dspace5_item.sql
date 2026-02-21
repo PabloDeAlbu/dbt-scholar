@@ -53,7 +53,5 @@ SELECT
     COALESCE(cc.collections_count, 0) AS collections_count,
     i.item_hk
 FROM item_dedup i
-LEFT JOIN owning_collection_dedup oc
-    ON oc.item_hk = i.item_hk
-LEFT JOIN collections_count cc
-    ON cc.item_hk = i.item_hk
+JOIN owning_collection_dedup oc USING (item_hk)
+JOIN collections_count cc USING (item_hk)

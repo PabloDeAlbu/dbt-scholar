@@ -87,7 +87,7 @@ models:
         tests:
           - not_null
 
-  - name: er_dspace5_item
+  - name: fct_dspace5_item
     description: Entidad item DSpace 5 con flags de publicación, colección dueña y recuento de colecciones asociadas.
     columns:
       - name: item_id
@@ -137,7 +137,7 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('er_dspace5_item')
+              to: ref('fct_dspace5_item')
               field: item_hk
       - name: metadatafield_fullname
         tests:

@@ -12,8 +12,8 @@ renamed as (
 ),
 ghost_record as (
     select
-        -1 as community_uuid,
-        -1 as collection_uuid,
+        '00000000-0000-0000-0000-000000000000'::uuid as community_uuid,
+        '00000000-0000-0000-0000-000000000000'::uuid as collection_uuid,
         {{ dbt_date.today() }} as load_datetime
 )
 
