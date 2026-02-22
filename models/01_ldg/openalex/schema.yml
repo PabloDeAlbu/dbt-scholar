@@ -6,16 +6,62 @@ sources:
     schema: ldg_openalex
     tables:
       - name: author
+        columns:
+          - name: id
+            tests: [not_null, unique]
+          - name: dv_load_datetime
+            tests: [not_null]
       - name: author_institution_year
+        columns:
+          - name: id
+            tests: [not_null]
+          - name: institution_id
+            tests: [not_null]
+          - name: dv_load_datetime
+            tests: [not_null]
       - name: institution
+        columns:
+          - name: id
+            tests: [not_null, unique]
+          - name: dv_load_datetime
+            tests: [not_null]
       - name: work
+        columns:
+          - name: id
+            tests: [not_null, unique]
+          - name: dv_load_datetime
+            tests: [not_null]
       - name: map_author_institution
+        columns:
+          - name: author_id
+            tests: [not_null]
+          - name: id
+          - name: dv_load_datetime
+            tests: [not_null]
       - name: map_author_topic
+        columns:
+          - name: id
+            tests: [not_null]
+          - name: id_topic
+            tests: [not_null]
+          - name: dv_load_datetime
+            tests: [not_null]
 #      - name: institution
       - name: map_work_institution
-      - name: language
-      - name: license
+        columns:
+          - name: work_id
+            tests: [not_null]
+          - name: id
+          - name: dv_load_datetime
+            tests: [not_null]
       - name: map_work_author
+        columns:
+          - name: work_id
+            tests: [not_null]
+          - name: author_id
+            tests: [not_null]
+          - name: dv_load_datetime
+            tests: [not_null]
       - name: map_work_concept
       - name: map_work_corresponding_author_ids
       - name: map_work_ids
@@ -23,5 +69,17 @@ sources:
       - name: map_work_primary_topics
       - name: map_work_referenced_works
       - name: map_work_location
+        columns:
+          - name: id
+            tests: [not_null]
+          - name: dv_load_datetime
+            tests: [not_null]
       - name: map_work_topics
+        columns:
+          - name: id
+            tests: [not_null]
+          - name: topic_id
+            tests: [not_null]
+          - name: dv_load_datetime
+            tests: [not_null]
       - name: worktype
