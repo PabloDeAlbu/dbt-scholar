@@ -4,7 +4,7 @@
 source_model: "ldg_openaire_organization"
 derived_columns:
   source: "!OPENAIRE"
-  load_datetime: load_datetime
+  load_datetime: dv_load_datetime
 hashed_columns:
   organization_hk: organization_id
   organization_hashdiff:

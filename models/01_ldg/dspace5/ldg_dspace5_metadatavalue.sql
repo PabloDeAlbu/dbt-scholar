@@ -12,7 +12,7 @@ renamed as (
     authority,
     confidence,
     resource_type_id,
-    {{ dbt_date.today() }} as load_datetime
+    {{ dbt_date.today() }} as dv_load_datetime
   from source
 ),
 ghost_record as (
@@ -26,7 +26,7 @@ ghost_record as (
     '!UNKNOWN' as authority,
     -1 as confidence,
     -1 as resource_type_id,
-    {{ dbt_date.today() }} as load_datetime
+    {{ dbt_date.today() }} as dv_load_datetime
 )
 
 select * from renamed

@@ -4,7 +4,7 @@
 source_model: 'stg_dspace5_bitstream'
 src_pk: bitstream_hk
 src_nk: bitstream_id
-src_ldts: load_datetime
+src_ldts: dv_load_datetime
 src_source: source
 {%- endset -%}
 

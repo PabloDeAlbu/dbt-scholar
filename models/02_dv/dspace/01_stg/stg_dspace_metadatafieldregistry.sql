@@ -2,9 +2,9 @@
 source_model: "ldg_dspace_metadatafieldregistry"
 derived_columns:
   source: "!DSPACEDB"
-  load_datetime: load_datetime
-  effective_from: load_datetime
-  start_date: load_datetime
+  load_datetime: dv_load_datetime
+  effective_from: dv_load_datetime
+  start_date: dv_load_datetime
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
   metadatafield_hk: metadata_field_id

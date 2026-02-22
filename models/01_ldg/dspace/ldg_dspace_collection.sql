@@ -11,7 +11,7 @@ renamed as (
         template_item_id,
         logo_bitstream_id,
         admin,
-        {{ dbt_date.today() }} as load_datetime
+        {{ dbt_date.today() }} as dv_load_datetime
     from source
 ),
 ghost_record as (
@@ -22,7 +22,7 @@ ghost_record as (
         '00000000-0000-0000-0000-000000000000'::uuid as template_item_id,
         '00000000-0000-0000-0000-000000000000'::uuid as logo_bitstream_id,
         '00000000-0000-0000-0000-000000000000'::uuid as admin,
-        {{ dbt_date.today() }} as load_datetime
+        {{ dbt_date.today() }} as dv_load_datetime
 )
 
 select * from renamed

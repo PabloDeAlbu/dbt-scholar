@@ -4,7 +4,7 @@
 source_model: "ldg_openalex_work"
 derived_columns:
   source: "!OPENALEX"
-  load_datetime: load_datetime
+  load_datetime: dv_load_datetime
   effective_from: publication_date
   start_date: publication_date
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')

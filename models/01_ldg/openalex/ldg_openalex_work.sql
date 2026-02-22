@@ -93,7 +93,7 @@ renamed as (
     {{ adapter.quote("best_oa_location.source.is_oa") }}::boolean as best_oa_location_source_is_oa,
     {{ adapter.quote("best_oa_location.source.issn_l") }}::text as best_oa_location_source_issn_l,
     {{ adapter.quote("best_oa_location.source.type") }}::text as best_oa_location_source_type,
-    load_datetime::timestamp
+    dv_load_datetime::timestamp
   from source
 ),
 ghost_record as (
@@ -188,7 +188,7 @@ ghost_record as (
     false as best_oa_location_source_is_oa,
     '!UNKNOWN'::text as best_oa_location_source_issn_l,
     '!UNKNOWN'::text as best_oa_location_source_type,
-    {{ dbt_date.today() }} as load_datetime
+    {{ dbt_date.today() }} as dv_load_datetime
 )
 select * from renamed
 union all

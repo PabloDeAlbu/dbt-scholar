@@ -4,7 +4,7 @@
 source_model: 'stg_openaire_researchproduct'
 src_pk: accessright_hk
 src_nk: best_access_right
-src_ldts: load_datetime
+src_ldts: dv_load_datetime
 src_source: source
 {%- endset -%}
 

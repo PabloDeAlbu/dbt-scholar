@@ -4,7 +4,7 @@
 source_model: 'stg_openalex_work'
 src_pk: doi_hk
 src_nk: doi
-src_ldts: load_datetime
+src_ldts: dv_load_datetime
 src_source: source
 {%- endset -%}
 

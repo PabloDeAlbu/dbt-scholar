@@ -14,7 +14,7 @@ sources:
           - name: date_issued
           - name: extract_datetime
           - name: _context 
-          - name: load_datetime
+          - name: dv_load_datetime
       - name: record_creators
       - name: record_descriptions
       - name: record_identifiers
@@ -37,29 +37,29 @@ sources:
           - name: version
           - name: access_right
           - name: license_condition
-          - name: load_datetime
+          - name: dv_load_datetime
       - name: record_creator
         columns:
           - name: handle
           - name: creator
-          - name: load_datetime
+          - name: dv_load_datetime
       - name: record_language
         columns:
           - name: handle
           - name: language_iso
-          - name: load_datetime
+          - name: dv_load_datetime
       - name: record_publisher
         columns:
           - name: handle
           - name: publisher
-          - name: load_datetime
+          - name: dv_load_datetime
       - name: record_relation
         columns:
           - name: handle
           - name: relation
-          - name: load_datetime
+          - name: dv_load_datetime
       - name: record_subject
         columns:
           - name: handle
           - name: relation
-          - name: load_datetime
+          - name: dv_load_datetime

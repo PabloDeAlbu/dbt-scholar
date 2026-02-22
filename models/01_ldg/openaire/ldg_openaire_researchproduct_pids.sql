@@ -9,7 +9,7 @@ casted as (
     id::text as researchproduct_id,
     scheme::text as scheme,
     value::text as value,
-    load_datetime::timestamp
+    dv_load_datetime::timestamp
   from source
 ),
 ghost_record as (
@@ -17,7 +17,7 @@ ghost_record as (
     '!UNKNOWN'::text as researchproduct_id,
     '!UNKNOWN'::text as scheme,
     '!UNKNOWN'::text as value,
-    {{ dbt_date.today() }} as load_datetime
+    {{ dbt_date.today() }} as dv_load_datetime
 )
 
 select * from casted

@@ -18,7 +18,7 @@ with source as (
         is_published::boolean,
         source_is_in_doaj::boolean,
         source_is_oa::boolean,
-        load_datetime::timestamp
+        dv_load_datetime::timestamp
     from {{ source('openalex', 'map_work_location') }}
 ),
 ghost_record as (
@@ -41,7 +41,7 @@ ghost_record as (
         false as is_published,
         false as source_is_in_doaj,
         false as source_is_oa,
-        {{ dbt_date.today() }} as load_datetime
+        {{ dbt_date.today() }} as dv_load_datetime
 )
 
 select * from source

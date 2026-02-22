@@ -27,7 +27,7 @@ renamed as (
     {{ adapter.quote("citationImpact.popularityClass") }}::text as popularity_class,
     {{ adapter.quote("usageCounts.downloads") }}::int as downloads,
     {{ adapter.quote("usageCounts.views") }}::int as views,
-    load_datetime::timestamp
+    dv_load_datetime::timestamp
   from source
 ),
 ghost_record as (
@@ -56,7 +56,7 @@ ghost_record as (
     '!UNKNOWN'::text as popularity_class,
     -1::int as downloads,
     -1::int as views,
-    {{ dbt_date.today() }} as load_datetime
+    {{ dbt_date.today() }} as dv_load_datetime
 )
 
 select * from renamed

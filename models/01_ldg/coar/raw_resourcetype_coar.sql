@@ -6,7 +6,7 @@ WITH base as (
         parent_label_2,
         parent_label_3,
         label_es,
-        {{ dbt_date.today() }} as load_datetime
+        {{ dbt_date.today() }} as dv_load_datetime
     FROM {{ref('seed_resourcetype_coar')}}
 ),
 ghost_record as (
@@ -17,7 +17,7 @@ ghost_record as (
         '!UNKNOWN' as parent_label_2,
         '!UNKNOWN' as parent_label_3,
         '!UNKNOWN' as label_es,
-        {{ dbt_date.today() }} as load_datetime
+        {{ dbt_date.today() }} as dv_load_datetime
 )
 
 SELECT * FROM base

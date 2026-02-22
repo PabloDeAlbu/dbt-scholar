@@ -4,7 +4,7 @@
 source_model: 'stg_coar_resourcetype'
 src_pk: coar_hk
 src_nk: coar_uri
-src_ldts: load_datetime
+src_ldts: dv_load_datetime
 src_source: source
 {%- endset -%}
 

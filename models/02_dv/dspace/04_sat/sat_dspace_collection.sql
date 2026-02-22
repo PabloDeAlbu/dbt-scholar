@@ -12,8 +12,8 @@ src_payload:
   - template_item_id
   - logo_bitstream_id
   - admin
-src_eff: load_datetime
-src_ldts: load_datetime
+src_eff: dv_load_datetime
+src_ldts: dv_load_datetime
 src_source: source
 {%- endset -%}
 

@@ -9,7 +9,7 @@ renamed as (
         uuid as community_uuid,
         admin,
         logo_bitstream_id,
-        {{ dbt_date.today() }} as load_datetime
+        {{ dbt_date.today() }} as dv_load_datetime
     from source
 ),
 ghost_record as (
@@ -18,7 +18,7 @@ ghost_record as (
         '!UNKNOWN' as community_uuid,
         false as admin,
         -1 as logo_bitstream_id,
-        {{ dbt_date.today() }} as load_datetime
+        {{ dbt_date.today() }} as dv_load_datetime
 )
 
 select * from renamed

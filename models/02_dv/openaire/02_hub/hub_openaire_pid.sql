@@ -6,7 +6,7 @@ src_pk: pid_hk
 src_nk: 
     - value
     - scheme
-src_ldts: load_datetime
+src_ldts: dv_load_datetime
 src_source: source
 {%- endset -%}
 

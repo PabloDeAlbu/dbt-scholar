@@ -7,7 +7,7 @@ renamed as (
     bundle_id,
     bitstream_id,
     bitstream_order,
-    {{ dbt_date.today() }} as load_datetime
+    {{ dbt_date.today() }} as dv_load_datetime
   from source
 ),
 ghost_record as (
@@ -16,7 +16,7 @@ ghost_record as (
     -1 as bundle_id,
     -1 as bitstream_id,
     -1 as bitstream_order,
-    {{ dbt_date.today() }} as load_datetime
+    {{ dbt_date.today() }} as dv_load_datetime
 )
 
 select * from renamed

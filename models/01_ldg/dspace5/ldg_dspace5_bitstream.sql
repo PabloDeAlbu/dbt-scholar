@@ -12,7 +12,7 @@ renamed as (
     deleted,
     store_number,
     sequence_id,
-    {{ dbt_date.today() }} as load_datetime
+    {{ dbt_date.today() }} as dv_load_datetime
   from source
 ),
 ghost_record as (
@@ -26,7 +26,7 @@ ghost_record as (
     false as deleted,
     -1 as store_number,
     -1 as sequence_id,
-    {{ dbt_date.today() }} as load_datetime
+    {{ dbt_date.today() }} as dv_load_datetime
 )
 
 select * from renamed

@@ -13,7 +13,7 @@ renamed as (
         discoverable,
         submitter_id,
         owning_collection,
-        {{ dbt_date.today() }} as load_datetime
+        {{ dbt_date.today() }} as dv_load_datetime
     from source
 ),
 ghost_record as (
@@ -26,7 +26,7 @@ ghost_record as (
         false as discoverable,
         '00000000-0000-0000-0000-000000000000'::uuid as submitter_id,
         '00000000-0000-0000-0000-000000000000'::uuid as owning_collection,
-        {{ dbt_date.today() }} as load_datetime
+        {{ dbt_date.today() }} as dv_load_datetime
 )
 
 select * from renamed

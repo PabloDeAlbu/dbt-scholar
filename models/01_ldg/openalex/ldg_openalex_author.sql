@@ -9,7 +9,7 @@ with source as (
         cited_by_count,
         updated_date,
         created_date,
-        load_datetime   
+        dv_load_datetime   
     from {{ source('openalex', 'author') }}
 ),
 
@@ -22,7 +22,7 @@ casted as (
         cited_by_count::int,
         updated_date::timestamp,
         created_date::timestamp,
-        load_datetime::timestamp
+        dv_load_datetime::timestamp
     from source
 ),
 ghost_record as (
@@ -34,7 +34,7 @@ ghost_record as (
         -1::int as cited_by_count,
         '1900-01-01'::timestamp as updated_date,
         '1900-01-01'::timestamp as created_date,
-        {{ dbt_date.today() }} as load_datetime
+        {{ dbt_date.today() }} as dv_load_datetime
 )
 
 select * from casted

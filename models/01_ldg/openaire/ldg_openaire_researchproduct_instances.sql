@@ -21,7 +21,7 @@ renamed as (
     {{ adapter.quote("articleProcessingCharge.currency") }}::text as apc_currency,
     scheme::text,
     value::text,
-    load_datetime::timestamp
+    dv_load_datetime::timestamp
   from source
 ),
 ghost_record as (
@@ -44,7 +44,7 @@ ghost_record as (
     '!UNKNOWN'::text as apc_currency,
     '!UNKNOWN'::text as scheme,
     '!UNKNOWN'::text as value,
-    {{ dbt_date.today() }} as load_datetime
+    {{ dbt_date.today() }} as dv_load_datetime
 )
 select * from renamed
 union all

@@ -4,7 +4,7 @@
 source_model: "ldg_dspace5_item"
 derived_columns:
   source: "!DSPACEDB"
-  load_datetime: load_datetime
+  load_datetime: dv_load_datetime
   effective_from: last_modified
   start_date: last_modified
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')

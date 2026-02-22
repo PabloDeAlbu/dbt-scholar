@@ -11,7 +11,7 @@ casted as (
     {{ adapter.quote("pid.id.scheme") }}::text as pid_scheme,
     {{ adapter.quote("pid.id.value") }}::text as orcid,
     {{ adapter.quote("pid.provenance") }}::text as pid_provenance,
-    load_datetime::timestamp
+    dv_load_datetime::timestamp
   from source
 ),
 ghost_record as (
@@ -24,7 +24,7 @@ ghost_record as (
     '!UNKNOWN'::text as pid_scheme,
     '!UNKNOWN'::text as orcid,
     '!UNKNOWN'::text as pid_provenance,
-    {{ dbt_date.today() }} as load_datetime
+    {{ dbt_date.today() }} as dv_load_datetime
 )
 
 SELECT * FROM casted

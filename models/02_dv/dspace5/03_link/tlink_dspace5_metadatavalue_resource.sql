@@ -10,7 +10,7 @@ src_fk:
 src_payload:
     - resource_type_id
 src_eff: effective_from
-src_ldts: load_datetime
+src_ldts: dv_load_datetime
 src_source: source
 {%- endset -%}
 

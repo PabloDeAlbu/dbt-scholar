@@ -13,7 +13,7 @@ base as (
         {{ adapter.quote("field.id") }}::text as field_id,
         {{ adapter.quote("subfield.display_name") }}::text as subfield_display_name,
         {{ adapter.quote("subfield.id")}}::text as subfield_id,
-        load_datetime::timestamp
+        dv_load_datetime::timestamp
     from source
 ),
 ghost_record as (
@@ -28,7 +28,7 @@ ghost_record as (
         '!UNKNOWN'::text as field_id,
         '!UNKNOWN'::text as subfield_display_name,
         '!UNKNOWN'::text as subfield_id,
-        {{ dbt_date.today() }} as load_datetime
+        {{ dbt_date.today() }} as dv_load_datetime
 )
 select * from base
 union all

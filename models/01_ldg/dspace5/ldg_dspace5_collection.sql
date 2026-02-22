@@ -11,7 +11,7 @@ renamed as (
     workflow_step_3,
     submitter,
     admin,
-    {{ dbt_date.today() }} as load_datetime
+    {{ dbt_date.today() }} as dv_load_datetime
   from source
 ),
 ghost_record as (
@@ -24,7 +24,7 @@ ghost_record as (
     false as workflow_step_3,
     false as submitter,
     false as admin,
-    {{ dbt_date.today() }} as load_datetime
+    {{ dbt_date.today() }} as dv_load_datetime
 )
 
 select * from renamed

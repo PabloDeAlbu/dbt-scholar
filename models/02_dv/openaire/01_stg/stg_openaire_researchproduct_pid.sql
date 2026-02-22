@@ -4,7 +4,7 @@
 source_model: "ldg_openaire_researchproduct_pids"
 derived_columns:
   source: "!OPENAIRE"
-  load_datetime: load_datetime
+  load_datetime: dv_load_datetime
 hashed_columns:
   researchproduct_hk: researchproduct_id
   pid_hk:    

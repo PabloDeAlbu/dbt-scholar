@@ -4,7 +4,7 @@
 source_model: 'stg_oai_record_descriptions'
 src_pk: dc_description_hk
 src_nk: dc_description
-src_ldts: load_datetime
+src_ldts: dv_load_datetime
 src_source: source
 {%- endset -%}
 

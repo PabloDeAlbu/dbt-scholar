@@ -6,7 +6,7 @@ renamed as (
     id as community_community_id,
     parent_comm_id,
     child_comm_id,
-    {{ dbt_date.today() }} as load_datetime
+    {{ dbt_date.today() }} as dv_load_datetime
   from source
 ),
 ghost_record as (
@@ -14,7 +14,7 @@ ghost_record as (
     -1 as community_community_id,
     -1 as parent_comm_id,
     -1 as child_comm_id,
-    {{ dbt_date.today() }} as load_datetime
+    {{ dbt_date.today() }} as dv_load_datetime
 )
 
 select * from renamed

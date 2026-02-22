@@ -4,7 +4,7 @@
 source_model: 'stg_openaire_researchproduct_collectedfrom'
 src_pk: datasource_hk
 src_nk: datasource_id
-src_ldts: load_datetime
+src_ldts: dv_load_datetime
 src_source: source
 {%- endset -%}
 

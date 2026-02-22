@@ -8,7 +8,7 @@ src_nk:
     - name
     - surname
     - rank
-src_ldts: load_datetime
+src_ldts: dv_load_datetime
 src_source: source
 {%- endset -%}
 

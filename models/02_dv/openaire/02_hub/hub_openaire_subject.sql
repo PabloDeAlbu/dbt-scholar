@@ -6,7 +6,7 @@ src_pk: subject_hk
 src_nk: 
     - subject_scheme
     - subject_value
-src_ldts: load_datetime
+src_ldts: dv_load_datetime
 src_source: source
 {%- endset -%}
 

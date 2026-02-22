@@ -33,7 +33,7 @@ renamed as (
         updated_date::text,
         created_date::text,
         extract_datetime::timestamp,
-        load_datetime::timestamp
+        dv_load_datetime::timestamp
     from source
 ),
 ghost_record as (
@@ -53,7 +53,7 @@ ghost_record as (
         '!UNKNOWN' as updated_date,
         '!UNKNOWN' as created_date,
         '1900-01-01'::timestamp as extract_datetime,
-        {{ dbt_date.today() }} as load_datetime
+        {{ dbt_date.today() }} as dv_load_datetime
 )
 
 select * from renamed

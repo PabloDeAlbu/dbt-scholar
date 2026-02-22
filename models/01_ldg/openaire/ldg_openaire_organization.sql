@@ -6,7 +6,7 @@ base as (
     organization_id::text,
     acronym::text,
     {{ adapter.quote("legalName") }}::text as legalname,
-    load_datetime::timestamp
+    dv_load_datetime::timestamp
   from source
 ),
 ghost_record as (
@@ -14,7 +14,7 @@ ghost_record as (
     '!UNKNOWN'::text as organization_id,
     '!UNKNOWN'::text as acronym,
     '!UNKNOWN'::text as legalname,
-    {{ dbt_date.today() }} as load_datetime
+    {{ dbt_date.today() }} as dv_load_datetime
 )
 
 select * from base
