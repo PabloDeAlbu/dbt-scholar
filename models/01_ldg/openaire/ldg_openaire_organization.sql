@@ -12,7 +12,7 @@ base as (
   select 
     organization_id::text,
     acronym::text,
-    {{ safe_cast(organization_relation, 'legalName', 'text', alias='legalname', col_names=organization_col_names) }},
+    {{ safe_cast(organization_relation, 'legalName', 'text', alias='legalname', col_names=organization_col_names, default_mode='ghost') }},
     dv_load_datetime::timestamp
   from source
 ),

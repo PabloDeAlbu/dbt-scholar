@@ -11,7 +11,7 @@ with source as (
 base as (
   select 
     id::text as researchproduct_id,
-    {{ safe_cast(researchproduct_originalid_relation, 'originalIds', 'text', alias='original_id', col_names=researchproduct_originalid_col_names) }},
+    {{ safe_cast(researchproduct_originalid_relation, 'originalIds', 'text', alias='original_id', col_names=researchproduct_originalid_col_names, default_mode='ghost') }},
     dv_load_datetime::timestamp
  from source
 ),

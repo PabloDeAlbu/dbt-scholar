@@ -14,10 +14,10 @@ casted as (
     name::text,
     rank::int,
     surname::text,
-    {{ safe_cast(researchproduct_authors_relation, 'fullName', 'text', alias='full_name', col_names=researchproduct_authors_col_names) }},
-    {{ safe_cast(researchproduct_authors_relation, 'pid.id.scheme', 'text', alias='pid_scheme', col_names=researchproduct_authors_col_names) }},
-    {{ safe_cast(researchproduct_authors_relation, 'pid.id.value', 'text', alias='orcid', col_names=researchproduct_authors_col_names) }},
-    {{ safe_cast(researchproduct_authors_relation, 'pid.provenance', 'text', alias='pid_provenance', col_names=researchproduct_authors_col_names) }},
+    {{ safe_cast(researchproduct_authors_relation, 'fullName', 'text', alias='full_name', col_names=researchproduct_authors_col_names, default_mode='ghost') }},
+    {{ safe_cast(researchproduct_authors_relation, 'pid.id.scheme', 'text', alias='pid_scheme', col_names=researchproduct_authors_col_names, default_mode='ghost') }},
+    {{ safe_cast(researchproduct_authors_relation, 'pid.id.value', 'text', alias='orcid', col_names=researchproduct_authors_col_names, default_mode='ghost') }},
+    {{ safe_cast(researchproduct_authors_relation, 'pid.provenance', 'text', alias='pid_provenance', col_names=researchproduct_authors_col_names, default_mode='ghost') }},
     dv_load_datetime::timestamp
   from source
 ),

@@ -12,8 +12,8 @@ renamed as (
   select
     id::text as researchproduct_id,
     provenance::text as provenance,
-    {{ safe_cast(researchproduct_subjects_relation, 'subject.scheme', 'text', alias='subject_scheme', col_names=researchproduct_subjects_col_names) }},
-    {{ safe_cast(researchproduct_subjects_relation, 'subject.value', 'text', alias='subject_value', col_names=researchproduct_subjects_col_names) }},
+    {{ safe_cast(researchproduct_subjects_relation, 'subject.scheme', 'text', alias='subject_scheme', col_names=researchproduct_subjects_col_names, default_mode='ghost') }},
+    {{ safe_cast(researchproduct_subjects_relation, 'subject.value', 'text', alias='subject_value', col_names=researchproduct_subjects_col_names, default_mode='ghost') }},
     dv_load_datetime::timestamp
   from source
 ),

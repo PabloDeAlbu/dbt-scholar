@@ -1,4 +1,4 @@
-{% macro safe_cast(relation, col_name, data_type=None, alias=None, default_sql='null', col_names=None) %}
+{% macro safe_cast(relation, col_name, data_type=None, alias=None, default_sql='null', col_names=None, default_mode='null') %}
   {# relation: ref()/source()
      col_name: nombre EXACTO en la tabla
      data_type: 'text', 'int', 'boolean', 'timestamp', etc. (si es none, no castea)
@@ -8,6 +8,22 @@
   #}
 
   {% set out_alias = alias if alias is not none else (col_name | replace('.', '_')) %}
+
+  {% set resolved_default_sql = default_sql %}
+  {% if (default_mode | lower) == 'ghost' and default_sql == 'null' and data_type is not none %}
+    {% set dt = (data_type | lower) %}
+    {% if dt in ['text', 'string', 'varchar', 'character varying'] %}
+      {% set resolved_default_sql = "'!UNKNOWN'" %}
+    {% elif dt in ['bool', 'boolean'] %}
+      {% set resolved_default_sql = 'false' %}
+    {% elif dt in ['int', 'integer', 'bigint', 'smallint'] %}
+      {% set resolved_default_sql = '-1' %}
+    {% elif dt in ['float', 'real', 'double', 'double precision', 'numeric', 'decimal'] %}
+      {% set resolved_default_sql = '-1' %}
+    {% elif dt in ['timestamp', 'timestamptz', 'timestamp with time zone', 'timestamp without time zone', 'date'] %}
+      {% set resolved_default_sql = "'1900-01-01'" %}
+    {% endif %}
+  {% endif %}
 
   {# En parse/compile sin conexión (execute == false), asumimos que existe. #}
   {% if not execute %}
@@ -32,9 +48,9 @@
       {% endif %}
     {% else %}
       {% if data_type is none %}
-        ({{ default_sql }}) as {{ out_alias }}
+        ({{ resolved_default_sql }}) as {{ out_alias }}
       {% else %}
-        ({{ default_sql }})::{{ data_type }} as {{ out_alias }}
+        ({{ resolved_default_sql }})::{{ data_type }} as {{ out_alias }}
       {% endif %}
     {% endif %}
   {% endif %}

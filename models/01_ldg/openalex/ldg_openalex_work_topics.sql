@@ -14,12 +14,12 @@ with source as (
 	        display_name::text,
 	        topic_id::text,
 	        score::double precision,
-	        {{ safe_cast(map_work_topics_relation, 'domain.display_name', 'text', alias='domain_display_name', col_names=map_work_topics_col_names) }},
-	        {{ safe_cast(map_work_topics_relation, 'domain.id', 'text', alias='domain_id', col_names=map_work_topics_col_names) }},
-	        {{ safe_cast(map_work_topics_relation, 'field.display_name', 'text', alias='field_display_name', col_names=map_work_topics_col_names) }},
-	        {{ safe_cast(map_work_topics_relation, 'field.id', 'text', alias='field_id', col_names=map_work_topics_col_names) }},
-	        {{ safe_cast(map_work_topics_relation, 'subfield.display_name', 'text', alias='subfield_display_name', col_names=map_work_topics_col_names) }},
-	        {{ safe_cast(map_work_topics_relation, 'subfield.id', 'text', alias='subfield_id', col_names=map_work_topics_col_names) }},
+	        {{ safe_cast(map_work_topics_relation, 'domain.display_name', 'text', alias='domain_display_name', col_names=map_work_topics_col_names, default_mode='ghost') }},
+	        {{ safe_cast(map_work_topics_relation, 'domain.id', 'text', alias='domain_id', col_names=map_work_topics_col_names, default_mode='ghost') }},
+	        {{ safe_cast(map_work_topics_relation, 'field.display_name', 'text', alias='field_display_name', col_names=map_work_topics_col_names, default_mode='ghost') }},
+	        {{ safe_cast(map_work_topics_relation, 'field.id', 'text', alias='field_id', col_names=map_work_topics_col_names, default_mode='ghost') }},
+	        {{ safe_cast(map_work_topics_relation, 'subfield.display_name', 'text', alias='subfield_display_name', col_names=map_work_topics_col_names, default_mode='ghost') }},
+	        {{ safe_cast(map_work_topics_relation, 'subfield.id', 'text', alias='subfield_id', col_names=map_work_topics_col_names, default_mode='ghost') }},
 	        dv_load_datetime::timestamp
 	    from source
 	),
