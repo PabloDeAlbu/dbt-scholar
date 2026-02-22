@@ -1,5 +1,12 @@
+{% set researchproduct_authors_relation = source('openaire', 'researchproduct_authors') %}
+{% if execute %}
+  {% set researchproduct_authors_col_names = adapter.get_columns_in_relation(researchproduct_authors_relation) | map(attribute='name') | map('lower') | list %}
+{% else %}
+  {% set researchproduct_authors_col_names = none %}
+{% endif %}
+
 with source as (
-  select * from {{ source('openaire', 'researchproduct_authors') }}
+  select * from {{ researchproduct_authors_relation }}
 ),
 casted as (
   select
@@ -7,10 +14,10 @@ casted as (
     name::text,
     rank::int,
     surname::text,
-    {{ adapter.quote("fullName") }}::text as full_name,
-    {{ adapter.quote("pid.id.scheme") }}::text as pid_scheme,
-    {{ adapter.quote("pid.id.value") }}::text as orcid,
-    {{ adapter.quote("pid.provenance") }}::text as pid_provenance,
+    {{ safe_cast(researchproduct_authors_relation, 'fullName', 'text', alias='full_name', col_names=researchproduct_authors_col_names) }},
+    {{ safe_cast(researchproduct_authors_relation, 'pid.id.scheme', 'text', alias='pid_scheme', col_names=researchproduct_authors_col_names) }},
+    {{ safe_cast(researchproduct_authors_relation, 'pid.id.value', 'text', alias='orcid', col_names=researchproduct_authors_col_names) }},
+    {{ safe_cast(researchproduct_authors_relation, 'pid.provenance', 'text', alias='pid_provenance', col_names=researchproduct_authors_col_names) }},
     dv_load_datetime::timestamp
   from source
 ),

@@ -1,32 +1,39 @@
+{% set researchproduct_relation = source('openaire', 'researchproduct') %}
+{% if execute %}
+  {% set researchproduct_col_names = adapter.get_columns_in_relation(researchproduct_relation) | map(attribute='name') | map('lower') | list %}
+{% else %}
+  {% set researchproduct_col_names = none %}
+{% endif %}
+
 with source as (
-  select * from {{ source('openaire', 'researchproduct') }}
+  select * from {{ researchproduct_relation }}
 ),
 renamed as (
   select
     id::text as researchproduct_id,
-    {{ adapter.quote("openAccessColor") }}::text as open_access_color,
-    {{ adapter.quote("publiclyFunded") }}::text as publicly_funded,
+    {{ safe_cast(researchproduct_relation, 'openAccessColor', 'text', alias='open_access_color', col_names=researchproduct_col_names) }},
+    {{ safe_cast(researchproduct_relation, 'publiclyFunded', 'text', alias='publicly_funded', col_names=researchproduct_col_names) }},
     type::text as type,
-    {{ adapter.quote("mainTitle") }}::text as main_title,
-    {{ adapter.quote("publicationDate") }}::timestamp as publication_date,
-    {{ adapter.quote("publisher") }}::text as publisher,
-    {{ adapter.quote("embargoEndDate") }}::timestamp as embargo_end_date,
-    {{ adapter.quote("isGreen") }}::boolean as is_green,
-    {{ adapter.quote("isInDiamondJournal") }}::boolean as is_in_diamond_journal,
+    {{ safe_cast(researchproduct_relation, 'mainTitle', 'text', alias='main_title', col_names=researchproduct_col_names) }},
+    {{ safe_cast(researchproduct_relation, 'publicationDate', 'timestamp', alias='publication_date', col_names=researchproduct_col_names) }},
+    {{ safe_cast(researchproduct_relation, 'publisher', 'text', alias='publisher', col_names=researchproduct_col_names) }},
+    {{ safe_cast(researchproduct_relation, 'embargoEndDate', 'timestamp', alias='embargo_end_date', col_names=researchproduct_col_names) }},
+    {{ safe_cast(researchproduct_relation, 'isGreen', 'boolean', alias='is_green', col_names=researchproduct_col_names) }},
+    {{ safe_cast(researchproduct_relation, 'isInDiamondJournal', 'boolean', alias='is_in_diamond_journal', col_names=researchproduct_col_names) }},
     language_code::text as language_code,
     language_label::text as language_label,
-    {{ adapter.quote("bestAccessRight_label") }}::text as best_access_right,
-    {{ adapter.quote("bestAccessRight_scheme") }}::text as best_access_right_uri,
-    {{ adapter.quote("citationImpact.citationClass") }}::text as citation_class,
-    {{ adapter.quote("citationImpact.citationCount") }}::int as citation_count,
-    {{ adapter.quote("citationImpact.impulse") }}::float as impulse,
-    {{ adapter.quote("citationImpact.impulseClass") }}::text as impulse_class,
-    {{ adapter.quote("citationImpact.influence") }}::float as influence,
-    {{ adapter.quote("citationImpact.influenceClass") }}::text as influence_class,
-    {{ adapter.quote("citationImpact.popularity") }}::float as popularity,
-    {{ adapter.quote("citationImpact.popularityClass") }}::text as popularity_class,
-    {{ adapter.quote("usageCounts.downloads") }}::int as downloads,
-    {{ adapter.quote("usageCounts.views") }}::int as views,
+    {{ safe_cast(researchproduct_relation, 'bestAccessRight_label', 'text', alias='best_access_right', col_names=researchproduct_col_names) }},
+    {{ safe_cast(researchproduct_relation, 'bestAccessRight_scheme', 'text', alias='best_access_right_uri', col_names=researchproduct_col_names) }},
+    {{ safe_cast(researchproduct_relation, 'citationImpact.citationClass', 'text', alias='citation_class', col_names=researchproduct_col_names) }},
+    {{ safe_cast(researchproduct_relation, 'citationImpact.citationCount', 'int', alias='citation_count', col_names=researchproduct_col_names) }},
+    {{ safe_cast(researchproduct_relation, 'citationImpact.impulse', 'float', alias='impulse', col_names=researchproduct_col_names) }},
+    {{ safe_cast(researchproduct_relation, 'citationImpact.impulseClass', 'text', alias='impulse_class', col_names=researchproduct_col_names) }},
+    {{ safe_cast(researchproduct_relation, 'citationImpact.influence', 'float', alias='influence', col_names=researchproduct_col_names) }},
+    {{ safe_cast(researchproduct_relation, 'citationImpact.influenceClass', 'text', alias='influence_class', col_names=researchproduct_col_names) }},
+    {{ safe_cast(researchproduct_relation, 'citationImpact.popularity', 'float', alias='popularity', col_names=researchproduct_col_names) }},
+    {{ safe_cast(researchproduct_relation, 'citationImpact.popularityClass', 'text', alias='popularity_class', col_names=researchproduct_col_names) }},
+    {{ safe_cast(researchproduct_relation, 'usageCounts.downloads', 'int', alias='downloads', col_names=researchproduct_col_names) }},
+    {{ safe_cast(researchproduct_relation, 'usageCounts.views', 'int', alias='views', col_names=researchproduct_col_names) }},
     dv_load_datetime::timestamp
   from source
 ),

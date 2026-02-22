@@ -1,11 +1,18 @@
+{% set organization_relation = source('openaire', 'organization') %}
+{% if execute %}
+  {% set organization_col_names = adapter.get_columns_in_relation(organization_relation) | map(attribute='name') | map('lower') | list %}
+{% else %}
+  {% set organization_col_names = none %}
+{% endif %}
+
 with source as (
-  select * from {{ source('openaire', 'organization') }}
+  select * from {{ organization_relation }}
 ),
 base as (
   select 
     organization_id::text,
     acronym::text,
-    {{ adapter.quote("legalName") }}::text as legalname,
+    {{ safe_cast(organization_relation, 'legalName', 'text', alias='legalname', col_names=organization_col_names) }},
     dv_load_datetime::timestamp
   from source
 ),
