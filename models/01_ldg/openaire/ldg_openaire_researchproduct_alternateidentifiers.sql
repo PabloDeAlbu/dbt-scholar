@@ -7,7 +7,7 @@ renamed AS (
     id::text as researchproduct_id,
     scheme::text,
     value::text,
-    dv_load_datetime::timestamp
+    _load_datetime::timestamp
   FROM source
 ),
 
@@ -16,7 +16,7 @@ ghost_record AS (
     '!UNKNOWN'::text as researchproduct_id,
     '!UNKNOWN'::text as scheme,
     '!UNKNOWN'::text as value,
-    {{ dbt_date.today() }} as dv_load_datetime
+    {{ dbt_date.today() }} as _load_datetime
 )
 
 SELECT * FROM renamed

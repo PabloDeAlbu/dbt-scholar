@@ -9,14 +9,14 @@ renamed AS (
     SELECT 
         "setSpec"::text as set_id,
         "setName"::text as set_name,
-        dv_load_datetime::timestamp
+        _load_datetime::timestamp
     FROM source
 ),
 ghost_record AS (
     SELECT
         '!UNKNOWN'::text as set_id,
         '!UNKNOWN'::text as set_name,
-        {{ dbt_date.today() }} as dv_load_datetime
+        {{ dbt_date.today() }} as _load_datetime
 )
 
 SELECT * FROM renamed

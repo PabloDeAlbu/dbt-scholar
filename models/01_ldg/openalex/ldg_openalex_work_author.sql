@@ -3,7 +3,7 @@ with source as (
         work_id,
         author_id,
         author_position,
-        dv_load_datetime
+        _load_datetime
  from {{ source('openalex', 'map_work_author') }}
 ),
 
@@ -12,7 +12,7 @@ casted as (
         work_id::text,
         author_id::text,
         author_position::text,
-        dv_load_datetime::timestamp
+        _load_datetime::timestamp
     from source
 ),
 ghost_record as (
@@ -20,7 +20,7 @@ ghost_record as (
         '!UNKNOWN'::text as work_id,
         '!UNKNOWN'::text as author_id,
         '!UNKNOWN'::text as author_position,
-        {{ dbt_date.today() }} as dv_load_datetime
+        {{ dbt_date.today() }} as _load_datetime
 )
 
 select * from casted

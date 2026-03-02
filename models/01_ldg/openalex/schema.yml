@@ -9,7 +9,7 @@ sources:
         columns:
           - name: id
             tests: [not_null, unique]
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
       - name: author_institution_year
         columns:
@@ -17,26 +17,26 @@ sources:
             tests: [not_null]
           - name: institution_id
             tests: [not_null]
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
       - name: institution
         columns:
           - name: id
             tests: [not_null, unique]
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
       - name: work
         columns:
           - name: id
             tests: [not_null, unique]
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
       - name: map_author_institution
         columns:
           - name: author_id
             tests: [not_null]
           - name: id
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
       - name: map_author_topic
         columns:
@@ -44,7 +44,7 @@ sources:
             tests: [not_null]
           - name: id_topic
             tests: [not_null]
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
 #      - name: institution
       - name: map_work_institution
@@ -52,7 +52,7 @@ sources:
           - name: work_id
             tests: [not_null]
           - name: id
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
       - name: map_work_author
         columns:
@@ -60,7 +60,7 @@ sources:
             tests: [not_null]
           - name: author_id
             tests: [not_null]
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
       - name: map_work_concept
       - name: map_work_corresponding_author_ids
@@ -72,7 +72,7 @@ sources:
         columns:
           - name: id
             tests: [not_null]
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
       - name: map_work_topics
         columns:
@@ -80,6 +80,6 @@ sources:
             tests: [not_null]
           - name: topic_id
             tests: [not_null]
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
       - name: worktype

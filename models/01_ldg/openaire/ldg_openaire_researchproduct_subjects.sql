@@ -14,7 +14,7 @@ renamed as (
     provenance::text as provenance,
     {{ safe_cast(researchproduct_subjects_relation, 'subject.scheme', 'text', alias='subject_scheme', col_names=researchproduct_subjects_col_names, default_mode='ghost') }},
     {{ safe_cast(researchproduct_subjects_relation, 'subject.value', 'text', alias='subject_value', col_names=researchproduct_subjects_col_names, default_mode='ghost') }},
-    dv_load_datetime::timestamp
+    _load_datetime::timestamp
   from source
 ),
 ghost_record as (
@@ -23,7 +23,7 @@ ghost_record as (
     '!UNKNOWN'::text as provenance,
     '!UNKNOWN'::text as subject_scheme,
     '!UNKNOWN'::text as subject_value,
-    {{ dbt_date.today() }} as dv_load_datetime
+    {{ dbt_date.today() }} as _load_datetime
 )
 
 select * from renamed

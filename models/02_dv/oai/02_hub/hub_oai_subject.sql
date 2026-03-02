@@ -4,7 +4,7 @@
 source_model: 'stg_oai_record_subjects'
 src_pk: dc_subject_hk
 src_nk: dc_subject
-src_ldts: dv_load_datetime
+src_ldts: _load_datetime
 src_source: source
 {%- endset -%}
 

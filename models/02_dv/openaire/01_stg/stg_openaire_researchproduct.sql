@@ -4,7 +4,7 @@
 source_model: "ldg_openaire_researchproduct"
 derived_columns:
   source: "!OPENAIRE"
-  load_datetime: dv_load_datetime
+  load_datetime: _load_datetime
 --  effective_from: date_acceptance
 --  start_date: date_acceptance
 --  end_date: to_date('9999-12-31', 'YYYY-MM-DD')

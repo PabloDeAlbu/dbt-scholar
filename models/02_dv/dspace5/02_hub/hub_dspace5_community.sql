@@ -4,7 +4,7 @@
 source_model: 'stg_dspace5_community'
 src_pk: community_hk
 src_nk: community_id
-src_ldts: dv_load_datetime
+src_ldts: _load_datetime
 src_source: source
 {%- endset -%}
 

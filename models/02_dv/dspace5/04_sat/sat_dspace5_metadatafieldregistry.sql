@@ -11,7 +11,7 @@ src_payload:
   - qualifier
   - scope_note
 src_eff: effective_from
-src_ldts: dv_load_datetime
+src_ldts: _load_datetime
 src_source: source
 {%- endset -%}
 

@@ -4,7 +4,7 @@
 source_model: 'stg_dspace5_handle'
 src_pk: handle_hk
 src_nk: handle
-src_ldts: dv_load_datetime
+src_ldts: _load_datetime
 src_source: source
 {%- endset -%}
 

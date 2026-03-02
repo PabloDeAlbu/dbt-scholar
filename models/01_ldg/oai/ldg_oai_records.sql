@@ -12,7 +12,7 @@ renamed AS (
     {{ str_to_date("date_issued") }}::timestamp AS date_issued,
     "_context",
     "extract_datetime"::timestamp,
-    "dv_load_datetime"::timestamp
+    "_load_datetime"::timestamp
   FROM source
 ),
 ghost_record AS (
@@ -23,7 +23,7 @@ ghost_record AS (
     '1900-01-01'::timestamp as date_issued,
     '!UNKNOWN' as "_context",
     '1900-01-01'::timestamp as extract_datetime,
-    {{ dbt_date.today() }} as dv_load_datetime
+    {{ dbt_date.today() }} as _load_datetime
 )
 
 SELECT * FROM renamed

@@ -8,8 +8,8 @@ src_hashdiff:
   alias: hashdiff
 src_payload:
   - set_name
-src_eff: dv_load_datetime
-src_ldts: dv_load_datetime
+src_eff: _load_datetime
+src_ldts: _load_datetime
 src_source: source
 {%- endset -%}
 

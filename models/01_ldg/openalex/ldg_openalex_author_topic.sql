@@ -6,7 +6,7 @@ with source as (
         domain_id,
         field_id,
         subfield_id,
-        dv_load_datetime
+        _load_datetime
     from {{ source('openalex', 'map_author_topic') }}
 ),
 casted as (
@@ -17,7 +17,7 @@ casted as (
         domain_id::text,
         field_id::text,
         subfield_id::text,
-        dv_load_datetime::timestamp
+        _load_datetime::timestamp
     from source
 ),
 ghost_record as (
@@ -28,7 +28,7 @@ ghost_record as (
         '!UNKNOWN'::text as domain_id,
         '!UNKNOWN'::text as field_id,
         '!UNKNOWN'::text as subfield_id,
-        {{ dbt_date.today() }} as dv_load_datetime
+        {{ dbt_date.today() }} as _load_datetime
 )
 
 

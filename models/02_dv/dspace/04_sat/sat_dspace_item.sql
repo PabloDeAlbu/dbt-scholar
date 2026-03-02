@@ -10,8 +10,8 @@ src_payload:
   - in_archive
   - withdrawn
   - discoverable
-src_eff: dv_load_datetime
-src_ldts: dv_load_datetime
+src_eff: _load_datetime
+src_ldts: _load_datetime
 src_source: source
 {%- endset -%}
 

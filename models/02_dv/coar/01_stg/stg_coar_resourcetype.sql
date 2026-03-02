@@ -4,7 +4,7 @@
 source_model: 'raw_resourcetype_coar'
 derived_columns:
   source: "!SEED"
-  load_datetime: dv_load_datetime
+  load_datetime: _load_datetime
 hashed_columns:
   coar_hk: coar_uri
   resourcetype_hashdiff:

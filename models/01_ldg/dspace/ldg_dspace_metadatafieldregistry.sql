@@ -10,7 +10,7 @@ renamed as (
         element,
         qualifier,
         scope_note,
-        {{ dbt_date.today() }} as dv_load_datetime
+        {{ dbt_date.today() }} as _load_datetime
     from source
 ),
 ghost_record as (
@@ -20,7 +20,7 @@ ghost_record as (
         '!UNKNOWN' as element,
         '!UNKNOWN' as qualifier,
         '!UNKNOWN' as scope_note,
-        {{ dbt_date.today() }} as dv_load_datetime
+        {{ dbt_date.today() }} as _load_datetime
 )
 
 select * from renamed

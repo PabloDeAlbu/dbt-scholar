@@ -34,7 +34,7 @@ renamed as (
     {{ safe_cast(researchproduct_relation, 'citationImpact.popularityClass', 'text', alias='popularity_class', col_names=researchproduct_col_names, default_mode='ghost') }},
     {{ safe_cast(researchproduct_relation, 'usageCounts.downloads', 'int', alias='downloads', col_names=researchproduct_col_names, default_mode='ghost') }},
     {{ safe_cast(researchproduct_relation, 'usageCounts.views', 'int', alias='views', col_names=researchproduct_col_names, default_mode='ghost') }},
-    dv_load_datetime::timestamp
+    _load_datetime::timestamp
   from source
 ),
 ghost_record as (
@@ -63,7 +63,7 @@ ghost_record as (
     '!UNKNOWN'::text as popularity_class,
     -1::int as downloads,
     -1::int as views,
-    {{ dbt_date.today() }} as dv_load_datetime
+    {{ dbt_date.today() }} as _load_datetime
 )
 
 select * from renamed

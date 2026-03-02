@@ -4,7 +4,7 @@
 source_model: 'stg_openalex_institution'
 src_pk: ror_hk
 src_nk: ror
-src_ldts: dv_load_datetime
+src_ldts: _load_datetime
 src_source: source
 {%- endset -%}
 

@@ -6,13 +6,13 @@ with source as (
 renamed as (
     select 
         uuid,
-        {{ dbt_date.today() }} as dv_load_datetime
+        {{ dbt_date.today() }} as _load_datetime
     from source
 ),
 ghost_record as (
     select
         '!UNKNOWN' as uuid,
-        {{ dbt_date.today() }} as dv_load_datetime
+        {{ dbt_date.today() }} as _load_datetime
 )
 
 select * from renamed

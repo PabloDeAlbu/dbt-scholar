@@ -4,7 +4,7 @@
 source_model: 'stg_dspace5_metadatavalue'
 src_pk: metadatavalue_hk
 src_nk: metadata_value_id
-src_ldts: dv_load_datetime
+src_ldts: _load_datetime
 src_source: source
 {%- endset -%}
 

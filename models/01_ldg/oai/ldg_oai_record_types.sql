@@ -9,7 +9,7 @@ renamed AS (
     "record_id"::text,
     "types"::text as dc_type,
     "extract_datetime"::timestamp,
-    "dv_load_datetime"::timestamp
+    "_load_datetime"::timestamp
   FROM source
 ),
 ghost_record AS (
@@ -17,7 +17,7 @@ ghost_record AS (
     '!UNKNOWN'::text as record_id,
     '!UNKNOWN'::text as dc_type,
     '1900-01-01'::timestamp as extract_datetime,
-    {{ dbt_date.today() }} as dv_load_datetime
+    {{ dbt_date.today() }} as _load_datetime
 )
 
 SELECT * FROM renamed

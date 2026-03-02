@@ -13,7 +13,7 @@ renamed as (
         authority,
         confidence,
         dspace_object_id,
-        {{ dbt_date.today() }} as dv_load_datetime
+        {{ dbt_date.today() }} as _load_datetime
     from source
 ),
 ghost_record as (
@@ -26,7 +26,7 @@ ghost_record as (
         '!UNKNOWN' as authority,
         -1 as confidence,
         '00000000-0000-0000-0000-000000000000'::uuid as dspace_object_id,
-        {{ dbt_date.today() }} as dv_load_datetime
+        {{ dbt_date.today() }} as _load_datetime
 )
 
 select * from renamed

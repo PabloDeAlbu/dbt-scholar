@@ -6,7 +6,7 @@ renamed as (
     id as collection_item_id,
     collection_id,
     item_id,
-    {{ dbt_date.today() }} as dv_load_datetime
+    {{ dbt_date.today() }} as _load_datetime
   from source
 ),
 ghost_record as (
@@ -14,7 +14,7 @@ ghost_record as (
     -1 as collection_item_id,
     -1 as collection_id,
     -1 as item_id,
-    {{ dbt_date.today() }} as dv_load_datetime
+    {{ dbt_date.today() }} as _load_datetime
 )
 select * from renamed
 union all

@@ -8,14 +8,14 @@ base as (
         {# FIXME #}
         geo::text,
         extract_datetime,
-        dv_load_datetime
+        _load_datetime
     from source
 ),
 ghost_record as (
     select
         '!UNKNOWN'::text as geo,
         '1900-01-01'::timestamp as extract_datetime,
-        {{ dbt_date.today() }} as dv_load_datetime
+        {{ dbt_date.today() }} as _load_datetime
 )
 
 select * from base

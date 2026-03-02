@@ -6,7 +6,7 @@ renamed as (
     community_id,
     logo_bitstream_id,
     admin,
-    {{ dbt_date.today() }} as dv_load_datetime
+    {{ dbt_date.today() }} as _load_datetime
   from source
 ),
 ghost_record as (
@@ -14,7 +14,7 @@ ghost_record as (
     -1 as community_id,
     -1 as logo_bitstream_id,
     false as admin,
-    {{ dbt_date.today() }} as dv_load_datetime
+    {{ dbt_date.today() }} as _load_datetime
 )
 
 select * from renamed

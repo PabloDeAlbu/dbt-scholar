@@ -4,7 +4,7 @@
 source_model: 'stg_openaire_organization'
 src_pk: organization_hk
 src_nk: organization_id
-src_ldts: dv_load_datetime
+src_ldts: _load_datetime
 src_source: source
 {%- endset -%}
 

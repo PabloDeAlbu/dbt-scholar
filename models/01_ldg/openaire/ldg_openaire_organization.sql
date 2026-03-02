@@ -13,7 +13,7 @@ base as (
     organization_id::text,
     acronym::text,
     {{ safe_cast(organization_relation, 'legalName', 'text', alias='legalname', col_names=organization_col_names, default_mode='ghost') }},
-    dv_load_datetime::timestamp
+    _load_datetime::timestamp
   from source
 ),
 ghost_record as (
@@ -21,7 +21,7 @@ ghost_record as (
     '!UNKNOWN'::text as organization_id,
     '!UNKNOWN'::text as acronym,
     '!UNKNOWN'::text as legalname,
-    {{ dbt_date.today() }} as dv_load_datetime
+    {{ dbt_date.today() }} as _load_datetime
 )
 
 select * from base

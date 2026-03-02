@@ -13,7 +13,7 @@ sources:
             tests: [not_null]
           - name: value
             tests: [not_null]
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
       - name: researchproduct_authors
         columns: 
@@ -30,7 +30,7 @@ sources:
             quote: true
           - name: pid.provenance
             quote: true
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
 
       - name: researchproduct_collectedfrom
@@ -41,7 +41,7 @@ sources:
             tests: [not_null]
           - name: value
             tests: [not_null]
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
       - name: researchproduct_instances
         columns:
@@ -54,7 +54,7 @@ sources:
           - name: urls
           - name: scheme
           - name: value
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
           - name: accessRight.code
             quote: true
@@ -83,7 +83,7 @@ sources:
           - name: originalIds
             quote: true
             tests: [not_null]
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
       - name: researchproduct_organizations
         columns:
@@ -91,7 +91,7 @@ sources:
             tests: [not_null]
           - name: organization_id
             tests: [not_null]
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
       - name: researchproduct_pids
         columns:
@@ -101,7 +101,7 @@ sources:
             tests: [not_null]
           - name: value
             tests: [not_null]
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
       - name: researchproduct_subjects
         columns:
@@ -114,7 +114,7 @@ sources:
           - name: subject.value
             quote: true
             tests: [not_null]
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
       - name: researchproduct_sources
         columns:
@@ -122,7 +122,7 @@ sources:
             tests: [not_null]
           - name: sources
             tests: [not_null]
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
       - name: researchproduct
         columns:
@@ -132,7 +132,7 @@ sources:
           tests: [not_null]
         - name: language_code
         - name: language_label
-        - name: dv_load_datetime
+        - name: _load_datetime
           tests: [not_null]
         - name: openAccessColor
           quote: true
@@ -181,7 +181,7 @@ sources:
           - name: acronym
           - name: legalName
             quote: true
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]
       - name: organization_pids
         columns:
@@ -191,5 +191,5 @@ sources:
             tests: [not_null]
           - name: pid_value
             tests: [not_null]
-          - name: dv_load_datetime
+          - name: _load_datetime
             tests: [not_null]

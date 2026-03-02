@@ -4,7 +4,7 @@
 source_model: 'stg_openalex_work'
 src_pk: pmid_hk
 src_nk: pmid
-src_ldts: dv_load_datetime
+src_ldts: _load_datetime
 src_source: source
 {%- endset -%}
 

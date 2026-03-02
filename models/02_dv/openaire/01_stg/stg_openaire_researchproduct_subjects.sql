@@ -6,7 +6,7 @@
 source_model: "ldg_openaire_researchproduct_subjects"
 derived_columns:
   source: "!OPENAIRE"
-  load_datetime: dv_load_datetime
+  load_datetime: _load_datetime
 hashed_columns:
   researchproduct_hk: researchproduct_id
   subject_hk:

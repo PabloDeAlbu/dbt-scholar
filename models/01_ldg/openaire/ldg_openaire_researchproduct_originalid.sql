@@ -12,14 +12,14 @@ base as (
   select 
     id::text as researchproduct_id,
     {{ safe_cast(researchproduct_originalid_relation, 'originalIds', 'text', alias='original_id', col_names=researchproduct_originalid_col_names, default_mode='ghost') }},
-    dv_load_datetime::timestamp
+    _load_datetime::timestamp
  from source
 ),
 ghost_record as (
   select
     '!UNKNOWN'::text as researchproduct_id,
     '!UNKNOWN'::text as original_id,
-    {{ dbt_date.today() }} as dv_load_datetime
+    {{ dbt_date.today() }} as _load_datetime
 )
 
 select * from base

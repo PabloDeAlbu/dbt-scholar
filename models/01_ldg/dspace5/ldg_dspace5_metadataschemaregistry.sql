@@ -6,7 +6,7 @@ renamed as (
     metadata_schema_id,
     namespace,
     short_id,
-    {{ dbt_date.today() }} as dv_load_datetime
+    {{ dbt_date.today() }} as _load_datetime
   from source
 ),
 ghost_record as (
@@ -14,7 +14,7 @@ ghost_record as (
     -1 as metadata_schema_id,
     '!UNKNOWN' as namespace,
     '!UNKNOWN' as short_id,
-    {{ dbt_date.today() }} as dv_load_datetime
+    {{ dbt_date.today() }} as _load_datetime
 )
 
 select * from renamed

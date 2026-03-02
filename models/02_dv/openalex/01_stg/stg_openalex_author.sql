@@ -4,7 +4,7 @@
 source_model: "ldg_openalex_author"
 derived_columns:
   source: "!OPENALEX"
-  load_datetime: dv_load_datetime
+  load_datetime: _load_datetime
 hashed_columns:
   author_hk: author_id
   orcid_hk: orcid

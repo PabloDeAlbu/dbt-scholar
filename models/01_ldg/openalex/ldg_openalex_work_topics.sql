@@ -20,7 +20,7 @@ with source as (
 	        {{ safe_cast(map_work_topics_relation, 'field.id', 'text', alias='field_id', col_names=map_work_topics_col_names, default_mode='ghost') }},
 	        {{ safe_cast(map_work_topics_relation, 'subfield.display_name', 'text', alias='subfield_display_name', col_names=map_work_topics_col_names, default_mode='ghost') }},
 	        {{ safe_cast(map_work_topics_relation, 'subfield.id', 'text', alias='subfield_id', col_names=map_work_topics_col_names, default_mode='ghost') }},
-	        dv_load_datetime::timestamp
+	        _load_datetime::timestamp
 	    from source
 	),
 	ghost_record as (
@@ -35,7 +35,7 @@ with source as (
         '!UNKNOWN'::text as field_id,
         '!UNKNOWN'::text as subfield_display_name,
         '!UNKNOWN'::text as subfield_id,
-        {{ dbt_date.today() }} as dv_load_datetime
+        {{ dbt_date.today() }} as _load_datetime
 )
 select * from base
 union all

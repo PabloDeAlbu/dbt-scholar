@@ -18,7 +18,7 @@ casted as (
     {{ safe_cast(researchproduct_authors_relation, 'pid.id.scheme', 'text', alias='pid_scheme', col_names=researchproduct_authors_col_names, default_mode='ghost') }},
     {{ safe_cast(researchproduct_authors_relation, 'pid.id.value', 'text', alias='orcid', col_names=researchproduct_authors_col_names, default_mode='ghost') }},
     {{ safe_cast(researchproduct_authors_relation, 'pid.provenance', 'text', alias='pid_provenance', col_names=researchproduct_authors_col_names, default_mode='ghost') }},
-    dv_load_datetime::timestamp
+    _load_datetime::timestamp
   from source
 ),
 ghost_record as (
@@ -31,7 +31,7 @@ ghost_record as (
     '!UNKNOWN'::text as pid_scheme,
     '!UNKNOWN'::text as orcid,
     '!UNKNOWN'::text as pid_provenance,
-    {{ dbt_date.today() }} as dv_load_datetime
+    {{ dbt_date.today() }} as _load_datetime
 )
 
 SELECT * FROM casted

@@ -4,7 +4,7 @@
 source_model: 'stg_openalex_work_topics'
 src_pk: topic_hk
 src_nk: topic_id
-src_ldts: dv_load_datetime
+src_ldts: _load_datetime
 src_source: source
 {%- endset -%}
 

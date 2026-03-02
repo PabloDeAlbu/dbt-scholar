@@ -4,7 +4,7 @@
 source_model: "ldg_openaire_researchproduct_author"
 derived_columns:
   source: "!OPENAIRE"
-  load_datetime: dv_load_datetime
+  load_datetime: _load_datetime
 hashed_columns:
   researchproduct_hk: researchproduct_id
   orcid_hk: orcid

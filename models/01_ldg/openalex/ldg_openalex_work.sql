@@ -100,7 +100,7 @@ renamed as (
 		    {{ safe_cast(work_relation, 'best_oa_location.source.is_oa', 'boolean', alias='best_oa_location_source_is_oa', col_names=work_col_names, default_mode='ghost') }},
 		    {{ safe_cast(work_relation, 'best_oa_location.source.issn_l', 'text', alias='best_oa_location_source_issn_l', col_names=work_col_names, default_mode='ghost') }},
 		    {{ safe_cast(work_relation, 'best_oa_location.source.type', 'text', alias='best_oa_location_source_type', col_names=work_col_names, default_mode='ghost') }},
-    dv_load_datetime::timestamp
+    _load_datetime::timestamp
   from source
 ),
 ghost_record as (
@@ -195,7 +195,7 @@ ghost_record as (
     false as best_oa_location_source_is_oa,
     '!UNKNOWN'::text as best_oa_location_source_issn_l,
     '!UNKNOWN'::text as best_oa_location_source_type,
-    {{ dbt_date.today() }} as dv_load_datetime
+    {{ dbt_date.today() }} as _load_datetime
 )
 select * from renamed
 union all

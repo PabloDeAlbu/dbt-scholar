@@ -4,7 +4,7 @@
 source_model: 'ldg_openalex_institution'
 derived_columns:
   source: "!OPENALEX"
-  load_datetime: dv_load_datetime
+  load_datetime: _load_datetime
 hashed_columns:
   institution_hk: institution_id
   ror_hk: ror

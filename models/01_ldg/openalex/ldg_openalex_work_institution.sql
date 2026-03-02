@@ -6,7 +6,7 @@ with source as (
         display_name,
         ror,
         type,
-        dv_load_datetime
+        _load_datetime
     from {{ source('openalex', 'map_work_institution') }}
 ),
 casted as (
@@ -17,7 +17,7 @@ casted as (
         display_name::text,
         ror::text,
         type::text,
-       dv_load_datetime::timestamp
+       _load_datetime::timestamp
     from source
 ),
 ghost_record as (
@@ -28,7 +28,7 @@ ghost_record as (
         '!UNKNOWN'::text as display_name,
         '!UNKNOWN'::text as ror,
         '!UNKNOWN'::text as type,
-        {{ dbt_date.today() }} as dv_load_datetime
+        {{ dbt_date.today() }} as _load_datetime
 )
 
 select * from casted

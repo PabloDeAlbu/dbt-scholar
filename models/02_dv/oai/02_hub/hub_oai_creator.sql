@@ -4,7 +4,7 @@
 source_model: 'stg_oai_record_creators'
 src_pk: dc_creator_hk
 src_nk: dc_creator
-src_ldts: dv_load_datetime
+src_ldts: _load_datetime
 src_source: source
 {%- endset -%}
 

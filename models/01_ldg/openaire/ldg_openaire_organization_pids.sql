@@ -6,7 +6,7 @@ base as (
     organization_id::text,
     pid_scheme::text,
     pid_value::text,
-    dv_load_datetime::timestamp
+    _load_datetime::timestamp
   from source
 ),
 ghost_record as (
@@ -14,7 +14,7 @@ ghost_record as (
     '!UNKNOWN'::text as organization_id,
     '!UNKNOWN'::text as pid_scheme,
     '!UNKNOWN'::text as pid_value,
-    {{ dbt_date.today() }} as dv_load_datetime
+    {{ dbt_date.today() }} as _load_datetime
 )
 
 select * from base

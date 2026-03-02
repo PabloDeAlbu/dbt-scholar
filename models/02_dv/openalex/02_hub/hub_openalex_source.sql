@@ -4,7 +4,7 @@
 source_model: 'stg_openalex_work_locations'
 src_pk: source_hk
 src_nk: source_id
-src_ldts: dv_load_datetime
+src_ldts: _load_datetime
 src_source: source
 {%- endset -%}
 

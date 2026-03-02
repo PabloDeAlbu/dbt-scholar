@@ -3,7 +3,7 @@ WITH base as (
         type::text,
         label_es::text,
         coar_uri::text,
-        {{ dbt_date.today() }} as dv_load_datetime
+        {{ dbt_date.today() }} as _load_datetime
     FROM {{ref('seed_coar_openaire')}}
 ),
 ghost_record as (
@@ -11,7 +11,7 @@ ghost_record as (
         '!UNKNOWN'::text as type,
         '!UNKNOWN'::text as label_es,
         '!UNKNOWN'::text as coar_uri,
-        {{ dbt_date.today() }} as dv_load_datetime
+        {{ dbt_date.today() }} as _load_datetime
 )
 
 SELECT * FROM base

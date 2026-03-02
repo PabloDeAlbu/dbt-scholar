@@ -4,7 +4,7 @@
 source_model: 'stg_dspace_metadataschemaregistry'
 src_pk: metadataschema_hk
 src_nk: metadata_schema_id
-src_ldts: dv_load_datetime
+src_ldts: _load_datetime
 src_source: source
 {%- endset -%}
 

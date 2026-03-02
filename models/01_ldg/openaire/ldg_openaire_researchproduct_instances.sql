@@ -28,7 +28,7 @@ renamed as (
     {{ safe_cast(researchproduct_instances_relation, 'articleProcessingCharge.currency', 'text', alias='apc_currency', col_names=researchproduct_instances_col_names, default_mode='ghost') }},
     scheme::text,
     value::text,
-    dv_load_datetime::timestamp
+    _load_datetime::timestamp
   from source
 ),
 ghost_record as (
@@ -51,7 +51,7 @@ ghost_record as (
     '!UNKNOWN'::text as apc_currency,
     '!UNKNOWN'::text as scheme,
     '!UNKNOWN'::text as value,
-    {{ dbt_date.today() }} as dv_load_datetime
+    {{ dbt_date.today() }} as _load_datetime
 )
 select * from renamed
 union all

@@ -4,9 +4,9 @@
 source_model: "ldg_oai_record_types"
 derived_columns:
   source: "!OAI"
-  load_datetime: dv_load_datetime
-  effective_from: dv_load_datetime
-  start_date: dv_load_datetime
+  load_datetime: _load_datetime
+  effective_from: _load_datetime
+  start_date: _load_datetime
   end_date: to_date('9999-12-31', 'YYYY-MM-DD')
 hashed_columns:
   record_hk: record_id
