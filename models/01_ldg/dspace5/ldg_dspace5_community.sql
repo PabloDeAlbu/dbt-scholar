@@ -9,13 +9,13 @@ renamed as (
     {{ dbt_date.today() }} as _load_datetime
   from source
 ),
-ghost_record as (
-  select
-    -1 as community_id,
-    -1 as logo_bitstream_id,
-    false as admin,
-    {{ dbt_date.today() }} as _load_datetime
-)
+	ghost_record as (
+	  select
+	    -1 as community_id,
+	    -1 as logo_bitstream_id,
+	    -1 as admin,
+	    {{ dbt_date.today() }} as _load_datetime
+	)
 
 select * from renamed
 union all
