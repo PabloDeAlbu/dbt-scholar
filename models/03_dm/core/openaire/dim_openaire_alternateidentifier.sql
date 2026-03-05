@@ -6,7 +6,7 @@ WITH base AS (
         scheme,
         alternateidentifier_hk,
         source,
-        load_datetime
+        _load_datetime AS load_datetime
     FROM {{ref('hub_openaire_alternateidentifier')}} hub_altid
 )
 

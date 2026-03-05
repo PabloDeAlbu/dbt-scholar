@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: fct_conicet_openaire_researchproduct
+    description: "Subset CONICET del hecho de publicaciones OpenAIRE, filtrado por `relOrganizationId` (openorgs) usado en la extracción."
+    columns:
+      - name: researchproduct_id
+        tests:
+          - not_null
+          - unique
+      - name: conicet_last_extract_datetime
+        tests: [not_null]
+      - name: relOrganizationId
+        tests: [not_null]
+

@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: fct_unlp_openaire_researchproduct
+    description: "Subset UNLP del hecho de publicaciones OpenAIRE, filtrado por ROR usado en la extracción."
+    columns:
+      - name: researchproduct_id
+        tests:
+          - not_null
+          - unique
+      - name: organization_ror
+        tests: [not_null]
+      - name: unlp_last_extract_datetime
+        tests: [not_null]
+

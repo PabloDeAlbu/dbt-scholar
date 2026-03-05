@@ -1,22 +1,21 @@
-{%- set conicet_rel_organization_id = 'openorgs____::40b9f835648a3e0d057d6917dd7e54d5' -%}
+{%- set unlp_ror = 'https://ror.org/01tjs6929' -%}
 
-WITH conicet_extract AS (
+WITH unlp_extract AS (
     SELECT
         researchproduct_hk,
-        MIN(load_datetime) AS conicet_first_extract_datetime,
-        MAX(load_datetime) AS conicet_last_extract_datetime
+        MIN(load_datetime) AS unlp_first_extract_datetime,
+        MAX(load_datetime) AS unlp_last_extract_datetime
     FROM {{ ref('brg_openaire_researchproduct_filter_applied') }}
-    WHERE _filter_param = 'relOrganizationId'
-      AND _filter_value = 'https://ror.org/03cqe8w59'
+    WHERE _filter_value = 'https://ror.org/01tjs6929'
     GROUP BY researchproduct_hk
 ),
 
 base AS (
-    SELECT 
+    SELECT
         fct.researchproduct_id,
-        conicet_first_extract_datetime,
-        conicet_last_extract_datetime,
-        'https://ror.org/03cqe8w59' AS relOrganizationId,
+        unlp_first_extract_datetime,
+        unlp_last_extract_datetime,
+        'https://ror.org/01tjs6929' AS organization_ror,
 
         publication_date,
         embargo_end_date,
@@ -31,10 +30,10 @@ base AS (
         publicly_funded,
         is_green,
         is_in_diamond_journal,
-        
+
         downloads,
         views,
-        
+
         citation_class,
         citation_count,
         impulse,
@@ -73,11 +72,10 @@ base AS (
         has_pmid,
         has_single_pmid,
         pmid_count
-
-    FROM {{ref('fct_openaire_researchproduct_publication')}} fct
-    INNER JOIN conicet_extract USING (researchproduct_hk)
+    FROM {{ ref('fct_openaire_researchproduct_publication') }} fct
+    INNER JOIN unlp_extract USING (researchproduct_hk)
     INNER JOIN {{ ref('brg_openaire_researchproduct_pid_stats') }} USING (researchproduct_hk)
 )
 
 SELECT * FROM base
--- WHERE has_arxiv = false AND has_doi = false AND has_handle = false AND has_mag = false AND has_pmb = false AND has_pmc = false AND has_pmid = false
+

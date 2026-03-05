@@ -1,22 +1,42 @@
 version: 2
 
-sources:
-  - name: openaire
-    description: 'OpenAIRE Research Graph'
-    schema: dm_openaire
-    tables:
-      - name: dim_openaire_datasource
-        columns:
-          - name: datasource_hk
-            tests:
-              - not_null
-              - unique
-          - name: datasource_name
-            tests:
-              - not_null
-      - name: fct_openaire_researchproduct_publication
-        columns:
-          - name: researchproduct_hk
-            data_tests:
-            - unique
+models:
+  - name: dim_openaire_datasource
+    description: "Dimensión de datasource OpenAIRE (collectedFrom)."
+    columns:
+      - name: datasource_hk
+        tests:
+          - not_null
+          - unique
+      - name: datasource_name
+        tests:
+          - not_null
 
+  - name: fct_openaire_researchproduct_publication
+    description: "Hecho de publicaciones OpenAIRE (estado actual, 1 fila por researchproduct_hk)."
+    columns:
+      - name: researchproduct_hk
+        tests:
+          - not_null
+          - unique
+      - name: load_datetime
+        tests: [not_null]
+
+  - name: brg_openaire_researchproduct_filter_applied
+    description: "Bridge de filtros aplicados en la extracción (permite cohortes por ror/openorgs/etc.)."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [researchproduct_hk, load_datetime, _filter_param, _filter_value]
+    columns:
+      - name: researchproduct_hk
+        tests: [not_null]
+      - name: load_datetime
+        tests: [not_null]
+
+  - name: brg_openaire_researchproduct_pid_stats
+    description: "Stats de identificadores por researchproduct (counts + flags por scheme)."
+    columns:
+      - name: researchproduct_hk
+        tests:
+          - not_null
+          - unique

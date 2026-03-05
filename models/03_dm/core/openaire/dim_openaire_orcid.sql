@@ -4,7 +4,7 @@ WITH base AS (
     SELECT 
         orcid_hk,
         orcid,
-        load_datetime,
+        _load_datetime AS load_datetime,
         source
     FROM {{ref('hub_openaire_orcid')}} 
 )
