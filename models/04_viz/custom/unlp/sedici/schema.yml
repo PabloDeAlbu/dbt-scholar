@@ -1,18 +1,119 @@
 version: 2
 
 models:
-  - name: dim_unlp_author
+  - name: viz_sedici_item
     description: >
-      Vista combinada de autores institucionales con datos de OpenAlex y OpenAIRE, unificados por ORCID.
+      Vista analítica de ítems del repositorio institucional UNLP (Sedici), orientada a consumo en Apache Superset.
+      Toma como base el hecho institucional `fct_unlp_ir_item_publication` (capa DM) y agrega metadatos
+      descriptivos (título, autores, subjects, ISSN/ISBN y señales de DOI) desde DSpace 5.
+    config:
+      tags: [viz]
     columns:
-      - name: openalex_author_id
-        description: Identificador del autor en OpenAlex
-        data_tests:
-          - unique
-          - not_null
+      - name: item_hk
+        description: Clave hash del ítem (grano de la vista).
+        data_tests: [not_null, unique]
+      - name: id
+        description: Handle/URI institucional (dc.identifier.uri).
+        data_tests: [not_null]
+      - name: date_accessioned
+        description: Fecha de incorporación (normalizada) para análisis temporal.
+      - name: date_issued
+        description: Fecha de publicación/emisión (normalizada) para análisis temporal.
 
-      - name: orcid
-        description: ORCID del autor, normalizado sin prefijo
-        data_tests:
-          - unique
-          - not_null
+  - name: viz_sedici_author
+    description: >
+      Vista de autores declarados en Sedici (campo `sedici.creator.person`) con conteo de ocurrencias.
+      Útil para ranking y perfiles simples en visualizaciones.
+    config:
+      tags: [viz]
+    columns:
+      - name: metadatavalue_hk
+        description: Identificador interno del valor de metadato (DSpace 5) para el autor.
+        data_tests: [not_null, unique]
+      - name: text_value
+        description: Nombre del autor tal como aparece en el metadato.
+        data_tests: [not_null]
+      - name: count
+        description: Cantidad de ocurrencias del autor en el corpus filtrado.
+        data_tests: [not_null]
+
+  - name: viz_sedici_item_author
+    description: >
+      Relación ítem–autor (N a N) para habilitar filtros y drill-down por autor en dashboards.
+    config:
+      tags: [viz]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_hk, metadatavalue_hk]
+    columns:
+      - name: item_hk
+        data_tests: [not_null]
+      - name: metadatavalue_hk
+        data_tests: [not_null]
+
+  - name: fct_sedici_item_accessioned
+    description: >
+      Hecho auxiliar a grano ítem para series temporales por fecha de incorporación al repositorio.
+    config:
+      tags: [viz]
+    columns:
+      - name: item_hk
+        data_tests: [not_null, unique]
+      - name: id
+        description: Handle/URI institucional.
+        data_tests: [not_null]
+      - name: date_accessioned
+        data_tests: [not_null]
+
+  - name: fct_sedici_item_accessioned_agg
+    description: Agregado diario de incorporaciones (`fct_sedici_item_accessioned`) para gráficos de serie temporal.
+    config:
+      tags: [viz]
+    columns:
+      - name: date_accessioned
+        data_tests: [not_null, unique]
+      - name: cantidad
+        data_tests: [not_null]
+
+  - name: dim_sedici_subject
+    description: Dimensión de subjects (dc.subject) con conteos, usada para rankings y filtros.
+    config:
+      tags: [viz]
+    columns:
+      - name: text_value
+        data_tests: [not_null, unique]
+      - name: count
+        data_tests: [not_null]
+
+  - name: dim_sedici_materia
+    description: Dimensión de materias (sedici.subject.materias) con conteos, usada para rankings y filtros.
+    config:
+      tags: [viz]
+    columns:
+      - name: text_value
+        data_tests: [not_null, unique]
+      - name: count
+        data_tests: [not_null]
+
+  - name: brg_sedici_item_materia
+    description: Bridge ítem–materia (sedici.subject.materias) para análisis por asignación temática.
+    config:
+      tags: [viz]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_hk, metadatavalue_hk]
+    columns:
+      - name: item_hk
+        data_tests: [not_null]
+      - name: metadatavalue_hk
+        data_tests: [not_null]
+
+  - name: fct_sedici_materia_item_count
+    description: Hecho agregado de cantidad de ítems por materia, derivado del bridge ítem–materia.
+    config:
+      tags: [viz]
+    columns:
+      - name: materia
+        data_tests: [not_null, unique]
+      - name: items_count
+        data_tests: [not_null]

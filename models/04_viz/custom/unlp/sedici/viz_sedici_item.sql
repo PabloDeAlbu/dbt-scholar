@@ -1,168 +1,125 @@
 {{ config(materialized='table') }}
 
-WITH title AS (
+WITH base AS (
     SELECT
-        bridge_i_mv.item_hk,
-        mv.text_value
-    FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
-    INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv USING (metadatavalue_hk)
-    WHERE
-        bridge_i_mv.metadatafield_fullname = 'dc.title'
+        item_hk,
+        item_id,
+        dc_identifier_uri,
+        date_issued,
+        date_accessioned,
+        type,
+        in_archive,
+        withdrawn,
+        discoverable
+    FROM {{ ref('fct_unlp_ir_item_publication') }}
+    WHERE in_archive = TRUE AND withdrawn = FALSE
 ),
 
-id AS (
+title AS (
     SELECT
-        bridge_i_mv.item_hk,
-        mv.text_value
-    FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
-    INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv USING (metadatavalue_hk)
-    WHERE
-        bridge_i_mv.metadatafield_fullname = 'dc.identifier.uri' AND
-        mv.text_value LIKE 'http://sedici.unlp.edu.ar/handle/10915%'
-),
-
-type AS (
-    SELECT
-        bridge_i_mv.item_hk,
-        mv.text_value
-    FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
-    INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv USING (metadatavalue_hk)
-    WHERE
-        bridge_i_mv.metadatafield_fullname = 'dc.type'
+        b.item_hk,
+        MIN(mv.text_value)::text AS title
+    FROM base b
+    JOIN {{ ref('brg_dspace5_item_metadatavalue') }} bridge_i_mv
+      ON bridge_i_mv.item_hk = b.item_hk AND bridge_i_mv.metadatafield_fullname = 'dc.title'
+    JOIN {{ ref('dim_dspace5_metadatavalue') }} mv USING (metadatavalue_hk)
+    GROUP BY 1
 ),
 
 subtype AS (
     SELECT
-        bridge_i_mv.item_hk,
-        mv.text_value
-    FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
-    INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv USING (metadatavalue_hk)
-    WHERE
-        bridge_i_mv.metadatafield_fullname = 'sedici.subtype'
+        b.item_hk,
+        STRING_AGG(DISTINCT mv.text_value::text, '|' ORDER BY mv.text_value::text) AS subtype
+    FROM base b
+    JOIN {{ ref('brg_dspace5_item_metadatavalue') }} bridge_i_mv
+      ON bridge_i_mv.item_hk = b.item_hk AND bridge_i_mv.metadatafield_fullname = 'sedici.subtype'
+    JOIN {{ ref('dim_dspace5_metadatavalue') }} mv USING (metadatavalue_hk)
+    GROUP BY 1
 ),
 
 subject AS (
     SELECT
-        bridge_i_mv.item_hk,
-        STRING_AGG(mv.text_value, '|' ORDER BY mv.text_value) as text_value
-    FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
-    INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv USING (metadatavalue_hk)
-    WHERE
-        bridge_i_mv.metadatafield_fullname = 'dc.subject'
-    GROUP BY bridge_i_mv.item_hk
+        b.item_hk,
+        STRING_AGG(DISTINCT mv.text_value::text, '|' ORDER BY mv.text_value::text) AS subject
+    FROM base b
+    JOIN {{ ref('brg_dspace5_item_metadatavalue') }} bridge_i_mv
+      ON bridge_i_mv.item_hk = b.item_hk AND bridge_i_mv.metadatafield_fullname = 'dc.subject'
+    JOIN {{ ref('dim_dspace5_metadatavalue') }} mv USING (metadatavalue_hk)
+    GROUP BY 1
 ),
 
 author AS (
-    SELECT 
-        bridge_i_mv.item_hk,
-        STRING_AGG(mv.text_value, '|' ORDER BY mv.text_value) as text_value,
-        COUNT(DISTINCT NULLIF(TRIM(mv.text_value), ''))::int AS author_count
-    FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
-    INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv USING (metadatavalue_hk)
-    WHERE bridge_i_mv.metadatafield_fullname = 'sedici.creator.person'
-    GROUP BY bridge_i_mv.item_hk
+    SELECT
+        b.item_hk,
+        STRING_AGG(DISTINCT mv.text_value::text, '|' ORDER BY mv.text_value::text) AS author,
+        COUNT(DISTINCT NULLIF(TRIM(mv.text_value::text), ''))::int AS author_count
+    FROM base b
+    JOIN {{ ref('brg_dspace5_item_metadatavalue') }} bridge_i_mv
+      ON bridge_i_mv.item_hk = b.item_hk AND bridge_i_mv.metadatafield_fullname = 'sedici.creator.person'
+    JOIN {{ ref('dim_dspace5_metadatavalue') }} mv USING (metadatavalue_hk)
+    GROUP BY 1
 ),
 
 issn AS (
-  SELECT 
-    bridge_i_mv.item_hk,
-    STRING_AGG(mv.text_value, '|' ORDER BY mv.text_value) as text_value
-  FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
-  JOIN {{ref('er_dspace5_metadatavalue')}} mv 
-    ON mv.metadatavalue_hk = bridge_i_mv.metadatavalue_hk
-  WHERE bridge_i_mv.metadatafield_fullname = 'sedici.identifier.issn'
-  GROUP BY bridge_i_mv.item_hk
+    SELECT
+        b.item_hk,
+        STRING_AGG(DISTINCT mv.text_value::text, '|' ORDER BY mv.text_value::text) AS issn
+    FROM base b
+    JOIN {{ ref('brg_dspace5_item_metadatavalue') }} bridge_i_mv
+      ON bridge_i_mv.item_hk = b.item_hk AND bridge_i_mv.metadatafield_fullname = 'sedici.identifier.issn'
+    JOIN {{ ref('dim_dspace5_metadatavalue') }} mv USING (metadatavalue_hk)
+    GROUP BY 1
 ),
 
 isbn AS (
-  SELECT 
-    bridge_i_mv.item_hk,
-    STRING_AGG(mv.text_value, '|' ORDER BY mv.text_value) as text_value
-  FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
-  JOIN {{ref('er_dspace5_metadatavalue')}} mv 
-    ON mv.metadatavalue_hk = bridge_i_mv.metadatavalue_hk
-  WHERE bridge_i_mv.metadatafield_fullname = 'sedici.identifier.isbn'
-  GROUP BY bridge_i_mv.item_hk
-),
-
-date_issued AS (
-  SELECT 
-    bridge_i_mv.item_hk,
-    STRING_AGG(mv.text_value, '|' ORDER BY mv.text_value) as text_value
-  FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
-  JOIN {{ref('er_dspace5_metadatavalue')}} mv 
-    ON mv.metadatavalue_hk = bridge_i_mv.metadatavalue_hk
-  WHERE bridge_i_mv.metadatafield_fullname = 'dc.date.issued'
-  GROUP BY bridge_i_mv.item_hk
-),
-
-date_accessioned AS (
-  SELECT 
-    bridge_i_mv.item_hk,
-    mv.text_value
-  FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
-  JOIN {{ref('er_dspace5_metadatavalue')}} mv USING (metadatavalue_hk)
-  WHERE bridge_i_mv.metadatafield_fullname = 'dc.date.accessioned'
-),
-
-
-doi_in_dc_identifier_uri AS (
     SELECT
-        bridge_i_mv.item_hk,
-        mv.text_value
-    FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
-    INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv USING (metadatavalue_hk)
-    WHERE
-        bridge_i_mv.metadatafield_fullname = 'dc.identifier.uri' AND
-        mv.text_value ILIKE '%doi%'
-),
-
-doi_in_sedici_identifier_other AS (
-    SELECT
-        bridge_i_mv.item_hk,
-        mv.text_value
-    FROM {{ref('er_dspace5_item_metadatavalue')}} bridge_i_mv
-    INNER JOIN {{ref('er_dspace5_metadatavalue')}} mv USING (metadatavalue_hk)
-    WHERE
-        bridge_i_mv.metadatafield_fullname = 'sedici.identifier.other' AND
-        mv.text_value ILIKE '%doi%'
+        b.item_hk,
+        STRING_AGG(DISTINCT mv.text_value::text, '|' ORDER BY mv.text_value::text) AS isbn
+    FROM base b
+    JOIN {{ ref('brg_dspace5_item_metadatavalue') }} bridge_i_mv
+      ON bridge_i_mv.item_hk = b.item_hk AND bridge_i_mv.metadatafield_fullname = 'sedici.identifier.isbn'
+    JOIN {{ ref('dim_dspace5_metadatavalue') }} mv USING (metadatavalue_hk)
+    GROUP BY 1
 ),
 
 doi AS (
-    SELECT * 
-    FROM doi_in_dc_identifier_uri
-    UNION 
-    SELECT * 
-    FROM doi_in_sedici_identifier_other
+    SELECT
+        b.item_hk,
+        STRING_AGG(DISTINCT mv.text_value::text, '|' ORDER BY mv.text_value::text) AS doi
+    FROM base b
+    JOIN {{ ref('brg_dspace5_item_metadatavalue') }} bridge_i_mv
+      ON bridge_i_mv.item_hk = b.item_hk
+     AND bridge_i_mv.metadatafield_fullname IN ('dc.identifier.uri', 'sedici.identifier.other')
+    JOIN {{ ref('dim_dspace5_metadatavalue') }} mv USING (metadatavalue_hk)
+    WHERE mv.text_value ILIKE '%doi%'
+    GROUP BY 1
 ),
 
-final as (
-    SELECT 
-        item.item_hk, 
-        title.text_value as title,
-        id.text_value as id,
-        {{ str_to_date("date_issued.text_value") }} as date_issued,
-        date_accessioned.text_value as date_accessioned,
-        subject.text_value as subject,
-        type.text_value as type,
-        subtype.text_value as subtype,
-        author.text_value as author,
-        author.author_count,
-        issn.text_value as issn,
-        isbn.text_value as isbn,
-        doi.text_value as doi
-    FROM {{ref('fct_dspace5_item')}} item
-    INNER JOIN title USING (item_hk)
-    INNER JOIN id USING (item_hk)
-    INNER JOIN type USING (item_hk)
-    INNER JOIN subtype USING (item_hk)
-    INNER JOIN date_issued USING (item_hk)
-    INNER JOIN date_accessioned USING (item_hk)
-    LEFT JOIN subject ON subject.item_hk = item.item_hk
-    LEFT JOIN author ON author.item_hk = item.item_hk
-    LEFT JOIN issn ON issn.item_hk = item.item_hk
-    LEFT JOIN isbn ON isbn.item_hk = item.item_hk
-    LEFT JOIN doi ON doi.item_hk = item.item_hk
+final AS (
+    SELECT
+        b.item_hk,
+        b.item_id,
+        t.title,
+        b.dc_identifier_uri AS id,
+        b.date_issued,
+        b.date_accessioned,
+        s.subject,
+        b.type,
+        st.subtype,
+        a.author,
+        COALESCE(a.author_count, 0) AS author_count,
+        i.issn,
+        ib.isbn,
+        d.doi,
+        b.discoverable
+    FROM base b
+    LEFT JOIN title t USING (item_hk)
+    LEFT JOIN subject s USING (item_hk)
+    LEFT JOIN subtype st USING (item_hk)
+    LEFT JOIN author a USING (item_hk)
+    LEFT JOIN issn i USING (item_hk)
+    LEFT JOIN isbn ib USING (item_hk)
+    LEFT JOIN doi d USING (item_hk)
 )
 
 SELECT * FROM final
