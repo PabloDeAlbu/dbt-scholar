@@ -13,6 +13,7 @@ WITH conicet_extract AS (
 
 base AS (
     SELECT 
+        fct.researchproduct_hk,
         fct.researchproduct_id,
         conicet_first_extract_datetime,
         conicet_last_extract_datetime,

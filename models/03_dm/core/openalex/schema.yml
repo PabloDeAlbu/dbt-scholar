@@ -2,136 +2,180 @@ version: 2
 
 models:
   - name: dim_openalex_author
+    description: Dimensión de autores OpenAlex con atributos básicos e identificadores (ORCID si existe).
+    config:
+      tags: [dm]
     columns:
       - name: author_id
-        tests:
+        description: Identificador canónico de OpenAlex para el autor.
+        data_tests:
           - not_null
           - unique
       - name: author_hk
-        tests:
+        description: Clave hash del autor (PK del hub).
+        data_tests:
           - not_null
           - unique
       - name: display_name
+        description: Nombre de despliegue del autor.
       - name: works_count
+        description: Cantidad de obras asociadas al autor (según OpenAlex).
       - name: cited_by_count
+        description: Total de citas recibidas por el autor (según OpenAlex).
       - name: orcid
+        description: ORCID del autor (si está disponible).
       - name: has_orcid
+        description: Flag que indica presencia de ORCID.
 
-  - name: fct_openalex_work_publication
-    description: >
-      Hecho de obras de OpenAlex con metadatos principales, métricas y
-      PIDs (doi/mag/pmcid/pmid). Incluye flags booleanos has_* para
-      facilitar filtrado en dashboards.
+  - name: dim_openalex_institution
+    description: Dimensión de instituciones OpenAlex con país e identificador ROR (si está disponible).
+    config:
+      tags: [dm]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: "ror = '-' OR trim(ror) ~ '^https?://ror[.]org/[0-9a-z]{9}/?$'"
     columns:
-      - name: work_id
-        description: ID de OpenAlex
-        tests:
-          - not_null
-          - unique
+      - name: institution_hk
+        description: Clave hash de la institución (PK del hub).
+        data_tests: [not_null, unique]
+      - name: institution_id
+        description: Identificador canónico de OpenAlex para la institución.
+        data_tests: [not_null, unique]
+      - name: ror
+        description: Identificador ROR (URL) o '-' si no está disponible.
 
+  - name: dim_openalex_topic
+    description: Dimensión de tópicos OpenAlex (display_name + jerarquías domain/field/subfield).
+    config:
+      tags: [dm]
+    columns:
+      - name: topic_hk
+        description: Clave hash del tópico (PK del hub).
+        data_tests: [not_null, unique]
+      - name: topic_id
+        description: Identificador canónico de OpenAlex para el tópico.
+        data_tests: [not_null, unique]
+      - name: display_name
+        description: Etiqueta del tópico.
+
+  - name: dim_openalex_work
+    description: >
+      Dimensión de obras (works) OpenAlex con metadatos bibliográficos esenciales y PIDs normalizados
+      (con placeholders '-' cuando no hay valor).
+    config:
+      tags: [dm]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: "doi = '-' OR doi ~* '^10\\\\.[0-9]{4,9}/\\\\S+$'"
+    columns:
       - name: work_hk
-        description: Clave hash/primaria del hub de work.
-        tests:
+        description: Clave hash de la obra (PK del hub).
+        data_tests:
           - not_null
           - unique
           - relationships:
               to: ref('hub_openalex_work')
               field: work_hk
-
-      - name: title
-        description: Título de la obra.
-
-      - name: type
-        description: Tipo de obra según OpenAlex (journal-article, book, etc).
-
-      - name: publication_year
-        description: Año de publicación (numérico).
-
-      - name: publication_date
-        description: Fecha de publicación (si está disponible).
-
-      - name: countries_distinct_count
-        description: Cantidad de países distintos en afiliaciones.
-
-      - name: institutions_distinct_count
-        description: Cantidad de instituciones distintas en afiliaciones.
-
-      - name: fwci
-        description: Field-Weighted Citation Impact (si disponible).
-
-      - name: has_fulltext
-        description: Indica si se detectó fulltext en OpenAlex.
-
-      - name: fulltext_origin
-        description: Origen del fulltext (repo, publisher, etc).
-
-      - name: cited_by_count
-        description: Conteo de citas.
-
-      - name: is_retracted
-        description: Flag de retracción.
-
-      - name: is_paratext
-        description: Flag de paratexto.
-
-      - name: locations_count
-        description: Cantidad de ubicaciones (publisher/repo).
-
-      - name: referenced_works_count
-        description: Cantidad de obras referenciadas.
-
-      - name: any_repository_has_fulltext
-        description: Algún repositorio tiene fulltext.
-
-      - name: is_oa
-        description: Flag de acceso abierto.
-
-      - name: oa_status
-        description: Estado OA (gold, green, hybrid, bronze, closed).
-
-      - name: oa_url
-        description: URL OA principal (si existe).
-
-      - name: cited_by_percentile_year_max
-        description: Máximo percentil anual de citas normalizado.
-
-      - name: cited_by_percentile_year_min
-        description: Mínimo percentil anual de citas normalizado.
-
-      - name: citation_normalized_percentile_is_in_top_10_percent
-        description: Flag si entra en top 10% normalizado.
-
-      - name: citation_normalized_percentile_is_in_top_1_percent
-        description: Flag si entra en top 1% normalizado.
-
-      - name: citation_normalized_percentile_value
-        description: Valor de percentil de citas normalizado.
-
-      - name: apc_list_currency
-        description: Moneda de APC listada.
-
-      - name: apc_list_value
-        description: Valor de APC listada.
-
-      - name: apc_list_value_usd
-        description: Valor de APC listada en USD.
-
-      - name: apc_paid_currency
-        description: Moneda de APC pagada.
-
-      - name: apc_paid_value
-        description: Valor de APC pagada.
-
-      - name: apc_paid_value_usd
-        description: Valor de APC pagada en USD.
-
-      # --- PIDs y flags ---
+      - name: work_id
+        description: Identificador canónico de OpenAlex para la obra.
+        data_tests: [not_null, unique]
       - name: doi
         description: DOI sin prefijo https://doi.org/ o '-' si no hay.
-      - name: mag
-        description: Identificador Microsoft Academic Graph o '-' si no hay.
-      - name: pmcid
-        description: Identificador PMC o '-' si no hay.
-      - name: pmid
-        description: Identificador PubMed o '-' si no hay.
+      - name: has_doi
+        description: Flag que indica presencia de DOI.
+        data_tests: [not_null]
 
+  - name: fct_openalex_work_publication
+    description: >
+      Hecho de obras de OpenAlex con métricas agregadas (citas, FWCI, percentiles,
+      y costos APC cuando aplica). Complementa a `dim_openalex_work`, que concentra
+      los metadatos bibliográficos y PIDs.
+    config:
+      tags: [dm]
+    columns:
+      - name: work_id
+        description: Identificador canónico de OpenAlex para la obra.
+        data_tests:
+          - not_null
+          - unique
+      - name: work_hk
+        description: Clave hash de la obra (PK del hub).
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('hub_openalex_work')
+              field: work_hk
+      - name: cited_by_count
+        description: Cantidad de citas según OpenAlex.
+      - name: fwci
+        description: Field-Weighted Citation Impact (si está disponible).
+      - name: citation_normalized_percentile_value
+        description: Valor de percentil de citas normalizado (si está disponible).
+
+  - name: brg_openalex_work_author
+    description: Bridge obra–autor (vínculos N a N entre works y authors).
+    config:
+      tags: [dm]
+    columns:
+      - name: work_author_hk
+        description: Clave hash del vínculo work-author.
+        data_tests: [not_null, unique]
+      - name: work_hk
+        data_tests: [not_null]
+      - name: author_hk
+        data_tests: [not_null]
+
+  - name: brg_openalex_work_institution
+    description: Bridge obra–institución (afiliaciones institucionales asociadas a works).
+    config:
+      tags: [dm]
+    columns:
+      - name: work_institution_hk
+        description: Clave hash del vínculo work-institution.
+        data_tests: [not_null, unique]
+      - name: work_hk
+        data_tests: [not_null]
+      - name: institution_hk
+        data_tests: [not_null]
+
+  - name: brg_openalex_author_institution
+    description: Bridge autor–institución (afiliaciones institucionales asociadas a authors).
+    config:
+      tags: [dm]
+    columns:
+      - name: author_institution_hk
+        description: Clave hash del vínculo author-institution.
+        data_tests: [not_null, unique]
+      - name: author_hk
+        data_tests: [not_null]
+      - name: institution_hk
+        data_tests: [not_null]
+
+  - name: brg_openalex_work_topic
+    description: Bridge obra–tópico (asignaciones temáticas por tópico).
+    config:
+      tags: [dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [work_hk, topic_hk]
+    columns:
+      - name: work_hk
+        data_tests: [not_null]
+      - name: topic_hk
+        data_tests: [not_null]
+
+  - name: brg_openalex_work_primarytopic
+    description: Bridge obra–tópico primario con score (tópico principal asignado por OpenAlex).
+    config:
+      tags: [dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [work_hk, topic_hk]
+    columns:
+      - name: work_hk
+        data_tests: [not_null]
+      - name: topic_hk
+        data_tests: [not_null]
+      - name: primarytopic_score
+        description: Score de asignación del tópico primario.

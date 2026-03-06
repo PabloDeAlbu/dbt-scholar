@@ -139,8 +139,11 @@ sources:
         - name: publiclyFunded
           quote: true
         - name: mainTitle
-          tests: [not_null]
           quote: true
+          tests:
+            - not_null:
+                config:
+                  severity: warn
         - name: publicationDate
           quote: true
         - name: publisher

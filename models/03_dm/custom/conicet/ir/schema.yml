@@ -2,32 +2,171 @@ version: 2
 
 models:
   - name: fct_conicet_item_publication
-    description: "Tabla de hechos principal de publicaciones de CONICET enriquecida con identificadores normalizados."
+    description: >
+      Hecho institucional CONICET a nivel de registro OAI, con metadatos descriptivos, tipología COAR,
+      condiciones de acceso y enriquecimiento de identificadores (Handle institucional, DOI principal y auditoría).
     config:
-      materialized: table
-    tests:
-      - unique:
-          column_name: record_hk
-      
-      - unique:
-          column_name: dc_relation_doi
-          # Descripción: Se configura como 'warn' porque es posible encontrar 
-          # duplicados legítimos (pre/post print) o errores históricos. 
-          # Queremos auditar sin detener el pipeline.
-          config:
-            severity: warn
-            
-      - unique:
-          column_name: dc_identifier_uri
-          # El Handle debe ser único.
-      
-      - not_null:
-          column_name: record_hk
-      
-      - not_null:
-          column_name: dc_identifier_uri
-          # Garantiza que solo entren registros con Handle válido (filtro INNER JOIN).
+      tags: [conicet, dm]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: "dc_identifier_uri ~ '^http://hdl\\\\.handle\\\\.net/11336/'"
+      - dbt_utils.expression_is_true:
+          expression: "dc_relation_doi is null OR dc_relation_doi ~* '^10\\\\.[0-9]{4,9}/\\\\S+$'"
+    columns:
+      - name: record_hk
+        description: Clave hash del registro OAI (grano del hecho).
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('fct_oai_record_publication')
+              field: record_hk
+      - name: record_id
+        description: Identificador OAI-PMH del registro.
+        data_tests: [not_null]
+      - name: title
+        description: Título del registro según el proveedor OAI.
+      - name: date_issued
+        description: Fecha declarada de emisión/publicación (si está disponible).
+      - name: coar_type
+        description: Etiqueta COAR del tipo de recurso.
+      - name: coar_right
+        description: Etiqueta COAR de derechos/acceso.
+      - name: dc_identifier_uri
+        description: >
+          Handle institucional (metadato `dc.identifier.uri`) filtrado por prefijo CONICET.
+        data_tests:
+          - not_null
+          - unique
+      - name: dc_relation_doi
+        description: DOI principal (cuando existe) obtenido desde `dc.relation` (altIdentifier/doi).
+        data_tests:
+          - unique:
+              config:
+                severity: warn
+      - name: doi_audit_string
+        description: Auditoría de DOIs (concatenación de todos los DOIs detectados o el principal).
+      - name: has_doi
+        description: Flag de presencia de DOI.
+        data_tests: [not_null]
+
+  - name: fct_conicet_creator_item_publication
+    description: >
+      Hecho a grano autor–publicación, derivado de afiliaciones parseadas (campo Fil:) para análisis de
+      productividad y co-ocurrencia institucional en el corpus CONICET.
+    config:
+      tags: [conicet, dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [author, record_hk]
+    columns:
+      - name: author
+        description: Nombre normalizado del autor (uppercase y limpieza básica).
+        data_tests: [not_null]
+      - name: record_hk
+        description: Clave hash del registro OAI asociado.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('fct_conicet_item_publication')
+              field: record_hk
+      - name: activity_count
+        description: Métrica unitaria para agregación (1 fila = 1 actividad autor-publicación).
+        data_tests: [not_null]
+
+  - name: brg_conicet_record_fil
+    description: Bridge de afiliaciones parseadas a partir de descripciones `Fil:` (autor + afiliación por registro).
+    config:
+      tags: [conicet, dm]
+    columns:
+      - name: record_description_hk
+        description: Clave hash del vínculo record-description.
+        data_tests:
+          - not_null
+          - unique
+      - name: record_hk
+        data_tests: [not_null]
+
+  - name: dim_conicet_item_type
+    description: Dimensión de tipologías OAI/DC mapeadas a COAR Resource Types para el corpus CONICET.
+    config:
+      tags: [conicet, dm]
+    columns:
+      - name: dc_type_hk
+        description: Clave hash del tipo (hub_oai_type).
+        data_tests: [not_null, unique]
+      - name: dc_type
+        description: URI/valor del tipo provisto por el repositorio.
+        data_tests: [not_null]
+      - name: label
+        description: Etiqueta legible del tipo (según seed de mapeo COAR).
+      - name: coar_uri
+        description: URI COAR asociada al tipo.
+        data_tests: [not_null]
+
+  - name: dim_conicet_item_accessright
+    description: Dimensión de condiciones de acceso (info:eu-repo/semantics/*) mapeadas a COAR Access Rights.
+    config:
+      tags: [conicet, dm]
+    columns:
+      - name: dc_right_hk
+        description: Clave hash de derechos (hub_oai_right).
+        data_tests: [not_null, unique]
+      - name: dc_right
+        description: URI/valor de derechos provisto por el repositorio.
+        data_tests: [not_null]
+      - name: coar_uri
+        description: URI COAR de la condición de acceso.
+        data_tests: [not_null]
+
+  - name: dim_conicet_item_subject_fos
+    description: Dimensión de clasificación temática FOS (FORD/BECyT) para subjects expresados como URIs.
+    config:
+      tags: [conicet, dm]
+    columns:
+      - name: dc_subject_hk
+        description: Clave hash del subject (hub_oai_subject).
+        data_tests: [not_null, unique]
+      - name: uri
+        description: URI original del subject (purl BECyT/FORD).
+        data_tests: [not_null]
+
+  - name: brg_conicet_item_identifier_uri
+    description: Bridge de identificador institucional `dc.identifier.uri` filtrado por prefijo CONICET.
+    config:
+      tags: [conicet, dm]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: "dc_identifier_uri ~ '^http://hdl\\\\.handle\\\\.net/11336/'"
+    columns:
+      - name: record_hk
+        data_tests: [not_null, unique]
+      - name: dc_identifier_uri
+        data_tests: [not_null]
+
+  - name: brg_conicet_item_relation_doi
+    description: Bridge agregado de DOIs (principal + auditoría + conteos) derivado de `dc.relation`.
+    config:
+      tags: [conicet, dm]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: "primary_doi is null OR primary_doi ~* '^10\\\\.[0-9]{4,9}/\\\\S+$'"
+    columns:
+      - name: record_hk
+        data_tests: [not_null, unique]
+      - name: primary_doi
+        description: DOI principal seleccionado por regla de negocio (MIN).
+      - name: count_doi
+        description: Cantidad de DOIs detectados para el registro.
+        data_tests: [not_null]
+
   - name: brg_conicet_item_fos_flattened
-    tests:
-      - unique:
-          column_name: record_hk
+    description: Bridge de subjects FOS aplanado (1 fila por record_hk) con flags de auditoría por multiplicidad.
+    config:
+      tags: [conicet, dm]
+    columns:
+      - name: record_hk
+        data_tests: [not_null, unique]
+      - name: has_multiple_fos_assignments
+        description: Flag que indica múltiples asignaciones FOS antes del aplanado.
+        data_tests: [not_null]

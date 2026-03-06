@@ -1,18 +1,18 @@
 version: 2
 
 models:
-  - name: fct_unlp_openaire_researchproduct
+  - name: fct_cic_openaire_researchproduct_publication
     description: >
-      Subconjunto institucional UNLP del hecho de publicaciones OpenAIRE, filtrado por ROR usado en la extracción
-      para definir una cohorte de producción académica atribuible a la institución.
+      Subconjunto institucional CIC del hecho de publicaciones OpenAIRE, filtrado por organización (ROR)
+      utilizada en la extracción para construir una cohorte reproducible.
     config:
-      tags: [unlp, dm]
+      tags: [cic, dm]
     data_tests:
       - dbt_utils.expression_is_true:
-          name: unlp_openaire_organization_ror_format
+          name: cic_openaire_organization_ror_format
           expression: "trim(organization_ror) ~ '^https?://ror[.]org/[0-9a-z]{9}/?$'"
           config:
-            alias: unlp_openaire_organization_ror_format
+            alias: cic_openaire_organization_ror_format
     columns:
       - name: researchproduct_hk
         description: Clave hash del research product (PK del hub).
@@ -28,8 +28,8 @@ models:
           - not_null
           - unique
       - name: organization_ror
-        description: Identificador ROR (URL) utilizado para filtrar la cohorte UNLP.
+        description: Identificador ROR (URL) utilizado para filtrar la cohorte CIC.
         data_tests: [not_null]
       - name: unlp_last_extract_datetime
-        description: Última fecha/hora en la que el research product fue observado en la cohorte UNLP.
+        description: Última fecha/hora en la que el research product fue observado en la cohorte (timestamp del extractor).
         data_tests: [not_null]

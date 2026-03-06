@@ -3,81 +3,91 @@ version: 2
 models:
   - name: er_dspace_item_metadatavalue
     description: Relación de item con valores de metadatos y su campo estándar de DSpace.
+    config:
+      tags: [dm]
     columns:
       - name: metadatavalue_hk
-        tests:
+        data_tests:
           - unique
           - not_null
       - name: item_hk
-        tests:
+        data_tests:
           - not_null
           - relationships:
               to: ref('fct_dspace_item')
               field: item_hk
       - name: metadatafield_fullname
-        tests:
+        data_tests:
           - not_null
           - relationships:
               to: ref('er_dspace_metadatafield')
               field: metadatafield_fullname
       - name: metadatafield_hk
-        tests:
+        data_tests:
           - not_null
           - relationships:
               to: ref('er_dspace_metadatafield')
               field: metadatafield_hk
       - name: scheme
-        tests:
+        data_tests:
           - not_null
       - name: element
-        tests:
+        data_tests:
           - not_null
 
   - name: fct_dspace_item
     description: Entidad item de DSpace con flags de publicación y colección dueña.
+    config:
+      tags: [dm]
     columns:
       - name: item_hk
-        tests:
+        data_tests:
           - unique
           - not_null
       - name: item_uuid
-        tests:
+        data_tests:
           - not_null
       - name: owningcollection_hk
 
   - name: er_dspace_collection
     description: Entidad colección con título y comunidad principal.
+    config:
+      tags: [dm]
     columns:
       - name: collection_hk
-        tests:
+        data_tests:
           - unique
           - not_null
       - name: text_value
         description: Título de la colección.
-        tests:
+        data_tests:
           - not_null
 
   - name: er_dspace_metadatafield
     description: Entidad catálogo de campos de metadatos (schema.element.qualifier).
+    config:
+      tags: [dm]
     columns:
       - name: metadatafield_hk
-        tests:
+        data_tests:
           - unique
           - not_null
       - name: metadatafield_fullname
-        tests:
+        data_tests:
           - unique
           - not_null
 
   - name: er_dspace_metadatavalue
     description: Entidad valores de metadatos asociados a su campo.
+    config:
+      tags: [dm]
     columns:
       - name: metadatavalue_hk
-        tests:
+        data_tests:
           - unique
           - not_null
       - name: metadatafield_hk
-        tests:
+        data_tests:
           - not_null
           - relationships:
               to: ref('er_dspace_metadatafield')
@@ -85,16 +95,18 @@ models:
 
   - name: er_dspace_metadatafield_usage
     description: Uso contado de cada campo de metadato.
+    config:
+      tags: [dm]
     columns:
       - name: metadatafield_hk
-        tests:
+        data_tests:
           - not_null
           - relationships:
               to: ref('er_dspace_metadatafield')
               field: metadatafield_hk
       - name: metadatafield_fullname
-        tests:
+        data_tests:
           - not_null
       - name: total_uses
-        tests:
+        data_tests:
           - not_null

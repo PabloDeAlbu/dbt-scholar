@@ -1,14 +1,177 @@
 version: 2
 
 models:
-  - name: fct_oai_record_publication
+  - name: dim_oai_set
+    description: >
+      Dimensión de sets OAI-PMH (setSpec + setName), utilizada para segmentar
+      colecciones/series en la capa de Data Mart.
     config:
-      materialized: table
-    tests:
-      - unique:
-          column_name: record_hk
-          config:
-            store_failures: true
-            schema: "dbt_oai_failures"
-      - not_null:
-          column_name: record_hk
+      tags: [dm]
+    columns:
+      - name: set_hk
+        description: Clave hash del set.
+        data_tests:
+          - not_null
+          - unique
+      - name: set_id
+        description: Identificador (setSpec) provisto por el endpoint OAI-PMH.
+        data_tests:
+          - not_null
+
+  - name: fct_oai_record_publication
+    description: >
+      Hecho de registros OAI-PMH (1 fila por record) con metadatos principales y
+      validaciones básicas de calidad (fecha y tipología).
+    config:
+      tags: [dm]
+    columns:
+      - name: record_hk
+        description: Clave hash del registro OAI (grano del modelo).
+        data_tests:
+          - not_null
+          - unique
+      - name: record_id
+        description: Identificador OAI-PMH del registro (p. ej. oai:...).
+        data_tests:
+          - not_null
+
+  - name: brg_oai_record_creator
+    description: Bridge record-creator (dc.creator) para análisis de autoría declarativa.
+    config:
+      tags: [dm]
+    columns:
+      - name: record_creator_hk
+        description: Clave hash del vínculo record-creator.
+        data_tests:
+          - not_null
+          - unique
+      - name: record_hk
+        data_tests: [not_null]
+      - name: dc_creator
+        description: Valor textual del creador según el proveedor OAI.
+
+  - name: brg_oai_record_identifier
+    description: Bridge record-identifier (dc.identifier), incluyendo URIs y PIDs crudos.
+    config:
+      tags: [dm]
+    columns:
+      - name: record_identifier_hk
+        description: Clave hash del vínculo record-identifier.
+        data_tests:
+          - not_null
+          - unique
+      - name: record_hk
+        data_tests: [not_null]
+      - name: dc_identifier
+        description: Identificador crudo informado por el proveedor (p. ej. Handle/URL).
+
+  - name: brg_oai_record_language
+    description: Bridge record-language (dc.language).
+    config:
+      tags: [dm]
+    columns:
+      - name: record_language_hk
+        description: Clave hash del vínculo record-language.
+        data_tests:
+          - not_null
+          - unique
+      - name: record_hk
+        data_tests: [not_null]
+      - name: dc_language
+        description: Código o etiqueta de idioma provista por el proveedor.
+
+  - name: brg_oai_record_publisher
+    description: Bridge record-publisher (dc.publisher).
+    config:
+      tags: [dm]
+    columns:
+      - name: record_publisher_hk
+        description: Clave hash del vínculo record-publisher.
+        data_tests:
+          - not_null
+          - unique
+      - name: record_hk
+        data_tests: [not_null]
+      - name: dc_publisher
+        description: Editorial/entidad publicadora informada por el proveedor.
+
+  - name: brg_oai_record_relation
+    description: >
+      Bridge record-relation (dc.relation) con descomposición del valor en tipo de relación y
+      tipo/valor de identificador cuando aplica.
+    config:
+      tags: [dm]
+    columns:
+      - name: record_relation_hk
+        description: Clave hash del vínculo record-relation.
+        data_tests:
+          - not_null
+          - unique
+      - name: record_hk
+        data_tests: [not_null]
+      - name: relation_type
+        description: Tipo de relación extraído del valor (p. ej. altIdentifier).
+      - name: identifier_type
+        description: Tipo de identificador extraído (p. ej. doi).
+      - name: identifier_value
+        description: Valor del identificador extraído (p. ej. 10.xxxx/xxxx).
+
+  - name: brg_oai_record_right
+    description: Bridge record-right (dc.rights) para condiciones de acceso/derechos declarados.
+    config:
+      tags: [dm]
+    columns:
+      - name: record_right_hk
+        description: Clave hash del vínculo record-right.
+        data_tests:
+          - not_null
+          - unique
+      - name: record_hk
+        data_tests: [not_null]
+      - name: dc_right
+        description: Valor textual de derechos (p. ej. info:eu-repo/semantics/openAccess).
+
+  - name: brg_oai_record_set
+    description: Bridge record-set para asignación de registros a sets OAI-PMH.
+    config:
+      tags: [dm]
+    columns:
+      - name: record_set_hk
+        description: Clave hash del vínculo record-set.
+        data_tests:
+          - not_null
+          - unique
+      - name: record_hk
+        data_tests: [not_null]
+      - name: set_hk
+        data_tests: [not_null]
+
+  - name: brg_oai_record_subject
+    description: Bridge record-subject (dc.subject) para temática declarativa y taxonomías.
+    config:
+      tags: [dm]
+    columns:
+      - name: record_subject_hk
+        description: Clave hash del vínculo record-subject.
+        data_tests:
+          - not_null
+          - unique
+      - name: record_hk
+        data_tests: [not_null]
+      - name: dc_subject
+        description: Valor crudo del subject (p. ej. URI taxonómica o keyword).
+
+  - name: brg_oai_record_type
+    description: Bridge record-type (dc.type) para tipología declarativa.
+    config:
+      tags: [dm]
+    columns:
+      - name: record_type_hk
+        description: Clave hash del vínculo record-type.
+        data_tests:
+          - not_null
+          - unique
+      - name: record_hk
+        data_tests: [not_null]
+      - name: dc_type
+        description: Valor crudo del tipo (p. ej. info:ar-repo/semantics/article).

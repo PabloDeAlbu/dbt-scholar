@@ -1,0 +1,19 @@
+version: 2
+
+models:
+  - name: fct_coar_resourcetype
+    description: >
+      Tabla de referencia (COAR Resource Types) utilizada para estandarizar la
+      tipología documental y habilitar análisis comparables entre fuentes.
+    config:
+      tags: [dm]
+    columns:
+      - name: coar_uri
+        description: URI canónica del tipo de recurso COAR.
+        data_tests:
+          - not_null
+          - unique
+      - name: label_es
+        description: Etiqueta en español del tipo de recurso (si está disponible).
+      - name: label
+        description: Etiqueta en inglés del tipo de recurso (si está disponible).
