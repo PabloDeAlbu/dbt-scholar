@@ -1,10 +1,66 @@
 version: 2
 
 models:
-
   - name: fct_unlp_ir_item_publication
+    description: >
+      Hecho institucional UNLP a nivel de ítem del repositorio (DSpace/Sedici), construido a partir
+      de metadatos OAI/DC y enriquecido con campos operativos del ítem (archivado, retirado, descubrible).
+    config:
+      tags: [unlp, dm]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: unlp_ir_dc_identifier_uri_sedici_handle
+          expression: "dc_identifier_uri ~ '^https?://sedici[.]unlp[.]edu[.]ar/handle/10915'"
+          config:
+            alias: unlp_ir_dc_identifier_uri_sedici_handle
+            severity: warn
+      - dbt_utils.expression_is_true:
+          name: unlp_ir_date_accessioned_raw_tokens
+          expression: "date_accessioned_raw is null OR date_accessioned_raw ~ '^(?:[0-9]{4}|[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]))(?:[|](?:[0-9]{4}|[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])))*$'"
+          config:
+            alias: unlp_ir_date_accessioned_raw_tokens
+            severity: warn
+      - dbt_utils.expression_is_true:
+          name: unlp_ir_date_issued_raw_tokens
+          expression: "date_issued_raw is null OR date_issued_raw ~ '^(?:[0-9]{4}|[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]))(?:[|](?:[0-9]{4}|[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])))*$'"
+          config:
+            alias: unlp_ir_date_issued_raw_tokens
+            severity: warn
     columns:
-      - name: item_id
+      - name: item_hk
+        description: Clave hash del ítem (PK del hub).
         data_tests:
+          - not_null
           - unique
+          - relationships:
+              to: ref('fct_dspace5_item')
+              field: item_hk
+      - name: item_id
+        description: ID original del ítem en DSpace 5.
+        data_tests:
+          - not_null
+      - name: dc_identifier_uri
+        description: >
+          Valor del metadato `dc.identifier.uri` (Handle/URI institucional) utilizado como identificador de citación.
+        data_tests:
+          - not_null
+      - name: dc_identifier_uri_raw
+        description: Valores crudos observados para `dc.identifier.uri` (concatenados) para auditoría de calidad.
+      - name: date_accessioned
+        description: Fecha de incorporación al repositorio (normalizada desde `dc.date.accessioned`).
+      - name: date_accessioned_raw
+        description: Valores crudos observados para `dc.date.accessioned` (concatenados) para auditoría.
+      - name: date_issued
+        description: Fecha declarada de emisión/publicación (normalizada desde `dc.date.issued`).
+      - name: date_issued_raw
+        description: Valores crudos observados para `dc.date.issued` (concatenados) para auditoría.
+
+  - name: dim_unlp_ir_item_type
+    description: Dimensión auxiliar de tipologías declaradas en `dc.type` (repositorio UNLP).
+    config:
+      tags: [unlp, dm]
+    columns:
+      - name: text_value
+        description: Valor textual de `dc.type`.
+        data_tests:
           - not_null
