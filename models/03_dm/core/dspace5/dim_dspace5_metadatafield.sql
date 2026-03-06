@@ -13,9 +13,9 @@ WITH base as (
         END AS metadatafield_fullname,
         sat_mf.metadatafield_hk
     FROM {{ ref('hub_dspace5_metadatafieldregistry') }} hub_mf
-    JOIN {{ latest_satellite(ref('sat_dspace5_metadatafieldregistry'), 'metadatafield_hk') }} AS sat_mf USING (metadatafield_hk)
+	    JOIN {{ latest_satellite(ref('sat_dspace5_metadatafieldregistry'), 'metadatafield_hk', order_column='_load_datetime') }} AS sat_mf USING (metadatafield_hk)
     JOIN {{ ref('link_dspace5_metadatafield_metadataschema') }} lnk_mf_ms USING (metadatafield_hk)
-    JOIN {{ latest_satellite(ref('sat_dspace5_metadataschemaregistry'), 'metadataschema_hk') }} AS sat_ms USING (metadataschema_hk)
+	    JOIN {{ latest_satellite(ref('sat_dspace5_metadataschemaregistry'), 'metadataschema_hk') }} AS sat_ms USING (metadataschema_hk)
 ),
 
 final as (

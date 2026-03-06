@@ -1,25 +1,17 @@
 {{ config(materialized = 'table') }}
 
-WITH item AS (
+WITH latest_item_hub AS {{ latest_satellite(ref('hub_dspace5_item'), 'item_hk', order_column='_load_datetime') }},
+latest_item_sat AS {{ latest_satellite(ref('sat_dspace5_item'), 'item_hk', order_column='_load_datetime') }},
+
+item AS (
     SELECT
         hub_i.item_id,
         sat_i.in_archive,
         sat_i.withdrawn,
         sat_i.discoverable,
-        hub_i.item_hk,
-        hub_i.load_datetime,
-        ROW_NUMBER() OVER (
-            PARTITION BY hub_i.item_hk
-            ORDER BY hub_i.load_datetime DESC
-        ) AS rn_item
-    FROM {{ ref('hub_dspace5_item') }} hub_i
-    INNER JOIN {{ latest_satellite(ref('sat_dspace5_item'), 'item_hk') }} AS sat_i
-        ON sat_i.item_hk = hub_i.item_hk
-),
-item_dedup AS (
-    SELECT item_id, in_archive, withdrawn, discoverable, item_hk
-    FROM item
-    WHERE rn_item = 1
+        hub_i.item_hk
+    FROM latest_item_hub hub_i
+    INNER JOIN latest_item_sat sat_i USING (item_hk)
 ),
 owning_collection AS (
     SELECT
@@ -52,6 +44,6 @@ SELECT
     oc.owningcollection_hk,
     COALESCE(cc.collections_count, 0) AS collections_count,
     i.item_hk
-FROM item_dedup i
-JOIN owning_collection_dedup oc USING (item_hk)
-JOIN collections_count cc USING (item_hk)
+FROM item i
+LEFT JOIN owning_collection_dedup oc USING (item_hk)
+LEFT JOIN collections_count cc USING (item_hk)

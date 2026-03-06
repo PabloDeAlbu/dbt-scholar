@@ -5,7 +5,7 @@ WITH community_titles AS (
     SELECT
         community_hk,
         text_value AS title
-    FROM {{ ref('er_dspace5_community_metadatavalue') }}
+    FROM {{ ref('brg_dspace5_community_metadatavalue') }}
     WHERE short_id = 'dc'
       AND element = 'title'
       AND qualifier IS NULL

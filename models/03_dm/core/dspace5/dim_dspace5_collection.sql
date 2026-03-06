@@ -10,7 +10,7 @@ WITH col AS (
             ORDER BY (dim_c.text_lang IS NULL) DESC, dim_c.text_lang, dim_c.place, dim_c.text_value
         ) AS rn_title
     FROM {{ ref('hub_dspace5_collection') }} hub_c
-    JOIN {{ ref('er_dspace5_collection_metadatavalue') }} dim_c ON 
+    JOIN {{ ref('brg_dspace5_collection_metadatavalue') }} dim_c ON 
         dim_c.collection_hk = hub_c.collection_hk
         AND dim_c.short_id = 'dc'
         AND dim_c.element = 'title'
@@ -31,7 +31,7 @@ final AS (
     JOIN {{ ref('link_dspace5_handle_resource') }} lnk_h_r ON
         lnk_h_r.resource_hk = col_dedup.collection_hk
     JOIN {{ ref('hub_dspace5_handle') }} hub_h USING (handle_hk)
-    JOIN {{ latest_satellite(ref('sat_dspace5_handle'), 'handle_hk') }} AS sat_h USING (handle_hk)
+	    JOIN {{ latest_satellite(ref('sat_dspace5_handle'), 'handle_hk', order_column='_load_datetime') }} AS sat_h USING (handle_hk)
     WHERE sat_h.resource_type_id = 3
 )
 

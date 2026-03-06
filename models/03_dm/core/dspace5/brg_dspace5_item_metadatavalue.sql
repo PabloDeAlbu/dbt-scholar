@@ -18,8 +18,8 @@ WITH base AS (
     FROM {{ ref('hub_dspace5_item') }} hub_i
     JOIN {{ ref('tlink_dspace5_metadatavalue_resource') }} lnk_mv_r ON hub_i.item_hk = lnk_mv_r.resource_hk
     JOIN {{ ref('link_dspace5_metadatavalue_metadatafield')}} lnk_mv_mf USING (metadatavalue_hk)
-    JOIN {{ ref('er_dspace5_metadatafield') }} mf USING (metadatafield_hk)
-    JOIN {{ latest_satellite(ref('sat_dspace5_metadatavalue'), 'metadatavalue_hk') }} AS sat_mv USING (metadatavalue_hk)
+    JOIN {{ ref('dim_dspace5_metadatafield') }} mf USING (metadatafield_hk)
+	    JOIN {{ latest_satellite(ref('sat_dspace5_metadatavalue'), 'metadatavalue_hk', order_column='_load_datetime') }} AS sat_mv USING (metadatavalue_hk)
     WHERE lnk_mv_r.resource_type_id = 2
 )
 
