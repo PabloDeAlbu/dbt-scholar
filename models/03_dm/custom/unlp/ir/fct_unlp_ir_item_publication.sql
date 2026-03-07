@@ -17,8 +17,11 @@ date_accessioned AS (
   SELECT 
     i_mv.item_hk,
     MIN(mv.text_value) FILTER (
-        WHERE mv.text_value ~ '^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$'
-    ) AS iso_date,
+        WHERE mv.text_value ~ '^[0-9]{4}[-/](0[1-9]|1[0-2])[-/](0[1-9]|[12][0-9]|3[01])'
+    ) AS date_ymd_any,
+    MIN(mv.text_value) FILTER (
+        WHERE mv.text_value ~ '^[0-9]{4}[-/](0[1-9]|1[0-2])$'
+    ) AS date_ym_any,
     MIN(mv.text_value) FILTER (
         WHERE mv.text_value ~ '^[0-9]{4}$'
     ) AS year_only,
@@ -33,8 +36,11 @@ date_issued AS (
   SELECT 
     i_mv.item_hk,
     MIN(mv.text_value) FILTER (
-        WHERE mv.text_value ~ '^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$'
-    ) AS iso_date,
+        WHERE mv.text_value ~ '^[0-9]{4}[-/](0[1-9]|1[0-2])[-/](0[1-9]|[12][0-9]|3[01])'
+    ) AS date_ymd_any,
+    MIN(mv.text_value) FILTER (
+        WHERE mv.text_value ~ '^[0-9]{4}[-/](0[1-9]|1[0-2])$'
+    ) AS date_ym_any,
     MIN(mv.text_value) FILTER (
         WHERE mv.text_value ~ '^[0-9]{4}$'
     ) AS year_only,
@@ -63,13 +69,15 @@ final as (
 
         date_accessioned.raw_values AS date_accessioned_raw,
         CASE
-            WHEN date_accessioned.iso_date IS NOT NULL THEN TO_DATE(date_accessioned.iso_date, 'YYYY-MM-DD')
+            WHEN date_accessioned.date_ymd_any IS NOT NULL THEN TO_DATE(REPLACE(LEFT(date_accessioned.date_ymd_any, 10), '/', '-'), 'YYYY-MM-DD')
+            WHEN date_accessioned.date_ym_any IS NOT NULL THEN TO_DATE(REPLACE(date_accessioned.date_ym_any, '/', '-') || '-01', 'YYYY-MM-DD')
             WHEN date_accessioned.year_only IS NOT NULL THEN TO_DATE(date_accessioned.year_only || '-01-01', 'YYYY-MM-DD')
         END AS date_accessioned,
 
         date_issued.raw_values AS date_issued_raw,
         CASE
-            WHEN date_issued.iso_date IS NOT NULL THEN TO_DATE(date_issued.iso_date, 'YYYY-MM-DD')
+            WHEN date_issued.date_ymd_any IS NOT NULL THEN TO_DATE(REPLACE(LEFT(date_issued.date_ymd_any, 10), '/', '-'), 'YYYY-MM-DD')
+            WHEN date_issued.date_ym_any IS NOT NULL THEN TO_DATE(REPLACE(date_issued.date_ym_any, '/', '-') || '-01', 'YYYY-MM-DD')
             WHEN date_issued.year_only IS NOT NULL THEN TO_DATE(date_issued.year_only || '-01-01', 'YYYY-MM-DD')
         END AS date_issued,
 
