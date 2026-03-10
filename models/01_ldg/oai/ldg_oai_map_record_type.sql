@@ -1,7 +1,7 @@
 {{ config(materialized = 'table') }}
 
 WITH source AS (
-  SELECT * FROM {{ source('oai', 'record_types') }}
+  SELECT * FROM {{ source('oai', 'map_record_type') }}
 ),
 
 renamed AS (
@@ -9,7 +9,7 @@ renamed AS (
     "record_id"::text,
     "types"::text as dc_type,
     "extract_datetime"::timestamp,
-    "_load_datetime"::timestamp
+    "load_datetime"::timestamp as _load_datetime
   FROM source
 ),
 ghost_record AS (

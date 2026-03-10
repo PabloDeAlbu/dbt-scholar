@@ -1,5 +1,5 @@
 with source as (
-  select * from {{ source('openaire', 'organization_pids') }}
+  select * from {{ source('openaire', 'map_organization_pid') }}
 ),
 base as (
   select 

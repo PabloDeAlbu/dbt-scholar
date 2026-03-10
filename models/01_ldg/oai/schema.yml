@@ -15,16 +15,16 @@ sources:
           - name: extract_datetime
           - name: _context 
           - name: _load_datetime
-      - name: record_creators
-      - name: record_descriptions
-      - name: record_identifiers
-      - name: record_languages
-      - name: record_publishers
-      - name: record_relations
-      - name: record_rights
-      - name: record_sets
-      - name: record_subjects
-      - name: record_types
+      - name: map_record_creator
+      - name: map_record_description
+      - name: map_record_identifier
+      - name: map_record_language
+      - name: map_record_publisher
+      - name: map_record_relation
+      - name: map_record_right
+      - name: map_record_set
+      - name: map_record_subject
+      - name: map_record_type
       - name: record_by_set
         columns:
           - name: record_id

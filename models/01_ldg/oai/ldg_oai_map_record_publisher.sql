@@ -1,7 +1,7 @@
 {{ config(materialized = 'table') }}
 
 WITH source AS (
-  SELECT * FROM {{ source('oai', 'record_publishers') }}
+  SELECT * FROM {{ source('oai', 'map_record_publisher') }}
 ),
 
 renamed AS (
@@ -9,7 +9,7 @@ renamed AS (
     "record_id"::text,
     "publishers"::text as dc_publisher,
     "extract_datetime"::timestamp,
-    "_load_datetime"::timestamp
+    "load_datetime"::timestamp as _load_datetime
   FROM source
 ),
 ghost_record AS (

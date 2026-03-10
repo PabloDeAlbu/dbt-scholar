@@ -11,7 +11,7 @@ sources:
             tests: [not_null, unique]
           - name: _load_datetime
             tests: [not_null]
-      - name: author_institution_year
+      - name: map_author_institution_year
         columns:
           - name: id
             tests: [not_null]
@@ -63,18 +63,18 @@ sources:
           - name: _load_datetime
             tests: [not_null]
       - name: map_work_concept
-      - name: map_work_corresponding_author_ids
+      - name: map_work_corresponding_author_id
       - name: map_work_ids
       - name: map_work_primary_location
       - name: map_work_primary_topics
-      - name: map_work_referenced_works
+      - name: map_work_referenced_work
       - name: map_work_location
         columns:
           - name: id
             tests: [not_null]
           - name: _load_datetime
             tests: [not_null]
-      - name: map_work_topics
+      - name: map_work_topic
         columns:
           - name: id
             tests: [not_null]

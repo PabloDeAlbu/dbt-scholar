@@ -1,21 +1,22 @@
 {{ config(materialized = 'table') }}
 
 WITH source AS (
-  SELECT * FROM {{ source('oai', 'record_sets') }}
+  SELECT * FROM {{ source('oai', 'map_record_identifier') }}
 ),
 
 renamed AS (
   SELECT
     "record_id"::text,
-    "set_id"::text,
+    "identifiers"::text as dc_identifier,
     "extract_datetime"::timestamp,
-    "_load_datetime"::timestamp
+    "load_datetime"::timestamp as _load_datetime
   FROM source
+  WHERE NOT(identifiers = 'CONICET Digital' OR identifiers = 'CONICET')
 ),
 ghost_record AS (
   SELECT
     '!UNKNOWN'::text as record_id,
-    '!UNKNOWN'::text as set_id,
+    '!UNKNOWN'::text as dc_identifier,
     '1900-01-01'::timestamp as extract_datetime,
     {{ dbt_date.today() }} as _load_datetime
 )

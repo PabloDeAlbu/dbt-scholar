@@ -1,7 +1,7 @@
 {{ config(materialized='view') }}
 
 {%- set yaml_metadata -%}
-source_model: "ldg_oai_record_creators"
+source_model: "ldg_oai_map_record_creator"
 derived_columns:
   source: "!OAI"
   load_datetime: _load_datetime

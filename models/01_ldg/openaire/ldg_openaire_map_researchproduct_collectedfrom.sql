@@ -1,25 +1,22 @@
 with source as (
-  select 
-    *
-  from {{ source('openaire', 'researchproduct_pids')}}
+  select * from {{ source('openaire', 'map_researchproduct_collectedfrom') }}
 ),
-
-casted as (
+renamed as (
   select
-    id::text as researchproduct_id,
-    scheme::text as scheme,
-    value::text as value,
+    researchproduct_id::text,
+    datasource_id::text,
+    value::text,
     _load_datetime::timestamp
   from source
 ),
 ghost_record as (
   select
     '!UNKNOWN'::text as researchproduct_id,
-    '!UNKNOWN'::text as scheme,
+    '!UNKNOWN'::text as datasource_id,
     '!UNKNOWN'::text as value,
     {{ dbt_date.today() }} as _load_datetime
 )
 
-select * from casted
+select * from renamed
 union all
 select * from ghost_record

@@ -1,21 +1,21 @@
 {{ config(materialized = 'table') }}
 
 WITH source AS (
-  SELECT * FROM {{ source('oai', 'record_subjects') }}
+  SELECT * FROM {{ source('oai', 'map_record_right') }}
 ),
 
 renamed AS (
   SELECT
     "record_id"::text,
-    "subjects"::text as dc_subject,
+    "rights"::text as dc_right,
     "extract_datetime"::timestamp,
-    "_load_datetime"::timestamp
+    "load_datetime"::timestamp as _load_datetime
   FROM source
 ),
 ghost_record AS (
   SELECT
     '!UNKNOWN'::text as record_id,
-    '!UNKNOWN'::text as dc_subject,
+    '!UNKNOWN'::text as dc_right,
     '1900-01-01'::timestamp as extract_datetime,
     {{ dbt_date.today() }} as _load_datetime
 )

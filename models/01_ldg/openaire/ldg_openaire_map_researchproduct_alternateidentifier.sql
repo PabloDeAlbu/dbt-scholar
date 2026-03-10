@@ -1,5 +1,5 @@
 WITH source AS (
-  SELECT * FROM {{ source('openaire', 'researchproduct_alternateidentifiers') }}
+  SELECT * FROM {{ source('openaire', 'map_researchproduct_alternateidentifier') }}
 ),
 
 renamed AS (

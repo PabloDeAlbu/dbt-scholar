@@ -5,7 +5,7 @@ sources:
     description: 'OpenAIRE Research Graph'
     schema: ldg_openaire
     tables:
-      - name: researchproduct_alternateidentifiers
+      - name: map_researchproduct_alternateidentifier
         columns:
           - name: id
             tests: [not_null]
@@ -15,7 +15,7 @@ sources:
             tests: [not_null]
           - name: _load_datetime
             tests: [not_null]
-      - name: researchproduct_authors
+      - name: map_researchproduct_author
         columns: 
           - name: id
             tests: [not_null]
@@ -33,7 +33,7 @@ sources:
           - name: _load_datetime
             tests: [not_null]
 
-      - name: researchproduct_collectedfrom
+      - name: map_researchproduct_collectedfrom
         columns:
           - name: researchproduct_id
             tests: [not_null]
@@ -43,7 +43,7 @@ sources:
             tests: [not_null]
           - name: _load_datetime
             tests: [not_null]
-      - name: researchproduct_instances
+      - name: map_researchproduct_instance
         columns:
           - name: id
             tests: [not_null]
@@ -76,7 +76,7 @@ sources:
             quote: true
           - name: articleProcessingCharge.currency
             quote: true
-      - name: researchproduct_originalid
+      - name: map_researchproduct_originalid
         columns:
           - name: id
             tests: [not_null]
@@ -85,7 +85,7 @@ sources:
             tests: [not_null]
           - name: _load_datetime
             tests: [not_null]
-      - name: researchproduct_organizations
+      - name: map_researchproduct_organization
         columns:
           - name: researchproduct_id
             tests: [not_null]
@@ -93,7 +93,7 @@ sources:
             tests: [not_null]
           - name: _load_datetime
             tests: [not_null]
-      - name: researchproduct_pids
+      - name: map_researchproduct_pid
         columns:
           - name: id
             tests: [not_null]
@@ -103,7 +103,7 @@ sources:
             tests: [not_null]
           - name: _load_datetime
             tests: [not_null]
-      - name: researchproduct_subjects
+      - name: map_researchproduct_subject
         columns:
           - name: id
             tests: [not_null]
@@ -116,7 +116,7 @@ sources:
             tests: [not_null]
           - name: _load_datetime
             tests: [not_null]
-      - name: researchproduct_sources
+      - name: map_researchproduct_source
         columns:
           - name: id
             tests: [not_null]
@@ -186,7 +186,7 @@ sources:
             quote: true
           - name: _load_datetime
             tests: [not_null]
-      - name: organization_pids
+      - name: map_organization_pid
         columns:
           - name: organization_id
             tests: [not_null]
