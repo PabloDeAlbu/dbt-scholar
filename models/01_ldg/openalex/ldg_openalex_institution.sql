@@ -32,7 +32,7 @@ renamed as (
         works_api_url::text,
         updated_date::text,
         created_date::text,
-        extract_datetime::timestamp,
+        _extract_datetime::timestamp as extract_datetime,
         _load_datetime::timestamp
     from source
 ),

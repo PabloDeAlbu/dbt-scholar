@@ -46,3 +46,37 @@ models:
 
       - name: source
         description: Source label provided by OpenAlex for the extraction record.
+
+  - name: fct_openalex_work_institution_ror
+    description: >
+      Audit fact filtrado a `institutions.ror`, enriquecido con la dimensión de
+      instituciones OpenAlex para exponer nombre institucional e identificador canónico.
+    config:
+      tags: [audit, openalex]
+    columns:
+      - name: extract_hk
+        description: Surrogate key heredada del evento de extracción.
+        data_tests:
+          - not_null
+          - unique
+      - name: work_hk
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_openalex_work')
+              field: work_hk
+      - name: work_id
+        data_tests: [not_null]
+      - name: institution_ror
+        description: ROR usado como `_filter_value` en la extracción.
+        data_tests: [not_null]
+      - name: institution_hk
+        description: Hash key de la institución OpenAlex, si existe match por ROR.
+      - name: institution_id
+        description: Identificador canónico de la institución en OpenAlex.
+      - name: institution_display_name
+        description: Nombre institucional legible.
+      - name: extract_datetime
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]

@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: fct_cic_openalex_work
+    description: >
+      Subconjunto institucional CIC del hecho de obras de OpenAlex, definido por la
+      cohorte extraída con el filtro `institutions.ror = https://ror.org/02s7sax82`.
+    config:
+      tags: [cic, dm]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: cic_openalex_institution_ror_format
+          expression: "trim(institution_ror) ~ '^https?://ror[.]org/[0-9a-z]{9}/?$'"
+          config:
+            alias: cic_openalex_institution_ror_format
+    columns:
+      - name: work_hk
+        description: Clave hash de la obra OpenAlex.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('dim_openalex_work')
+              field: work_hk
+      - name: work_id
+        description: Identificador canónico de la obra en OpenAlex.
+        data_tests: [not_null, unique]
+      - name: institution_hk
+        description: Clave hash de la institución CIC en OpenAlex.
+        data_tests: [not_null]
+      - name: institution_id
+        description: Identificador canónico de OpenAlex para la institución.
+        data_tests: [not_null]
+      - name: institution_display_name
+        description: Nombre de despliegue de la institución en OpenAlex.
+      - name: institution_ror
+        description: ROR utilizado para definir la cohorte CIC.
+        data_tests: [not_null]
+      - name: cic_first_extract_datetime
+        description: Primera fecha/hora de extracción observada para la obra en la cohorte CIC.
+        data_tests: [not_null]
+      - name: cic_last_extract_datetime
+        description: Última fecha/hora de extracción observada para la obra en la cohorte CIC.
+        data_tests: [not_null]

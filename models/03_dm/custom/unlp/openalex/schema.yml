@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: fct_unlp_openalex_work
+    description: >
+      Subconjunto institucional UNLP del hecho de obras de OpenAlex, definido por la
+      afiliación institucional de la obra al ROR de la Universidad Nacional de La Plata.
+    config:
+      tags: [unlp, dm]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: unlp_openalex_institution_ror_format
+          expression: "trim(institution_ror) ~ '^https?://ror[.]org/[0-9a-z]{9}/?$'"
+          config:
+            alias: unlp_openalex_institution_ror_format
+    columns:
+      - name: work_hk
+        description: Clave hash de la obra OpenAlex.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('dim_openalex_work')
+              field: work_hk
+      - name: work_id
+        description: Identificador canónico de la obra en OpenAlex.
+        data_tests:
+          - not_null
+          - unique
+      - name: institution_hk
+        description: Clave hash de la institución OpenAlex asociada a UNLP.
+        data_tests: [not_null]
+      - name: institution_id
+        description: Identificador canónico de OpenAlex para la institución.
+        data_tests: [not_null]
+      - name: institution_display_name
+        description: Nombre de despliegue de la institución en OpenAlex.
+      - name: institution_ror
+        description: ROR de la institución utilizado para definir la cohorte UNLP.
+        data_tests: [not_null]
+      - name: unlp_first_seen_datetime
+        description: Primera fecha de carga en la que la obra fue observada afiliada a UNLP.
+        data_tests: [not_null]
+      - name: unlp_last_seen_datetime
+        description: Última fecha de carga en la que la obra fue observada afiliada a UNLP.
+        data_tests: [not_null]
