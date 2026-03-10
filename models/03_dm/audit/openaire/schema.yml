@@ -1,0 +1,52 @@
+version: 2
+
+models:
+  - name: fct_openaire_researchproduct_extract
+    description: >
+      Audit fact for OpenAIRE extraction events. Records each observation of a research
+      product in an extraction, including the applied filter, extraction timestamp,
+      and warehouse load timestamp.
+    config:
+      tags: [audit, openaire]
+    columns:
+      - name: extract_hk
+        description: Surrogate key for the extraction fact row.
+        data_tests:
+          - not_null
+          - unique
+
+      - name: researchproduct_hk
+        description: Hash key of the OpenAIRE research product.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_openaire_researchproduct')
+              field: researchproduct_hk
+
+      - name: researchproduct_id
+        description: Canonical OpenAIRE identifier for the research product.
+        data_tests:
+          - not_null
+
+      - name: _filter_param
+        description: Name of the filter parameter applied during extraction.
+        data_tests:
+          - not_null
+
+      - name: _filter_value
+        description: Value of the filter parameter applied during extraction.
+        data_tests:
+          - not_null
+
+      - name: extract_datetime
+        description: Timestamp of the extraction event in OpenAIRE.
+        data_tests:
+          - not_null
+
+      - name: load_datetime
+        description: Timestamp when the record was loaded into the warehouse.
+        data_tests:
+          - not_null
+
+      - name: source
+        description: Source label provided by OpenAIRE for the extraction record.

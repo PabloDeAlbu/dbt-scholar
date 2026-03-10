@@ -72,6 +72,13 @@ models:
         +schema: openalex
         +tags: [openalex]
     03_dm:
+      audit:
+        openaire:
+          +schema: audit
+          +tags: [audit]
+        openalex:
+          +schema: audit
+          +tags: [audit]
       core:
         coar:
           +schema: coar
