@@ -203,6 +203,10 @@ models:
         data_tests: [not_null, unique]
       - name: organization_id
         data_tests: [not_null]
+      - name: organization_ror
+        description: Identificador ROR de la organización, cuando OpenAIRE lo expone como PID.
+      - name: organization_name
+        description: Nombre legible priorizado para consumo analítico.
 
   - name: brg_openaire_researchproduct_organization
     description: Bridge research product–organization.

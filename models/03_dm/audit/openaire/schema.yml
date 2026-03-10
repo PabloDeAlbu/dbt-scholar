@@ -50,3 +50,45 @@ models:
 
       - name: source
         description: Source label provided by OpenAIRE for the extraction record.
+
+  - name: fct_openaire_researchproduct_extract_relorganizationid
+    description: >
+      Audit fact filtrado a `relOrganizationId`, enriquecido con la dimensión de organizaciones
+      para exponer nombre institucional y `organization_id` de OpenAIRE a partir del ROR.
+    config:
+      tags: [audit, openaire]
+    columns:
+      - name: extract_hk
+        description: Surrogate key heredada del evento de extracción.
+        data_tests:
+          - not_null
+          - unique
+      - name: researchproduct_hk
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_openaire_researchproduct')
+              field: researchproduct_hk
+      - name: researchproduct_id
+        data_tests:
+          - not_null
+      - name: organization_ror
+        description: ROR usado como `_filter_value` en la extracción.
+        data_tests:
+          - not_null
+      - name: organization_hk
+        description: Hash key de la organización en OpenAIRE, si existe match por ROR.
+      - name: organization_id
+        description: Identificador canónico de la organización en OpenAIRE.
+      - name: organization_name
+        description: Nombre legible de la institución.
+      - name: legalname
+        description: Nombre legal informado por OpenAIRE.
+      - name: acronym
+        description: Acrónimo informado por OpenAIRE.
+      - name: extract_datetime
+        data_tests:
+          - not_null
+      - name: load_datetime
+        data_tests:
+          - not_null
