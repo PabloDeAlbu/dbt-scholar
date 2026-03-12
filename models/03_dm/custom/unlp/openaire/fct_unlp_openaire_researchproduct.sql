@@ -10,6 +10,15 @@ WITH unlp_extract AS (
     GROUP BY researchproduct_hk
 ),
 
+sdg AS (
+    SELECT
+        researchproduct_hk,
+        COUNT(*) AS sdg_count,
+        STRING_AGG(subject_value, '|' ORDER BY subject_value) AS sdg_values
+    FROM {{ ref('brg_openaire_researchproduct_subject_sdg') }}
+    GROUP BY researchproduct_hk
+),
+
 base AS (
     SELECT
         fct.researchproduct_hk,
@@ -72,10 +81,15 @@ base AS (
 
         has_pmid,
         has_single_pmid,
-        pmid_count
+        pmid_count,
+
+        COALESCE(sdg.sdg_count, 0) AS sdg_count,
+        COALESCE(sdg.sdg_count, 0) > 0 AS has_sdg,
+        sdg.sdg_values
     FROM {{ ref('fct_openaire_researchproduct_publication') }} fct
     INNER JOIN unlp_extract USING (researchproduct_hk)
     INNER JOIN {{ ref('brg_openaire_researchproduct_pid_stats') }} USING (researchproduct_hk)
+    LEFT JOIN sdg USING (researchproduct_hk)
 )
 
 SELECT * FROM base

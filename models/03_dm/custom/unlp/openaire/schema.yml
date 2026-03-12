@@ -33,3 +33,11 @@ models:
       - name: unlp_last_extract_datetime
         description: Última fecha/hora en la que el research product fue observado en la cohorte UNLP.
         data_tests: [not_null]
+      - name: sdg_count
+        description: Cantidad de SDGs asociados al research product según subjects OpenAIRE.
+        data_tests: [not_null]
+      - name: has_sdg
+        description: Flag que indica si el research product tiene al menos un SDG asociado.
+        data_tests: [not_null]
+      - name: sdg_values
+        description: Lista de SDGs asociados, concatenados con `|`.

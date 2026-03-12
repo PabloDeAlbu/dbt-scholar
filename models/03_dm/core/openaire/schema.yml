@@ -148,6 +148,31 @@ models:
       - name: subject_hk
         data_tests: [not_null]
 
+  - name: brg_openaire_researchproduct_subject_sdg
+    description: Bridge research product–SDG (subconjunto de subjects OpenAIRE con scheme `SDG`).
+    config:
+      tags: [dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [researchproduct_hk, subject_hk]
+    columns:
+      - name: researchproduct_hk
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_openaire_researchproduct')
+              field: researchproduct_hk
+      - name: researchproduct_id
+        data_tests: [not_null]
+      - name: subject_hk
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_openaire_subject')
+              field: subject_hk
+      - name: subject_value
+        data_tests: [not_null]
+
   - name: dim_openaire_url
     description: Dimensión de URLs asociadas a research products.
     config:
