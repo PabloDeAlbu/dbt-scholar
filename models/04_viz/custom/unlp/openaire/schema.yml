@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: viz_unlp_openaire_researchproduct_subject_sdg
+    description: >
+      Vista analítica de la producción OpenAIRE atribuida a UNLP con sus SDGs, a grano
+      research product x SDG, para filtros temáticos, rankings y visualizaciones.
+    config:
+      tags: [viz]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [researchproduct_hk, subject_hk]
+    columns:
+      - name: researchproduct_hk
+        description: Clave hash del research product OpenAIRE.
+        data_tests: [not_null]
+      - name: researchproduct_id
+        description: Identificador canónico de OpenAIRE.
+        data_tests: [not_null]
+      - name: organization_ror
+        description: ROR institucional usado para definir la cohorte UNLP.
+        data_tests: [not_null]
+      - name: subject_hk
+        description: Clave hash del subject SDG.
+        data_tests: [not_null]
+      - name: sdg
+        description: Valor textual del SDG asociado al research product.
+        data_tests: [not_null]
