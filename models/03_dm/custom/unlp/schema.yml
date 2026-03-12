@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: fct_unlp_publication
+    description: >
+      Hecho consolidado de publicaciones UNLP que cruza ítems del repositorio institucional con
+      publicaciones OpenAIRE por PID normalizados, priorizando DOI y luego handle.
+    config:
+      tags: [unlp, dm]
+    columns:
+      - name: publication_hk
+        description: Identificador técnico del registro consolidado.
+        data_tests: [not_null, unique]
+      - name: publication_source
+        description: Origen del registro consolidado (`matched`, `ir_only`, `openaire_only`).
+        data_tests: [not_null]
+      - name: has_ir
+        description: Indica si la publicación tiene contraparte en el repositorio institucional.
+        data_tests: [not_null]
+      - name: has_openaire
+        description: Indica si la publicación tiene contraparte en OpenAIRE.
+        data_tests: [not_null]
+      - name: match_scheme
+        description: Esquema del PID usado para el match, si existe.
+      - name: match_pid
+        description: PID normalizado usado para el match, si existe.
+      - name: item_hk
+        description: Clave hash del ítem del IR, cuando existe.
+      - name: researchproduct_hk
+        description: Clave hash del research product OpenAIRE, cuando existe.
