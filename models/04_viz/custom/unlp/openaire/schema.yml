@@ -26,3 +26,56 @@ models:
       - name: sdg
         description: Valor textual del SDG asociado al research product.
         data_tests: [not_null]
+
+  - name: viz_unlp_publication_sdg
+    description: >
+      Vista analítica de publicaciones UNLP con match confirmado entre IR y OpenAIRE, a grano
+      publicación x SDG, para agrupar y explorar la producción institucional por ODS.
+    config:
+      tags: [viz]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [publication_hk, sdg]
+    columns:
+      - name: publication_hk
+        description: Identificador técnico de la publicación consolidada.
+        data_tests: [not_null]
+      - name: item_hk
+        description: Clave hash del ítem del IR.
+        data_tests: [not_null]
+      - name: researchproduct_hk
+        description: Clave hash del research product OpenAIRE.
+        data_tests: [not_null]
+      - name: match_scheme
+        description: Esquema del PID usado para vincular IR y OpenAIRE.
+      - name: sdg
+        description: Valor textual del ODS asociado a la publicación.
+        data_tests: [not_null]
+
+  - name: viz_unlp_ir_publication_sdg
+    description: >
+      Vista analítica de todos los recursos del IR de UNLP, preservando los no matcheados con OpenAIRE
+      y expandiendo SDGs cuando existen. Permite medir cobertura de match y cobertura temática ODS
+      sobre el universo completo del repositorio.
+    config:
+      tags: [viz]
+    columns:
+      - name: publication_hk
+        description: Identificador técnico de la publicación consolidada.
+        data_tests: [not_null]
+      - name: item_hk
+        description: Clave hash del ítem del IR.
+        data_tests: [not_null]
+      - name: item_id
+        description: Identificador numérico del ítem en DSpace.
+        data_tests: [not_null]
+      - name: publication_source
+        description: Origen del registro consolidado (`matched` o `ir_only` para esta vista).
+        data_tests: [not_null]
+      - name: has_openaire
+        description: Indica si el recurso del IR fue matcheado con OpenAIRE.
+        data_tests: [not_null]
+      - name: has_sdg
+        description: Indica si el recurso tiene al menos un SDG asociado vía OpenAIRE.
+      - name: sdg
+        description: Valor textual del ODS asociado; queda nulo cuando no hay match o no hay SDG.

@@ -60,6 +60,60 @@ dc_type AS (
     WHERE i_mv.metadatafield_fullname = 'dc.type'
 ),
 
+ir_title AS (
+    SELECT
+        i_mv.item_hk,
+        MIN(mv.text_value)::text AS title
+    FROM {{ ref('brg_dspace5_item_metadatavalue') }} i_mv
+    JOIN {{ ref('dim_dspace5_metadatavalue') }} mv USING (metadatavalue_hk)
+    WHERE i_mv.metadatafield_fullname = 'dc.title'
+    GROUP BY i_mv.item_hk
+),
+
+ir_doi_raw AS (
+    SELECT
+        i_mv.item_hk,
+        LOWER(mv.text_value)::text AS raw_value
+    FROM {{ ref('brg_dspace5_item_metadatavalue') }} i_mv
+    JOIN {{ ref('dim_dspace5_metadatavalue') }} mv USING (metadatavalue_hk)
+    WHERE i_mv.metadatafield_fullname IN ('dc.identifier.uri', 'sedici.identifier.other')
+),
+
+ir_doi_pid AS (
+    SELECT DISTINCT
+        item_hk,
+        REGEXP_REPLACE(
+            SUBSTRING(raw_value FROM '(10\.[0-9]{4,9}/[^[:space:]<>|";]+)'),
+            '[\.\),;:]+$',
+            ''
+        ) AS pid_value
+    FROM ir_doi_raw
+    WHERE SUBSTRING(raw_value FROM '(10\.[0-9]{4,9}/[^[:space:]<>|";]+)') IS NOT NULL
+),
+
+ir_handle_pid AS (
+    SELECT DISTINCT
+        item_hk,
+        LOWER(REGEXP_REPLACE(dc_identifier_uri, '^https?://[^/]+/handle/', '')) AS pid_value
+    FROM id
+    WHERE dc_identifier_uri ~* '^https?://[^/]+/handle/'
+),
+
+ir_pid_agg AS (
+    SELECT
+        item_hk,
+        COUNT(*) FILTER (WHERE scheme = 'doi') AS doi_count,
+        COUNT(*) FILTER (WHERE scheme = 'handle') AS handle_count,
+        STRING_AGG(pid_value, '|' ORDER BY pid_value) FILTER (WHERE scheme = 'doi') AS doi,
+        STRING_AGG(pid_value, '|' ORDER BY pid_value) FILTER (WHERE scheme = 'handle') AS handle
+    FROM (
+        SELECT item_hk, 'doi'::text AS scheme, pid_value FROM ir_doi_pid
+        UNION
+        SELECT item_hk, 'handle'::text AS scheme, pid_value FROM ir_handle_pid
+    ) pid
+    GROUP BY item_hk
+),
+
 final as (
     SELECT 
         item.item_hk,
@@ -82,12 +136,21 @@ final as (
         END AS date_issued,
 
         dc_type.text_value as type,
+        ir_title.title,
+        COALESCE(ir_pid_agg.doi_count, 0) AS doi_count,
+        COALESCE(ir_pid_agg.handle_count, 0) AS handle_count,
+        COALESCE(ir_pid_agg.doi_count, 0) > 0 AS has_doi,
+        COALESCE(ir_pid_agg.handle_count, 0) > 0 AS has_handle,
+        ir_pid_agg.doi,
+        ir_pid_agg.handle,
         in_archive,
         withdrawn,
         discoverable
     FROM {{ref('fct_dspace5_item')}} item
     JOIN id USING (item_hk)
     JOIN dc_type USING (item_hk)
+    LEFT JOIN ir_title USING (item_hk)
+    LEFT JOIN ir_pid_agg USING (item_hk)
     LEFT JOIN date_accessioned USING (item_hk)
     LEFT JOIN date_issued USING (item_hk)
 )

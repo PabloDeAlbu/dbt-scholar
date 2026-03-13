@@ -1,0 +1,57 @@
+WITH base AS (
+    SELECT
+        publication_hk,
+        publication_source,
+        has_ir,
+        has_openaire,
+        has_sdg,
+        item_hk,
+        item_id,
+        dc_identifier_uri,
+        researchproduct_hk,
+        researchproduct_id,
+        match_scheme,
+        match_pid,
+        title,
+        publication_date_best,
+        publication_type_best,
+        publisher,
+        best_access_right,
+        organization_ror,
+        unlp_first_extract_datetime,
+        unlp_last_extract_datetime,
+        COALESCE(sdg_count, 0) AS sdg_count,
+        sdg_values
+    FROM {{ ref('fct_unlp_publication') }}
+    WHERE has_ir = TRUE
+),
+
+final AS (
+    SELECT
+        base.publication_hk,
+        base.publication_source,
+        base.has_ir,
+        base.has_openaire,
+        base.has_sdg,
+        base.item_hk,
+        base.item_id,
+        base.dc_identifier_uri,
+        base.researchproduct_hk,
+        base.researchproduct_id,
+        base.match_scheme,
+        base.match_pid,
+        base.title,
+        base.publication_date_best,
+        base.publication_type_best,
+        base.publisher,
+        base.best_access_right,
+        base.organization_ror,
+        base.unlp_first_extract_datetime,
+        base.unlp_last_extract_datetime,
+        base.sdg_count,
+        NULLIF(BTRIM(sdg.sdg), '') AS sdg
+    FROM base
+    LEFT JOIN LATERAL REGEXP_SPLIT_TO_TABLE(COALESCE(base.sdg_values, ''), '[|]') AS sdg(sdg) ON TRUE
+)
+
+SELECT * FROM final

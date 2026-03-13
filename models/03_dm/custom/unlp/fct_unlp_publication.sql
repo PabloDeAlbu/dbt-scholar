@@ -8,7 +8,14 @@ WITH ir_base AS (
         dc_identifier_uri_raw,
         date_issued,
         date_accessioned,
+        title AS ir_title,
         type AS ir_type,
+        has_doi AS ir_has_doi,
+        has_handle AS ir_has_handle,
+        doi_count AS ir_doi_count,
+        handle_count AS ir_handle_count,
+        doi AS ir_doi,
+        handle AS ir_handle,
         in_archive,
         withdrawn,
         discoverable
@@ -16,81 +23,27 @@ WITH ir_base AS (
     WHERE in_archive = TRUE AND withdrawn = FALSE
 ),
 
-ir_title AS (
-    SELECT
-        i.item_hk,
-        MIN(mv.text_value)::text AS ir_title
-    FROM ir_base i
-    JOIN {{ ref('brg_dspace5_item_metadatavalue') }} i_mv
-      ON i_mv.item_hk = i.item_hk
-     AND i_mv.metadatafield_fullname = 'dc.title'
-    JOIN {{ ref('dim_dspace5_metadatavalue') }} mv USING (metadatavalue_hk)
-    GROUP BY i.item_hk
-),
-
-ir_handle_pid AS (
+ir_pid AS (
     SELECT DISTINCT
         item_hk,
         'handle'::text AS scheme,
-        LOWER(REGEXP_REPLACE(dc_identifier_uri, '^https?://[^/]+/handle/', '')) AS pid_value
+        pid_value
     FROM ir_base
-    WHERE dc_identifier_uri ~* '^https?://[^/]+/handle/'
-),
-
-ir_doi_raw AS (
-    SELECT
-        i.item_hk,
-        LOWER(mv.text_value)::text AS raw_value
-    FROM ir_base i
-    JOIN {{ ref('brg_dspace5_item_metadatavalue') }} i_mv
-      ON i_mv.item_hk = i.item_hk
-     AND i_mv.metadatafield_fullname IN ('dc.identifier.uri', 'sedici.identifier.other')
-    JOIN {{ ref('dim_dspace5_metadatavalue') }} mv USING (metadatavalue_hk)
-),
-
-ir_doi_pid AS (
+    CROSS JOIN LATERAL REGEXP_SPLIT_TO_TABLE(COALESCE(ir_handle, ''), '[|]') AS pid_value
+    WHERE pid_value <> ''
+    UNION
     SELECT DISTINCT
         item_hk,
         'doi'::text AS scheme,
-        REGEXP_REPLACE(
-            SUBSTRING(raw_value FROM '(10\.[0-9]{4,9}/[^[:space:]<>|";]+)'),
-            '[\.\),;:]+$',
-            ''
-        ) AS pid_value
-    FROM ir_doi_raw
-    WHERE SUBSTRING(raw_value FROM '(10\.[0-9]{4,9}/[^[:space:]<>|";]+)') IS NOT NULL
-),
-
-ir_pid AS (
-    SELECT * FROM ir_handle_pid
-    UNION
-    SELECT * FROM ir_doi_pid
-),
-
-ir_pid_agg AS (
-    SELECT
-        item_hk,
-        COUNT(*) FILTER (WHERE scheme = 'doi') AS ir_doi_count,
-        COUNT(*) FILTER (WHERE scheme = 'handle') AS ir_handle_count,
-        STRING_AGG(pid_value, '|' ORDER BY pid_value) FILTER (WHERE scheme = 'doi') AS ir_doi,
-        STRING_AGG(pid_value, '|' ORDER BY pid_value) FILTER (WHERE scheme = 'handle') AS ir_handle
-    FROM ir_pid
-    GROUP BY item_hk
+        pid_value
+    FROM ir_base
+    CROSS JOIN LATERAL REGEXP_SPLIT_TO_TABLE(COALESCE(ir_doi, ''), '[|]') AS pid_value
+    WHERE pid_value <> ''
 ),
 
 ir_publication AS (
-    SELECT
-        ir_base.*,
-        ir_title.ir_title,
-        COALESCE(ir_pid_agg.ir_doi_count, 0) AS ir_doi_count,
-        COALESCE(ir_pid_agg.ir_handle_count, 0) AS ir_handle_count,
-        COALESCE(ir_pid_agg.ir_doi_count, 0) > 0 AS ir_has_doi,
-        COALESCE(ir_pid_agg.ir_handle_count, 0) > 0 AS ir_has_handle,
-        ir_pid_agg.ir_doi,
-        ir_pid_agg.ir_handle
+    SELECT *
     FROM ir_base
-    LEFT JOIN ir_title USING (item_hk)
-    LEFT JOIN ir_pid_agg USING (item_hk)
 ),
 
 openaire_pid_raw AS (
