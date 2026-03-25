@@ -20,7 +20,7 @@ WITH base AS (
         org.organization_name,
         org.legalname,
         org.acronym
-    FROM {{ ref('fct_openaire_researchproduct_extract') }} extract
+    FROM {{ ref('fct_openaire_researchproduct_extraction') }} extract
     LEFT JOIN {{ ref('dim_openaire_organization') }} org
         ON extract._filter_value = org.organization_ror
     WHERE extract._filter_param = 'relOrganizationId'

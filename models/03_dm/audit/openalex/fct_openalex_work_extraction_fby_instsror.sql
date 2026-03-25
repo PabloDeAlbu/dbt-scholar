@@ -18,7 +18,7 @@ WITH base AS (
         extract.extract_datetime,
         extract.load_datetime,
         extract.source
-    FROM {{ ref('fct_openalex_work_extract') }} extract
+    FROM {{ ref('fct_openalex_work_extraction') }} extract
     LEFT JOIN {{ ref('dim_openalex_institution') }} dim_i
         ON extract._filter_value = dim_i.ror
     WHERE extract._filter_param = 'institutions.ror'

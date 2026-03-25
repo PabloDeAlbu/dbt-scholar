@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: fct_openaire_researchproduct_extract
+  - name: fct_openaire_researchproduct_extraction
     description: >
       Audit fact for OpenAIRE extraction events. Records each observation of a research
       product in an extraction, including the applied filter, extraction timestamp,
@@ -52,15 +52,15 @@ models:
       - name: source
         description: Source label provided by OpenAIRE for the extraction record.
 
-  - name: fct_openaire_researchproduct_relorganizationid_extract
+  - name: fct_openaire_researchproduct_extraction_fby_relorgid
     description: >
-      Audit fact filtrado a `relOrganizationId`, enriquecido con la dimensión de organizaciones
-      para exponer nombre institucional y `organization_id` de OpenAIRE a partir del ROR.
+      Audit view by `relOrganizationId`. It shows which OpenAIRE extraction
+      retrieved each research product for the ROR used in the extraction method.
     config:
       tags: [audit, openaire]
     columns:
       - name: extract_cdk
-        description: Clave de extracción heredada del satélite del Data Vault.
+        description: Extraction key from the Data Vault satellite.
         data_tests:
           - not_null
           - unique
@@ -74,19 +74,19 @@ models:
         data_tests:
           - not_null
       - name: organization_ror
-        description: ROR usado como `_filter_value` en la extracción.
+        description: ROR used by the extraction method to retrieve data from OpenAIRE.
         data_tests:
           - not_null
       - name: organization_hk
-        description: Hash key de la organización en OpenAIRE, si existe match por ROR.
+        description: OpenAIRE organization hash key when a ROR match exists.
       - name: organization_id
-        description: Identificador canónico de la organización en OpenAIRE.
+        description: Canonical OpenAIRE organization identifier.
       - name: organization_name
-        description: Nombre legible de la institución.
+        description: Organization name.
       - name: legalname
-        description: Nombre legal informado por OpenAIRE.
+        description: OpenAIRE legal name.
       - name: acronym
-        description: Acrónimo informado por OpenAIRE.
+        description: OpenAIRE acronym.
       - name: extract_datetime
         data_tests:
           - not_null

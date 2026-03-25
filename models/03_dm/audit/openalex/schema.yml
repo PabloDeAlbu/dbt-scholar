@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: fct_openalex_work_extract
+  - name: fct_openalex_work_extraction
     description: >
       Audit fact for OpenAlex extraction events. Records each observation of a work
       in an extraction, including any applied filter plus extraction and warehouse
@@ -48,15 +48,15 @@ models:
       - name: source
         description: Source label provided by OpenAlex for the extraction record.
 
-  - name: fct_openalex_work_institution_ror
+  - name: fct_openalex_work_extraction_fby_instsror
     description: >
-      Audit fact filtrado a `institutions.ror`, enriquecido con la dimensión de
-      instituciones OpenAlex para exponer nombre institucional e identificador canónico.
+      Audit view by `institutions.ror`. It shows which OpenAlex extraction
+      retrieved each work for the ROR used in the extraction method.
     config:
       tags: [audit, openalex]
     columns:
       - name: extract_cdk
-        description: Clave de extracción heredada del satélite del Data Vault.
+        description: Extraction key from the Data Vault satellite.
         data_tests:
           - not_null
           - unique
@@ -69,14 +69,14 @@ models:
       - name: work_id
         data_tests: [not_null]
       - name: institution_ror
-        description: ROR usado como `_filter_value` en la extracción.
+        description: ROR used by the extraction method to retrieve data from OpenAlex.
         data_tests: [not_null]
       - name: institution_hk
-        description: Hash key de la institución OpenAlex, si existe match por ROR.
+        description: OpenAlex institution hash key when a ROR match exists.
       - name: institution_id
-        description: Identificador canónico de la institución en OpenAlex.
+        description: Canonical OpenAlex institution identifier.
       - name: institution_display_name
-        description: Nombre institucional legible.
+        description: Institution display name.
       - name: extract_datetime
         data_tests: [not_null]
       - name: load_datetime
