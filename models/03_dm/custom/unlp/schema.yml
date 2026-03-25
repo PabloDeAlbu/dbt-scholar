@@ -6,7 +6,10 @@ models:
       Hecho consolidado de publicaciones UNLP que cruza ítems del repositorio institucional con
       publicaciones OpenAIRE por PID normalizados, priorizando DOI y luego handle. La resolución de
       metadatos y PIDs del IR se toma exclusivamente desde `fct_unlp_ir_item_publication`, sin volver
-      a resolver cruces directo contra los bridges crudos de DSpace 5.
+      a resolver cruces directo contra los bridges crudos de DSpace 5. Este modelo no debe interpretarse
+      como un universo deduplicado canónico entre IR y OpenAIRE: el match por PID identifica coincidencias
+      entre conjuntos, pero no garantiza deduplicación global. Para análisis OpenAIRE-first usar
+      `fct_unlp_openaire_publication_ir_match_by_pid`.
     config:
       tags: [unlp, dm]
     columns:

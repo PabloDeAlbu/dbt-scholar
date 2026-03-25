@@ -41,3 +41,46 @@ models:
         data_tests: [not_null]
       - name: sdg_values
         description: Lista de SDGs asociados, concatenados con `|`.
+
+  - name: fct_unlp_openaire_publication_ir_match_by_pid
+    description: >
+      Hecho analítico OpenAIRE-first para UNLP (1 fila por `researchproduct_hk`) con enriquecimiento
+      opcional desde el IR sólo cuando existe coincidencia exacta por PID normalizado. Este modelo
+      es adecuado para análisis donde el universo lo define OpenAIRE y el IR se interpreta como
+      cobertura adicional por match exacto.
+    config:
+      tags: [unlp, dm]
+    columns:
+      - name: publication_hk
+        description: Identificador técnico derivado del `researchproduct_hk`.
+        data_tests: [not_null, unique]
+      - name: researchproduct_hk
+        description: Clave hash del research product OpenAIRE.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('dim_openaire_researchproduct')
+              field: researchproduct_hk
+      - name: researchproduct_id
+        description: Identificador canónico del research product en OpenAIRE.
+        data_tests: [not_null]
+      - name: has_ir_pid_match
+        description: Indica si el research product tiene un match resuelto contra un ítem del IR por PID exacto.
+        data_tests: [not_null]
+      - name: match_scheme
+        description: Esquema del PID usado para el match exacto contra IR, cuando existe.
+      - name: match_pid
+        description: PID normalizado usado para el match exacto contra IR, cuando existe.
+      - name: ir_candidate_match_count
+        description: Cantidad de ítems del IR candidatos para ese research product según match exacto por PID.
+      - name: item_hk
+        description: Clave hash del ítem del IR, cuando existe match exacto resuelto.
+      - name: has_sdg
+        description: Flag OpenAIRE que indica si el research product tiene al menos un SDG asociado.
+        data_tests: [not_null]
+      - name: sdg_count
+        description: Cantidad de SDGs asociados según OpenAIRE.
+        data_tests: [not_null]
+      - name: sdg_values
+        description: Lista de SDGs asociados, concatenados con `|`.
