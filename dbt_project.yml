@@ -80,6 +80,7 @@ models:
           +schema: audit
           +tags: [audit]
       core:
+        +schema: core
         coar:
           +schema: coar
           +tags: [coar]

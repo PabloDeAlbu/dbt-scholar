@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: dim_organization
+    description: Dimensión central de organizaciones consolidada entre OpenAIRE y OpenAlex, con cruce por ROR cuando está disponible.
+    config:
+      tags: [dm]
+    columns:
+      - name: organization_ror
+        description: Identificador ROR compartido entre fuentes cuando existe.
+      - name: organization_name
+        description: Nombre legible de la organización, priorizando OpenAIRE y luego OpenAlex.
+      - name: openaire_organization_hk
+        description: Clave hash nativa de OpenAIRE para la organización, cuando aplica.
+      - name: openaire_organization_id
+        description: Identificador canónico de OpenAIRE para la organización, cuando aplica.
+      - name: openalex_institution_hk
+        description: Clave hash nativa de OpenAlex para la institución, cuando aplica.
+      - name: openalex_institution_id
+        description: Identificador canónico de OpenAlex para la institución, cuando aplica.
+      - name: has_openaire
+        description: Flag que indica presencia de la organización en OpenAIRE.
+        data_tests: [not_null]
+      - name: has_openalex
+        description: Flag que indica presencia de la organización en OpenAlex.
+        data_tests: [not_null]
