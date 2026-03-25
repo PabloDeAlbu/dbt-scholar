@@ -5,8 +5,8 @@ WITH unlp_extract AS (
         researchproduct_hk,
         MIN(load_datetime) AS unlp_first_extract_datetime,
         MAX(load_datetime) AS unlp_last_extract_datetime
-    FROM {{ ref('brg_openaire_researchproduct_filter_applied') }}
-    WHERE _filter_value = 'https://ror.org/01tjs6929'
+    FROM {{ ref('fct_openaire_researchproduct_extraction_fby_relorgid') }}
+    WHERE organization_ror = 'https://ror.org/01tjs6929'
     GROUP BY researchproduct_hk
 ),
 

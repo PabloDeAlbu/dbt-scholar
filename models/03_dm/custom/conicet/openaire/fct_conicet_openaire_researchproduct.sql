@@ -5,9 +5,8 @@ WITH conicet_extract AS (
         researchproduct_hk,
         MIN(load_datetime) AS conicet_first_extract_datetime,
         MAX(load_datetime) AS conicet_last_extract_datetime
-    FROM {{ ref('brg_openaire_researchproduct_filter_applied') }}
-    WHERE _filter_param = 'relOrganizationId'
-      AND _filter_value = 'https://ror.org/03cqe8w59'
+    FROM {{ ref('fct_openaire_researchproduct_extraction_fby_relorgid') }}
+    WHERE organization_ror = 'https://ror.org/03cqe8w59'
     GROUP BY researchproduct_hk
 ),
 
