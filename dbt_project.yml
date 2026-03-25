@@ -113,6 +113,8 @@ models:
           +tags: [unlp]
     04_viz:
       core:
+        audit:
+          +schema: audit
         openaire:
           +schema: openaire
           +tags: [openaire]
