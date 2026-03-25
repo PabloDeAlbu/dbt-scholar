@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: stg_openalex_work__extract
+    description: >
+      Staging model for OpenAlex work extraction events.
+      It standardizes extraction metadata and builds `extract_cdk` to identify
+      each extracted record by entity, extraction time, and applied filter.
+    columns:
+      - name: extract_cdk
+        description: >
+          Hash key for the extraction event.
+          It identifies the extracted record by work, extraction time,
+          and filter values.
