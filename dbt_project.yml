@@ -34,9 +34,6 @@ models:
   dbt_scholar:
     +materialized: table
     01_ldg:
-      audit:
-        +schema: ldg_audit
-        +tags: [audit]
       coar:
         +schema: coar
         +tags: [coar]
@@ -75,6 +72,13 @@ models:
         +schema: openalex
         +tags: [openalex]
     03_dm:
+      audit:
+        openaire:
+          +schema: audit
+          +tags: [audit]
+        openalex:
+          +schema: audit
+          +tags: [audit]
       core:
         coar:
           +schema: coar

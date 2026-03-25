@@ -5,7 +5,7 @@ WITH cic_extract AS (
         work_hk,
         MIN(extract_datetime) AS cic_first_extract_datetime,
         MAX(extract_datetime) AS cic_last_extract_datetime
-    FROM {{ ref('ldg_audit_openalex_work_extract') }}
+    FROM {{ ref('fct_openalex_work_extract') }}
     WHERE _filter_param = 'institutions.ror'
       AND _filter_value = '{{ cic_ror }}'
     GROUP BY work_hk
