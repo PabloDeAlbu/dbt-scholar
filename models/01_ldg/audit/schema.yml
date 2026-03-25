@@ -1,0 +1,71 @@
+version: 2
+
+models:
+  - name: ldg_audit_openaire_researchproduct_extract
+    description: >
+      Estado interno de las extracciones de OpenAIRE derivado del satélite
+      `sat_openaire_researchproduct__extract` del Data Vault. Expone el evento
+      de extracción sin generar claves surrogadas adicionales en el data mart.
+    columns:
+      - name: extract_cdk
+        description: Clave compuesta de negocio de la extracción en el satélite.
+        data_tests: [not_null, unique]
+      - name: researchproduct_hk
+        data_tests: [not_null]
+      - name: researchproduct_id
+        data_tests: [not_null]
+      - name: _filter_param
+      - name: _filter_value
+      - name: extract_datetime
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+      - name: source
+        data_tests: [not_null]
+
+  - name: ldg_audit_openalex_work_extract
+    description: >
+      Estado interno de las extracciones de OpenAlex derivado del satélite
+      `sat_openalex_work__extract` del Data Vault. Expone el evento de
+      extracción sin generar claves surrogadas adicionales en el data mart.
+    columns:
+      - name: extract_cdk
+        description: Clave compuesta de negocio de la extracción en el satélite.
+        data_tests: [not_null, unique]
+      - name: work_hk
+        data_tests: [not_null]
+      - name: work_id
+        data_tests: [not_null]
+      - name: _filter_param
+      - name: _filter_value
+      - name: extract_datetime
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+      - name: source
+        data_tests: [not_null]
+
+  - name: ldg_audit_extraction
+    description: >
+      Tabla audit genérica de landing para relevar procesos internos de
+      extracción. Consolida el estado de extracción disponible en el Data Vault
+      para cada fuente, empezando por OpenAIRE y OpenAlex.
+    columns:
+      - name: source_system
+        data_tests: [not_null]
+      - name: entity_name
+        data_tests: [not_null]
+      - name: extract_cdk
+        data_tests: [not_null]
+      - name: entity_hk
+        data_tests: [not_null]
+      - name: entity_id
+        data_tests: [not_null]
+      - name: _filter_param
+      - name: _filter_value
+      - name: extract_datetime
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+      - name: source
+        data_tests: [not_null]
