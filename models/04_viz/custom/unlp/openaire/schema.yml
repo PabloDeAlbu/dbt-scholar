@@ -30,7 +30,10 @@ models:
   - name: viz_unlp_publication_sdg
     description: >
       Vista analítica de publicaciones UNLP con match confirmado entre IR y OpenAIRE, a grano
-      publicación x SDG, para agrupar y explorar la producción institucional por ODS.
+      publicación x SDG, para agrupar y explorar la producción institucional por ODS. Actualmente
+      se apoya en `fct_unlp_publication`, por lo que sólo incluye registros `matched` y no representa
+      el universo completo OpenAIRE-first. Para análisis basados en OpenAIRE con enriquecimiento
+      opcional desde IR por PID exacto, usar `fct_unlp_openaire_publication_ir_match_by_pid`.
     config:
       tags: [viz]
     data_tests:

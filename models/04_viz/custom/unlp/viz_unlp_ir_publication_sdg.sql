@@ -13,6 +13,7 @@ WITH base AS (
         match_scheme,
         match_pid,
         title,
+        ir_type,
         publication_date_best,
         publication_type_best,
         publisher,
@@ -41,6 +42,7 @@ final AS (
         base.match_scheme,
         base.match_pid,
         base.title,
+        base.ir_type,
         base.publication_date_best,
         base.publication_type_best,
         base.publisher,
@@ -49,7 +51,11 @@ final AS (
         base.unlp_first_extract_datetime,
         base.unlp_last_extract_datetime,
         base.sdg_count,
-        NULLIF(BTRIM(sdg.sdg), '') AS sdg
+        CASE
+            WHEN NULLIF(BTRIM(sdg.sdg), '') ~ '^[0-9](\D|$)' THEN
+                REGEXP_REPLACE(NULLIF(BTRIM(sdg.sdg), ''), '^([0-9])(\D|$)', '0\1\2')
+            ELSE NULLIF(BTRIM(sdg.sdg), '')
+        END AS sdg
     FROM base
     LEFT JOIN LATERAL REGEXP_SPLIT_TO_TABLE(COALESCE(base.sdg_values, ''), '[|]') AS sdg(sdg) ON TRUE
 )
