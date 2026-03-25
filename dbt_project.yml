@@ -80,6 +80,8 @@ models:
           +schema: audit
           +tags: [audit]
       core:
+        # Models in models/03_dm/core/ root build in dm_core.
+        # Subdirectories can override +schema and build in dm_<subschema>.
         +schema: core
         coar:
           +schema: coar

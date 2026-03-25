@@ -11,3 +11,4 @@ catalog.json
 run/
 logs/
 dbt_packages/
+dbt_internal_packages/
