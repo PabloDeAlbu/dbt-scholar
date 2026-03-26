@@ -37,6 +37,9 @@ models:
       coar:
         +schema: coar
         +tags: [coar]
+      dspacedb5:
+        +schema: dspacedb5
+        +tags: [dspacedb5]
       dspace:
         +schema: dspace
         +tags: [dspace]
@@ -56,6 +59,9 @@ models:
       coar:
         +schema: coar
         +tags: [coar]
+      dspacedb5:
+        +schema: dspacedb5
+        +tags: [dspacedb5]
       dspace:
         +schema: dspace
         +tags: [dspace]
@@ -73,12 +79,8 @@ models:
         +tags: [openalex]
     03_dm:
       audit:
-        openaire:
-          +schema: audit
-          +tags: [audit]
-        openalex:
-          +schema: audit
-          +tags: [audit]
+        +schema: audit
+        +tags: [audit]
       core:
         # Models in models/03_dm/core/ root build in dm_core.
         # Subdirectories can override +schema and build in dm_<subschema>.
@@ -86,6 +88,9 @@ models:
         coar:
           +schema: coar
           +tags: [coar]
+        dspacedb5:
+          +schema: dspacedb5
+          +tags: [dspacedb5]
         dspace:
           +schema: dspace
           +tags: [dspace]
@@ -139,6 +144,9 @@ seeds:
     dspacedb:
       +schema: dspacedb
       +tags: [dspacedb]
+    dspacedb5:
+      +schema: dspacedb5
+      +tags: [dspacedb5]
     openaire:
       +schema: openaire
       +tags: [openaire]

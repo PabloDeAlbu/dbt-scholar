@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: fct_dspacedb5_item_extraction_window
+    description: >
+      Ventana temporal de observación por item scopeado, repositorio e institución. Resume la
+      primera y última extracción/carga en la que el item fue visto.
+    config:
+      tags: [dspacedb5, dm]
+    columns:
+      - name: item_hk
+        data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+
+  - name: fct_dspacedb5_item_publication
+    description: >
+      Hecho core de items publicados DSpace 5 a nivel de item scopeado por repositorio e
+      institución. Expone el último estado conocido del item junto con su ventana temporal de
+      observación en las extracciones.
+    config:
+      tags: [dspacedb5, dm]
+    columns:
+      - name: item_hk
+        data_tests: [not_null, unique]
+      - name: item_id
+        data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]

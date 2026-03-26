@@ -1,0 +1,58 @@
+version: 2
+
+sources:
+  - name: dspacedb5
+    description: 'DSpace 5 dump cargado manualmente para la rama dspacedb5'
+    schema: ldg_dspacedb5
+    tables:
+      - name: bitstream
+      - name: bundle2bitstream
+      - name: collection
+      - name: collection2item
+      - name: community
+      - name: community2collection
+      - name: community2community
+      - name: handle
+      - name: item
+      - name: item2bundle
+      - name: metadatafieldregistry
+      - name: metadataschemaregistry
+      - name: metadatavalue
+
+models:
+  - name: ldg_dspacedb5_context
+    description: >
+      Contexto activo del dump DSpace 5 utilizado para inyectar `source_label`, `institution_ror`,
+      `extract_datetime` y `load_datetime` sobre las tablas crudas de `ldg_dspacedb5`.
+    columns:
+      - name: context_id
+        data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+      - name: extract_datetime
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+
+  - name: ldg_dspacedb5_item
+    description: >
+      Capa landing normalizada para items DSpace 5 con contexto explícito de repositorio e
+      institución inyectado desde `seed_dspacedb5_context`.
+    columns:
+      - name: item_id
+        data_tests:
+          - not_null
+      - name: _source_label
+        data_tests:
+          - not_null
+      - name: _institution_ror
+        data_tests:
+          - not_null
+      - name: _extract_datetime
+        data_tests:
+          - not_null
+      - name: _load_datetime
+        data_tests:
+          - not_null

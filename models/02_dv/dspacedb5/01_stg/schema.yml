@@ -1,0 +1,23 @@
+version: 2
+
+models:
+  - name: stg_dspacedb5_item
+    description: >
+      Staging model para items DSpace 5 scopeados por institución y repositorio. Construye la
+      business key `item_bk` como combinación de `_institution_ror`, `_source_label` e `item_id`,
+      y deriva hash keys compatibles con un DV multi-repositorio.
+    columns:
+      - name: item_bk
+        description: Business key scopeada por institución, repositorio e ID local del item.
+      - name: item_hk
+        description: Hash key del item scopeado.
+      - name: extract_datetime
+        description: Fecha/hora de extracción normalizada.
+
+  - name: stg_dspacedb5_item__extract
+    description: >
+      Staging model de eventos de extracción de items DSpace 5. Construye `extract_cdk` para
+      identificar cada observación del item en una extracción determinada.
+    columns:
+      - name: extract_cdk
+        description: Hash key del evento de extracción por item y fecha de extracción.
