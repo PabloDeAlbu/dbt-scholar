@@ -51,3 +51,11 @@ models:
         description: Primera carga en la que se observó el item dentro del scope UNLP.
       - name: last_load_datetime
         description: Última carga en la que se observó el item dentro del scope UNLP.
+      - name: dc_date_available
+        description: Fecha `dc.date.available` normalizada como `date`.
+      - name: dc_date_available_raw
+        description: Valores crudos observados para `dc.date.available`, concatenados para auditoría.
+      - name: dc_date_issued
+        description: Fecha `dc.date.issued` normalizada como `date`.
+      - name: dc_date_issued_raw
+        description: Valores crudos observados para `dc.date.issued`, concatenados para auditoría.
