@@ -27,6 +27,8 @@ models:
     columns:
       - name: context_id
         data_tests: [not_null]
+      - name: institution_key
+        data_tests: [not_null]
       - name: source_label
         data_tests: [not_null]
       - name: institution_ror
@@ -39,7 +41,7 @@ models:
   - name: ldg_dspacedb5_item
     description: >
       Capa landing normalizada para items DSpace 5 con contexto explícito de repositorio e
-      institución inyectado desde `seed_dspacedb5_context`.
+      institución inyectado desde `seed_dspacedb5_repository`.
     columns:
       - name: item_id
         data_tests:

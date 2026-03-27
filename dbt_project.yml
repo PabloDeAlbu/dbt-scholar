@@ -37,6 +37,9 @@ models:
       coar:
         +schema: coar
         +tags: [coar]
+      dspacedb:
+        +schema: dspacedb
+        +tags: [dspacedb]
       dspacedb5:
         +schema: dspacedb5
         +tags: [dspacedb5]
@@ -59,6 +62,9 @@ models:
       coar:
         +schema: coar
         +tags: [coar]
+      dspacedb:
+        +schema: dspacedb
+        +tags: [dspacedb]
       dspacedb5:
         +schema: dspacedb5
         +tags: [dspacedb5]
@@ -88,6 +94,9 @@ models:
         coar:
           +schema: coar
           +tags: [coar]
+        dspacedb:
+          +schema: dspacedb
+          +tags: [dspacedb]
         dspacedb5:
           +schema: dspacedb5
           +tags: [dspacedb5]
