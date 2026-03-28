@@ -12,16 +12,12 @@ WITH base AS (
 
 metadatafield_dates AS (
     SELECT
-        mf.metadata_field_id,
-        ms.short_id,
-        mf.element,
-        mf.qualifier
-    FROM {{ ref('ldg_dspacedb5_metadatafieldregistry') }} AS mf
-    JOIN {{ ref('ldg_dspacedb5_metadataschemaregistry') }} AS ms
-        ON mf.metadata_schema_id = ms.metadata_schema_id
-    WHERE ms.short_id = 'dc'
-      AND mf.element = 'date'
-      AND mf.qualifier IN ('available', 'issued')
+        metadatafield_hk,
+        qualifier
+    FROM {{ ref('dim_dspacedb5_metadatafield') }}
+    WHERE short_id = 'dc'
+      AND element = 'date'
+      AND qualifier IN ('available', 'issued')
 ),
 
 raw_dates AS (
@@ -31,12 +27,11 @@ raw_dates AS (
         md.qualifier,
         mv.text_value
     FROM base
-    JOIN {{ ref('ldg_dspacedb5_metadatavalue') }} AS mv
-        ON base.item_id = mv.resource_id
+    JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
+        USING (item_hk)
     JOIN metadatafield_dates AS md
-        ON mv.metadata_field_id = md.metadata_field_id
-    WHERE mv.resource_type_id = 2
-      AND mv.text_value IS NOT NULL
+        USING (metadatafield_hk)
+    WHERE mv.text_value IS NOT NULL
 ),
 
 parsed_dates AS (

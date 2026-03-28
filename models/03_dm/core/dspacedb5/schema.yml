@@ -3,8 +3,9 @@ version: 2
 models:
   - name: fct_dspacedb5_item_extraction_window
     description: >
-      Ventana temporal de observación por item scopeado, repositorio e institución. Resume la
-      primera y última extracción/carga en la que el item fue visto.
+      Ventana temporal de observación por item contextualizado por repositorio e institución.
+      Resume la primera y última extracción/carga en la que el item fue visto. En `core` los
+      metadatos técnicos ya se consumen en su forma normalizada sin prefijo `_`.
     config:
       tags: [dspacedb5, dm]
     columns:
@@ -17,7 +18,7 @@ models:
 
   - name: fct_dspacedb5_item_publication
     description: >
-      Hecho core de items publicados DSpace 5 a nivel de item scopeado por repositorio e
+      Hecho core de items publicados DSpace 5 a nivel de item contextualizado por repositorio e
       institución. Expone el último estado conocido del item junto con su ventana temporal de
       observación en las extracciones.
     config:
@@ -30,4 +31,28 @@ models:
       - name: source_label
         data_tests: [not_null]
       - name: institution_ror
+        data_tests: [not_null]
+
+  - name: dim_dspacedb5_metadatafield
+    description: Dimensión de campos de metadatos contextualizados por repositorio e institución para la rama `dspacedb5`.
+    config:
+      tags: [dspacedb5, dm]
+    columns:
+      - name: metadatafield_fullname
+        data_tests: [not_null, unique]
+      - name: metadatafield_hk
+        data_tests: [not_null, unique]
+
+  - name: fct_dspacedb5_item_metadata
+    description: >
+      Hecho core de metadatos observados por item para la rama `dspacedb5`. Expone el último valor
+      conocido por `item_hk + metadata_value_id` sobre el histórico persistido en DV.
+    config:
+      tags: [dspacedb5, dm]
+    columns:
+      - name: item_hk
+        data_tests: [not_null]
+      - name: metadata_value_id
+        data_tests: [not_null]
+      - name: metadatafield_fullname
         data_tests: [not_null]

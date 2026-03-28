@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: sat_dspacedb5_item__extract
+    description: >
+      Satélite multi-activo de observaciones de extracción por item contextualizado por
+      repositorio e institución.
+    columns:
+      - name: item_hk
+        description: Hash key del item contextualizado por repositorio e institución.
+      - name: extract_datetime
+        description: Fecha/hora de la extracción observada.
+
+  - name: sat_dspacedb5_item_metadatavalue
+    description: >
+      Satélite histórico por cambio de metadatos observados por item para la rama `dspacedb5`.
+      Conserva una nueva fila solo cuando cambia el payload del metadato, no en cada dump.
+    columns:
+      - name: item_hk
+        description: Hash key del item contextualizado por repositorio e institución.
+      - name: metadatafield_fullname
+        description: Nombre canónico del campo de metadato.
+      - name: text_value
+        description: Valor textual del metadato observado.
+      - name: extract_datetime
+        description: Fecha/hora de la extracción observada.

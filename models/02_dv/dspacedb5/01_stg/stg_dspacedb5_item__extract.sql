@@ -3,6 +3,7 @@
 WITH raw_source AS (
     SELECT
         item_id::text AS item_id,
+        item_bk,
         _source_label::text AS source_label,
         _institution_ror::text AS institution_ror,
         COALESCE(_extract_datetime::timestamp, _load_datetime::timestamp) AS extract_datetime,
@@ -31,8 +32,8 @@ final AS (
         ) }}
     FROM (
         SELECT
-            COALESCE(institution_ror::text, '') || '||' || COALESCE(source_label::text, '') || '||' || COALESCE(item_id::text, '') AS item_bk,
             item_id,
+            item_bk,
             source_label,
             institution_ror,
             extract_datetime,

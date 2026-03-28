@@ -9,7 +9,7 @@ models:
       tags: [unlp, dm]
     columns:
       - name: item_hk
-        description: Hash key del item scopeado por institución y repositorio.
+        description: Hash key del item contextualizado por repositorio e institución.
         data_tests:
           - not_null
           - unique

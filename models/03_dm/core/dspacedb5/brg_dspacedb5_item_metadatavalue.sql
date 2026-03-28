@@ -1,0 +1,28 @@
+{{ config(materialized='table') }}
+
+WITH base AS (
+    SELECT
+        hub_i.item_bk,
+        mf.metadatafield_fullname,
+        mf.short_id,
+        mf.element,
+        mf.qualifier,
+        sat_mv.text_value,
+        sat_mv.text_lang,
+        sat_mv.place,
+        sat_mv.authority,
+        sat_mv.confidence,
+        mf.metadatafield_hk,
+        lnk_mv_r.resource_hk AS item_hk,
+        lnk_mv_r.metadatavalue_hk
+    FROM {{ ref('hub_dspacedb5_item') }} hub_i
+    JOIN {{ ref('tlink_dspacedb5_metadatavalue_resource') }} lnk_mv_r
+        ON hub_i.item_hk = lnk_mv_r.resource_hk
+    JOIN {{ ref('link_dspacedb5_metadatavalue_metadatafield') }} lnk_mv_mf USING (metadatavalue_hk)
+    JOIN {{ ref('dim_dspacedb5_metadatafield') }} mf USING (metadatafield_hk)
+    JOIN {{ latest_satellite(ref('sat_dspacedb5_metadatavalue'), 'metadatavalue_hk', order_column='load_datetime') }} AS sat_mv
+        USING (metadatavalue_hk)
+    WHERE lnk_mv_r.resource_type_id = 2
+)
+
+SELECT * FROM base

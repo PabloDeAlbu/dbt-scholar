@@ -15,6 +15,9 @@ renamed AS (
     discoverable,
     context.source_label AS _source_label,
     context.institution_ror AS _institution_ror,
+    context.institution_ror || '||' || context.source_label AS _repository_scope,
+    context.institution_ror || '||' || context.source_label || '||' || item_id::text AS item_bk,
+    context.institution_ror || '||' || context.source_label || '||' || owning_collection::text AS owningcollection_bk,
     context.extract_datetime AS _extract_datetime,
     context.load_datetime AS _load_datetime
   FROM source
@@ -31,6 +34,9 @@ ghost_record AS (
     false AS discoverable,
     '!UNKNOWN' AS _source_label,
     '!UNKNOWN' AS _institution_ror,
+    '!UNKNOWN||!UNKNOWN' AS _repository_scope,
+    '!UNKNOWN||!UNKNOWN||-1' AS item_bk,
+    '!UNKNOWN||!UNKNOWN||-1' AS owningcollection_bk,
     '1900-01-01'::timestamp AS _extract_datetime,
     '1900-01-01'::timestamp AS _load_datetime
 )

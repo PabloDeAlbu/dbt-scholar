@@ -41,20 +41,26 @@ models:
   - name: ldg_dspacedb5_item
     description: >
       Capa landing normalizada para items DSpace 5 con contexto explícito de repositorio e
-      institución inyectado desde `seed_dspacedb5_repository`.
+      institución inyectado desde `seed_dspacedb5_repository`. En `ldg` los metadatos técnicos de
+      ingestión se conservan con prefijo `_` (`_source_label`, `_institution_ror`,
+      `_extract_datetime`, `_load_datetime`) para distinguirlos de los atributos de negocio.
     columns:
       - name: item_id
         data_tests:
           - not_null
       - name: _source_label
+        description: Etiqueta técnica de la fuente en la capa landing.
         data_tests:
           - not_null
       - name: _institution_ror
+        description: ROR institucional técnico inyectado en la capa landing.
         data_tests:
           - not_null
       - name: _extract_datetime
+        description: Fecha/hora técnica de extracción conservada con prefijo `_` en landing.
         data_tests:
           - not_null
       - name: _load_datetime
+        description: Fecha/hora técnica de carga conservada con prefijo `_` en landing.
         data_tests:
           - not_null

@@ -3,21 +3,49 @@ version: 2
 models:
   - name: stg_dspacedb5_item
     description: >
-      Staging model para items DSpace 5 scopeados por institución y repositorio. Construye la
-      business key `item_bk` como combinación de `_institution_ror`, `_source_label` e `item_id`,
-      y deriva hash keys compatibles con un DV multi-repositorio.
+      Staging model para items DSpace 5 contextualizados por repositorio e institución. Construye
+      la business key `item_bk` como combinación de `_institution_ror`, `_source_label` e
+      `item_id`, y deriva hash keys compatibles con un DV multi-repositorio. Desde `stg` en
+      adelante, los metadatos técnicos de ingestión se exponen sin prefijo `_`
+      (`source_label`, `institution_ror`, `extract_datetime`, `load_datetime`) como forma
+      normalizada de trabajo para DV y DM.
     columns:
       - name: item_bk
-        description: Business key scopeada por institución, repositorio e ID local del item.
+        description: Business key del item contextualizado por repositorio e institución.
       - name: item_hk
-        description: Hash key del item scopeado.
+        description: Hash key del item contextualizado por repositorio e institución.
       - name: extract_datetime
         description: Fecha/hora de extracción normalizada.
 
   - name: stg_dspacedb5_item__extract
     description: >
       Staging model de eventos de extracción de items DSpace 5. Construye `extract_cdk` para
-      identificar cada observación del item en una extracción determinada.
+      identificar cada observación del item en una extracción determinada. Toma los metadatos
+      técnicos provenientes de `ldg` y los normaliza sin prefijo `_`.
     columns:
       - name: extract_cdk
         description: Hash key del evento de extracción por item y fecha de extracción.
+
+  - name: stg_dspacedb5_item_metadatavalue
+    description: >
+      Staging model estructural de la relación item-metadatovalue para `dspacedb5`. Resuelve en
+      una sola vista el join entre item, metadatavalue, metadatafieldregistry y
+      metadataschemaregistry, y estandariza `metadatafield_fullname`. Los metadatos técnicos de
+      ingestión se consumen desde `ldg` con `_` y se exponen aquí sin prefijo.
+    columns:
+      - name: item_bk
+        description: Business key del item contextualizado por repositorio e institución.
+      - name: metadatavalue_bk
+        description: Business key del valor de metadato contextualizado por repositorio e institución.
+      - name: source_label
+        description: Etiqueta de fuente normalizada, sin prefijo `_`, para uso en DV y DM.
+      - name: institution_ror
+        description: ROR institucional normalizado, sin prefijo `_`, para uso en DV y DM.
+      - name: extract_datetime
+        description: Fecha/hora de extracción normalizada, sin prefijo `_`, para uso en DV y DM.
+      - name: load_datetime
+        description: Fecha/hora de carga normalizada, sin prefijo `_`, para uso en DV y DM.
+      - name: metadatafield_fullname
+        description: Nombre canónico del campo de metadato.
+      - name: item_metadatavalue_extract_hk
+        description: Hash key del evento item-metadato por extracción.
