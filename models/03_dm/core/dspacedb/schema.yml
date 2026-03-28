@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: fct_dspacedb_item_extraction_window
+    description: >
+      Ventana temporal de observación por item contextualizado por repositorio e institución.
+      Resume la primera y última extracción/carga en la que el item fue visto.
+    config:
+      tags: [dspacedb, dm]
+    columns:
+      - name: item_hk
+        data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+
+  - name: fct_dspacedb_item_publication
+    description: >
+      Hecho base de items publicados para la rama `dspacedb`, a grano item. Expone el último
+      estado conocido del item junto con su ventana temporal de observación en las extracciones.
+      En DSpace 7+ el identificador canónico de la entidad es `item_uuid`; `item_id` se conserva
+      solo como identificador legado cuando está presente.
+    config:
+      tags: [dspacedb, dm]
+    columns:
+      - name: item_id
+        description: Identificador legado del item, conservado si existe por compatibilidad.
+        data_tests: [not_null]
+      - name: item_uuid
+        description: UUID canónico del item en DSpace 7+.
+        data_tests: [not_null, unique]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+
+  - name: fct_dspacedb_item_metadata
+    description: >
+      Hecho core de metadatos observados por item para la rama `dspacedb`. Expone el último valor
+      conocido por `item_metadatavalue_hk` sobre el histórico persistido en DV.
+    config:
+      tags: [dspacedb, dm]
+    columns:
+      - name: item_uuid
+        data_tests: [not_null]
+      - name: metadata_value_id
+        data_tests: [not_null]
+      - name: metadatafield_fullname
+        data_tests: [not_null]

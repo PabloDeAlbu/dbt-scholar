@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: stg_dspacedb_item
+    description: >
+      Staging model para items DSpace contextualizados por repositorio e institución. Desde `stg`
+      en adelante, los metadatos técnicos de ingestión se exponen sin prefijo `_`.
+    columns:
+      - name: item_bk
+        description: Business key del item contextualizado por repositorio e institución.
+      - name: item_hk
+        description: Hash key del item contextualizado por repositorio e institución.
+
+  - name: stg_dspacedb_item__extract
+    description: >
+      Staging model de eventos de extracción de items DSpace. Construye `extract_cdk` para
+      identificar cada observación del item en una extracción determinada.
+    columns:
+      - name: extract_cdk
+        description: Hash key del evento de extracción por item y fecha de extracción.
+
+  - name: stg_dspacedb_item_metadatavalue
+    description: >
+      Staging model estructural de la relación item-metadatovalue para `dspacedb`. Resuelve el
+      join entre item, metadatavalue, metadatafieldregistry y metadataschemaregistry, y
+      estandariza `metadatafield_fullname`.
+    columns:
+      - name: item_metadatavalue_hk
+        description: Hash key estable de la relación item-metadato.
+      - name: metadatafield_fullname
+        description: Nombre canónico del campo de metadato.

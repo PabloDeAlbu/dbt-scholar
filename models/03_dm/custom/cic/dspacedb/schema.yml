@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: fct_cic_dspacedb_item_publication
+    description: >
+      Hecho institucional de items publicados en CIC DIGITAL, construido sobre
+      `fct_dspacedb_item_publication` y enriquecido con el metadato `dc.title` desde la capa core
+      de metadatos.
+    config:
+      tags: [cic, dm]
+    columns:
+      - name: item_uuid
+        data_tests: [not_null, unique]
+      - name: item_id
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+      - name: dc_title
+        description: Valor preferido de `dc.title`.
+      - name: dc_title_raw
+        description: Valores crudos observados para `dc.title`, concatenados para auditoría.

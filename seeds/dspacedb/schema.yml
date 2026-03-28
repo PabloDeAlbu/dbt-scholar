@@ -1,0 +1,18 @@
+version: 2
+
+seeds:
+  - name: seed_dspacedb_repository
+    description: >
+      Mapeo versionado de repositorios DSpace para la rama `dspacedb`. Define el `source_label`,
+      el ROR institucional y el repositorio activo por defecto para construir el contexto del dump.
+    columns:
+      - name: repository_key
+        data_tests: [not_null, unique]
+      - name: institution_key
+        data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+      - name: is_active
+        data_tests: [not_null]

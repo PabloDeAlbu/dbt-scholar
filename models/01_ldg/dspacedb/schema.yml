@@ -1,0 +1,57 @@
+version: 2
+
+sources:
+  - name: dspacedb
+    description: 'DSpace database parametrizada para cargas manuales tipo dspacedb'
+    schema: ldg_dspacedb
+    tables:
+      - name: collection
+      - name: collection2item
+      - name: community
+      - name: community2collection
+      - name: community2community
+      - name: dspaceobject
+      - name: item
+      - name: metadatafieldregistry
+      - name: metadataschemaregistry
+      - name: metadatavalue
+
+models:
+  - name: ldg_dspacedb_context
+    description: >
+      Contexto activo del dump DSpace utilizado para inyectar `source_label`, `institution_ror`,
+      `extract_datetime` y `load_datetime` sobre las tablas crudas de `ldg_dspacedb`.
+    columns:
+      - name: context_id
+        data_tests: [not_null]
+      - name: institution_key
+        data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+      - name: extract_datetime
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+
+  - name: ldg_dspacedb_item
+    description: >
+      Capa landing normalizada para items DSpace con contexto explícito de repositorio e
+      institución inyectado desde el repositorio seleccionado en `seed_dspacedb_repository`.
+    columns:
+      - name: item_id
+        data_tests:
+          - not_null
+      - name: _source_label
+        data_tests:
+          - not_null
+      - name: _institution_ror
+        data_tests:
+          - not_null
+      - name: _extract_datetime
+        data_tests:
+          - not_null
+      - name: _load_datetime
+        data_tests:
+          - not_null
