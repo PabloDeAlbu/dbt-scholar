@@ -59,3 +59,53 @@ models:
         description: Fecha `dc.date.issued` normalizada como `date`.
       - name: dc_date_issued_raw
         description: Valores crudos observados para `dc.date.issued`, concatenados para auditoría.
+
+  - name: fct_unlp_dspace5db_eperson
+    description: >
+      Hecho institucional de usuarios `eperson` del repositorio DSpace 5 de UNLP, construido
+      sobre la tabla fuente `eperson` contextualizada por repositorio y enriquecido con actividad
+      como submitter a partir de `fct_unlp_dspace5db_item_publication`.
+    config:
+      tags: [unlp, dm]
+    columns:
+      - name: eperson_hk
+        description: Hash key estable del usuario dentro del scope institucional del repositorio.
+        data_tests:
+          - not_null
+          - unique
+      - name: eperson_id
+        description: ID original del usuario en la base transaccional DSpace 5.
+        data_tests:
+          - not_null
+      - name: email
+        description: Email registrado para la cuenta del usuario.
+      - name: netid
+        description: NetID o identificador de autenticación institucional informado por DSpace.
+      - name: can_log_in
+        description: Flag que indica si la cuenta tiene habilitado el login.
+      - name: require_certificate
+        description: Flag que indica si el usuario requiere certificado para autenticarse.
+      - name: self_registered
+        description: Flag que indica si la cuenta fue auto-registrada.
+      - name: submitter_flag
+        description: Flag que indica si el usuario aparece como submitter en al menos un item institucional.
+      - name: first_item_submission_date
+        description: Primera fecha aproximada de envío de ítems por el usuario.
+      - name: last_item_submission_date
+        description: Última fecha aproximada de envío de ítems por el usuario.
+      - name: source_label
+        description: Etiqueta de fuente del repositorio cargado.
+        data_tests:
+          - not_null
+      - name: institution_ror
+        description: ROR institucional del repositorio.
+        data_tests:
+          - not_null
+      - name: first_extract_datetime
+        description: Primera observación temporal del usuario en el warehouse para este scope institucional.
+      - name: last_extract_datetime
+        description: Última observación temporal del usuario en el warehouse para este scope institucional.
+      - name: first_load_datetime
+        description: Primera carga en la que el usuario quedó observado dentro del scope UNLP.
+      - name: last_load_datetime
+        description: Última carga en la que el usuario quedó observado dentro del scope UNLP.

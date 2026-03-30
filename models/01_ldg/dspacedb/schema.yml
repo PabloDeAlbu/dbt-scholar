@@ -11,6 +11,7 @@ sources:
       - name: community2collection
       - name: community2community
       - name: dspaceobject
+      - name: eperson
       - name: item
       - name: metadatafieldregistry
       - name: metadataschemaregistry

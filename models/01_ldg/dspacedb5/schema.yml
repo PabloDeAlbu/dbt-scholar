@@ -12,6 +12,7 @@ sources:
       - name: community
       - name: community2collection
       - name: community2community
+      - name: eperson
       - name: handle
       - name: item
       - name: item2bundle
