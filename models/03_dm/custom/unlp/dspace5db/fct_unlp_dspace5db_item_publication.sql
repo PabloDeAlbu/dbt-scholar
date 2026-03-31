@@ -3,11 +3,7 @@
 WITH base AS (
     SELECT *
     FROM {{ ref('fct_dspacedb5_item_publication') }}
-    WHERE institution_ror IN (
-        SELECT institution_ror
-        FROM {{ ref('seed_dspacedb5_repository') }}
-        WHERE institution_key = 'unlp'
-    )
+    WHERE institution_ror = 'https://ror.org/01tjs6929'
 ),
 
 metadatafield_dates AS (

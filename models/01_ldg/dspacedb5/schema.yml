@@ -24,12 +24,9 @@ models:
   - name: ldg_dspacedb5_context
     description: >
       Contexto activo del dump DSpace 5 utilizado para inyectar `source_label`, `institution_ror`,
-      `extract_datetime` y `load_datetime` sobre las tablas crudas de `ldg_dspacedb5`.
+      `extract_datetime` y `load_datetime` sobre las tablas crudas de `ldg_dspacedb5`. Los valores
+      de `source_label` e `institution_ror` se parametrizan con `vars` en `dbt_project.yml`.
     columns:
-      - name: context_id
-        data_tests: [not_null]
-      - name: institution_key
-        data_tests: [not_null]
       - name: source_label
         data_tests: [not_null]
       - name: institution_ror
@@ -42,9 +39,9 @@ models:
   - name: ldg_dspacedb5_item
     description: >
       Capa landing normalizada para items DSpace 5 con contexto explícito de repositorio e
-      institución inyectado desde `seed_dspacedb5_repository`. En `ldg` los metadatos técnicos de
-      ingestión se conservan con prefijo `_` (`_source_label`, `_institution_ror`,
-      `_extract_datetime`, `_load_datetime`) para distinguirlos de los atributos de negocio.
+      institución inyectado desde `vars` del proyecto. En `ldg` los metadatos técnicos de ingestión
+      se conservan con prefijo `_` (`_source_label`, `_institution_ror`, `_extract_datetime`,
+      `_load_datetime`) para distinguirlos de los atributos de negocio.
     columns:
       - name: item_id
         data_tests:

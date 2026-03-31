@@ -21,12 +21,9 @@ models:
   - name: ldg_dspacedb_context
     description: >
       Contexto activo del dump DSpace utilizado para inyectar `source_label`, `institution_ror`,
-      `extract_datetime` y `load_datetime` sobre las tablas crudas de `ldg_dspacedb`.
+      `extract_datetime` y `load_datetime` sobre las tablas crudas de `ldg_dspacedb`. Los valores
+      de `source_label` e `institution_ror` se parametrizan con `vars` en `dbt_project.yml`.
     columns:
-      - name: context_id
-        data_tests: [not_null]
-      - name: institution_key
-        data_tests: [not_null]
       - name: source_label
         data_tests: [not_null]
       - name: institution_ror
@@ -39,7 +36,7 @@ models:
   - name: ldg_dspacedb_item
     description: >
       Capa landing normalizada para items DSpace con contexto explícito de repositorio e
-      institución inyectado desde el repositorio seleccionado en `seed_dspacedb_repository`.
+      institución inyectado desde `vars` del proyecto.
     columns:
       - name: item_id
         data_tests:

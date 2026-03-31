@@ -3,11 +3,7 @@
 WITH base AS (
     SELECT *
     FROM {{ ref('fct_dspacedb_item_publication') }}
-    WHERE institution_ror IN (
-        SELECT institution_ror
-        FROM {{ ref('seed_dspacedb_repository') }}
-        WHERE institution_key = 'cic'
-    )
+    WHERE institution_ror = 'https://ror.org/02s7sax82'
 ),
 
 metadatafield_title AS (

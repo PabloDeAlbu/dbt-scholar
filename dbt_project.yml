@@ -172,3 +172,10 @@ data_tests:
 
 vars:
     "dbt_date:time_zone": "America/Argentina/Buenos_Aires"
+
+    # Ejemplo cic:
+    dspacedb_source_label: "cicdigital"
+    dspacedb_institution_ror: "https://ror.org/02s7sax82"
+    # Ejemplo unlp:
+    dspacedb5_source_label: "sedici"
+    dspacedb5_institution_ror: "https://ror.org/01tjs6929"

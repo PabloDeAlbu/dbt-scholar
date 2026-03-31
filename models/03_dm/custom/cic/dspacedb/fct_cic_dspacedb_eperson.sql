@@ -7,7 +7,7 @@ WITH context AS (
         extract_datetime,
         load_datetime
     FROM {{ ref('ldg_dspacedb_context') }}
-    WHERE institution_key = 'cic'
+    WHERE institution_ror = 'https://ror.org/02s7sax82'
 ),
 
 base_eperson AS (
