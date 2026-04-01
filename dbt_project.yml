@@ -87,6 +87,8 @@ models:
       audit:
         +schema: audit
         +tags: [audit]
+        oai:
+          +tags: [oai]
         dspacedb:
           +tags: [dspacedb]
         dspacedb5:
@@ -187,3 +189,7 @@ vars:
     # Ejemplo unlp:
     dspacedb5_source_label: "sedici"
     dspacedb5_institution_ror: "https://ror.org/01tjs6929"
+
+    # Ejemplo oai con conicet:
+    oai_repository_identifier: "ri.conicet.gov.ar"
+    oai_institution_ror: "https://ror.org/03cqe8w59"

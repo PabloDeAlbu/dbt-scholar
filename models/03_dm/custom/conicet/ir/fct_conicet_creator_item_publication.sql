@@ -23,7 +23,7 @@ papers_context AS (
         subject_subarea,   -- FOS Nivel 2
         coar_type,
         has_doi
-    FROM {{ ref('fct_conicet_item_publication') }}
+    FROM {{ ref('fct_conicet_oai_record_publication') }}
 )
 
 -- 3. Tabla Final: Centrada en la actividad del Autor

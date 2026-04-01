@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: fct_conicet_oai_record_publication
+    description: >
+      Hecho institucional CONICET a nivel de registro OAI, con metadatos descriptivos,
+      tipologia COAR, condiciones de acceso y enriquecimiento de identificadores
+      dentro del subconjunto del repositorio OAI configurado por variables.
+    config:
+      tags: [conicet, dm]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: "dc_identifier_uri ~ '^http://hdl\\\\.handle\\\\.net/11336/'"
+      - dbt_utils.expression_is_true:
+          expression: "dc_relation_doi is null OR dc_relation_doi ~* '^10\\\\.[0-9]{4,9}/\\\\S+$'"
+    columns:
+      - name: record_hk
+        description: Clave hash del registro OAI.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('fct_oai_record_publication')
+              field: record_hk
+      - name: record_id
+        description: Identificador OAI-PMH del registro.
+        data_tests: [not_null]
+      - name: repository_identifier
+        description: Identificador del repositorio OAI del que proviene el registro.
+      - name: institution_ror
+        description: ROR institucional asignado al contexto de extraccion.
+      - name: dc_identifier_uri
+        description: Handle institucional filtrado por prefijo CONICET.
+        data_tests:
+          - not_null
+          - unique
+      - name: dc_relation_doi
+        description: DOI principal obtenido desde `dc.relation`.
+        data_tests:
+          - unique:
+              config:
+                severity: warn

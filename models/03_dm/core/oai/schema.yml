@@ -21,7 +21,8 @@ models:
   - name: fct_oai_record_publication
     description: >
       Hecho de registros OAI-PMH (1 fila por record) con metadatos principales y
-      validaciones básicas de calidad (fecha y tipología).
+      validaciones básicas de calidad (fecha y tipología), junto con el contexto
+      técnico de extracción generado por este proyecto.
     config:
       tags: [dm]
     columns:
@@ -34,6 +35,10 @@ models:
         description: Identificador OAI-PMH del registro (p. ej. oai:...).
         data_tests:
           - not_null
+      - name: repository_identifier
+        description: Identificador del repositorio proveedor del registro OAI.
+      - name: institution_ror
+        description: ROR institucional asignado al contexto de extracción.
 
   - name: brg_oai_record_creator
     description: Bridge record-creator (dc.creator) para análisis de autoría declarativa.

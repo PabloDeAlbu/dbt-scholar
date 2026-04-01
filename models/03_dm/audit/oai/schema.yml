@@ -1,0 +1,43 @@
+version: 2
+
+models:
+  - name: fct_oai_record_extraction
+    description: >
+      Hecho de auditoría de eventos de extracción OAI. Registra cada observación
+      de un record en una extracción y reutiliza `extract_cdk` desde el satellite
+      de extracción como identificador del evento.
+    config:
+      tags: [audit, oai]
+    columns:
+      - name: extract_cdk
+        description: Business key del evento de extracción reutilizada desde el Data Vault.
+        data_tests:
+          - not_null
+          - unique
+      - name: record_hk
+        description: Hash key del record OAI.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('fct_oai_record_publication')
+              field: record_hk
+      - name: record_id
+        description: Identificador OAI-PMH canónico del record.
+        data_tests:
+          - not_null
+      - name: repository_identifier
+        description: Identificador del repositorio usado para contextualizar la extracción.
+        data_tests:
+          - not_null
+      - name: institution_ror
+        description: ROR institucional asignado al contexto de extracción.
+        data_tests:
+          - not_null
+      - name: extract_datetime
+        description: Fecha/hora del evento de extracción en la fuente.
+        data_tests:
+          - not_null
+      - name: load_datetime
+        description: Fecha/hora de carga del registro en el warehouse.
+        data_tests:
+          - not_null

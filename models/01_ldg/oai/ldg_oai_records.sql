@@ -10,9 +10,9 @@ renamed AS (
     "col_id"::text,
     "title"::text,
     {{ str_to_date("date_issued") }}::timestamp AS date_issued,
-    "_context",
+    'request'::text AS "_context",
     "extract_datetime"::timestamp,
-    "_load_datetime"::timestamp
+    "load_datetime"::timestamp AS _load_datetime
   FROM source
 ),
 ghost_record AS (

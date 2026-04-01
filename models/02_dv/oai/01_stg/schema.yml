@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: stg_oai_record__extract
+    description: >
+      Staging model de eventos de extracción de registros OAI. Construye `extract_cdk`
+      como business key hasheada para identificar cada observación del registro en
+      una extracción determinada y en un repositorio determinado.
+    columns:
+      - name: extract_cdk
+        description: >
+          Hash key del evento de extracción por registro, fecha de extracción y
+          contexto de repositorio.
