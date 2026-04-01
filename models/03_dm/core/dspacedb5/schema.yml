@@ -1,20 +1,6 @@
 version: 2
 
 models:
-  - name: fct_dspacedb5_item_extraction_window
-    description: >
-      Ventana temporal de observación por item contextualizado por repositorio e institución.
-      Resume la primera y última extracción/carga en la que el item fue visto. En `core` los
-      metadatos técnicos ya se consumen en su forma normalizada sin prefijo `_`.
-    config:
-      tags: [dspacedb5, dm]
-    columns:
-      - name: item_hk
-        data_tests: [not_null]
-      - name: source_label
-        data_tests: [not_null]
-      - name: institution_ror
-        data_tests: [not_null]
 
   - name: fct_dspacedb5_item_publication
     description: >

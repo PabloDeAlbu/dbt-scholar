@@ -87,6 +87,14 @@ models:
       audit:
         +schema: audit
         +tags: [audit]
+        dspacedb:
+          +tags: [dspacedb]
+        dspacedb5:
+          +tags: [dspacedb5]
+        openaire:
+          +tags: [openaire]
+        openalex:
+          +tags: [openalex]
       core:
         # Models in models/03_dm/core/ root build in dm_core.
         # Subdirectories can override +schema and build in dm_<subschema>.

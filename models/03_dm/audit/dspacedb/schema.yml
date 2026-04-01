@@ -1,0 +1,17 @@
+version: 2
+
+models:
+  - name: fct_dspacedb_item_extraction_window
+    description: >
+      Ventana temporal de observacion por item contextualizado por repositorio e institucion.
+      Resume la primera y ultima extraccion/carga en la que el item fue visto. En `audit`
+      se conserva el contexto operacional de observacion antes de su consumo desde `core`.
+    config:
+      tags: [audit, dspacedb]
+    columns:
+      - name: item_hk
+        data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]

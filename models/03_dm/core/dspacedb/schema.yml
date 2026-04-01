@@ -1,20 +1,6 @@
 version: 2
 
 models:
-  - name: fct_dspacedb_item_extraction_window
-    description: >
-      Ventana temporal de observación por item contextualizado por repositorio e institución.
-      Resume la primera y última extracción/carga en la que el item fue visto.
-    config:
-      tags: [dspacedb, dm]
-    columns:
-      - name: item_hk
-        data_tests: [not_null]
-      - name: source_label
-        data_tests: [not_null]
-      - name: institution_ror
-        data_tests: [not_null]
-
   - name: fct_dspacedb_item_publication
     description: >
       Hecho base de items publicados para la rama `dspacedb`, a grano item. Expone el último
