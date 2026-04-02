@@ -1,6 +1,69 @@
 version: 2
 
 models:
+  - name: fct_entity_extract
+    description: >
+      Hecho transversal de eventos de extraccion a nivel entidad. Unifica las
+      extracciones observadas en OAI, OpenAIRE, OpenAlex, dspacedb y dspacedb5
+      bajo un esquema comun y cruza `institution_ror` con la dimension central
+      de organizaciones.
+    config:
+      tags: [dm]
+    columns:
+      - name: source_system
+        description: Sistema fuente que origina la extraccion.
+        data_tests: [not_null]
+      - name: entity_type
+        description: Tipo de entidad extraida dentro de la fuente.
+        data_tests: [not_null]
+      - name: entity_hk
+        description: Clave hash de la entidad en su fuente de origen.
+        data_tests: [not_null]
+      - name: entity_id
+        description: Identificador natural o canonico de la entidad.
+      - name: extract_cdk
+        description: Business key del evento de extraccion.
+        data_tests: [not_null]
+      - name: extract_datetime
+        description: Fecha/hora del evento de extraccion.
+        data_tests: [not_null]
+      - name: load_datetime
+        description: Fecha/hora de carga en el warehouse.
+        data_tests: [not_null]
+      - name: institution_ror
+        description: ROR institucional asociado al contexto de extraccion.
+      - name: organization_name
+        description: Nombre legible de la organizacion resuelto desde `dim_organization`.
+
+  - name: fct_entity_extract_by_ror
+    description: >
+      Agregado diario de extracciones por ROR, fuente, tipo de entidad y
+      contexto operativo de extraccion. Resume volumen de filas, cantidad de
+      extracciones y cantidad de entidades observadas.
+    config:
+      tags: [dm]
+    columns:
+      - name: extract_date
+        description: Fecha de extraccion normalizada a dia.
+        data_tests: [not_null]
+      - name: institution_ror
+        description: ROR institucional del agregado.
+      - name: source_system
+        description: Sistema fuente del agregado.
+        data_tests: [not_null]
+      - name: entity_type
+        description: Tipo de entidad agregado.
+        data_tests: [not_null]
+      - name: extract_row_count
+        description: Cantidad de filas de eventos consideradas en el agregado.
+        data_tests: [not_null]
+      - name: extraction_count
+        description: Cantidad de eventos de extraccion distintos.
+        data_tests: [not_null]
+      - name: entity_count
+        description: Cantidad de entidades distintas observadas.
+        data_tests: [not_null]
+
   - name: dim_organization
     description: Dimensión central de organizaciones consolidada entre OpenAIRE y OpenAlex, con cruce por ROR cuando está disponible.
     config:
