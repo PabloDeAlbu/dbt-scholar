@@ -1,12 +1,59 @@
 version: 2
 
 models:
+  - name: fct_entity_publication
+    description: >
+      Hecho analítico transversal de publicaciones. Unifica las publicaciones
+      modeladas en `core` para OpenAlex, OpenAIRE, OAI, dspacedb y dspacedb5
+      bajo una estructura común orientada a análisis por institución, fuente y
+      fecha de publicación, sin deduplicación entre fuentes. En OpenAlex y
+      OpenAIRE, la asignación institucional se resuelve desde
+      `fct_entity_extract`, preservando el contexto operativo del ROR utilizado
+      en la extracción y no una afiliación bibliográfica intrínseca de la entidad.
+    config:
+      tags: [dm]
+    columns:
+      - name: source_system
+        description: Sistema fuente de la publicación.
+        data_tests: [not_null]
+      - name: entity_type
+        description: Tipo analítico de entidad unificada; en este modelo toma el valor `publication`.
+      - name: entity_hk
+        description: Clave hash de la entidad en su sistema fuente.
+        data_tests: [not_null]
+      - name: entity_id
+        description: Identificador natural o canónico de la entidad en su sistema fuente.
+        data_tests: [not_null]
+      - name: institution_ror
+        description: >
+          ROR institucional asociado al contexto analítico de la publicación. En
+          OpenAlex y OpenAIRE proviene del contexto de extracción preservado en
+          `fct_entity_extract` y representa el ROR usado para obtener la entidad,
+          no una relación bibliográfica nativa.
+      - name: publication_date
+        description: Fecha de publicación normalizada cuando la fuente expone una fecha completa.
+      - name: publication_year
+        description: Año de publicación derivado de la fecha o del año fuente cuando no hay fecha completa.
+      - name: load_datetime
+        description: Fecha/hora de carga usada como corte temporal del registro unificado.
+      - name: doi
+        description: DOI de la publicación cuando la fuente lo expone con claridad.
+      - name: title
+        description: Título preferido de la publicación cuando la fuente lo expone.
+      - name: publication_type
+        description: Tipología textual de la publicación según la fuente.
+      - name: source_label
+        description: Etiqueta técnica de procedencia o fuente de extracción cuando está disponible.
+      - name: extract_datetime
+        description: Fecha/hora del último contexto de extracción cuando la fuente lo expone en la fact base.
+
   - name: fct_entity_extract
     description: >
       Hecho transversal de eventos de extraccion a nivel entidad. Unifica las
       extracciones observadas en OAI, OpenAIRE, OpenAlex, dspacedb y dspacedb5
       bajo un esquema comun y cruza `institution_ror` con la dimension central
-      de organizaciones.
+      de organizaciones. En OpenAlex y OpenAIRE, `institution_ror` refleja el
+      ROR usado como parámetro de extracción para recuperar la entidad.
     config:
       tags: [dm]
     columns:
@@ -31,7 +78,10 @@ models:
         description: Fecha/hora de carga en el warehouse.
         data_tests: [not_null]
       - name: institution_ror
-        description: ROR institucional asociado al contexto de extraccion.
+        description: >
+          ROR institucional asociado al contexto de extraccion. En OpenAlex y
+          OpenAIRE corresponde al ROR usado como parámetro/filtro del endpoint
+          para recuperar la entidad.
       - name: organization_name
         description: Nombre legible de la organizacion resuelto desde `dim_organization`.
       - name: openaire_acronym

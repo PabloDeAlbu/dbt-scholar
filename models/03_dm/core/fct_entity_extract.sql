@@ -4,7 +4,7 @@ WITH openalex_extract AS (
     SELECT
         'openalex'::text AS source_system,
         'work'::text AS entity_type,
-        extract.work_hk::text AS entity_hk,
+        extract.work_hk AS entity_hk,
         extract.work_id::text AS entity_id,
         extract.extract_cdk::text AS extract_cdk,
         extract.extract_datetime,
@@ -21,7 +21,7 @@ openaire_extract AS (
     SELECT
         'openaire'::text AS source_system,
         'researchproduct'::text AS entity_type,
-        extract.researchproduct_hk::text AS entity_hk,
+        extract.researchproduct_hk AS entity_hk,
         extract.researchproduct_id::text AS entity_id,
         extract.extract_cdk::text AS extract_cdk,
         extract.extract_datetime,
@@ -38,7 +38,7 @@ oai_extract AS (
     SELECT
         'oai'::text AS source_system,
         'record'::text AS entity_type,
-        extract.record_hk::text AS entity_hk,
+        extract.record_hk AS entity_hk,
         extract.record_id::text AS entity_id,
         extract.extract_cdk::text AS extract_cdk,
         extract.extract_datetime,
@@ -55,7 +55,7 @@ dspacedb_extract AS (
     SELECT
         'dspacedb'::text AS source_system,
         'item'::text AS entity_type,
-        extract.item_hk::text AS entity_hk,
+        extract.item_hk AS entity_hk,
         extract.item_uuid::text AS entity_id,
         extract.extract_cdk::text AS extract_cdk,
         extract.extract_datetime,
@@ -72,7 +72,7 @@ dspacedb5_extract AS (
     SELECT
         'dspacedb5'::text AS source_system,
         'item'::text AS entity_type,
-        extract.item_hk::text AS entity_hk,
+        extract.item_hk AS entity_hk,
         extract.item_id::text AS entity_id,
         extract.extract_cdk::text AS extract_cdk,
         extract.extract_datetime,
