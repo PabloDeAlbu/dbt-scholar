@@ -1,6 +1,33 @@
 version: 2
 
 models:
+  - name: latest_sat_oai_record
+    description: >
+      Estado más reciente de `sat_oai_record`, a grano `record_hk`. Desacopla la
+      resolución latest del satélite principal de registros OAI.
+    config:
+      tags: [dm]
+    columns:
+      - name: record_hk
+        data_tests: [not_null, unique]
+      - name: load_datetime
+        data_tests: [not_null]
+
+  - name: latest_sat_oai_record__extract
+    description: >
+      Último contexto de extracción por `record_hk + repository_identifier + institution_ror`
+      a partir de `sat_oai_record__extract`.
+    config:
+      tags: [dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [record_hk, repository_identifier, institution_ror]
+    columns:
+      - name: record_hk
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+
   - name: dim_oai_set
     description: >
       Dimensión de sets OAI-PMH (setSpec + setName), utilizada para segmentar

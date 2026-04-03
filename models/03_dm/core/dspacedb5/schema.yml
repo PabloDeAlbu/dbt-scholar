@@ -1,6 +1,41 @@
 version: 2
 
 models:
+  - name: latest_sat_dspacedb5_item
+    description: Estado más reciente de `sat_dspacedb5_item`, a grano `item_hk`.
+    config:
+      tags: [dspacedb5, dm]
+    columns:
+      - name: item_hk
+        data_tests: [not_null, unique]
+      - name: load_datetime
+        data_tests: [not_null]
+
+  - name: latest_sat_dspacedb5_item__extract
+    description: >
+      Último contexto de extracción por `item_hk + source_label + institution_ror`
+      a partir de `sat_dspacedb5_item__extract`.
+    config:
+      tags: [dspacedb5, dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_hk, source_label, institution_ror]
+    columns:
+      - name: item_hk
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+
+  - name: latest_sat_dspacedb5_item_metadatavalue
+    description: >
+      Estado más reciente de `sat_dspacedb5_item_metadatavalue`, a grano `item_metadatavalue_hk`.
+    config:
+      tags: [dspacedb5, dm]
+    columns:
+      - name: item_metadatavalue_hk
+        data_tests: [not_null, unique]
+      - name: metadata_value_id
+        data_tests: [not_null]
 
   - name: fct_dspacedb5_item_publication
     description: >

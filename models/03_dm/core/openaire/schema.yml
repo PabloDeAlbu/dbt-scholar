@@ -1,6 +1,18 @@
 version: 2
 
 models:
+  - name: latest_sat_openaire_researchproduct
+    description: >
+      Estado más reciente de `sat_openaire_researchproduct`, a grano `researchproduct_hk`.
+      Sirve como base reusable para dimensiones y hechos de publicaciones OpenAIRE.
+    config:
+      tags: [dm]
+    columns:
+      - name: researchproduct_hk
+        data_tests: [not_null, unique]
+      - name: load_datetime
+        data_tests: [not_null]
+
   - name: dim_openaire_researchproduct
     description: Dimensión mínima de research products (ID canónico de OpenAIRE y su hash key).
     config:

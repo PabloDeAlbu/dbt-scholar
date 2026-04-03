@@ -16,7 +16,7 @@ WITH base AS (
         sat.source,
         sat.record_hk
     FROM {{ ref('sat_oai_record__extract') }} sat
-    INNER JOIN {{ latest_satellite(ref('sat_oai_record'), 'record_hk', order_column='_load_datetime') }} record USING (record_hk)
+    INNER JOIN {{ ref('latest_sat_oai_record') }} record USING (record_hk)
     {% if is_incremental() %}
     WHERE sat.load_datetime > (SELECT COALESCE(MAX(load_datetime), '1900-01-01'::timestamp) FROM {{ this }})
     {% endif %}

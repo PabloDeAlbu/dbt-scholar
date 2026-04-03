@@ -1,28 +1,13 @@
 {{ config(materialized = 'table') }}
 
-WITH latest_sat AS {{ latest_satellite(ref('sat_oai_record'), 'record_hk', order_column='_load_datetime') }},
+WITH latest_sat AS (
+    SELECT *
+    FROM {{ ref('latest_sat_oai_record') }}
+),
 
 latest_extract AS (
-    SELECT
-        record_hk,
-        repository_identifier,
-        institution_ror,
-        extract_datetime,
-        load_datetime
-    FROM (
-        SELECT
-            record_hk,
-            repository_identifier,
-            institution_ror,
-            extract_datetime,
-            load_datetime,
-            ROW_NUMBER() OVER (
-                PARTITION BY record_hk, repository_identifier, institution_ror
-                ORDER BY extract_datetime DESC, load_datetime DESC
-            ) AS rn
-        FROM {{ ref('sat_oai_record__extract') }}
-    ) ranked
-    WHERE rn = 1
+    SELECT *
+    FROM {{ ref('latest_sat_oai_record__extract') }}
 ),
 
 base as (

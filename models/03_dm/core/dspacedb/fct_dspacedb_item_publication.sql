@@ -9,12 +9,8 @@ WITH item_hub AS (
 latest_item_id AS (
     SELECT
         item_hk,
-        item_id,
-        ROW_NUMBER() OVER (
-            PARTITION BY item_hk
-            ORDER BY load_datetime DESC, extract_datetime DESC
-        ) AS rn
-    FROM {{ ref('stg_dspacedb_item') }}
+        item_id
+    FROM {{ ref('latest_stg_dspacedb_item') }}
 ),
 latest_item_sat AS (
     SELECT
@@ -26,7 +22,7 @@ latest_item_sat AS (
         owning_collection,
         last_modified,
         load_datetime
-    FROM {{ latest_satellite(ref('sat_dspacedb_item'), 'item_hk', order_column='load_datetime') }}
+    FROM {{ ref('latest_sat_dspacedb_item') }}
 ),
 latest_item_extract AS (
     SELECT
@@ -34,12 +30,8 @@ latest_item_extract AS (
         source_label,
         institution_ror,
         extract_datetime,
-        load_datetime,
-        ROW_NUMBER() OVER (
-            PARTITION BY item_hk, source_label, institution_ror
-            ORDER BY extract_datetime DESC, load_datetime DESC
-        ) AS rn
-    FROM {{ ref('sat_dspacedb_item__extract') }}
+        load_datetime
+    FROM {{ ref('latest_sat_dspacedb_item__extract') }}
 ),
 final AS (
     SELECT
@@ -66,10 +58,8 @@ final AS (
     INNER JOIN item_hub AS hub
         USING (item_hk)
     LEFT JOIN latest_item_id AS legacy
-        ON hub.item_hk = legacy.item_hk
-       AND legacy.rn = 1
-    WHERE extract.rn = 1
-      AND sat.in_archive = true
+        USING (item_hk)
+    WHERE sat.in_archive = true
       AND sat.withdrawn = false
 )
 

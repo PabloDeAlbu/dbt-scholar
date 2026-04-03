@@ -1,5 +1,8 @@
 WITH
-latest_sat_work AS {{ latest_satellite(ref('sat_openalex_work'), 'work_hk') }},
+latest_sat_work AS (
+    SELECT *
+    FROM {{ ref('latest_sat_openalex_work') }}
+),
 
 final AS (
     SELECT

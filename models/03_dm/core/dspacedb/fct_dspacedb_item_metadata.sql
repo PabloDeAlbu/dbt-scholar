@@ -2,15 +2,6 @@
 
 WITH latest_row AS (
     SELECT
-        *,
-        ROW_NUMBER() OVER (
-            PARTITION BY item_metadatavalue_hk
-            ORDER BY load_datetime DESC
-        ) AS rn
-    FROM {{ ref('sat_dspacedb_item_metadatavalue') }}
-),
-final AS (
-    SELECT
         item_hk,
         item_id,
         item_uuid,
@@ -30,8 +21,11 @@ final AS (
         authority,
         confidence,
         load_datetime
+    FROM {{ ref('latest_sat_dspacedb_item_metadatavalue') }}
+),
+final AS (
+    SELECT *
     FROM latest_row
-    WHERE rn = 1
 )
 
 SELECT * FROM final

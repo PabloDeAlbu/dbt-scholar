@@ -1,0 +1,47 @@
+{{ config(materialized='table') }}
+
+-- Latest row from sat_openalex_work keyed by work_hk.
+WITH latest AS {{ latest_satellite(ref('sat_openalex_work'), 'work_hk', order_column='load_datetime') }}
+
+SELECT
+    work_hk,
+    title,
+    display_name,
+    language,
+    type,
+    type_crossref,
+    fulltext_origin,
+    cited_by_api_url,
+    has_fulltext,
+    is_retracted,
+    is_paratext,
+    institutions_distinct_count,
+    fwci,
+    cited_by_count,
+    locations_count,
+    referenced_works_count,
+    countries_distinct_count,
+    publication_year,
+    publication_date,
+    oa_status,
+    oa_url,
+    any_repository_has_fulltext,
+    is_oa,
+    apc_list_currency,
+    apc_list_value,
+    apc_list_value_usd,
+    apc_paid_currency,
+    apc_paid_value,
+    apc_paid_value_usd,
+    citation_normalized_percentile_is_in_top_10_percent,
+    citation_normalized_percentile_is_in_top_1_percent,
+    citation_normalized_percentile_value,
+    cited_by_percentile_year_max,
+    cited_by_percentile_year_min,
+    biblio_first_page,
+    biblio_issue,
+    biblio_last_page,
+    biblio_volume,
+    load_datetime,
+    source
+FROM latest

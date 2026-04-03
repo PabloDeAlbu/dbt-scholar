@@ -1,6 +1,18 @@
 version: 2
 
 models:
+  - name: latest_sat_openalex_work
+    description: >
+      Estado más reciente de `sat_openalex_work`, a grano `work_hk`. Centraliza la
+      resolución latest para reutilización en dimensiones y facts de works.
+    config:
+      tags: [dm]
+    columns:
+      - name: work_hk
+        data_tests: [not_null, unique]
+      - name: load_datetime
+        data_tests: [not_null]
+
   - name: dim_openalex_author
     description: Dimensión de autores OpenAlex con atributos básicos e identificadores (ORCID si existe).
     config:

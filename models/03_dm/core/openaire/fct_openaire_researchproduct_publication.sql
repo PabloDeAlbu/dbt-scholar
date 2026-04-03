@@ -1,6 +1,9 @@
 {{ config(materialized = 'table') }}
 
-WITH latest_rp AS {{ latest_satellite(ref('sat_openaire_researchproduct'), 'researchproduct_hk') }}
+WITH latest_rp AS (
+    SELECT *
+    FROM {{ ref('latest_sat_openaire_researchproduct') }}
+)
 
 SELECT
     dim_rp.researchproduct_id,
