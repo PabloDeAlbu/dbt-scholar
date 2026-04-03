@@ -36,7 +36,7 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              values: ['Repositorio Institucional', 'OAI-PMH', 'OpenAIRE', 'OpenAlex']
+              values: ['Repositorio Institucional', 'OpenAIRE', 'OpenAlex']
       - name: entity_type
         description: Tipo analítico de entidad unificada; en este modelo toma el valor `publication`.
         data_tests: [not_null]
@@ -89,7 +89,7 @@ models:
         data_tests:
           - not_null
           - accepted_values:
-              values: ['Repositorio Institucional', 'OAI-PMH', 'OpenAIRE', 'OpenAlex']
+              values: ['Repositorio Institucional', 'OpenAIRE', 'OpenAlex']
       - name: entity_type
         description: Tipo de entidad extraida dentro de la fuente.
         data_tests: [not_null]

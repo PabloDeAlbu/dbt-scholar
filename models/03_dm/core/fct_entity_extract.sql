@@ -108,8 +108,7 @@ final AS (
             WHEN extract.source_system = 'openalex' THEN 'OpenAlex'
         END AS source_label,
         CASE
-            WHEN extract.source_system IN ('dspacedb', 'dspacedb5') THEN 'Repositorio Institucional'
-            WHEN extract.source_system = 'oai' THEN 'OAI-PMH'
+            WHEN extract.source_system IN ('dspacedb', 'dspacedb5', 'oai') THEN 'RI'
             WHEN extract.source_system = 'openaire' THEN 'OpenAIRE'
             WHEN extract.source_system = 'openalex' THEN 'OpenAlex'
         END AS source_short_label,
