@@ -268,6 +268,13 @@ openalex_publication AS (
         ON pub.work_hk = extract.entity_hk
 ),
 
+organization AS (
+    SELECT
+        organization_ror,
+        organization_name
+    FROM {{ ref('dim_organization') }}
+),
+
 unioned AS (
     SELECT
         source_system,
@@ -360,6 +367,7 @@ SELECT
     unioned.entity_hk,
     unioned.entity_id,
     unioned.institution_ror,
+    COALESCE(organization.organization_name, unioned.institution_ror) AS institution_label,
     unioned.publication_date,
     unioned.publication_year,
     unioned.doi,
@@ -370,3 +378,5 @@ SELECT
 FROM unioned
 INNER JOIN source_labels
     USING (source_system)
+LEFT JOIN organization
+    ON unioned.institution_ror = organization.organization_ror

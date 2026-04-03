@@ -46,6 +46,8 @@ models:
           OpenAlex y OpenAIRE proviene del contexto de extracción preservado en
           `fct_entity_extract` y representa el ROR usado para obtener la entidad,
           no una relación bibliográfica nativa.
+      - name: institution_label
+        description: Nombre legible de la institución para visualización; usa `organization_name` de `dim_organization` y, si no existe match, fallback a `institution_ror`.
       - name: publication_date
         description: Fecha de publicación normalizada cuando la fuente expone una fecha completa.
       - name: publication_year
