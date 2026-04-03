@@ -34,6 +34,8 @@ models:
         description: ROR institucional asociado al contexto de extraccion.
       - name: organization_name
         description: Nombre legible de la organizacion resuelto desde `dim_organization`.
+      - name: openaire_acronym
+        description: Acrónimo de la organización informado por OpenAIRE cuando existe.
 
   - name: fct_entity_extract_by_ror
     description: >
@@ -48,6 +50,10 @@ models:
         data_tests: [not_null]
       - name: institution_ror
         description: ROR institucional del agregado.
+      - name: organization_name
+        description: Nombre legible de la organización resuelto desde `dim_organization`.
+      - name: openaire_acronym
+        description: Acrónimo de la organización informado por OpenAIRE cuando existe.
       - name: source_system
         description: Sistema fuente del agregado.
         data_tests: [not_null]
@@ -77,6 +83,8 @@ models:
         description: Clave hash nativa de OpenAIRE para la organización, cuando aplica.
       - name: openaire_organization_id
         description: Identificador canónico de OpenAIRE para la organización, cuando aplica.
+      - name: openaire_acronym
+        description: Acrónimo de la organización informado por OpenAIRE, cuando existe.
       - name: openalex_institution_hk
         description: Clave hash nativa de OpenAlex para la institución, cuando aplica.
       - name: openalex_institution_id

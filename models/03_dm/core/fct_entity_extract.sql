@@ -110,6 +110,8 @@ final AS (
         extract.load_datetime,
         extract.institution_ror,
         org.organization_name,
+        org.openaire_organization_id,       
+        org.openaire_acronym,
         extract.repository_identifier,
         extract.filter_param,
         extract.filter_value,
