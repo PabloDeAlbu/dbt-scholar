@@ -285,6 +285,30 @@ unioned AS (
     SELECT * FROM openaire_publication
     UNION ALL
     SELECT * FROM openalex_publication
+),
+
+final AS (
+    SELECT
+        source_system,
+        entity_type,
+        entity_hk,
+        entity_id,
+        institution_ror,
+        CASE
+            WHEN publication_date = DATE '0001-01-01' THEN NULL
+            ELSE publication_date
+        END AS publication_date,
+        CASE
+            WHEN publication_date = DATE '0001-01-01' THEN NULL
+            ELSE publication_year
+        END AS publication_year,
+        load_datetime,
+        doi,
+        title,
+        publication_type,
+        source_label,
+        extract_datetime
+    FROM unioned
 )
 
-SELECT * FROM unioned
+SELECT * FROM final

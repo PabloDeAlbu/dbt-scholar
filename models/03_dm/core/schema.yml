@@ -12,6 +12,12 @@ models:
       en la extracción y no una afiliación bibliográfica intrínseca de la entidad.
     config:
       tags: [dm]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: "publication_date IS NULL OR publication_date <> DATE '0001-01-01'"
+          config:
+            severity: warn
+            store_failures: true
     columns:
       - name: source_system
         description: Sistema fuente de la publicación.
