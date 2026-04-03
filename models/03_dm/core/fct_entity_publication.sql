@@ -364,6 +364,12 @@ unioned AS (
 SELECT
     unioned.source_system,
     source_labels.source_label,
+    CASE
+        WHEN unioned.source_system IN ('dspacedb', 'dspacedb5') THEN 'Repositorio Institucional'
+        WHEN unioned.source_system = 'oai' THEN 'OAI-PMH'
+        WHEN unioned.source_system = 'openaire' THEN 'OpenAIRE'
+        WHEN unioned.source_system = 'openalex' THEN 'OpenAlex'
+    END AS source_short_label,
     unioned.entity_type,
     unioned.entity_hk,
     unioned.entity_id,

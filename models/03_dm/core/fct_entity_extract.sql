@@ -100,6 +100,19 @@ unioned AS (
 final AS (
     SELECT
         extract.source_system,
+        CASE
+            WHEN extract.source_system = 'dspacedb' THEN 'DSpace 7+'
+            WHEN extract.source_system = 'dspacedb5' THEN 'DSpace 5'
+            WHEN extract.source_system = 'oai' THEN 'OAI-PMH'
+            WHEN extract.source_system = 'openaire' THEN 'OpenAIRE'
+            WHEN extract.source_system = 'openalex' THEN 'OpenAlex'
+        END AS source_label,
+        CASE
+            WHEN extract.source_system IN ('dspacedb', 'dspacedb5') THEN 'Repositorio Institucional'
+            WHEN extract.source_system = 'oai' THEN 'OAI-PMH'
+            WHEN extract.source_system = 'openaire' THEN 'OpenAIRE'
+            WHEN extract.source_system = 'openalex' THEN 'OpenAlex'
+        END AS source_short_label,
         extract.entity_type,
         extract.entity_hk,
         extract.entity_id,
@@ -112,8 +125,7 @@ final AS (
         org.openaire_acronym,
         extract.repository_identifier,
         extract.filter_param,
-        extract.filter_value,
-        extract.source_label
+        extract.filter_value
     FROM unioned extract
     LEFT JOIN {{ ref('dim_organization') }} org
         ON extract.institution_ror = org.organization_ror

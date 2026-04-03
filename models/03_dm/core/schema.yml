@@ -31,6 +31,12 @@ models:
           - not_null
           - accepted_values:
               values: ['DSpace 7+', 'DSpace 5', 'OAI-PMH', 'OpenAIRE', 'OpenAlex']
+      - name: source_short_label
+        description: Etiqueta analítica agregada de fuente para visualización y análisis comparativo.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Repositorio Institucional', 'OAI-PMH', 'OpenAIRE', 'OpenAlex']
       - name: entity_type
         description: Tipo analítico de entidad unificada; en este modelo toma el valor `publication`.
         data_tests: [not_null]
@@ -76,6 +82,14 @@ models:
       - name: source_system
         description: Sistema fuente que origina la extraccion.
         data_tests: [not_null]
+      - name: source_label
+        description: Etiqueta legible detallada del sistema fuente.
+      - name: source_short_label
+        description: Etiqueta analítica agregada de fuente para visualización y análisis comparativo.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Repositorio Institucional', 'OAI-PMH', 'OpenAIRE', 'OpenAlex']
       - name: entity_type
         description: Tipo de entidad extraida dentro de la fuente.
         data_tests: [not_null]

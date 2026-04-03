@@ -39,8 +39,10 @@ models:
       institución inyectado desde `vars` del proyecto.
     columns:
       - name: item_id
-        data_tests:
-          - not_null
+        description: >
+          Identificador legado numérico del item. Puede venir nulo en DSpace 7+ y
+          solo estará presente cuando el registro conserve referencia a un item de
+          una versión legacy del repositorio.
       - name: _source_label
         data_tests:
           - not_null
