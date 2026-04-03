@@ -271,6 +271,7 @@ openalex_publication AS (
 organization AS (
     SELECT
         organization_ror,
+        openaire_acronym,
         organization_name
     FROM {{ ref('dim_organization') }}
 ),
@@ -367,6 +368,7 @@ SELECT
     unioned.entity_hk,
     unioned.entity_id,
     unioned.institution_ror,
+    COALESCE(organization.openaire_acronym, organization.organization_name, unioned.institution_ror) AS institution_short_label,
     COALESCE(organization.organization_name, unioned.institution_ror) AS institution_label,
     unioned.publication_date,
     unioned.publication_year,
