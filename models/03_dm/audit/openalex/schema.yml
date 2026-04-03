@@ -1,52 +1,19 @@
 version: 2
 
 models:
-  - name: fct_openalex_work_extraction
+  - name: fct_openalex_work_extraction_window
     description: >
-      Audit fact for OpenAlex extraction events. Records each observation of a work
-      in an extraction, including any applied filter plus extraction and warehouse
-      load timestamps. Reuses `extract_cdk` from the extraction satellite as the
-      event identifier.
+      Ventana temporal de observación por work y criterio de extracción. Resume
+      primera y última observación/carga a partir del hecho base de extracción.
     config:
       tags: [audit, openalex]
     columns:
-      - name: extract_cdk
-        description: Extraction business key reused from the Data Vault satellite.
-        data_tests:
-          - not_null
-          - unique
-
       - name: work_hk
-        description: Hash key of the OpenAlex work.
-        data_tests:
-          - not_null
-          - relationships:
-              to: ref('dim_openalex_work')
-              field: work_hk
-
-      - name: work_id
-        description: Canonical OpenAlex identifier for the work.
-        data_tests:
-          - not_null
-
+        data_tests: [not_null]
       - name: _filter_param
-        description: Name of the filter parameter applied during extraction.
-
+        data_tests: [not_null]
       - name: _filter_value
-        description: Value of the filter parameter applied during extraction.
-
-      - name: extract_datetime
-        description: Timestamp of the extraction event in OpenAlex.
-        data_tests:
-          - not_null
-
-      - name: load_datetime
-        description: Timestamp when the record was loaded into the warehouse.
-        data_tests:
-          - not_null
-
-      - name: source
-        description: Source label provided by OpenAlex for the extraction record.
+        data_tests: [not_null]
 
   - name: fct_openalex_work_extraction_fby_instsror
     description: >

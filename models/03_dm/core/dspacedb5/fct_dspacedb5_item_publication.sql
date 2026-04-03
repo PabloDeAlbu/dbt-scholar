@@ -29,6 +29,18 @@ latest_item_extract AS (
         load_datetime
     FROM {{ ref('latest_sat_dspacedb5_item__extract') }}
 ),
+extraction_window AS (
+    SELECT
+        item_hk,
+        source_label,
+        institution_ror,
+        MIN(extract_datetime) AS first_extract_datetime,
+        MAX(extract_datetime) AS last_extract_datetime,
+        MIN(load_datetime) AS first_load_datetime,
+        MAX(load_datetime) AS last_load_datetime
+    FROM {{ ref('fct_dspacedb5_item_extraction') }}
+    GROUP BY item_hk, source_label, institution_ror
+),
 
 final AS (
     SELECT
@@ -47,7 +59,7 @@ final AS (
         win.first_load_datetime,
         win.last_load_datetime
     FROM latest_item_extract AS extract
-    INNER JOIN {{ ref('fct_dspacedb5_item_extraction_window') }} AS win
+    INNER JOIN extraction_window AS win
         USING (item_hk, source_label, institution_ror)
     INNER JOIN latest_item_sat AS sat
         USING (item_hk)

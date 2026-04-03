@@ -13,6 +13,28 @@ models:
       - name: load_datetime
         data_tests: [not_null]
 
+  - name: fct_openaire_researchproduct_extraction
+    description: >
+      Hecho base de eventos de extracción de OpenAIRE a nivel research product.
+      Conserva el filtro aplicado y los timestamps técnicos del evento.
+    config:
+      tags: [dm]
+    columns:
+      - name: extract_cdk
+        data_tests: [not_null, unique]
+      - name: researchproduct_hk
+        data_tests: [not_null]
+      - name: researchproduct_id
+        data_tests: [not_null]
+      - name: _filter_param
+        data_tests: [not_null]
+      - name: _filter_value
+        data_tests: [not_null]
+      - name: extract_datetime
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+
   - name: dim_openaire_researchproduct
     description: Dimensión mínima de research products (ID canónico de OpenAIRE y su hash key).
     config:

@@ -28,6 +28,28 @@ models:
       - name: load_datetime
         data_tests: [not_null]
 
+  - name: fct_oai_record_extraction
+    description: >
+      Hecho base de eventos de extracción OAI a nivel record. Conserva el
+      contexto de repositorio e institución junto con los timestamps técnicos.
+    config:
+      tags: [dm]
+    columns:
+      - name: extract_cdk
+        data_tests: [not_null, unique]
+      - name: record_hk
+        data_tests: [not_null]
+      - name: record_id
+        data_tests: [not_null]
+      - name: repository_identifier
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+      - name: extract_datetime
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+
   - name: dim_oai_set
     description: >
       Dimensión de sets OAI-PMH (setSpec + setName), utilizada para segmentar

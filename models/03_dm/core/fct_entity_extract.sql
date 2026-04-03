@@ -55,36 +55,34 @@ dspacedb_extract AS (
     SELECT
         'dspacedb'::text AS source_system,
         'item'::text AS entity_type,
-        sat.item_hk::text AS entity_hk,
-        SPLIT_PART(hub.item_bk, '||', 3)::text AS entity_id,
-        sat.extract_cdk::text AS extract_cdk,
-        sat.extract_datetime,
-        sat.load_datetime,
-        sat.institution_ror,
+        extract.item_hk::text AS entity_hk,
+        extract.item_uuid::text AS entity_id,
+        extract.extract_cdk::text AS extract_cdk,
+        extract.extract_datetime,
+        extract.load_datetime,
+        extract.institution_ror,
         NULL::text AS repository_identifier,
         NULL::text AS filter_param,
         NULL::text AS filter_value,
-        sat.source_label::text AS source_label
-    FROM {{ ref('sat_dspacedb_item__extract') }} sat
-    INNER JOIN {{ ref('hub_dspacedb_item') }} hub USING (item_hk)
+        extract.source_label::text AS source_label
+    FROM {{ ref('fct_dspacedb_item_extraction') }} extract
 ),
 
 dspacedb5_extract AS (
     SELECT
         'dspacedb5'::text AS source_system,
         'item'::text AS entity_type,
-        sat.item_hk::text AS entity_hk,
-        SPLIT_PART(hub.item_bk, '||', 3)::text AS entity_id,
-        sat.extract_cdk::text AS extract_cdk,
-        sat.extract_datetime,
-        sat.load_datetime,
-        sat.institution_ror,
+        extract.item_hk::text AS entity_hk,
+        extract.item_id::text AS entity_id,
+        extract.extract_cdk::text AS extract_cdk,
+        extract.extract_datetime,
+        extract.load_datetime,
+        extract.institution_ror,
         NULL::text AS repository_identifier,
         NULL::text AS filter_param,
         NULL::text AS filter_value,
-        sat.source_label::text AS source_label
-    FROM {{ ref('sat_dspacedb5_item__extract') }} sat
-    INNER JOIN {{ ref('hub_dspacedb5_item') }} hub USING (item_hk)
+        extract.source_label::text AS source_label
+    FROM {{ ref('fct_dspacedb5_item_extraction') }} extract
 ),
 
 unioned AS (

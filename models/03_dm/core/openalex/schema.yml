@@ -13,6 +13,25 @@ models:
       - name: load_datetime
         data_tests: [not_null]
 
+  - name: fct_openalex_work_extraction
+    description: >
+      Hecho base de eventos de extracción de OpenAlex a nivel work. Conserva el
+      filtro aplicado y los timestamps técnicos del evento para reutilización en
+      capas analíticas y operativas.
+    config:
+      tags: [dm]
+    columns:
+      - name: extract_cdk
+        data_tests: [not_null, unique]
+      - name: work_hk
+        data_tests: [not_null]
+      - name: work_id
+        data_tests: [not_null]
+      - name: extract_datetime
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+
   - name: dim_openalex_author
     description: Dimensión de autores OpenAlex con atributos básicos e identificadores (ORCID si existe).
     config:

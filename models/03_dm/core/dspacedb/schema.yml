@@ -49,6 +49,28 @@ models:
       - name: metadata_value_id
         data_tests: [not_null]
 
+  - name: fct_dspacedb_item_extraction
+    description: >
+      Hecho base de eventos de extracción para items de la rama `dspacedb`.
+      Conserva el contexto técnico de observación por repositorio e institución.
+    config:
+      tags: [dspacedb, dm]
+    columns:
+      - name: extract_cdk
+        data_tests: [not_null, unique]
+      - name: item_hk
+        data_tests: [not_null]
+      - name: item_uuid
+        data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+      - name: extract_datetime
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+
   - name: fct_dspacedb_item_publication
     description: >
       Hecho base de items publicados para la rama `dspacedb`, a grano item. Expone el último

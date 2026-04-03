@@ -37,6 +37,28 @@ models:
       - name: metadata_value_id
         data_tests: [not_null]
 
+  - name: fct_dspacedb5_item_extraction
+    description: >
+      Hecho base de eventos de extracción para items de la rama `dspacedb5`.
+      Conserva el contexto técnico de observación por repositorio e institución.
+    config:
+      tags: [dspacedb5, dm]
+    columns:
+      - name: extract_cdk
+        data_tests: [not_null, unique]
+      - name: item_hk
+        data_tests: [not_null]
+      - name: item_id
+        data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+      - name: extract_datetime
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+
   - name: fct_dspacedb5_item_publication
     description: >
       Hecho core de items publicados DSpace 5 a nivel de item contextualizado por repositorio e
