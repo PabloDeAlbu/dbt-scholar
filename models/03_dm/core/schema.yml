@@ -21,9 +21,19 @@ models:
     columns:
       - name: source_system
         description: Sistema fuente de la publicación.
-        data_tests: [not_null]
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['dspacedb', 'dspacedb5', 'oai', 'openaire', 'openalex']
+      - name: source_label
+        description: Etiqueta amigable de fuente orientada a visualización y dashboards.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['DSpace 7+', 'DSpace 5', 'OAI-PMH', 'OpenAIRE', 'OpenAlex']
       - name: entity_type
         description: Tipo analítico de entidad unificada; en este modelo toma el valor `publication`.
+        data_tests: [not_null]
       - name: entity_hk
         description: Clave hash de la entidad en su sistema fuente.
         data_tests: [not_null]
@@ -48,8 +58,6 @@ models:
         description: Título preferido de la publicación cuando la fuente lo expone.
       - name: publication_type
         description: Tipología textual de la publicación según la fuente.
-      - name: source_label
-        description: Etiqueta técnica de procedencia o fuente de extracción cuando está disponible.
       - name: extract_datetime
         description: Fecha/hora del último contexto de extracción cuando la fuente lo expone en la fact base.
 
