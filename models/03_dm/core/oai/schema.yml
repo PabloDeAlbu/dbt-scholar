@@ -84,6 +84,17 @@ models:
         description: Identificador OAI-PMH del registro (p. ej. oai:...).
         data_tests:
           - not_null
+          - unique
+      - name: dc_type
+        description: >
+          Valores de `dc.type` agregados a nivel record y concatenados con `|`.
+          Se conserva en crudo para auditoría y resolución posterior fuera de la fact base OAI.
+      - name: dc_type_count
+        description: Cantidad de valores distintos de `dc.type` detectados para el record.
+        data_tests: [not_null]
+      - name: has_multiple_dc_type
+        description: Flag que indica si el record tiene más de un `dc.type` distinto.
+        data_tests: [not_null]
       - name: repository_identifier
         description: Identificador del repositorio proveedor del registro OAI.
       - name: institution_ror
