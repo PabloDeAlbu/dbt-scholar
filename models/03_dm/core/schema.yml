@@ -1,6 +1,42 @@
 version: 2
 
 models:
+  - name: dim_resource_type
+    description: >
+      Dimensión canónica de tipologías documentales COAR. Se construye sobre la
+      capa COAR del proyecto (`dim_coar_resource_type`), derivada del Data Vault
+      de COAR y cargada desde el seed correspondiente a COAR Resource Types 2.0.
+      Centraliza las etiquetas y jerarquías para reutilización aguas abajo.
+    config:
+      tags: [dm]
+    columns:
+      - name: resource_type_uri
+        description: URI canónica del tipo de recurso COAR.
+        data_tests: [not_null, unique]
+      - name: resource_type_label
+        description: Etiqueta en inglés del tipo de recurso.
+      - name: resource_type_label_es
+        description: Etiqueta en español del tipo de recurso.
+
+  - name: dim_access_right
+    description: >
+      Dimensión canónica de niveles de acceso COAR. Actualmente se construye
+      desde el seed de access rights, centralizando el mapeo entre `dc.right`
+      y el vocabulario COAR para reutilización transversal en la capa core.
+    config:
+      tags: [dm]
+    columns:
+      - name: access_right_uri
+        description: URI canónica del nivel de acceso COAR.
+        data_tests: [not_null, unique]
+      - name: access_right_label
+        description: Etiqueta en inglés del nivel de acceso.
+      - name: access_right_label_es
+        description: Etiqueta en español del nivel de acceso.
+      - name: dc_right
+        description: Valor `dc.right` que mapea al nivel de acceso.
+        data_tests: [not_null, unique]
+
   - name: fct_entity_publication
     description: >
       Hecho analítico transversal de publicaciones. Unifica las publicaciones

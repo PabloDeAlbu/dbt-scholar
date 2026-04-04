@@ -1,10 +1,11 @@
 version: 2
 
 models:
-  - name: fct_coar_resourcetype
+  - name: dim_coar_resource_type
     description: >
-      Tabla de referencia (COAR Resource Types) utilizada para estandarizar la
-      tipología documental y habilitar análisis comparables entre fuentes.
+      Dimensión de referencia de COAR Resource Types 2.0 derivada del Data Vault
+      de COAR. Expone la URI canónica, etiquetas y jerarquías del vocabulario
+      para estandarizar tipologías documentales entre fuentes.
     config:
       tags: [dm]
     columns:
