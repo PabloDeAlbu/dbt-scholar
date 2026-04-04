@@ -17,34 +17,26 @@ models:
 
   - name: fct_openalex_work_extraction_fby_instsror
     description: >
-      Audit view by `institutions.ror`. It shows which OpenAlex extraction
-      retrieved each work for the ROR used in the extraction method.
+      Audit view by `institutions.ror`, aggregated at extraction timestamp and
+      institution level to count extracted OpenAlex works. Publication metadata
+      is enriched from `dim_openalex_work`, which represents the current
+      descriptive state of each work in the DM layer rather than a historical
+      point-in-time reconstruction; temporal traceability remains in the Data
+      Vault satellites.
     config:
       tags: [audit, openalex]
     columns:
-      - name: extract_cdk
-        description: Extraction key from the Data Vault satellite.
-        data_tests:
-          - not_null
-          - unique
-      - name: work_hk
-        data_tests:
-          - not_null
-          - relationships:
-              to: ref('dim_openalex_work')
-              field: work_hk
-      - name: work_id
+      - name: extract_datetime
         data_tests: [not_null]
+      - name: publication_date
+        description: Publication date of the extracted OpenAlex work.
+      - name: institution_id
+        description: Canonical OpenAlex institution identifier.
       - name: institution_ror
         description: ROR used by the extraction method to retrieve data from OpenAlex.
         data_tests: [not_null]
-      - name: institution_hk
-        description: OpenAlex institution hash key when a ROR match exists.
-      - name: institution_id
-        description: Canonical OpenAlex institution identifier.
       - name: institution_display_name
         description: Institution display name.
-      - name: extract_datetime
-        data_tests: [not_null]
-      - name: load_datetime
+      - name: work_count
+        description: Distinct works extracted from OpenAlex for the timestamp and institution.
         data_tests: [not_null]
