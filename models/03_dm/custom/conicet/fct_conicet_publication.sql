@@ -8,8 +8,7 @@ WITH base AS (
         date_issued,
         repository_identifier,
         institution_ror,
-        coar_type,
-        coar_uri,
+        dc_type,
         dc_identifier_uri,
         dc_relation_doi,
         doi_audit_string,
@@ -23,13 +22,24 @@ WITH base AS (
     FROM {{ ref('fct_conicet_oai_record_publication') }}
 ),
 
-access_right AS (
+dim_publication_type AS (
+    SELECT
+        seed.record_type AS dc_type,
+        dim.resource_type_label AS publication_type,
+        dim.resource_type_uri AS publication_type_uri
+    FROM {{ ref('seed_coar_resource_types2conicet_oai_dc_types') }} seed
+    INNER JOIN {{ ref('dim_resource_type') }} dim
+        ON seed.coar_uri = dim.resource_type_uri
+    WHERE seed.coar_uri != '#N/A'
+),
+
+dim_access_right AS (
     SELECT
         brg.record_hk,
-        MIN(seed.coar_label) AS access_right,
-        MIN(seed.coar_uri) AS access_right_uri
+        MIN(dim.access_right_label) AS access_right,
+        MIN(dim.access_right_uri) AS access_right_uri
     FROM {{ ref('brg_oai_record_right') }} brg
-    INNER JOIN {{ ref('seed_coar_access_right') }} seed
+    INNER JOIN {{ ref('dim_access_right') }} dim
         USING (dc_right)
     GROUP BY brg.record_hk
 ),
@@ -44,10 +54,10 @@ final AS (
         CASE
             WHEN base.date_issued IS NOT NULL THEN EXTRACT(YEAR FROM base.date_issued)::integer
         END AS publication_year,
-        base.coar_type AS publication_type,
-        base.coar_uri AS publication_type_uri,
-        access_right.access_right,
-        access_right.access_right_uri,
+        dim_publication_type.publication_type,
+        dim_publication_type.publication_type_uri,
+        dim_access_right.access_right,
+        dim_access_right.access_right_uri,
         base.repository_identifier,
         base.institution_ror,
         base.dc_identifier_uri AS institutional_uri,
@@ -61,7 +71,9 @@ final AS (
         base.fos_code_level_1 AS subject_code,
         base.mult_fos_flag AS has_multiple_subject_assignments
     FROM base
-    LEFT JOIN access_right USING (record_hk)
+    LEFT JOIN dim_publication_type
+        ON base.dc_type = dim_publication_type.dc_type
+    LEFT JOIN dim_access_right USING (record_hk)
 )
 
 SELECT * FROM final
