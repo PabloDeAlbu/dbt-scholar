@@ -6,7 +6,7 @@ WITH base AS (
         REPLACE(dim_i.institution_id, 'https://openalex.org/', '') as institution_id,
         COALESCE(ror, '-') as ror,
         dim_a.display_name as author_name,
-        dim_i.display_name as institution_name,
+        dim_i.institution_display_name as institution_name,
         dim_a.author_hk,
         dim_i.institution_hk
     FROM {{ref('brg_openalex_author_institution')}} 

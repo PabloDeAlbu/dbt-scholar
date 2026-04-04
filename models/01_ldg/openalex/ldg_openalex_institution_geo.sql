@@ -7,8 +7,8 @@ base as (
     select 
         {# FIXME #}
         geo::text,
-        extract_datetime,
-        _load_datetime
+        _extract_datetime::timestamp as extract_datetime,
+        _load_datetime::timestamp
     from source
 ),
 ghost_record as (
