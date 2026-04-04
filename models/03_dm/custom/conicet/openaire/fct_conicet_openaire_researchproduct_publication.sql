@@ -1,5 +1,3 @@
-{%- set conicet_rel_organization_id = 'openorgs____::40b9f835648a3e0d057d6917dd7e54d5' -%}
-
 WITH conicet_extract AS (
     SELECT
         researchproduct_hk,
