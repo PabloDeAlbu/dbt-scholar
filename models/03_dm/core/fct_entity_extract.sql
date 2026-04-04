@@ -9,12 +9,13 @@ WITH openalex_extract AS (
         extract.extract_cdk::text AS extract_cdk,
         extract.extract_datetime,
         extract.load_datetime,
-        extract.institution_ror,
+        extract._filter_value::text AS institution_ror,
         NULL::text AS repository_identifier,
         extract._filter_param::text AS filter_param,
-        extract.institution_ror::text AS filter_value,
+        extract._filter_value::text AS filter_value,
         NULL::text AS source_label
-    FROM {{ ref('fct_openalex_work_extraction_fby_instsror') }} extract
+    FROM {{ ref('fct_openalex_work_extraction') }} extract
+    WHERE extract._filter_param = 'institutions.ror'
 ),
 
 openaire_extract AS (
@@ -26,12 +27,13 @@ openaire_extract AS (
         extract.extract_cdk::text AS extract_cdk,
         extract.extract_datetime,
         extract.load_datetime,
-        extract.organization_ror AS institution_ror,
+        extract._filter_value::text AS institution_ror,
         NULL::text AS repository_identifier,
         extract._filter_param::text AS filter_param,
-        extract.organization_ror::text AS filter_value,
+        extract._filter_value::text AS filter_value,
         NULL::text AS source_label
-    FROM {{ ref('fct_openaire_researchproduct_extraction_fby_relorgid') }} extract
+    FROM {{ ref('fct_openaire_researchproduct_extraction') }} extract
+    WHERE extract._filter_param = 'relOrganizationId'
 ),
 
 oai_extract AS (
