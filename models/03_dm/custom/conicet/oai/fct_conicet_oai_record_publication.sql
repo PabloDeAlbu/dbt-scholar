@@ -13,13 +13,10 @@ base as (
         fct.institution_ror,
         dim_type.label as coar_type,
         dim_type.coar_uri,
-        dim_right.coar_label as coar_right,
         fct.record_hk
     FROM {{ ref('fct_oai_record_publication') }} fct
     INNER JOIN {{ ref('brg_oai_record_type') }} USING (record_hk)
     INNER JOIN {{ ref('dim_conicet_item_type') }} dim_type USING (dc_type_hk)
-    INNER JOIN {{ ref('brg_oai_record_right') }} USING (record_hk)
-    INNER JOIN {{ ref('dim_conicet_item_accessright') }} dim_right USING (dc_right_hk)
     WHERE fct.repository_identifier = '{{ conicet_repository_identifier }}'
       AND fct.institution_ror = '{{ conicet_institution_ror }}'
 ),

@@ -10,7 +10,6 @@ WITH base AS (
         institution_ror,
         coar_type,
         coar_uri,
-        coar_right,
         dc_identifier_uri,
         dc_relation_doi,
         doi_audit_string,
@@ -24,32 +23,45 @@ WITH base AS (
     FROM {{ ref('fct_conicet_oai_record_publication') }}
 ),
 
+access_right AS (
+    SELECT
+        brg.record_hk,
+        MIN(seed.coar_label) AS access_right,
+        MIN(seed.coar_uri) AS access_right_uri
+    FROM {{ ref('brg_oai_record_right') }} brg
+    INNER JOIN {{ ref('seed_coar_access_right') }} seed
+        USING (dc_right)
+    GROUP BY brg.record_hk
+),
+
 final AS (
     SELECT
-        record_hk,
-        record_id,
+        base.record_hk,
+        base.record_id,
         'oai'::text AS source_system,
-        title,
-        date_issued AS publication_date,
+        base.title,
+        base.date_issued AS publication_date,
         CASE
-            WHEN date_issued IS NOT NULL THEN EXTRACT(YEAR FROM date_issued)::integer
+            WHEN base.date_issued IS NOT NULL THEN EXTRACT(YEAR FROM base.date_issued)::integer
         END AS publication_year,
-        coar_type AS publication_type,
-        coar_uri AS publication_type_uri,
-        coar_right AS access_right,
-        repository_identifier,
-        institution_ror,
-        dc_identifier_uri AS institutional_uri,
-        dc_relation_doi AS doi,
-        doi_audit_string,
-        has_doi,
-        has_multiple_doi,
-        doi_count_check AS doi_count,
-        subject_area,
-        subject_subarea,
-        fos_code_level_1 AS subject_code,
-        mult_fos_flag AS has_multiple_subject_assignments
+        base.coar_type AS publication_type,
+        base.coar_uri AS publication_type_uri,
+        access_right.access_right,
+        access_right.access_right_uri,
+        base.repository_identifier,
+        base.institution_ror,
+        base.dc_identifier_uri AS institutional_uri,
+        base.dc_relation_doi AS doi,
+        base.doi_audit_string,
+        base.has_doi,
+        base.has_multiple_doi,
+        base.doi_count_check AS doi_count,
+        base.subject_area,
+        base.subject_subarea,
+        base.fos_code_level_1 AS subject_code,
+        base.mult_fos_flag AS has_multiple_subject_assignments
     FROM base
+    LEFT JOIN access_right USING (record_hk)
 )
 
 SELECT * FROM final

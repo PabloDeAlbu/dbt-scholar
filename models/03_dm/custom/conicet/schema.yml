@@ -34,7 +34,9 @@ models:
       - name: publication_type_uri
         description: URI COAR asociada a la tipología canónica.
       - name: access_right
-        description: Etiqueta de acceso declarada para la publicación.
+        description: Etiqueta de acceso canónica mapeada desde `dc.right` con `seed_coar_access_right`.
+      - name: access_right_uri
+        description: URI COAR del nivel de acceso, resuelta desde `seed_coar_access_right`.
       - name: repository_identifier
         description: Identificador del repositorio OAI que origina el registro.
       - name: institution_ror
