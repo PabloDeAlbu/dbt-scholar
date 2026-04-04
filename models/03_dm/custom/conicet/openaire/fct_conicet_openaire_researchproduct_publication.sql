@@ -74,7 +74,7 @@ base AS (
         has_single_pmid,
         pmid_count
 
-    FROM {{ref('fct_openaire_researchproduct_publication')}} fct
+    FROM {{ ref('fct_openaire_researchproduct_publication') }} fct
     INNER JOIN conicet_extract USING (researchproduct_hk)
     INNER JOIN {{ ref('brg_openaire_researchproduct_pid_stats') }} USING (researchproduct_hk)
 )

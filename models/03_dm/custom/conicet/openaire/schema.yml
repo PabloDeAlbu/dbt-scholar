@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: fct_conicet_openaire_researchproduct
+  - name: fct_conicet_openaire_researchproduct_publication
     description: >
       Subconjunto institucional CONICET del hecho de publicaciones OpenAIRE, filtrado por organización
       (ROR) aplicada durante la extracción para construir una cohorte reproducible.
