@@ -22,15 +22,29 @@ WITH base AS (
     FROM {{ ref('fct_conicet_oai_record_publication') }}
 ),
 
+record_dc_type AS (
+    SELECT DISTINCT
+        base.record_hk,
+        NULLIF(dc_type_value, '') AS dc_type
+    FROM base
+    CROSS JOIN LATERAL REGEXP_SPLIT_TO_TABLE(COALESCE(base.dc_type, ''), '[|]') AS dc_type_value
+    WHERE NULLIF(dc_type_value, '') IS NOT NULL
+),
+
 dim_publication_type AS (
     SELECT
-        seed.record_type AS dc_type,
-        dim.resource_type_label AS publication_type,
-        dim.resource_type_uri AS publication_type_uri
-    FROM {{ ref('seed_coar_resource_types2conicet_oai_dc_types') }} seed
+        record_dc_type.record_hk,
+        MIN(dim.resource_type_label) AS publication_type,
+        MIN(dim.resource_type_uri) AS publication_type_uri,
+        COUNT(DISTINCT dim.resource_type_uri) AS publication_type_count,
+        (COUNT(DISTINCT dim.resource_type_uri) > 1) AS has_multiple_publication_type
+    FROM record_dc_type
+    INNER JOIN {{ ref('seed_coar_resource_types2conicet_oai_dc_types') }} seed
+        ON record_dc_type.dc_type = seed.record_type
     INNER JOIN {{ ref('dim_resource_type') }} dim
         ON seed.coar_uri = dim.resource_type_uri
     WHERE seed.coar_uri != '#N/A'
+    GROUP BY record_dc_type.record_hk
 ),
 
 dim_access_right AS (
@@ -56,6 +70,8 @@ final AS (
         END AS publication_year,
         dim_publication_type.publication_type,
         dim_publication_type.publication_type_uri,
+        COALESCE(dim_publication_type.publication_type_count, 0) AS publication_type_count,
+        COALESCE(dim_publication_type.has_multiple_publication_type, false) AS has_multiple_publication_type,
         dim_access_right.access_right,
         dim_access_right.access_right_uri,
         base.repository_identifier,
@@ -71,8 +87,7 @@ final AS (
         base.fos_code_level_1 AS subject_code,
         base.mult_fos_flag AS has_multiple_subject_assignments
     FROM base
-    LEFT JOIN dim_publication_type
-        ON base.dc_type = dim_publication_type.dc_type
+    LEFT JOIN dim_publication_type USING (record_hk)
     LEFT JOIN dim_access_right USING (record_hk)
 )
 

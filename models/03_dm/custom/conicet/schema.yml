@@ -27,6 +27,12 @@ models:
         description: Tipo canónico de publicación, resuelto fuera de OAI desde dimensiones core.
       - name: publication_type_uri
         description: URI COAR asociada al tipo canónico de publicación.
+      - name: publication_type_count
+        description: Cantidad de tipos canónicos distintos resueltos desde los valores raw de `dc.type`.
+        data_tests: [not_null]
+      - name: has_multiple_publication_type
+        description: Flag que indica multiplicidad de tipos canónicos para la publicación.
+        data_tests: [not_null]
       - name: access_right
         description: Access right canónico resuelto fuera de OAI desde dimensiones core.
       - name: access_right_uri
