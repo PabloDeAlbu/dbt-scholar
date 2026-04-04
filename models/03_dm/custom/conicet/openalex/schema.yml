@@ -1,0 +1,45 @@
+version: 2
+
+models:
+  - name: fct_conicet_openalex_work_publication
+    description: >
+      Subconjunto institucional CONICET del hecho de publications de OpenAlex,
+      definido por la cohorte extraída con el filtro
+      `institutions.ror = https://ror.org/03cqe8w59`.
+    config:
+      tags: [conicet, dm]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: conicet_openalex_institution_ror_format
+          expression: "trim(institution_ror) ~ '^https?://ror[.]org/[0-9a-z]{9}/?$'"
+          config:
+            alias: conicet_openalex_institution_ror_format
+    columns:
+      - name: work_hk
+        description: Clave hash del work de OpenAlex.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('dim_openalex_work')
+              field: work_hk
+      - name: work_id
+        description: Identificador canónico del work en OpenAlex.
+        data_tests: [not_null, unique]
+      - name: institution_hk
+        description: Clave hash de la institución CONICET en OpenAlex.
+        data_tests: [not_null]
+      - name: institution_id
+        description: Identificador canónico de OpenAlex para la institución.
+        data_tests: [not_null]
+      - name: institution_display_name
+        description: Nombre de display de la institución en OpenAlex.
+      - name: institution_ror
+        description: ROR utilizado para definir la cohorte CONICET.
+        data_tests: [not_null]
+      - name: conicet_first_extract_datetime
+        description: Primera fecha/hora de extracción observada para el work en la cohorte CONICET.
+        data_tests: [not_null]
+      - name: conicet_last_extract_datetime
+        description: Última fecha/hora de extracción observada para el work en la cohorte CONICET.
+        data_tests: [not_null]
