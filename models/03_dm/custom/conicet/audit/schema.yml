@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: fct_conicet_oai_record_publication_quality
+    description: >
+      Fact de quality a nivel record para el subset OAI de CONICET. Expone patterns
+      y flags de validación sobre identifier URI, DOI y multiplicidad de `dc.type`
+      para debugging de normalización y ajuste de tests.
+    config:
+      tags: [audit, conicet]
+    columns:
+      - name: record_hk
+        description: Clave hash del record auditado.
+        data_tests: [not_null, unique]
+      - name: record_id
+        description: Identificador OAI-PMH del record.
+        data_tests: [not_null]
+      - name: dc_identifier_uri_pattern
+        description: Pattern clasificado para `dc_identifier_uri`.
+        data_tests: [not_null]
+      - name: dc_identifier_uri_is_valid
+        description: Flag de validez del identifier URI según el contrato auditado.
+        data_tests: [not_null]
+      - name: dc_relation_doi_pattern
+        description: Pattern clasificado para `dc_relation_doi`.
+        data_tests: [not_null]
+      - name: dc_relation_doi_is_valid
+        description: Flag de validez del DOI según el contrato auditado.
+        data_tests: [not_null]
+      - name: dc_type_count
+        description: Cantidad de valores distintos de `dc.type` detectados para el record.
+        data_tests: [not_null]
+      - name: has_multiple_dc_type
+        description: Flag de multiplicidad de `dc.type`.
+        data_tests: [not_null]
+
+  - name: fct_conicet_oai_record_publication_quality_summary
+    description: >
+      Summary agregado de quality para el subset OAI de CONICET. Resume volumen
+      total, valid e invalid por dimensión de control y pattern detectado.
+    config:
+      tags: [audit, conicet]
+    columns:
+      - name: quality_dimension
+        description: Dimensión auditada (`dc_identifier_uri` o `dc_relation_doi`).
+        data_tests: [not_null]
+      - name: quality_pattern
+        description: Pattern detectado dentro de la dimensión auditada.
+        data_tests: [not_null]
+      - name: record_count
+        description: Cantidad total de records en el pattern.
+        data_tests: [not_null]
+      - name: valid_record_count
+        description: Cantidad de records válidos en el pattern.
+        data_tests: [not_null]
+      - name: invalid_record_count
+        description: Cantidad de records inválidos en el pattern.
+        data_tests: [not_null]

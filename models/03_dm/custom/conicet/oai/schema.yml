@@ -3,9 +3,9 @@ version: 2
 models:
   - name: fct_conicet_oai_record_publication
     description: >
-      Hecho institucional CONICET a nivel de registro OAI, con metadatos descriptivos,
-      tipologia COAR, condiciones de acceso y enriquecimiento de identificadores
-      dentro del subconjunto del repositorio OAI configurado por variables.
+      Hecho institucional CONICET a nivel de record OAI. Conserva el grano 1 fila
+      por `record_hk` de `fct_oai_record_publication`, filtra el subset institucional
+      configurado por variables y agrega enrichment 1:1 de identifier, DOI y subject.
     config:
       tags: [conicet, dm]
     data_tests:
@@ -23,7 +23,15 @@ models:
               to: ref('fct_oai_record_publication')
               field: record_hk
       - name: record_id
-        description: Identificador OAI-PMH del registro.
+        description: Identificador OAI-PMH del record.
+        data_tests: [not_null, unique]
+      - name: dc_type
+        description: Lista raw de valores `dc.type` agregados en OAI y concatenados con `|`.
+      - name: dc_type_count
+        description: Cantidad de valores distintos de `dc.type` detectados para el record.
+        data_tests: [not_null]
+      - name: has_multiple_dc_type
+        description: Flag que indica multiplicidad de `dc.type` en el record.
         data_tests: [not_null]
       - name: repository_identifier
         description: Identificador del repositorio OAI del que proviene el registro.

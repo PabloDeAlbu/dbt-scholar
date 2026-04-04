@@ -5,17 +5,17 @@
 
 WITH
 base as (
-    SELECT DISTINCT
+    SELECT
         fct.record_id,
         fct.title,
         fct.date_issued,
         fct.repository_identifier,
         fct.institution_ror,
-        hub_t.dc_type,
+        fct.dc_type,
+        fct.dc_type_count,
+        fct.has_multiple_dc_type,
         fct.record_hk
     FROM {{ ref('fct_oai_record_publication') }} fct
-    INNER JOIN {{ ref('brg_oai_record_type') }} USING (record_hk)
-    INNER JOIN {{ ref('hub_oai_type') }} hub_t USING (dc_type_hk)
     WHERE fct.repository_identifier = '{{ conicet_repository_identifier }}'
       AND fct.institution_ror = '{{ conicet_institution_ror }}'
 ),

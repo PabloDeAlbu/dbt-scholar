@@ -19,24 +19,24 @@ models:
               field: record_hk
       - name: record_id
         description: Identificador OAI-PMH original, preservado como identificador de negocio actual.
-        data_tests: [not_null]
+        data_tests: [not_null, unique]
       - name: source_system
-        description: Sistema fuente desde el cual se resuelve la publicación canónica.
+        description: Source system desde el cual se resuelve la publicación canónica.
         data_tests: [not_null]
+      - name: publication_type
+        description: Tipo canónico de publicación, resuelto fuera de OAI desde dimensiones core.
+      - name: publication_type_uri
+        description: URI COAR asociada al tipo canónico de publicación.
+      - name: access_right
+        description: Access right canónico resuelto fuera de OAI desde dimensiones core.
+      - name: access_right_uri
+        description: URI COAR del access right canónico.
       - name: title
         description: Título principal de la publicación.
       - name: publication_date
         description: Fecha de publicación tomada desde `date_issued` en la fuente OAI actual.
       - name: publication_year
         description: Año derivado de `publication_date` cuando la fecha está disponible.
-      - name: publication_type
-        description: Tipología canónica de la publicación, actualmente mapeada a COAR.
-      - name: publication_type_uri
-        description: URI COAR asociada a la tipología canónica.
-      - name: access_right
-        description: Etiqueta de acceso canónica mapeada desde `dc.right` con `seed_coar_access_right`.
-      - name: access_right_uri
-        description: URI COAR del nivel de acceso, resuelta desde `seed_coar_access_right`.
       - name: repository_identifier
         description: Identificador del repositorio OAI que origina el registro.
       - name: institution_ror
