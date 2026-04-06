@@ -61,6 +61,8 @@ models:
         description: Fecha `dc.date.issued` normalizada como `date`.
       - name: dc_date_issued_raw
         description: Valores crudos observados para `dc.date.issued`, concatenados para auditoría.
+      - name: dc_type
+        description: Valores distintos de `dc.type` agregados a nivel item y concatenados con `|`.
 
   - name: fct_smn_dspacedb5_metadatafield_usage
     description: >
@@ -77,6 +79,10 @@ models:
           - unique
       - name: metadatafield_fullname
         description: Nombre completo del campo en formato `schema.element.qualifier`.
+        data_tests:
+          - not_null
+      - name: metadatafield_name
+        description: Nombre derivado del campo concatenando `short_id`, `element` y `qualifier` cuando existe.
         data_tests:
           - not_null
       - name: short_id

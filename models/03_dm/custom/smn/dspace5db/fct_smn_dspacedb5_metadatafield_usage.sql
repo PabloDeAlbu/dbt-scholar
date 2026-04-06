@@ -28,6 +28,11 @@ final AS (
     SELECT
         metadatafield_hk,
         metadatafield_fullname,
+        CASE
+            WHEN qualifier IS NOT NULL
+                THEN short_id || '.' || element || '.' || qualifier
+            ELSE short_id || '.' || element
+        END AS metadatafield_name,
         short_id,
         element,
         qualifier,

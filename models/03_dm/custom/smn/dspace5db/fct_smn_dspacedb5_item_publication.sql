@@ -63,16 +63,30 @@ date_issued AS (
     GROUP BY item_hk
 ),
 
+dc_type AS (
+    SELECT
+        base.item_hk,
+        STRING_AGG(DISTINCT md.text_value, '|' ORDER BY md.text_value) AS dc_type
+    FROM base
+    JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS md
+        USING (item_hk)
+    WHERE md.metadatafield_fullname = 'dc.type'
+      AND md.text_value IS NOT NULL
+    GROUP BY base.item_hk
+),
+
 final AS (
     SELECT
         base.*,
         da.dc_date_available,
         da.dc_date_available_raw,
         di.dc_date_issued,
-        di.dc_date_issued_raw
+        di.dc_date_issued_raw,
+        dc_type.dc_type
     FROM base
     LEFT JOIN date_available AS da USING (item_hk)
     LEFT JOIN date_issued AS di USING (item_hk)
+    LEFT JOIN dc_type USING (item_hk)
 )
 
 SELECT * FROM final
