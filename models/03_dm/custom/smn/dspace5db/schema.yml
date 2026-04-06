@@ -61,3 +61,51 @@ models:
         description: Fecha `dc.date.issued` normalizada como `date`.
       - name: dc_date_issued_raw
         description: Valores crudos observados para `dc.date.issued`, concatenados para auditoría.
+
+  - name: fct_smn_dspacedb5_metadatafield_usage
+    description: >
+      Hecho agregado de uso de campos de metadatos sobre los ítems publicados de SMN en DSpace 5.
+      Resume qué esquemas y campos existen, cuántas ocurrencias de metadatos tiene cada campo y en
+      cuántos ítems distintos aparece dentro del scope `source_label = SMN`.
+    config:
+      tags: [smn, dm]
+    columns:
+      - name: metadatafield_hk
+        description: Hash key del campo de metadato.
+        data_tests:
+          - not_null
+          - unique
+      - name: metadatafield_fullname
+        description: Nombre completo del campo en formato `schema.element.qualifier`.
+        data_tests:
+          - not_null
+      - name: short_id
+        description: Identificador corto del esquema de metadatos.
+        data_tests:
+          - not_null
+      - name: element
+        description: Elemento del campo de metadatos.
+        data_tests:
+          - not_null
+      - name: qualifier
+        description: Qualifier del campo de metadatos, si existe.
+      - name: metadata_value_count
+        description: Cantidad total de ocurrencias de metadatos observadas para el campo.
+        data_tests:
+          - not_null
+      - name: item_count
+        description: Cantidad de ítems distintos en los que aparece el campo.
+        data_tests:
+          - not_null
+      - name: item_id_count
+        description: Cantidad de `item_id` distintos en los que aparece el campo.
+        data_tests:
+          - not_null
+      - name: source_label
+        description: Etiqueta de fuente del repositorio cargado; para este scope se espera `SMN`.
+        data_tests:
+          - not_null
+      - name: institution_ror
+        description: ROR institucional del repositorio; para este scope se espera `https://ror.org/028x29h02`.
+        data_tests:
+          - not_null
