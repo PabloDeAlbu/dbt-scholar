@@ -51,7 +51,7 @@ submitter_activity AS (
         MAX(last_extract_datetime) AS last_submitter_extract_datetime,
         MIN(first_load_datetime) AS first_submitter_load_datetime,
         MAX(last_load_datetime) AS last_submitter_load_datetime
-    FROM {{ ref('fct_unlp_dspace5db_item_publication') }}
+    FROM {{ ref('fct_unlp_dspacedb5_item_publication') }}
     -- DSpace no expone en este mart una fecha explícita de envío; usamos `dc_date_available`
     -- como mejor aproximación y caemos a `last_modified`, `dc_date_issued` y luego la
     -- primera observación en warehouse si el item no trae fechas de negocio útiles.

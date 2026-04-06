@@ -4,7 +4,7 @@ WITH monthly_counts AS (
     SELECT
         DATE_TRUNC('month', dc_date_available)::date AS available_month,
         COUNT(*) AS items_available_monthly
-    FROM {{ ref('fct_unlp_dspace5db_item_publication') }}
+    FROM {{ ref('fct_unlp_dspacedb5_item_publication') }}
     WHERE dc_date_available IS NOT NULL
     GROUP BY 1
 ),

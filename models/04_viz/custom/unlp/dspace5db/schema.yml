@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: fct_unlp_dspace5db_item_available_monthly_agg
+  - name: fct_unlp_dspacedb5_item_available_monthly_agg
     description: >
       Serie mensual del repositorio UNLP basada en `dc.date.available`, con altas del mes
       y acumulado total al cierre de cada mes.
