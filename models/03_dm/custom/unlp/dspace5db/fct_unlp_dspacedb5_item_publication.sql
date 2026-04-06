@@ -36,14 +36,7 @@ parsed_dates AS (
         item_id,
         qualifier,
         text_value AS raw_value,
-        CASE
-            WHEN text_value ~ '^[0-9]{4}[-/](0[1-9]|1[0-2])[-/](0[1-9]|[12][0-9]|3[01])'
-                THEN TO_DATE(REPLACE(LEFT(text_value, 10), '/', '-'), 'YYYY-MM-DD')
-            WHEN text_value ~ '^[0-9]{4}[-/](0[1-9]|1[0-2])$'
-                THEN TO_DATE(REPLACE(text_value, '/', '-') || '-01', 'YYYY-MM-DD')
-            WHEN text_value ~ '^[0-9]{4}$'
-                THEN TO_DATE(text_value || '-01-01', 'YYYY-MM-DD')
-        END AS parsed_date
+        {{ str_to_date('text_value') }} AS parsed_date
     FROM raw_dates
 ),
 
@@ -54,7 +47,7 @@ date_available AS (
         STRING_AGG(DISTINCT raw_value, '|' ORDER BY raw_value) AS dc_date_available_raw
     FROM parsed_dates
     WHERE qualifier = 'available'
-      AND parsed_date IS NOT NULL
+      AND parsed_date <> DATE '9999-12-31'
     GROUP BY item_hk
 ),
 
@@ -65,7 +58,7 @@ date_issued AS (
         STRING_AGG(DISTINCT raw_value, '|' ORDER BY raw_value) AS dc_date_issued_raw
     FROM parsed_dates
     WHERE qualifier = 'issued'
-      AND parsed_date IS NOT NULL
+      AND parsed_date <> DATE '9999-12-31'
     GROUP BY item_hk
 ),
 
