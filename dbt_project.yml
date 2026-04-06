@@ -132,6 +132,9 @@ models:
         conicet:
           +schema: conicet
           +tags: [conicet]
+        smn:
+          +schema: smn
+          +tags: [smn]
         unlp:
           +schema: unlp
           +tags: [unlp]

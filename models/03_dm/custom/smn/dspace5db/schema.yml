@@ -1,0 +1,63 @@
+version: 2
+
+models:
+  - name: fct_smn_dspacedb5_item_publication
+    description: >
+      Hecho mínimo de ítems publicados del repositorio DSpace 5 de SMN, construido como filtro
+      institucional sobre `fct_dspacedb5_item_publication`. Este scope filtra
+      `institution_ror = https://ror.org/028x29h02` y `source_label = SMN` para
+      aislar la ingesta institucional esperada.
+    config:
+      tags: [smn, dm]
+    columns:
+      - name: item_hk
+        description: Hash key del item contextualizado por repositorio e institución.
+        data_tests:
+          - not_null
+          - unique
+      - name: item_id
+        description: ID original del item en DSpace 5.
+        data_tests:
+          - not_null
+      - name: submitter_id
+        description: ID del usuario submitter en la base transaccional.
+      - name: in_archive
+        description: Flag que indica si el item está archivado.
+        data_tests:
+          - not_null
+      - name: withdrawn
+        description: Flag que indica si el item fue retirado.
+        data_tests:
+          - not_null
+      - name: discoverable
+        description: Flag que indica si el item es descubrible.
+        data_tests:
+          - not_null
+      - name: owning_collection
+        description: ID de la colección dueña del item.
+      - name: last_modified
+        description: Última modificación reportada por DSpace para el item.
+      - name: source_label
+        description: Etiqueta de fuente del repositorio cargado; para este scope se espera el valor exacto `SMN`.
+        data_tests:
+          - not_null
+      - name: institution_ror
+        description: ROR institucional del repositorio; para este scope se espera `https://ror.org/028x29h02`.
+        data_tests:
+          - not_null
+      - name: first_extract_datetime
+        description: Primera extracción en la que se observó el item dentro del scope SMN.
+      - name: last_extract_datetime
+        description: Última extracción en la que se observó el item dentro del scope SMN.
+      - name: first_load_datetime
+        description: Primera carga en la que se observó el item dentro del scope SMN.
+      - name: last_load_datetime
+        description: Última carga en la que se observó el item dentro del scope SMN.
+      - name: dc_date_available
+        description: Fecha `dc.date.available` normalizada como `date`.
+      - name: dc_date_available_raw
+        description: Valores crudos observados para `dc.date.available`, concatenados para auditoría.
+      - name: dc_date_issued
+        description: Fecha `dc.date.issued` normalizada como `date`.
+      - name: dc_date_issued_raw
+        description: Valores crudos observados para `dc.date.issued`, concatenados para auditoría.
