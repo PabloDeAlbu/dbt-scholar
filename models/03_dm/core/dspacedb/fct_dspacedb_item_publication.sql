@@ -6,15 +6,10 @@ WITH item_hub AS (
         SPLIT_PART(item_bk, '||', 3)::uuid AS item_uuid
     FROM {{ ref('hub_dspacedb_item') }}
 ),
-latest_item_id AS (
-    SELECT
-        item_hk,
-        item_id
-    FROM {{ ref('latest_stg_dspacedb_item') }}
-),
 latest_item_sat AS (
     SELECT
         item_hk,
+        item_id,
         submitter_id,
         in_archive,
         withdrawn,
@@ -48,7 +43,7 @@ extraction_window AS (
 final AS (
     SELECT
         hub.item_hk,
-        legacy.item_id,
+        sat.item_id,
         hub.item_uuid,
         sat.submitter_id,
         sat.in_archive,
@@ -68,8 +63,6 @@ final AS (
     INNER JOIN latest_item_sat AS sat
         USING (item_hk)
     INNER JOIN item_hub AS hub
-        USING (item_hk)
-    LEFT JOIN latest_item_id AS legacy
         USING (item_hk)
     WHERE sat.in_archive = true
       AND sat.withdrawn = false

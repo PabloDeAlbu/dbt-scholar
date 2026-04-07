@@ -1,18 +1,6 @@
 version: 2
 
 models:
-  - name: latest_stg_dspacedb_item
-    description: >
-      Última fila de `stg_dspacedb_item` por `item_hk`. Se usa para resolver el
-      identificador legado y otros atributos de staging sin repetir lógica latest.
-    config:
-      tags: [dspacedb, dm]
-    columns:
-      - name: item_hk
-        data_tests: [not_null, unique]
-      - name: item_uuid
-        data_tests: [not_null]
-
   - name: latest_sat_dspacedb_item
     description: Estado más reciente de `sat_dspacedb_item`, a grano `item_hk`.
     config:
@@ -20,6 +8,8 @@ models:
     columns:
       - name: item_hk
         data_tests: [not_null, unique]
+      - name: item_id
+        data_tests: [not_null]
       - name: load_datetime
         data_tests: [not_null]
 
@@ -48,6 +38,25 @@ models:
         data_tests: [not_null, unique]
       - name: metadata_value_id
         data_tests: [not_null]
+
+  - name: dim_dspacedb_metadatafield
+    description: >
+      Dimensión de campos de metadatos contextualizados por repositorio e institución para la rama
+      `dspacedb`.
+    config:
+      tags: [dspacedb, dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [metadatafield_fullname, source_label, institution_ror]
+    columns:
+      - name: metadatafield_fullname
+        data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+      - name: metadatafield_hk
+        data_tests: [not_null, unique]
 
   - name: fct_dspacedb_item_extraction
     description: >
@@ -103,4 +112,57 @@ models:
       - name: metadata_value_id
         data_tests: [not_null]
       - name: metadatafield_fullname
+        data_tests: [not_null]
+
+  - name: fct_dspacedb_metadatafield_usage
+    description: >
+      Hecho agregado de uso de campos de metadatos sobre los ítems observados en `dspacedb`.
+      Resume cuántas ocurrencias de metadatos tiene cada campo y en cuántos ítems distintos aparece
+      dentro de cada scope `source_label + institution_ror`.
+    config:
+      tags: [dspacedb, dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [metadatafield_hk, source_label, institution_ror]
+    columns:
+      - name: metadatafield_hk
+        description: Hash key del campo de metadato.
+        data_tests: [not_null]
+      - name: metadatafield_fullname
+        description: Nombre completo del campo en formato `schema.element.qualifier`.
+        data_tests: [not_null]
+      - name: metadatafield_name
+        description: Nombre derivado del campo concatenando `short_id`, `element` y `qualifier` cuando existe.
+        data_tests: [not_null]
+      - name: short_id
+        description: Identificador corto del esquema de metadatos.
+        data_tests: [not_null]
+      - name: metadata_field_id
+        description: Identificador técnico legado del campo de metadato.
+        data_tests: [not_null]
+      - name: element
+        description: Elemento del campo de metadatos.
+        data_tests: [not_null]
+      - name: qualifier
+        description: Qualifier del campo de metadatos, si existe.
+      - name: metadata_value_count
+        description: Cantidad total de ocurrencias de metadatos observadas para el campo.
+        data_tests: [not_null]
+      - name: metadata_value_id_count
+        description: Cantidad de `metadata_value_id` distintos observados para el campo.
+        data_tests: [not_null]
+      - name: item_count
+        description: Cantidad de ítems distintos en los que aparece el campo.
+        data_tests: [not_null]
+      - name: item_id_count
+        description: Cantidad de `item_id` distintos en los que aparece el campo.
+        data_tests: [not_null]
+      - name: item_uuid_count
+        description: Cantidad de `item_uuid` distintos en los que aparece el campo.
+        data_tests: [not_null]
+      - name: source_label
+        description: Etiqueta de fuente del repositorio cargado.
+        data_tests: [not_null]
+      - name: institution_ror
+        description: ROR institucional del repositorio cargado.
         data_tests: [not_null]

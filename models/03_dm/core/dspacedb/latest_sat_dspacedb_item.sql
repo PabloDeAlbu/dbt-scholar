@@ -5,6 +5,7 @@ WITH latest AS {{ latest_satellite(ref('sat_dspacedb_item'), 'item_hk', order_co
 
 SELECT
     item_hk,
+    item_id,
     submitter_id,
     in_archive,
     withdrawn,

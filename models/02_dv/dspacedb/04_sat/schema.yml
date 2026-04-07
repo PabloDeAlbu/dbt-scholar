@@ -6,6 +6,8 @@ models:
     columns:
       - name: item_hk
         description: Hash key del item contextualizado por repositorio e institución.
+      - name: item_id
+        description: Identificador legado del item, preservado por compatibilidad.
 
   - name: sat_dspacedb_item__extract
     description: >
