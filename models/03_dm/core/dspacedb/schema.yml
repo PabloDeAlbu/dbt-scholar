@@ -114,6 +114,32 @@ models:
       - name: metadatafield_fullname
         data_tests: [not_null]
 
+  - name: fct_dspacedb_eperson
+    description: >
+      Hecho simplificado de usuarios `eperson` para la rama `dspacedb`. Resume identidad, señales
+      de administración, carga y lectura sobre un repositorio DSpace sin historización completa en
+      DV. Se construye directo sobre `source`.
+    config:
+      tags: [dspacedb, dm]
+    columns:
+      - name: eperson_id
+        description: Identificador legado del usuario en la base transaccional DSpace.
+      - name: eperson_uuid
+        description: UUID canónico del usuario en DSpace.
+        data_tests: [not_null]
+      - name: can_log_in
+        description: Flag que indica si la cuenta tiene habilitado el login.
+      - name: last_active
+        description: Última actividad registrada en DSpace para el usuario.
+      - name: group_count
+        description: Cantidad de grupos efectivos a los que pertenece el usuario.
+      - name: is_administrator
+        description: >
+          Flag derivado que resume si el usuario pertenece al grupo `Administrator` o a grupos
+          administradores de comunidad o colección.
+      - name: submitted_item_count
+        description: Cantidad de ítems en los que el usuario aparece como `submitter_id`.
+
   - name: fct_dspacedb_metadatafield_usage
     description: >
       Hecho agregado de uso de campos de metadatos sobre los ítems observados en `dspacedb`.
