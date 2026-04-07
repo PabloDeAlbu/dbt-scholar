@@ -1,6 +1,13 @@
 {{ config(materialized='table') }}
 
-WITH metadata AS (
+WITH ghost_metadatafield AS (
+    SELECT metadatafield_hk
+    FROM {{ ref('stg_dspacedb_metadatafieldregistry') }}
+    WHERE metadata_field_id = -1
+      AND source_label = '!UNKNOWN'
+      AND institution_ror = '!UNKNOWN'
+),
+metadata AS (
     SELECT
         metadatafield_hk,
         metadatafield_fullname,
@@ -15,6 +22,10 @@ WITH metadata AS (
         source_label,
         institution_ror
     FROM {{ ref('fct_dspacedb_item_metadata') }}
+    WHERE metadatafield_hk NOT IN (
+        SELECT metadatafield_hk
+        FROM ghost_metadatafield
+    )
 ),
 final AS (
     SELECT
