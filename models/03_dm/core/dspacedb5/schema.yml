@@ -1,6 +1,54 @@
 version: 2
 
 models:
+  - name: brg_dspacedb5_collection_metadatavalue
+    description: >
+      Bridge de colección con valores de metadatos y su campo asociado, construido desde DV para
+      la rama `dspacedb5`.
+    config:
+      tags: [dspacedb5, dm]
+
+  - name: brg_dspacedb5_community_metadatavalue
+    description: >
+      Bridge de comunidad con valores de metadatos y su campo asociado, construido desde DV para
+      la rama `dspacedb5`.
+    config:
+      tags: [dspacedb5, dm]
+
+  - name: dim_dspacedb5_collection
+    description: >
+      Dimensión de colecciones DSpace 5 contextualizadas por repositorio e institución, con título
+      preferido derivado de `dc.title`.
+    config:
+      tags: [dspacedb5, dm]
+    columns:
+      - name: collection_hk
+        data_tests: [not_null, unique]
+      - name: collection_id
+        data_tests: [not_null]
+
+  - name: dim_dspacedb5_community
+    description: >
+      Dimensión de comunidades DSpace 5 con jerarquía inmediata y comunidad raíz para facilitar
+      agrupamientos por comunidad base y filtros por subárbol.
+    config:
+      tags: [dspacedb5, dm]
+    columns:
+      - name: community_hk
+        data_tests: [not_null, unique]
+      - name: community_id
+        data_tests: [not_null]
+
+  - name: brg_dspacedb5_item_collection
+    description: >
+      Bridge item-colección para DSpace 5. Expone todas las colecciones asociadas al item y la
+      cantidad total de colecciones observadas por item.
+    config:
+      tags: [dspacedb5, dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_hk, collection_hk]
+
   - name: latest_sat_dspacedb5_item
     description: Estado más reciente de `sat_dspacedb5_item`, a grano `item_hk`.
     config:
@@ -62,8 +110,9 @@ models:
   - name: fct_dspacedb5_item_publication
     description: >
       Hecho core de items publicados DSpace 5 a nivel de item contextualizado por repositorio e
-      institución. Expone el último estado conocido del item junto con su ventana temporal de
-      observación en las extracciones.
+      institución. Expone el último estado conocido del item, su colección dueña hashable y la
+      cantidad de colecciones asociadas, junto con su ventana temporal de observación en las
+      extracciones.
     config:
       tags: [dspacedb5, dm]
     columns:
@@ -71,18 +120,43 @@ models:
         data_tests: [not_null, unique]
       - name: item_id
         data_tests: [not_null]
+      - name: owningcollection_hk
+      - name: collections_count
       - name: source_label
         data_tests: [not_null]
       - name: institution_ror
         data_tests: [not_null]
 
+  - name: fct_dspacedb5_item_community
+    description: >
+      Hecho analítico item-colección-comunidad para DSpace 5. Permite agrupar ítems por comunidad
+      inmediata o comunidad raíz y filtrar por ramas jerárquicas específicas.
+    config:
+      tags: [dspacedb5, dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_hk, collection_hk]
+    columns:
+      - name: item_hk
+        data_tests: [not_null]
+      - name: collection_hk
+        data_tests: [not_null]
+      - name: community_hk
+
   - name: dim_dspacedb5_metadatafield
     description: Dimensión de campos de metadatos contextualizados por repositorio e institución para la rama `dspacedb5`.
     config:
       tags: [dspacedb5, dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [metadatafield_fullname, source_label, institution_ror]
     columns:
       - name: metadatafield_fullname
-        data_tests: [not_null, unique]
+        data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
       - name: metadatafield_hk
         data_tests: [not_null, unique]
 

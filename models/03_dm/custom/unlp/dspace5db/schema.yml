@@ -4,7 +4,8 @@ models:
   - name: fct_unlp_dspacedb5_item_publication
     description: >
       Hecho mínimo de ítems publicados del repositorio DSpace 5 de UNLP, construido como filtro
-      institucional sobre `fct_dspacedb5_item_publication`.
+      institucional sobre `fct_dspacedb5_item_publication` y enriquecido con la comunidad de la
+      colección dueña para análisis temático o estructural.
     config:
       tags: [unlp, dm]
     columns:
@@ -33,6 +34,10 @@ models:
           - not_null
       - name: owning_collection
         description: ID de la colección dueña del item.
+      - name: owningcollection_hk
+        description: Hash key estable de la colección dueña dentro del scope institucional.
+      - name: collections_count
+        description: Cantidad de colecciones asociadas al item.
       - name: last_modified
         description: Última modificación reportada por DSpace para el item.
       - name: source_label
@@ -59,6 +64,40 @@ models:
         description: Fecha `dc.date.issued` normalizada como `date`.
       - name: dc_date_issued_raw
         description: Valores crudos observados para `dc.date.issued`, concatenados para auditoría.
+      - name: owning_collection_title
+        description: Título preferido de la colección dueña.
+      - name: owning_community_title
+        description: Título preferido de la comunidad inmediata de la colección dueña.
+      - name: owning_root_community_title
+        description: Título preferido de la comunidad raíz de la rama donde cae la colección dueña.
+      - name: owning_community_path_titles
+        description: Camino jerárquico de títulos desde la comunidad raíz hasta la comunidad dueña.
+
+  - name: fct_unlp_dspacedb5_item_community
+    description: >
+      Hecho institucional item-colección-comunidad para UNLP. Permite agrupar por comunidad raíz
+      y filtrar por ramas específicas como `Revistas`.
+    config:
+      tags: [unlp, dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_hk, collection_hk]
+
+  - name: fct_unlp_dspacedb5_root_community_summary
+    description: >
+      Resumen analítico por comunidad raíz para UNLP sobre DSpace 5. Sirve como primer corte para
+      entender cómo se distribuyen los items entre comunidades base y qué ramas concentran más
+      colecciones o publicaciones emitidas.
+    config:
+      tags: [unlp, dm]
+    columns:
+      - name: root_community_hk
+      - name: root_community_id
+      - name: root_community_title
+      - name: item_count
+      - name: item_count_owning_collection
+      - name: collection_count
+      - name: community_count
 
   - name: fct_unlp_dspacedb5_eperson
     description: >

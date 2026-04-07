@@ -1,6 +1,31 @@
 version: 2
 
 models:
+  - name: stg_dspacedb5_collection
+    description: >
+      Staging model estructural de colecciones DSpace 5 contextualizadas por repositorio e
+      institución. Deriva `collection_bk` y `collection_hk` para reutilización analítica en la
+      rama `dspacedb5`.
+
+  - name: stg_dspacedb5_community
+    description: >
+      Staging model estructural de comunidades DSpace 5 contextualizadas por repositorio e
+      institución. Deriva `community_bk` y `community_hk`.
+
+  - name: stg_dspacedb5_collection2item
+    description: >
+      Staging model de la relación colección-item en DSpace 5. Expone hash keys consistentes con
+      `stg_dspacedb5_item` y `stg_dspacedb5_collection`.
+
+  - name: stg_dspacedb5_community2collection
+    description: >
+      Staging model de la relación comunidad-colección en DSpace 5. Expone hash keys consistentes
+      con las entidades contextualizadas por repositorio.
+
+  - name: stg_dspacedb5_community2community
+    description: >
+      Staging model de la jerarquía comunidad-padre/comunidad-hija en DSpace 5.
+
   - name: stg_dspacedb5_item
     description: >
       Staging model para items DSpace 5 contextualizados por repositorio e institución. Construye

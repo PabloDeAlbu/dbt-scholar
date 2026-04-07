@@ -41,6 +41,31 @@ extraction_window AS (
     FROM {{ ref('fct_dspacedb5_item_extraction') }}
     GROUP BY item_hk, source_label, institution_ror
 ),
+item_collection_counts AS (
+    SELECT
+        item_hk,
+        MAX(collections_count) AS collections_count
+    FROM {{ ref('brg_dspacedb5_item_collection') }}
+    GROUP BY item_hk
+),
+owning_collection_bk AS (
+    SELECT
+        item_hk,
+        source_label,
+        institution_ror,
+        institution_ror || '||' || source_label || '||' || owning_collection::text AS owningcollection_bk
+    FROM latest_item_extract AS extract
+    INNER JOIN latest_item_sat AS sat
+        USING (item_hk)
+),
+owning_collection_hk AS (
+    SELECT
+        item_hk,
+        source_label,
+        institution_ror,
+        {{ automate_dv.hash(columns='owningcollection_bk', alias='owningcollection_hk') }}
+    FROM owning_collection_bk
+),
 
 final AS (
     SELECT
@@ -51,6 +76,8 @@ final AS (
         sat.withdrawn,
         sat.discoverable,
         sat.owning_collection,
+        owning.owningcollection_hk,
+        COALESCE(icc.collections_count, 0) AS collections_count,
         sat.last_modified,
         extract.source_label,
         extract.institution_ror,
@@ -65,6 +92,10 @@ final AS (
         USING (item_hk)
     INNER JOIN item_hub AS hub
         USING (item_hk)
+    LEFT JOIN item_collection_counts AS icc
+        USING (item_hk)
+    LEFT JOIN owning_collection_hk AS owning
+        USING (item_hk, source_label, institution_ror)
     WHERE sat.in_archive = true
       AND sat.withdrawn = false
 )

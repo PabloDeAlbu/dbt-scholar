@@ -1,5 +1,6 @@
 {{ config(materialized='table') }}
 
+-- FIXME: this model is a latest technical projection of metadatavalue payload, not a true analytical dimension.
 WITH base AS (
     SELECT
         sat_mv.text_value,

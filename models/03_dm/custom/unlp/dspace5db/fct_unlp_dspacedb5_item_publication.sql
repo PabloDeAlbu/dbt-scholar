@@ -39,6 +39,26 @@ parsed_dates AS (
         {{ str_to_date('text_value') }} AS parsed_date
     FROM raw_dates
 ),
+owning_community AS (
+    SELECT
+        item_hk,
+        collection_hk AS owningcollection_hk,
+        collection_title AS owning_collection_title,
+        community_hk AS owning_community_hk,
+        community_id AS owning_community_id,
+        community_title AS owning_community_title,
+        root_community_hk AS owning_root_community_hk,
+        root_community_id AS owning_root_community_id,
+        root_community_title AS owning_root_community_title,
+        community_path_ids AS owning_community_path_ids,
+        community_path_titles AS owning_community_path_titles,
+        ROW_NUMBER() OVER (
+            PARTITION BY item_hk
+            ORDER BY community_path_titles, community_id, collection_id
+        ) AS rn
+    FROM {{ ref('fct_unlp_dspacedb5_item_community') }}
+    WHERE is_owning_collection
+),
 
 date_available AS (
     SELECT
@@ -68,10 +88,22 @@ final AS (
         da.dc_date_available,
         da.dc_date_available_raw,
         di.dc_date_issued,
-        di.dc_date_issued_raw
+        di.dc_date_issued_raw,
+        oc.owning_collection_title,
+        oc.owning_community_hk,
+        oc.owning_community_id,
+        oc.owning_community_title,
+        oc.owning_root_community_hk,
+        oc.owning_root_community_id,
+        oc.owning_root_community_title,
+        oc.owning_community_path_ids,
+        oc.owning_community_path_titles
     FROM base
     LEFT JOIN date_available AS da USING (item_hk)
     LEFT JOIN date_issued AS di USING (item_hk)
+    LEFT JOIN owning_community AS oc
+        ON base.item_hk = oc.item_hk
+       AND oc.rn = 1
 )
 
 SELECT * FROM final

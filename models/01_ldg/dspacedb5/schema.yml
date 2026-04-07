@@ -23,11 +23,15 @@ sources:
 models:
   - name: ldg_dspacedb5_context
     description: >
-      Contexto activo del dump DSpace 5 utilizado para inyectar `source_label`, `institution_ror`,
-      `extract_datetime` y `load_datetime` sobre las tablas crudas de `ldg_dspacedb5`. Los valores
-      de `source_label` e `institution_ror` se parametrizan con `vars` en `dbt_project.yml`.
+      Contexto activo del dump DSpace 5 utilizado para inyectar `base_url`, `source_label`,
+      `institution_ror`, `extract_datetime` y `load_datetime` sobre las tablas crudas de
+      `ldg_dspacedb5`. `base_url` se parametriza con `vars` en `dbt_project.yml`, se normaliza a
+      minúsculas y sin protocolo, y por compatibilidad también se expone como `source_label`.
     columns:
+      - name: base_url
+        data_tests: [not_null]
       - name: source_label
+        description: Alias compatible derivado de `base_url`.
         data_tests: [not_null]
       - name: institution_ror
         data_tests: [not_null]
