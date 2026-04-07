@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: audit_dspacedb5_item_publication_unique_item_hk
+    description: >
+      Auditoría de violaciones a la unicidad esperada de `item_hk` en
+      `fct_dspacedb5_item_publication`.
+    config:
+      tags: [audit, dspacedb5]
+    columns:
+      - name: item_hk
+        data_tests: [not_null]
+      - name: issue_count
+        data_tests: [not_null]
+
+  - name: audit_dspacedb5_metadatafield_fullname_unique_by_scope
+    description: >
+      Auditoría de violaciones a la unicidad esperada de `metadatafield_fullname` por
+      `source_label + institution_ror` en `dim_dspacedb5_metadatafield`.
+    config:
+      tags: [audit, dspacedb5]
+    columns:
+      - name: metadatafield_fullname
+        data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+      - name: issue_count
+        data_tests: [not_null]
+
+  - name: audit_dspacedb5_source_label_variants_by_institution_ror
+    description: >
+      Auditoría de instituciones con más de un `source_label` observado en
+      `fct_dspacedb5_item_extraction`.
+    config:
+      tags: [audit, dspacedb5]
+    columns:
+      - name: institution_ror
+        data_tests: [not_null]
+      - name: issue_count
+        data_tests: [not_null]
