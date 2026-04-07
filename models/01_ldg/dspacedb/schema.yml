@@ -5,17 +5,23 @@ sources:
     description: 'DSpace database parametrizada para cargas manuales tipo dspacedb'
     schema: ldg_dspacedb
     tables:
+      - name: community
       - name: collection
       - name: collection2item
-      - name: community
       - name: community2collection
       - name: community2community
+      - name: cwf_collectionrole
+      - name: cwf_workflowitemrole
       - name: dspaceobject
       - name: eperson
+      - name: epersongroup
+      - name: epersongroup2eperson
+      - name: group2groupcache
       - name: item
       - name: metadatafieldregistry
       - name: metadataschemaregistry
       - name: metadatavalue
+      - name: resourcepolicy
 
 models:
   - name: ldg_dspacedb_context
