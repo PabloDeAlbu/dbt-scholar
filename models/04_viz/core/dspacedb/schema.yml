@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: viz_dspacedb_item_metadata
+    description: >
+      Vista mínima de metadatos de ítems DSpace, pensada para exploración directa sobre
+      `fct_dspacedb_item_metadata`.
+    columns:
+      - name: item_uuid
+        data_tests: [not_null]
+      - name: metadatafield_fullname
+        description: Nombre técnico del metadato en formato `schema.element.qualifier`.
+      - name: text_value
+        description: Valor textual del metadato.
+      - name: authority
+        description: Autoridad asociada al valor de metadato cuando existe.

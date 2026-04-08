@@ -142,6 +142,9 @@ models:
       core:
         audit:
           +schema: audit
+        dspacedb:
+          +schema: dspacedb
+          +tags: [dspacedb]
         openaire:
           +schema: openaire
           +tags: [openaire]
