@@ -1,6 +1,35 @@
 version: 2
 
 models:
+  - name: audit_conicet_oai_record_relation_doi_parse
+    description: >
+      Auditoría detallada del parseo de `dc.relation` para relaciones `altIdentifier/doi` del
+      subset OAI de CONICET. Permite detectar DOI vacíos, truncados o correctamente parseados.
+    config:
+      tags: [audit, conicet]
+    columns:
+      - name: record_hk
+        data_tests: [not_null]
+      - name: record_id
+        data_tests: [not_null]
+      - name: dc_relation
+        data_tests: [not_null]
+      - name: doi_parse_pattern
+        data_tests: [not_null]
+
+  - name: audit_conicet_oai_record_relation_doi_parse_summary
+    description: >
+      Summary agregado de patterns del parseo DOI en `dc.relation` para CONICET OAI.
+    config:
+      tags: [audit, conicet]
+    columns:
+      - name: doi_parse_pattern
+        data_tests: [not_null]
+      - name: row_count
+        data_tests: [not_null]
+      - name: record_count
+        data_tests: [not_null]
+
   - name: audit_conicet_publication_doi_coverage
     description: >
       Auditoría simple de cobertura DOI para publicaciones CONICET OAI y OpenAIRE. Resume volumen

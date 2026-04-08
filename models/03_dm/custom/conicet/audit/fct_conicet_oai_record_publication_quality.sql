@@ -37,13 +37,13 @@ classified AS (
         dc_relation_doi,
         CASE
             WHEN dc_relation_doi IS NULL THEN 'null'
-            WHEN dc_relation_doi ~* '^10\\.[0-9]{4,9}/\\S+$' THEN 'bare_doi'
-            WHEN dc_relation_doi ~* '^https?://(dx\\.)?doi\\.org/' THEN 'doi_url'
+            WHEN dc_relation_doi ~* '^10\.[0-9]{4,9}/[^[:space:]]+$' THEN 'bare_doi'
+            WHEN dc_relation_doi ~* '^https?://(dx\.)?doi\.org/' THEN 'doi_url'
             WHEN dc_relation_doi ~* 'doi' THEN 'contains_doi_text'
             ELSE 'other'
         END AS dc_relation_doi_pattern,
         COALESCE(
-            dc_relation_doi IS NULL OR dc_relation_doi ~* '^10\\.[0-9]{4,9}/\\S+$',
+            dc_relation_doi IS NULL OR dc_relation_doi ~* '^10\.[0-9]{4,9}/[^[:space:]]+$',
             false
         ) AS dc_relation_doi_is_valid,
         dc_type,

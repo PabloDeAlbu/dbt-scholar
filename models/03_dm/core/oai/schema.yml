@@ -166,6 +166,9 @@ models:
       tipo/valor de identificador cuando aplica.
     config:
       tags: [dm]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: "identifier_type <> 'doi' OR identifier_value IS NULL OR identifier_value !~* '^10\\.[0-9]{4,9}$'"
     columns:
       - name: record_relation_hk
         description: Clave hash del vínculo record-relation.
@@ -179,7 +182,7 @@ models:
       - name: identifier_type
         description: Tipo de identificador extraído (p. ej. doi).
       - name: identifier_value
-        description: Valor del identificador extraído (p. ej. 10.xxxx/xxxx).
+        description: Valor del identificador extraído preservando el contenido completo después del prefijo semántico (p. ej. 10.xxxx/xxxx).
 
   - name: brg_oai_record_right
     description: Bridge record-right (dc.rights) para condiciones de acceso/derechos declarados.
