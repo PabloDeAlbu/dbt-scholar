@@ -4,10 +4,10 @@ WITH oai_base AS (
     SELECT
         record_hk,
         record_id,
-        doi AS doi_raw
-    FROM {{ ref('fct_conicet_publication') }}
-    WHERE doi IS NOT NULL
-      AND TRIM(doi) <> ''
+        dc_relation_doi AS doi_raw
+    FROM {{ ref('fct_conicet_oai_record_publication') }}
+    WHERE dc_relation_doi IS NOT NULL
+      AND TRIM(dc_relation_doi) <> ''
 ),
 
 oai_doi AS (

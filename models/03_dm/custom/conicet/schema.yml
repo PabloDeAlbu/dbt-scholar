@@ -72,6 +72,25 @@ models:
       - name: has_multiple_subject_assignments
         description: Flag de auditoría para publicaciones con múltiples subjects FOS antes del aplanado.
         data_tests: [not_null]
+      - name: matched_by_unique_doi
+        description: >
+          Flag que indica si la publicación OAI pudo enriquecerse con OpenAIRE mediante
+          un match único 1 a 1 por DOI normalizado.
+        data_tests: [not_null]
+      - name: openaire_researchproduct_hk
+        description: Clave hash de la publicación OpenAIRE asociada por match único de DOI.
+      - name: openaire_researchproduct_id
+        description: Identificador de negocio de la publicación OpenAIRE asociada por match único de DOI.
+      - name: openaire_publication_date
+        description: Fecha de publicación informada por OpenAIRE para la publicación matcheada por DOI.
+      - name: openaire_type
+        description: Tipo de publicación informado por OpenAIRE para la publicación matcheada por DOI.
+      - name: openaire_access_right
+        description: Condición de acceso principal informada por OpenAIRE para la publicación matcheada por DOI.
+      - name: openaire_access_right_uri
+        description: URI de acceso principal informada por OpenAIRE para la publicación matcheada por DOI.
+      - name: openaire_citation_count
+        description: Cantidad de citas informada por OpenAIRE para la publicación matcheada por DOI.
 
   - name: fct_conicet_creator_item_publication
     description: >
