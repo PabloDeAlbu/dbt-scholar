@@ -1,0 +1,47 @@
+version: 2
+
+models:
+  - name: viz_conicet_publication_openaire_doi
+    description: >
+      Vista mínima de consumo sobre `fct_conicet_publication` para observar el
+      enriquecimiento por match único de DOI con OpenAIRE. Conserva el grano de
+      la publicación OAI y expone sólo un subconjunto corto de atributos base y
+      de la fuente enriquecedora.
+    config:
+      tags: [viz]
+    columns:
+      - name: record_hk
+        description: Clave hash de la publicación CONICET basada en OAI.
+        data_tests: [not_null, unique]
+      - name: record_id
+        description: Identificador OAI-PMH del registro.
+        data_tests: [not_null]
+      - name: title
+        description: Título principal de la publicación.
+      - name: publication_date
+        description: Fecha de publicación proveniente de la base OAI.
+      - name: publication_year
+        description: Año derivado de la fecha de publicación OAI.
+      - name: publication_type
+        description: Tipo de publicación canónico resuelto sobre la base OAI.
+      - name: access_right
+        description: Condición de acceso canónica resuelta sobre la base OAI.
+      - name: institutional_uri
+        description: URI institucional de la publicación en el repositorio CONICET.
+      - name: doi
+        description: DOI principal detectado del lado OAI.
+      - name: matched_by_unique_doi
+        description: >
+          Flag que indica si la publicación pudo enriquecerse con OpenAIRE
+          mediante un match único 1 a 1 por DOI normalizado.
+        data_tests: [not_null]
+      - name: openaire_researchproduct_id
+        description: Identificador OpenAIRE de la publicación matcheada por DOI.
+      - name: openaire_publication_date
+        description: Fecha de publicación informada por OpenAIRE.
+      - name: openaire_type
+        description: Tipo de publicación informado por OpenAIRE.
+      - name: openaire_access_right
+        description: Condición de acceso principal informada por OpenAIRE.
+      - name: openaire_citation_count
+        description: Cantidad de citas informada por OpenAIRE.
