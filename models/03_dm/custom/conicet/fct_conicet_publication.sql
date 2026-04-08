@@ -6,6 +6,7 @@ WITH base AS (
         record_id,
         title,
         date_issued,
+        valid_date_issued,
         repository_identifier,
         institution_ror,
         dc_type,
@@ -88,9 +89,11 @@ final AS (
         base.record_id,
         'oai'::text AS source_system,
         base.title,
-        base.date_issued AS publication_date,
         CASE
-            WHEN base.date_issued IS NOT NULL THEN EXTRACT(YEAR FROM base.date_issued)::integer
+            WHEN base.valid_date_issued THEN base.date_issued
+        END AS publication_date,
+        CASE
+            WHEN base.valid_date_issued THEN EXTRACT(YEAR FROM base.date_issued)::integer
         END AS publication_year,
         dim_publication_type.publication_type,
         dim_publication_type.publication_type_uri,

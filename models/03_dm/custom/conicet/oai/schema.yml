@@ -37,6 +37,11 @@ models:
         description: Identificador del repositorio OAI del que proviene el registro.
       - name: institution_ror
         description: ROR institucional asignado al contexto de extraccion.
+      - name: valid_date_issued
+        description: >
+          Flag heredado de `fct_oai_record_publication` que indica si `date_issued`
+          cae dentro del rango válido definido por la estructura OAI.
+        data_tests: [not_null]
       - name: dc_identifier_uri
         description: Handle institucional filtrado por prefijo CONICET.
         data_tests:

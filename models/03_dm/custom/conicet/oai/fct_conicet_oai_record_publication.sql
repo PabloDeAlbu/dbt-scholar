@@ -9,6 +9,7 @@ base as (
         fct.record_id,
         fct.title,
         fct.date_issued,
+        fct.valid_date_issued,
         fct.repository_identifier,
         fct.institution_ror,
         fct.dc_type,
