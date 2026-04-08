@@ -93,3 +93,37 @@ models:
       - name: has_doi_label
         description: Label binario de disponibilidad de DOI para visualización.
         data_tests: [not_null]
+
+  - name: viz_conicet_publication_pid_coverage
+    description: >
+      Vista agregada de cobertura DOI para análisis descriptivo en Superset.
+      Expone conteos y proporciones de publicaciones con DOI según dimensión
+      analítica (`publication_type`, `publication_year`, `subject_area`) en una
+      interfaz única de consumo.
+    config:
+      tags: [viz]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [analysis_dimension, analysis_value]
+    columns:
+      - name: analysis_dimension
+        description: Dimensión analítica usada para la agregación.
+        data_tests: [not_null]
+      - name: analysis_value
+        description: Valor de la dimensión analítica agregada.
+        data_tests: [not_null]
+      - name: publication_count
+        description: Cantidad total de publicaciones para la dimensión/valor.
+        data_tests: [not_null]
+      - name: publication_with_doi_count
+        description: Cantidad de publicaciones con DOI para la dimensión/valor.
+        data_tests: [not_null]
+      - name: publication_without_doi_count
+        description: Cantidad de publicaciones sin DOI para la dimensión/valor.
+        data_tests: [not_null]
+      - name: publication_with_doi_ratio
+        description: Proporción de publicaciones con DOI para la dimensión/valor.
+        data_tests: [not_null]
+      - name: publication_without_doi_ratio
+        description: Proporción de publicaciones sin DOI para la dimensión/valor.
+        data_tests: [not_null]
