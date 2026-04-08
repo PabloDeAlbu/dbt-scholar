@@ -1,6 +1,56 @@
 version: 2
 
 models:
+  - name: audit_conicet_publication_doi_coverage
+    description: >
+      Auditoría simple de cobertura DOI para publicaciones CONICET OAI y OpenAIRE. Resume volumen
+      de entidades con DOI raw, DOI normalizado y el volumen actual de matches exactos por DOI.
+    config:
+      tags: [audit, conicet]
+    columns:
+      - name: source_system
+        data_tests: [not_null]
+      - name: entity_count
+        data_tests: [not_null]
+      - name: entity_with_doi_raw_count
+        data_tests: [not_null]
+      - name: entity_with_doi_normalized_count
+        data_tests: [not_null]
+      - name: distinct_doi_normalized_count
+        data_tests: [not_null]
+
+  - name: audit_conicet_publication_doi_match_summary
+    description: >
+      Summary de matches DOI entre OAI y OpenAIRE para CONICET. Distingue matches únicos y
+      ambiguos sin tratarlos todavía como errores.
+    config:
+      tags: [audit, conicet]
+    columns:
+      - name: match_rule
+        data_tests: [not_null]
+      - name: match_row_count
+        data_tests: [not_null]
+      - name: unique_match_row_count
+        data_tests: [not_null]
+      - name: ambiguous_match_row_count
+        data_tests: [not_null]
+
+  - name: audit_conicet_publication_doi_examples
+    description: >
+      Tabla de ejemplos de DOI raw y normalizados por fuente para inspección manual. Indica si el
+      DOI participó o no en algún match del bridge `brg_conicet_publication_doi`.
+    config:
+      tags: [audit, conicet]
+    columns:
+      - name: source_system
+        data_tests: [not_null]
+      - name: entity_id
+        data_tests: [not_null]
+      - name: doi_raw
+        data_tests: [not_null]
+      - name: has_match
+        data_tests: [not_null]
+
   - name: fct_conicet_oai_record_publication_quality
     description: >
       Fact de quality a nivel record para el subset OAI de CONICET. Expone patterns

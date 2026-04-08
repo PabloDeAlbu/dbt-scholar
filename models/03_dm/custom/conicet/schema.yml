@@ -194,3 +194,36 @@ models:
       - name: has_multiple_fos_assignments
         description: Flag que indica múltiples asignaciones FOS antes del aplanado.
         data_tests: [not_null]
+
+  - name: brg_conicet_publication_doi
+    description: >
+      Bridge mínimo de superposición entre publicaciones CONICET OAI y OpenAIRE usando solamente
+      DOI exacto normalizado. No intenta reconciliación general multi-PID; conserva flags de
+      unicidad y conteos para auditar matches ambiguos.
+    config:
+      tags: [conicet, dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [record_hk, researchproduct_hk, doi_normalized]
+    columns:
+      - name: record_hk
+        data_tests: [not_null]
+      - name: researchproduct_hk
+        data_tests: [not_null]
+      - name: doi_normalized
+        description: >
+          DOI normalizado en lowercase y sin prefijos `https://doi.org/`, `http://dx.doi.org/` o
+          `doi:`.
+        data_tests: [not_null]
+      - name: is_unique_oai
+        description: Flag que indica que la entidad OAI tiene un único DOI normalizado.
+        data_tests: [not_null]
+      - name: is_unique_openaire
+        description: Flag que indica que la entidad OpenAIRE tiene un único DOI normalizado.
+        data_tests: [not_null]
+      - name: is_unique_match
+        description: Flag que indica match 1 a 1 entre OAI y OpenAIRE para ese DOI.
+        data_tests: [not_null]
+      - name: match_rule
+        description: Regla de matching aplicada.
+        data_tests: [not_null]
