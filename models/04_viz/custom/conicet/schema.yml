@@ -60,3 +60,36 @@ models:
         description: Condición de acceso principal informada por OpenAIRE.
       - name: openaire_citation_count
         description: Cantidad de citas informada por OpenAIRE.
+
+  - name: viz_conicet_publication_pid_profile
+    description: >
+      Vista de consumo para caracterizar la disponibilidad de DOI en publicaciones
+      CONICET del repositorio. Mantiene el grano de publicación y expone labels
+      de apoyo para Superset orientados al análisis descriptivo de PIDs.
+    config:
+      tags: [viz]
+    columns:
+      - name: record_hk
+        description: Clave hash de la publicación CONICET a grano record.
+        data_tests: [not_null, unique]
+      - name: record_id
+        description: Identificador OAI-PMH del registro institucional.
+        data_tests: [not_null]
+      - name: title
+        description: Título principal de la publicación.
+      - name: publication_year
+        description: Año de publicación proyectado desde la fact curada CONICET.
+      - name: publication_type
+        description: Tipo de publicación curado para consumo analítico.
+      - name: subject_area
+        description: Área temática principal de la publicación.
+      - name: institutional_uri
+        description: URI institucional de la publicación en el repositorio CONICET.
+      - name: doi
+        description: DOI principal detectado del lado OAI.
+      - name: has_doi
+        description: Flag base que indica presencia de DOI.
+        data_tests: [not_null]
+      - name: has_doi_label
+        description: Label binario de disponibilidad de DOI para visualización.
+        data_tests: [not_null]
