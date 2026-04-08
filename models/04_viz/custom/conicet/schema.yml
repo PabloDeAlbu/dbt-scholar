@@ -35,6 +35,21 @@ models:
           Flag que indica si la publicación pudo enriquecerse con OpenAIRE
           mediante un match único 1 a 1 por DOI normalizado.
         data_tests: [not_null]
+      - name: has_doi_label
+        description: >
+          Label de consumo para Superset que resume presencia de DOI en la
+          publicación OAI (`Con DOI` / `Sin DOI`).
+        data_tests: [not_null]
+      - name: matched_by_unique_doi_label
+        description: >
+          Label de consumo para Superset que resume si hubo match único por DOI
+          con OpenAIRE.
+        data_tests: [not_null]
+      - name: doi_integration_status_label
+        description: >
+          Estado integrado de cobertura DOI para visualización. Valores esperados:
+          `Sin DOI`, `Con DOI y con match`, `Con DOI y sin match`.
+        data_tests: [not_null]
       - name: openaire_researchproduct_id
         description: Identificador OpenAIRE de la publicación matcheada por DOI.
       - name: openaire_publication_date
