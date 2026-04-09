@@ -64,8 +64,9 @@ models:
   - name: viz_conicet_publication_pid_profile
     description: >
       Vista de consumo para caracterizar la disponibilidad de DOI en publicaciones
-      CONICET del repositorio. Mantiene el grano de publicación y expone labels
-      de apoyo para Superset orientados al análisis descriptivo de PIDs.
+      CONICET del repositorio. Mantiene el grano de publicación y expone flags
+      y conteos de PIDs tomados de OAI y, cuando existe match único por DOI, del
+      enriquecimiento OpenAIRE.
     config:
       tags: [viz]
     columns:
@@ -89,6 +90,54 @@ models:
         description: DOI principal detectado del lado OAI.
       - name: has_doi
         description: Flag base que indica presencia de DOI.
+        data_tests: [not_null]
+      - name: matched_by_unique_doi
+        description: Flag que indica si la publicación pudo vincularse 1 a 1 con OpenAIRE por DOI.
+        data_tests: [not_null]
+      - name: has_repo_handle
+        description: Flag que indica presencia de identificador institucional tipo handle/URI del repositorio.
+        data_tests: [not_null]
+      - name: has_openaire_doi
+        description: Flag que indica presencia de DOI del lado OpenAIRE para la publicación matcheada.
+        data_tests: [not_null]
+      - name: openaire_doi_count
+        description: Cantidad de DOIs asociados en OpenAIRE a la publicación matcheada.
+        data_tests: [not_null]
+      - name: has_openaire_handle
+        description: Flag que indica presencia de handle del lado OpenAIRE.
+        data_tests: [not_null]
+      - name: openaire_handle_count
+        description: Cantidad de handles asociados en OpenAIRE.
+        data_tests: [not_null]
+      - name: has_openaire_arxiv
+        description: Flag que indica presencia de identificador arXiv del lado OpenAIRE.
+        data_tests: [not_null]
+      - name: openaire_arxiv_count
+        description: Cantidad de identificadores arXiv asociados en OpenAIRE.
+        data_tests: [not_null]
+      - name: has_openaire_pmid
+        description: Flag que indica presencia de PMID del lado OpenAIRE.
+        data_tests: [not_null]
+      - name: openaire_pmid_count
+        description: Cantidad de PMIDs asociados en OpenAIRE.
+        data_tests: [not_null]
+      - name: has_openaire_pmc
+        description: Flag que indica presencia de PMC del lado OpenAIRE.
+        data_tests: [not_null]
+      - name: openaire_pmc_count
+        description: Cantidad de PMCs asociados en OpenAIRE.
+        data_tests: [not_null]
+      - name: has_openaire_pmb
+        description: Flag que indica presencia de PMB del lado OpenAIRE.
+        data_tests: [not_null]
+      - name: openaire_pmb_count
+        description: Cantidad de PMBs asociados en OpenAIRE.
+        data_tests: [not_null]
+      - name: has_openaire_mag
+        description: Flag que indica presencia de MAG ID del lado OpenAIRE.
+        data_tests: [not_null]
+      - name: openaire_mag_count
+        description: Cantidad de MAG IDs asociados en OpenAIRE.
         data_tests: [not_null]
       - name: has_doi_label
         description: Label binario de disponibilidad de DOI para visualización.
@@ -126,4 +175,166 @@ models:
         data_tests: [not_null]
       - name: publication_without_doi_ratio
         description: Proporción de publicaciones sin DOI para la dimensión/valor.
+
+  - name: viz_conicet_publication_pid_coverage_by_type
+    description: >
+      Vista agregada de cobertura de PIDs para análisis descriptivo en Superset.
+      Expone conteos y proporciones por tipo de PID y fuente (`oai`, `repository`,
+      `openaire`) sobre el universo de publicaciones OAI de CONICET.
+    config:
+      tags: [viz]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [pid_type, pid_source, analysis_dimension, analysis_value]
+    columns:
+      - name: pid_type
+        description: Tipo de PID analizado (`doi`, `handle`, `arxiv`, `pmid`, `pmc`, `pmb`, `mag_id`).
         data_tests: [not_null]
+      - name: pid_source
+        description: Fuente desde la cual se observa el PID (`oai`, `repository`, `openaire`).
+        data_tests: [not_null]
+      - name: analysis_dimension
+        description: Dimensión analítica usada para la agregación.
+        data_tests: [not_null]
+      - name: analysis_value
+        description: Valor de la dimensión analítica agregada.
+        data_tests: [not_null]
+      - name: publication_count
+        description: Cantidad total de publicaciones para la combinación analítica.
+        data_tests: [not_null]
+      - name: publication_with_pid_count
+        description: Cantidad de publicaciones con el PID analizado.
+        data_tests: [not_null]
+      - name: publication_without_pid_count
+        description: Cantidad de publicaciones sin el PID analizado.
+        data_tests: [not_null]
+      - name: publication_with_pid_ratio
+        description: Proporción de publicaciones con el PID analizado.
+      - name: publication_without_pid_ratio
+        description: Proporción de publicaciones sin el PID analizado.
+        data_tests: [not_null]
+
+  - name: viz_conicet_oai_pid_candidate_summary
+    description: >
+      Vista agregada para explorar candidatos a PID presentes en `dc.identifier`
+      y `dc.relation` del subset OAI de CONICET. Resume volumen por patrón
+      detectado y por estado respecto de las reglas actuales de identificación.
+    config:
+      tags: [viz]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            [source_field, relation_parse_status, relation_type, identifier_type, pid_candidate_type, current_rule_status, enters_current_doi_rule]
+    columns:
+      - name: source_field
+        description: Campo OAI de origen (`dc_identifier` o `dc_relation`).
+        data_tests: [not_null]
+      - name: relation_parse_status
+        description: Tipo de parseo aplicado a `dc.relation` (`eu_repo_semantic`, `raw_url`, `slash_text`, `free_text`) o fallback textual si no aplica.
+        data_tests: [not_null]
+      - name: relation_type
+        description: Tipo de relación parseado desde `dc.relation` o fallback textual si no aplica.
+        data_tests: [not_null]
+      - name: identifier_type
+        description: Tipo de identificador parseado desde `dc.relation` o fallback textual si no aplica.
+        data_tests: [not_null]
+      - name: pid_candidate_type
+        description: Clasificación heurística del valor observado.
+        data_tests: [not_null]
+      - name: current_rule_status
+        description: Estado del valor respecto de las reglas actuales del modelo CONICET.
+        data_tests: [not_null]
+      - name: enters_current_doi_rule
+        description: Flag que indica si el valor entra en la regla DOI actual.
+        data_tests: [not_null]
+      - name: row_count
+        description: Cantidad de filas raw observadas para la combinación.
+        data_tests: [not_null]
+      - name: record_count
+        description: Cantidad de records distintos afectados por la combinación.
+        data_tests: [not_null]
+
+  - name: viz_conicet_oai_pid_record_distribution
+    description: >
+      Vista agregada de distribución de records OAI de CONICET por tipo de
+      identificador observado. Trabaja a nivel `record_hk` y excluye los valores
+      clasificados como `other` y `empty` para facilitar la lectura de cobertura
+      por identificador.
+    config:
+      tags: [viz]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            [source_field, relation_parse_status, relation_type, identifier_type, pid_candidate_type, current_rule_status, enters_current_doi_rule]
+    columns:
+      - name: source_field
+        description: Campo OAI de origen (`dc_identifier` o `dc_relation`).
+        data_tests: [not_null]
+      - name: relation_parse_status
+        description: Tipo de parseo aplicado a `dc.relation` o `not_applicable` para `dc_identifier`.
+        data_tests: [not_null]
+      - name: relation_type
+        description: Tipo de relación parseado desde `dc.relation` o fallback textual si no aplica.
+        data_tests: [not_null]
+      - name: identifier_type
+        description: Tipo de identificador parseado desde `dc.relation` o fallback textual si no aplica.
+        data_tests: [not_null]
+      - name: pid_candidate_type
+        description: Tipo de identificador considerado en la distribución.
+        data_tests: [not_null]
+      - name: current_rule_status
+        description: Estado del valor respecto de las reglas actuales del modelo CONICET.
+        data_tests: [not_null]
+      - name: enters_current_doi_rule
+        description: Flag que indica si el valor entra en la regla DOI actual.
+        data_tests: [not_null]
+      - name: record_count
+        description: Cantidad de records distintos con el identificador observado.
+        data_tests: [not_null]
+      - name: total_record_count
+        description: Cantidad total de records en el universo OAI de CONICET.
+        data_tests: [not_null]
+      - name: record_ratio
+        description: Proporción de records con el identificador observado sobre el universo total.
+
+  - name: viz_conicet_oai_pid_record_distribution_core
+    description: >
+      Vista derivada de distribución de records OAI de CONICET que conserva sólo
+      identificadores más claramente interpretables como PID. Excluye `url` y
+      `purl` además de los descartes ya hechos en la vista base.
+    config:
+      tags: [viz]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            [source_field, relation_parse_status, relation_type, identifier_type, pid_candidate_type, current_rule_status, enters_current_doi_rule]
+    columns:
+      - name: source_field
+        description: Campo OAI de origen (`dc_identifier` o `dc_relation`).
+        data_tests: [not_null]
+      - name: relation_parse_status
+        description: Tipo de parseo aplicado a `dc.relation` o `not_applicable` para `dc_identifier`.
+        data_tests: [not_null]
+      - name: relation_type
+        description: Tipo de relación parseado desde `dc.relation` o fallback textual si no aplica.
+        data_tests: [not_null]
+      - name: identifier_type
+        description: Tipo de identificador parseado desde `dc.relation` o fallback textual si no aplica.
+        data_tests: [not_null]
+      - name: pid_candidate_type
+        description: Tipo de identificador retenido en la lectura core.
+        data_tests: [not_null]
+      - name: current_rule_status
+        description: Estado del valor respecto de las reglas actuales del modelo CONICET.
+        data_tests: [not_null]
+      - name: enters_current_doi_rule
+        description: Flag que indica si el valor entra en la regla DOI actual.
+        data_tests: [not_null]
+      - name: record_count
+        description: Cantidad de records distintos con el identificador observado.
+        data_tests: [not_null]
+      - name: total_record_count
+        description: Cantidad total de records en el universo OAI de CONICET.
+        data_tests: [not_null]
+      - name: record_ratio
+        description: Proporción de records con el identificador observado sobre el universo total.

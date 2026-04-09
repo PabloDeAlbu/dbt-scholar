@@ -1,6 +1,34 @@
 version: 2
 
 models:
+  - name: audit_conicet_oai_record_pid_candidates
+    description: >
+      Auditoría detallada de valores candidatos a PID presentes en `dc.identifier`
+      y `dc.relation` para el subset OAI de CONICET. Señala si el valor entra o
+      no en la regla DOI actual y clasifica patrones observables como handle,
+      ORCID, arXiv, ISBN, ISSN, DOI o URL genérica.
+    config:
+      tags: [audit, conicet]
+    columns:
+      - name: record_hk
+        data_tests: [not_null]
+      - name: record_id
+        data_tests: [not_null]
+      - name: source_field
+        data_tests: [not_null]
+      - name: source_row_hk
+        data_tests: [not_null]
+      - name: relation_parse_status
+        data_tests: [not_null]
+      - name: identifier_value
+      - name: raw_value
+      - name: enters_current_doi_rule
+        data_tests: [not_null]
+      - name: pid_candidate_type
+        data_tests: [not_null]
+      - name: current_rule_status
+        data_tests: [not_null]
+
   - name: audit_conicet_oai_record_relation_doi_parse
     description: >
       Auditoría detallada del parseo de `dc.relation` para relaciones `altIdentifier/doi` del
