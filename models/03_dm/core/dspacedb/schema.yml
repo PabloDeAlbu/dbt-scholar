@@ -15,13 +15,13 @@ models:
 
   - name: latest_sat_dspacedb_item__extract
     description: >
-      Último contexto de extracción por `item_hk + source_label + institution_ror`
+      Último contexto de extracción por `item_hk + base_url + institution_ror`
       a partir de `sat_dspacedb_item__extract`.
     config:
       tags: [dspacedb, dm]
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [item_hk, source_label, institution_ror]
+          combination_of_columns: [item_hk, base_url, institution_ror]
     columns:
       - name: item_hk
         data_tests: [not_null]
@@ -63,13 +63,13 @@ models:
 
   - name: latest_sat_dspacedb_collection__extract
     description: >
-      Último contexto de extracción por `collection_hk + source_label + institution_ror`
+      Último contexto de extracción por `collection_hk + base_url + institution_ror`
       a partir de `sat_dspacedb_collection__extract`.
     config:
       tags: [dspacedb, dm]
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [collection_hk, source_label, institution_ror]
+          combination_of_columns: [collection_hk, base_url, institution_ror]
     columns:
       - name: collection_hk
         data_tests: [not_null]
@@ -79,12 +79,13 @@ models:
   - name: dim_dspacedb_metadatafield
     description: >
       Dimensión de campos de metadatos contextualizados por repositorio e institución para la rama
-      `dspacedb`.
+      `dspacedb`. Usa `base_url + institution_ror` como scope técnico estable y conserva
+      `source_label` como alias compatible.
     config:
       tags: [dspacedb, dm]
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [metadatafield_fullname, source_label, institution_ror]
+          combination_of_columns: [metadatafield_fullname, base_url, institution_ror]
     columns:
       - name: metadatafield_fullname
         data_tests: [not_null]
@@ -98,7 +99,8 @@ models:
   - name: dim_dspacedb_collection
     description: >
       Dimensión de collections contextualizadas por repositorio e institución para la rama
-      `dspacedb`.
+      `dspacedb`. Resuelve `collection_title` desde metadatos históricos y usa `base_url +
+      institution_ror` como scope técnico estable.
     config:
       tags: [dspacedb, dm]
     columns:
@@ -116,7 +118,8 @@ models:
   - name: fct_dspacedb_item_extraction
     description: >
       Hecho base de eventos de extracción para items de la rama `dspacedb`.
-      Conserva el contexto técnico de observación por repositorio e institución.
+      Conserva el contexto técnico de observación por `base_url + institution_ror`, manteniendo
+      `source_label` como alias compatible.
     config:
       tags: [dspacedb, dm]
     columns:
@@ -140,7 +143,8 @@ models:
       Hecho base de items publicados para la rama `dspacedb`, a grano item. Expone el último
       estado conocido del item junto con su ventana temporal de observación en las extracciones.
       En DSpace 7+ el identificador canónico de la entidad es `item_uuid`; `item_id` se conserva
-      solo como identificador legado cuando está presente.
+      solo como identificador legado cuando está presente. El contexto técnico estable del modelo
+      es `base_url + institution_ror`.
     config:
       tags: [dspacedb, dm]
     columns:
@@ -199,7 +203,7 @@ models:
     description: >
       Hecho agregado de uso de campos de metadatos sobre los ítems observados en `dspacedb`.
       Resume cuántas ocurrencias de metadatos tiene cada campo y en cuántos ítems distintos aparece
-      dentro de cada scope `source_label + institution_ror`.
+      dentro de cada scope técnico `base_url + institution_ror`.
     config:
       tags: [dspacedb, dm]
     data_tests:

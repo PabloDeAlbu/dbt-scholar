@@ -8,15 +8,24 @@ models:
       de metadatos.
     config:
       tags: [cic, dm]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: "coalesce(owning_collection_title, '') not in ('', '!UNKNOWN', 'N/A', 'NA')"
+          config:
+            severity: warn
     columns:
       - name: item_uuid
         data_tests: [not_null, unique]
       - name: item_id
-        data_tests: [not_null]
+        description: Identificador legado del item, disponible sólo cuando el dump lo conserva.
       - name: institution_ror
         data_tests: [not_null]
       - name: owning_collection_title
         description: Título de la colección owning del item en DSpace.
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: dc_title
         description: Valor preferido de `dc.title`.
       - name: dc_title_raw

@@ -1,6 +1,15 @@
 WITH context AS (
     SELECT
-        '{{ var("dspacedb_source_label", "unknown") }}'::text AS source_label,
+        REGEXP_REPLACE(
+            LOWER(TRIM('{{ var("dspacedb_base_url", var("dspacedb_source_label", "unknown")) }}'::text)),
+            '^https?://',
+            ''
+        ) AS base_url,
+        REGEXP_REPLACE(
+            LOWER(TRIM('{{ var("dspacedb_base_url", var("dspacedb_source_label", "unknown")) }}'::text)),
+            '^https?://',
+            ''
+        ) AS source_label,
         '{{ var("dspacedb_institution_ror", "https://ror.org/unknown") }}'::text AS institution_ror,
         COALESCE(
             NULLIF('{{ var("dspacedb_extract_datetime", "") }}', '')::timestamp,

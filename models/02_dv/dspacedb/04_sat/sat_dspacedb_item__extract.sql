@@ -9,6 +9,7 @@ src_hashdiff:
   alias: "hashdiff"
 src_payload:
   - extract_datetime
+  - base_url
   - institution_ror
   - source_label
 src_eff: "load_datetime"

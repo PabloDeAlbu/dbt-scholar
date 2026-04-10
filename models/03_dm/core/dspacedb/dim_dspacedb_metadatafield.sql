@@ -6,6 +6,7 @@
 WITH base AS (
     SELECT
         stg_mf.metadatafield_bk,
+        stg_mf.base_url,
         stg_mf.institution_ror,
         stg_mf.source_label,
         stg_ms.short_id,
@@ -26,6 +27,7 @@ WITH base AS (
 final AS (
     SELECT
         metadatafield_fullname,
+        base_url,
         source_label,
         institution_ror,
         short_id,
@@ -35,7 +37,7 @@ final AS (
         qualifier,
         metadatafield_hk
     FROM base
-    GROUP BY 1,2,3,4,5,6,7,8,9
+    GROUP BY 1,2,3,4,5,6,7,8,9,10
 )
 
 SELECT * FROM final

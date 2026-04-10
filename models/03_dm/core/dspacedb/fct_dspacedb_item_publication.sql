@@ -22,6 +22,7 @@ latest_item_sat AS (
 latest_item_extract AS (
     SELECT
         item_hk,
+        base_url,
         source_label,
         institution_ror,
         extract_datetime,
@@ -31,6 +32,7 @@ latest_item_extract AS (
 extraction_window AS (
     SELECT
         item_hk,
+        base_url,
         source_label,
         institution_ror,
         MIN(extract_datetime) AS first_extract_datetime,
@@ -38,7 +40,7 @@ extraction_window AS (
         MIN(load_datetime) AS first_load_datetime,
         MAX(load_datetime) AS last_load_datetime
     FROM {{ ref('fct_dspacedb_item_extraction') }}
-    GROUP BY item_hk, source_label, institution_ror
+    GROUP BY item_hk, base_url, source_label, institution_ror
 ),
 final AS (
     SELECT
@@ -51,6 +53,7 @@ final AS (
         sat.discoverable,
         sat.owning_collection,
         sat.last_modified,
+        extract.base_url,
         extract.source_label,
         extract.institution_ror,
         win.first_extract_datetime,
@@ -59,7 +62,7 @@ final AS (
         win.last_load_datetime
     FROM latest_item_extract AS extract
     INNER JOIN extraction_window AS win
-        USING (item_hk, source_label, institution_ror)
+        USING (item_hk, base_url, source_label, institution_ror)
     INNER JOIN latest_item_sat AS sat
         USING (item_hk)
     INNER JOIN item_hub AS hub

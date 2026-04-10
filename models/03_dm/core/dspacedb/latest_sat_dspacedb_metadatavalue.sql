@@ -18,6 +18,7 @@ SELECT
     authority,
     confidence,
     dspace_object_id,
+    base_url,
     source_label,
     institution_ror,
     extract_datetime,

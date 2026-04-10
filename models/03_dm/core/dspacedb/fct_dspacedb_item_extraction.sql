@@ -18,6 +18,7 @@ base AS (
         sat.item_hk,
         latest_item_sat.item_id,
         item_hub.item_uuid,
+        sat.base_url,
         sat.source_label,
         sat.institution_ror,
         sat.extract_datetime,

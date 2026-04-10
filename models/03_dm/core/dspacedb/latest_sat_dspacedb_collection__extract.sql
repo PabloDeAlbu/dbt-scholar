@@ -11,6 +11,7 @@ SELECT
     collection_hk,
     extract_cdk,
     extract_datetime,
+    base_url,
     institution_ror,
     source_label,
     load_datetime,

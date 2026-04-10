@@ -13,6 +13,7 @@ src_payload:
   - template_item_id
   - logo_bitstream_id
   - admin
+  - base_url
   - source_label
   - institution_ror
 src_eff: effective_from

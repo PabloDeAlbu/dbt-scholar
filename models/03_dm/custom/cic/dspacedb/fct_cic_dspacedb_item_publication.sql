@@ -13,7 +13,7 @@ owning_collection AS (
     FROM base
     LEFT JOIN {{ ref('dim_dspacedb_collection') }} AS col
         ON base.owning_collection = col.collection_uuid
-       AND base.source_label = col.source_label
+       AND base.base_url = col.base_url
        AND base.institution_ror = col.institution_ror
     GROUP BY base.item_uuid
 ),

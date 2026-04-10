@@ -189,8 +189,8 @@ data_tests:
 vars:
     "dbt_date:time_zone": "America/Argentina/Buenos_Aires"
 
-    # Ejemplo cic:
-    dspacedb_source_label: "cicdigital"
+    # Ejemplo cic. Usar sin protocolo y sin `/` final.
+    dspacedb_base_url: "digital.cic.gba.gob.ar"
     dspacedb_institution_ror: "https://ror.org/02s7sax82"
 
     # Valores requeridos para dumps `dspacedb5`.

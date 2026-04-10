@@ -26,11 +26,15 @@ sources:
 models:
   - name: ldg_dspacedb_context
     description: >
-      Contexto activo del dump DSpace utilizado para inyectar `source_label`, `institution_ror`,
-      `extract_datetime` y `load_datetime` sobre las tablas crudas de `ldg_dspacedb`. Los valores
-      de `source_label` e `institution_ror` se parametrizan con `vars` en `dbt_project.yml`.
+      Contexto activo del dump DSpace utilizado para inyectar `base_url`, `source_label`,
+      `institution_ror`, `extract_datetime` y `load_datetime` sobre las tablas crudas de
+      `ldg_dspacedb`. `base_url` se parametriza con `vars` en `dbt_project.yml`, se normaliza a
+      minúsculas y sin protocolo, y por compatibilidad también se expone como `source_label`.
     columns:
+      - name: base_url
+        data_tests: [not_null]
       - name: source_label
+        description: Alias compatible derivado de `base_url`.
         data_tests: [not_null]
       - name: institution_ror
         data_tests: [not_null]
@@ -42,7 +46,9 @@ models:
   - name: ldg_dspacedb_item
     description: >
       Capa landing normalizada para items DSpace con contexto explícito de repositorio e
-      institución inyectado desde `vars` del proyecto.
+      institución inyectado desde `vars` del proyecto. En `ldg` los metadatos técnicos de
+      ingestión se conservan con prefijo `_` (`_base_url`, `_source_label`, `_institution_ror`,
+      `_extract_datetime`, `_load_datetime`) para distinguirlos de los atributos de negocio.
     columns:
       - name: item_id
         description: >
@@ -50,6 +56,11 @@ models:
           solo estará presente cuando el registro conserve referencia a un item de
           una versión legacy del repositorio.
       - name: _source_label
+        description: Alias compatible derivado de `_base_url` en la capa landing.
+        data_tests:
+          - not_null
+      - name: _base_url
+        description: Base URL técnica del repositorio, normalizada y sin protocolo.
         data_tests:
           - not_null
       - name: _institution_ror
