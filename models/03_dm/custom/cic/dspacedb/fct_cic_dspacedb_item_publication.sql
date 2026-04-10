@@ -6,6 +6,18 @@ WITH base AS (
     WHERE institution_ror = 'https://ror.org/02s7sax82'
 ),
 
+owning_collection AS (
+    SELECT
+        base.item_uuid,
+        MIN(col.collection_title) AS owning_collection_title
+    FROM base
+    LEFT JOIN {{ ref('dim_dspacedb_collection') }} AS col
+        ON base.owning_collection = col.collection_uuid
+       AND base.source_label = col.source_label
+       AND base.institution_ror = col.institution_ror
+    GROUP BY base.item_uuid
+),
+
 metadatafield_title AS (
     SELECT
         metadatafield_hk
@@ -34,9 +46,12 @@ title_agg AS (
 final AS (
     SELECT
         base.*,
+        owning.owning_collection_title,
         title.dc_title,
         title.dc_title_raw
     FROM base
+    LEFT JOIN owning_collection AS owning
+        USING (item_uuid)
     LEFT JOIN title_agg AS title
         USING (item_uuid)
 )

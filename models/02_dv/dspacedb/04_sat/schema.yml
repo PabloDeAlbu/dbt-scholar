@@ -9,6 +9,24 @@ models:
       - name: item_id
         description: Identificador legado del item, preservado por compatibilidad.
 
+  - name: sat_dspacedb_collection
+    description: Satélite histórico de atributos operativos de la colección para la rama `dspacedb`.
+    columns:
+      - name: collection_hk
+        description: Hash key de la colección contextualizada por repositorio e institución.
+      - name: collection_uuid
+        description: UUID canónico de la colección en DSpace.
+
+  - name: sat_dspacedb_collection__extract
+    description: >
+      Satélite multi-activo de observaciones de extracción por colección contextualizada por
+      repositorio e institución.
+    columns:
+      - name: collection_hk
+        description: Hash key de la colección contextualizada por repositorio e institución.
+      - name: extract_datetime
+        description: Fecha/hora de la extracción observada.
+
   - name: sat_dspacedb_item__extract
     description: >
       Satélite multi-activo de observaciones de extracción por item contextualizado por
@@ -28,3 +46,13 @@ models:
         description: Hash key del item contextualizado por repositorio e institución.
       - name: metadatafield_fullname
         description: Nombre canónico del campo de metadato.
+
+  - name: sat_dspacedb_metadatavalue
+    description: >
+      Satélite histórico de valores de metadato observados sobre objetos DSpace para la rama
+      `dspacedb`.
+    columns:
+      - name: metadatavalue_hk
+        description: Hash key del valor de metadato contextualizado por repositorio e institución.
+      - name: dspace_object_id
+        description: UUID del objeto DSpace al que pertenece el metadato.

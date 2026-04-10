@@ -39,6 +39,43 @@ models:
       - name: metadata_value_id
         data_tests: [not_null]
 
+  - name: latest_sat_dspacedb_metadatavalue
+    description: Estado más reciente de `sat_dspacedb_metadatavalue`, a grano `metadatavalue_hk`.
+    config:
+      tags: [dspacedb, dm]
+    columns:
+      - name: metadatavalue_hk
+        data_tests: [not_null, unique]
+      - name: metadata_value_id
+        data_tests: [not_null]
+
+  - name: latest_sat_dspacedb_collection
+    description: Estado más reciente de `sat_dspacedb_collection`, a grano `collection_hk`.
+    config:
+      tags: [dspacedb, dm]
+    columns:
+      - name: collection_hk
+        data_tests: [not_null, unique]
+      - name: collection_uuid
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+
+  - name: latest_sat_dspacedb_collection__extract
+    description: >
+      Último contexto de extracción por `collection_hk + source_label + institution_ror`
+      a partir de `sat_dspacedb_collection__extract`.
+    config:
+      tags: [dspacedb, dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [collection_hk, source_label, institution_ror]
+    columns:
+      - name: collection_hk
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+
   - name: dim_dspacedb_metadatafield
     description: >
       Dimensión de campos de metadatos contextualizados por repositorio e institución para la rama
@@ -57,6 +94,24 @@ models:
         data_tests: [not_null]
       - name: metadatafield_hk
         data_tests: [not_null, unique]
+
+  - name: dim_dspacedb_collection
+    description: >
+      Dimensión de collections contextualizadas por repositorio e institución para la rama
+      `dspacedb`.
+    config:
+      tags: [dspacedb, dm]
+    columns:
+      - name: collection_hk
+        data_tests: [not_null, unique]
+      - name: collection_uuid
+        data_tests: [not_null]
+      - name: collection_title
+        description: Título o nombre visible de la colección en DSpace.
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
 
   - name: fct_dspacedb_item_extraction
     description: >

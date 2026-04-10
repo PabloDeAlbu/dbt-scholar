@@ -22,6 +22,7 @@ WITH raw_source AS (
 final AS (
     SELECT
         metadatavalue_hk,
+        metadatavalue_hashdiff,
         metadatafield_hk,
         dspaceobject_hk,
         metadatavalue_bk,
@@ -48,7 +49,21 @@ final AS (
         SELECT
             {{ automate_dv.hash(columns='metadatavalue_bk', alias='metadatavalue_hk') }},
             {{ automate_dv.hash(columns='metadatafield_bk', alias='metadatafield_hk') }},
-            {{ automate_dv.hash(columns='dspaceobject_bk', alias='dspaceobject_hk') }}
+            {{ automate_dv.hash(columns='dspaceobject_bk', alias='dspaceobject_hk') }},
+            {{ automate_dv.hash(
+                columns=[
+                    'metadatavalue_bk',
+                    'metadatafield_bk',
+                    'dspaceobject_bk',
+                    'text_value',
+                    'text_lang',
+                    'place',
+                    'authority',
+                    'confidence'
+                ],
+                alias='metadatavalue_hashdiff',
+                is_hashdiff=true
+            ) }}
     ) s1
 )
 

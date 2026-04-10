@@ -11,6 +11,23 @@ models:
       - name: item_hk
         description: Hash key del item contextualizado por repositorio e institución.
 
+  - name: stg_dspacedb_collection
+    description: >
+      Staging model para collections DSpace contextualizadas por repositorio e institución.
+    columns:
+      - name: collection_bk
+        description: Business key de la colección contextualizada por repositorio e institución.
+      - name: collection_hk
+        description: Hash key de la colección contextualizada por repositorio e institución.
+
+  - name: stg_dspacedb_collection__extract
+    description: >
+      Staging model de eventos de extracción de collections DSpace. Construye `extract_cdk` para
+      identificar cada observación de la colección en una extracción determinada.
+    columns:
+      - name: extract_cdk
+        description: Hash key del evento de extracción por colección y fecha de extracción.
+
   - name: stg_dspacedb_item__extract
     description: >
       Staging model de eventos de extracción de items DSpace. Construye `extract_cdk` para
