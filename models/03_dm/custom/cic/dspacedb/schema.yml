@@ -4,8 +4,8 @@ models:
   - name: fct_cic_dspacedb_item_publication
     description: >
       Hecho institucional de items publicados en CIC DIGITAL, construido sobre
-      `fct_dspacedb_item_publication` y enriquecido con el metadato `dc.title` desde la capa core
-      de metadatos.
+      `fct_dspacedb_item_publication` y enriquecido con metadatos institucionales como
+      `dc.title`, `dc.date.available` y `dcterms.issued` desde la capa core de metadatos.
     config:
       tags: [cic, dm]
     data_tests:
@@ -26,6 +26,14 @@ models:
           - not_null:
               config:
                 severity: warn
+      - name: dc_date_available
+        description: Fecha parseada de disponibilidad del item en el repositorio a partir de `dc.date.available`.
+      - name: dc_date_available_raw
+        description: Valores crudos observados para `dc.date.available`, concatenados para auditoría.
+      - name: dcterms_issued
+        description: Fecha parseada de publicación del item a partir de `dcterms.issued`.
+      - name: dcterms_issued_raw
+        description: Valores crudos observados para `dcterms.issued`, concatenados para auditoría.
       - name: dc_title
         description: Valor preferido de `dc.title`.
       - name: dc_title_raw
