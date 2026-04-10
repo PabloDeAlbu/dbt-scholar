@@ -53,3 +53,67 @@ models:
           - unique:
               config:
                 severity: warn
+
+  - name: fct_conicet_oai_record_pid_profile
+    description: >
+      Perfilado de PIDs a nivel `record_hk` para el subset OAI de CONICET.
+      Clasifica patrones observados en `dc_identifier_uri` y `dc_relation_doi`
+      y expone flags de validez orientados a entender cobertura y calidad de
+      identificadores en la fuente institucional.
+    config:
+      tags: [conicet, dm]
+    columns:
+      - name: record_hk
+        description: Clave hash del record perfilado.
+        data_tests: [not_null, unique]
+      - name: record_id
+        description: Identificador OAI-PMH del record.
+        data_tests: [not_null]
+      - name: dc_identifier_uri_pattern
+        description: Patrón clasificado para `dc_identifier_uri`.
+        data_tests: [not_null]
+      - name: dc_identifier_uri_is_valid
+        description: Flag de validez del identifier URI según el contrato institucional esperado.
+        data_tests: [not_null]
+      - name: dc_relation_doi_pattern
+        description: Patrón clasificado para `dc_relation_doi`.
+        data_tests: [not_null]
+      - name: dc_relation_doi_is_valid
+        description: Flag de validez del DOI OAI según el contrato esperado.
+        data_tests: [not_null]
+      - name: dc_type_count
+        description: Cantidad de valores distintos de `dc.type` detectados para el record.
+        data_tests: [not_null]
+      - name: has_multiple_dc_type
+        description: Flag de multiplicidad de `dc.type`.
+        data_tests: [not_null]
+      - name: has_doi
+        description: Flag que indica presencia de DOI en OAI.
+        data_tests: [not_null]
+      - name: has_multiple_doi
+        description: Flag que indica multiplicidad de DOI detectada en el record.
+        data_tests: [not_null]
+
+  - name: fct_conicet_oai_record_pid_coverage
+    description: >
+      Resumen agregado de cobertura y validez de PIDs en la fuente OAI de CONICET.
+      Agrupa por dimensión observada (`dc_identifier_uri`, `dc_relation_doi`) y
+      por patrón detectado para facilitar lectura analítica del perfilado base.
+    config:
+      tags: [conicet, dm]
+    columns:
+      - name: pid_dimension
+        description: Dimensión perfilada (`dc_identifier_uri` o `dc_relation_doi`).
+        data_tests: [not_null]
+      - name: pid_pattern
+        description: Patrón detectado dentro de la dimensión perfilada.
+        data_tests: [not_null]
+      - name: record_count
+        description: Cantidad total de records observados para el patrón.
+        data_tests: [not_null]
+      - name: valid_record_count
+        description: Cantidad de records válidos para el patrón.
+        data_tests: [not_null]
+      - name: invalid_record_count
+        description: Cantidad de records inválidos para el patrón.
+        data_tests: [not_null]

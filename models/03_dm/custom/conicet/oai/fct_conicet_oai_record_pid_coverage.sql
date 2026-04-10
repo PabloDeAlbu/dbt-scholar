@@ -2,13 +2,13 @@
 
 WITH base AS (
     SELECT *
-    FROM {{ ref('fct_conicet_oai_record_publication_quality') }}
+    FROM {{ ref('fct_conicet_oai_record_pid_profile') }}
 ),
 
 identifier_summary AS (
     SELECT
-        'dc_identifier_uri'::text AS quality_dimension,
-        dc_identifier_uri_pattern AS quality_pattern,
+        'dc_identifier_uri'::text AS pid_dimension,
+        dc_identifier_uri_pattern AS pid_pattern,
         COUNT(*) AS record_count,
         COUNT(*) FILTER (WHERE dc_identifier_uri_is_valid) AS valid_record_count,
         COUNT(*) FILTER (WHERE NOT dc_identifier_uri_is_valid) AS invalid_record_count
@@ -18,8 +18,8 @@ identifier_summary AS (
 
 doi_summary AS (
     SELECT
-        'dc_relation_doi'::text AS quality_dimension,
-        dc_relation_doi_pattern AS quality_pattern,
+        'dc_relation_doi'::text AS pid_dimension,
+        dc_relation_doi_pattern AS pid_pattern,
         COUNT(*) AS record_count,
         COUNT(*) FILTER (WHERE dc_relation_doi_is_valid) AS valid_record_count,
         COUNT(*) FILTER (WHERE NOT dc_relation_doi_is_valid) AS invalid_record_count

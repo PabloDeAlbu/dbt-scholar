@@ -63,10 +63,11 @@ models:
 
   - name: viz_conicet_publication_pid_profile
     description: >
-      Vista de consumo para caracterizar la disponibilidad de DOI en publicaciones
-      CONICET del repositorio. Mantiene el grano de publicación y expone flags
-      y conteos de PIDs tomados de OAI y, cuando existe match único por DOI, del
-      enriquecimiento OpenAIRE.
+      Vista de consumo para caracterizar la disponibilidad de PIDs en publicaciones
+      CONICET con base explícita en la fuente OAI institucional. Mantiene el grano
+      de `record_hk` de `fct_conicet_oai_record_publication`, resuelve el tipo de
+      publicación a partir de `dc.type` y agrega, cuando existe match único por DOI,
+      el enriquecimiento de PIDs proveniente de OpenAIRE.
     config:
       tags: [viz]
     columns:
@@ -76,26 +77,29 @@ models:
       - name: record_id
         description: Identificador OAI-PMH del registro institucional.
         data_tests: [not_null]
+      - name: source_system
+        description: Fuente base del perfilado; en esta vista corresponde al registro OAI institucional.
+        data_tests: [not_null]
       - name: title
         description: Título principal de la publicación.
       - name: publication_year
-        description: Año de publicación proyectado desde la fact curada CONICET.
+        description: Año de publicación derivado de `date_issued` cuando la fecha OAI es válida.
       - name: publication_type
-        description: Tipo de publicación curado para consumo analítico.
+        description: Tipo de publicación resuelto desde `dc.type` vía mapeo a COAR.
       - name: subject_area
-        description: Área temática principal de la publicación.
+        description: Área temática principal proveniente del perfilado FOS del registro OAI.
       - name: institutional_uri
         description: URI institucional de la publicación en el repositorio CONICET.
       - name: doi
         description: DOI principal detectado del lado OAI.
       - name: has_doi
-        description: Flag base que indica presencia de DOI.
+        description: Flag base que indica presencia de DOI en la fuente OAI.
         data_tests: [not_null]
       - name: matched_by_unique_doi
-        description: Flag que indica si la publicación pudo vincularse 1 a 1 con OpenAIRE por DOI.
+        description: Flag que indica si la publicación OAI pudo vincularse 1 a 1 con OpenAIRE por DOI.
         data_tests: [not_null]
       - name: has_repo_handle
-        description: Flag que indica presencia de identificador institucional tipo handle/URI del repositorio.
+        description: Flag que indica presencia de identificador institucional tipo handle/URI en OAI.
         data_tests: [not_null]
       - name: has_openaire_doi
         description: Flag que indica presencia de DOI del lado OpenAIRE para la publicación matcheada.
@@ -176,43 +180,6 @@ models:
       - name: publication_without_doi_ratio
         description: Proporción de publicaciones sin DOI para la dimensión/valor.
 
-  - name: viz_conicet_publication_pid_coverage_by_type
-    description: >
-      Vista agregada de cobertura de PIDs para análisis descriptivo en Superset.
-      Expone conteos y proporciones por tipo de PID y fuente (`oai`, `repository`,
-      `openaire`) sobre el universo de publicaciones OAI de CONICET.
-    config:
-      tags: [viz]
-    data_tests:
-      - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [pid_type, pid_source, analysis_dimension, analysis_value]
-    columns:
-      - name: pid_type
-        description: Tipo de PID analizado (`doi`, `handle`, `arxiv`, `pmid`, `pmc`, `pmb`, `mag_id`).
-        data_tests: [not_null]
-      - name: pid_source
-        description: Fuente desde la cual se observa el PID (`oai`, `repository`, `openaire`).
-        data_tests: [not_null]
-      - name: analysis_dimension
-        description: Dimensión analítica usada para la agregación.
-        data_tests: [not_null]
-      - name: analysis_value
-        description: Valor de la dimensión analítica agregada.
-        data_tests: [not_null]
-      - name: publication_count
-        description: Cantidad total de publicaciones para la combinación analítica.
-        data_tests: [not_null]
-      - name: publication_with_pid_count
-        description: Cantidad de publicaciones con el PID analizado.
-        data_tests: [not_null]
-      - name: publication_without_pid_count
-        description: Cantidad de publicaciones sin el PID analizado.
-        data_tests: [not_null]
-      - name: publication_with_pid_ratio
-        description: Proporción de publicaciones con el PID analizado.
-      - name: publication_without_pid_ratio
-        description: Proporción de publicaciones sin el PID analizado.
-        data_tests: [not_null]
 
   - name: viz_conicet_oai_pid_candidate_summary
     description: >
@@ -281,48 +248,6 @@ models:
         data_tests: [not_null]
       - name: pid_candidate_type
         description: Tipo de identificador considerado en la distribución.
-        data_tests: [not_null]
-      - name: current_rule_status
-        description: Estado del valor respecto de las reglas actuales del modelo CONICET.
-        data_tests: [not_null]
-      - name: enters_current_doi_rule
-        description: Flag que indica si el valor entra en la regla DOI actual.
-        data_tests: [not_null]
-      - name: record_count
-        description: Cantidad de records distintos con el identificador observado.
-        data_tests: [not_null]
-      - name: total_record_count
-        description: Cantidad total de records en el universo OAI de CONICET.
-        data_tests: [not_null]
-      - name: record_ratio
-        description: Proporción de records con el identificador observado sobre el universo total.
-
-  - name: viz_conicet_oai_pid_record_distribution_core
-    description: >
-      Vista derivada de distribución de records OAI de CONICET que conserva sólo
-      identificadores más claramente interpretables como PID. Excluye `url` y
-      `purl` además de los descartes ya hechos en la vista base.
-    config:
-      tags: [viz]
-    data_tests:
-      - dbt_utils.unique_combination_of_columns:
-          combination_of_columns:
-            [source_field, relation_parse_status, relation_type, identifier_type, pid_candidate_type, current_rule_status, enters_current_doi_rule]
-    columns:
-      - name: source_field
-        description: Campo OAI de origen (`dc_identifier` o `dc_relation`).
-        data_tests: [not_null]
-      - name: relation_parse_status
-        description: Tipo de parseo aplicado a `dc.relation` o `not_applicable` para `dc_identifier`.
-        data_tests: [not_null]
-      - name: relation_type
-        description: Tipo de relación parseado desde `dc.relation` o fallback textual si no aplica.
-        data_tests: [not_null]
-      - name: identifier_type
-        description: Tipo de identificador parseado desde `dc.relation` o fallback textual si no aplica.
-        data_tests: [not_null]
-      - name: pid_candidate_type
-        description: Tipo de identificador retenido en la lectura core.
         data_tests: [not_null]
       - name: current_rule_status
         description: Estado del valor respecto de las reglas actuales del modelo CONICET.
