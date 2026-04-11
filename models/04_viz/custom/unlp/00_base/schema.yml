@@ -1,0 +1,57 @@
+version: 2
+
+models:
+  - name: viz_unlp_dedup_batch_by_year
+    description: >
+      Vista agregada simple para comparar volumen anual de publicaciones entre
+      SEDICI y OpenAlex en la cohorte UNLP y así definir lotes iniciales de trabajo.
+    config:
+      tags: [viz]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [publication_year, source_system]
+    columns:
+      - name: publication_year
+        description: Año de publicación usado para agrupar el lote.
+        data_tests: [not_null]
+      - name: source_system
+        description: Sistema de origen del registro (`sedici` u `openalex`).
+        data_tests: [not_null]
+      - name: publication_count
+        description: Cantidad de publicaciones observadas para el año y origen.
+        data_tests: [not_null]
+
+  - name: viz_unlp_sedici_dedup_export
+    description: >
+      Export simple de publicaciones SEDICI en formato tabular compatible con
+      el deduplicador, sin lógica de matching ni resolución adicional.
+    config:
+      tags: [viz]
+    columns:
+      - name: source_id
+        description: Identificador interno del registro en SEDICI.
+        data_tests: [not_null]
+      - name: source_system
+        description: Origen del registro exportado.
+        data_tests: [not_null]
+      - name: institutional_uri
+        description: URI institucional del ítem en SEDICI.
+        data_tests: [not_null]
+      - name: publication_year
+        description: Año derivado de `date_issued` cuando está disponible.
+
+  - name: viz_unlp_openalex_dedup_export
+    description: >
+      Export simple de obras OpenAlex de la cohorte UNLP en formato tabular
+      compatible con el deduplicador, pensado para compararse contra SEDICI.
+    config:
+      tags: [viz]
+    columns:
+      - name: source_id
+        description: Identificador canónico de la obra en OpenAlex.
+        data_tests: [not_null]
+      - name: source_system
+        description: Origen del registro exportado.
+        data_tests: [not_null]
+      - name: publication_year
+        description: Año de publicación informado por OpenAlex.

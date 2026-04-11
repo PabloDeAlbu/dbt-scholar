@@ -7,7 +7,7 @@ WITH context AS (
         extract_datetime,
         load_datetime
     FROM {{ ref('ldg_dspacedb5_context') }}
-    WHERE institution_key = 'unlp'
+    WHERE institution_ror = 'https://ror.org/01tjs6929'
 ),
 
 base_eperson AS (
@@ -51,10 +51,7 @@ submitter_activity AS (
         MAX(last_extract_datetime) AS last_submitter_extract_datetime,
         MIN(first_load_datetime) AS first_submitter_load_datetime,
         MAX(last_load_datetime) AS last_submitter_load_datetime
-    FROM {{ ref('fct_unlp_dspacedb5_item_publication') }}
-    -- DSpace no expone en este mart una fecha explícita de envío; usamos `dc_date_available`
-    -- como mejor aproximación y caemos a `last_modified`, `dc_date_issued` y luego la
-    -- primera observación en warehouse si el item no trae fechas de negocio útiles.
+    FROM {{ ref('fct_unlp_ir_item_publication') }}
     WHERE submitter_id IS NOT NULL
       AND submitter_id <> -1
     GROUP BY submitter_id
