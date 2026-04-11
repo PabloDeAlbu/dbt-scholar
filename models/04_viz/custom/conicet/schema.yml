@@ -37,12 +37,12 @@ models:
         data_tests: [not_null]
       - name: has_doi_label
         description: >
-          Label de consumo para Superset que resume presencia de DOI en la
+          Label de consumo que resume presencia de DOI en la
           publicación OAI (`Con DOI` / `Sin DOI`).
         data_tests: [not_null]
       - name: matched_by_unique_doi_label
         description: >
-          Label de consumo para Superset que resume si hubo match único por DOI
+          Label de consumo que resume si hubo match único por DOI
           con OpenAIRE.
         data_tests: [not_null]
       - name: doi_integration_status_label
@@ -149,7 +149,7 @@ models:
 
   - name: viz_conicet_publication_pid_coverage
     description: >
-      Vista agregada de cobertura DOI para análisis descriptivo en Superset.
+      Vista agregada de cobertura DOI para análisis descriptivo y visualización.
       Expone conteos y proporciones de publicaciones con DOI según dimensión
       analítica (`publication_type`, `publication_year`, `subject_area`) en una
       interfaz única de consumo.
@@ -263,3 +263,34 @@ models:
         data_tests: [not_null]
       - name: record_ratio
         description: Proporción de records con el identificador observado sobre el universo total.
+
+  - name: viz_conicet_oai_record_pid_quality
+    description: >
+      Vista larga derivada de `fct_conicet_oai_record_pid_coverage` para
+      visualización y análisis. Expone una fila por combinación de
+      dimensión PID, patrón detectado y estado de calidad para facilitar stacked
+      bar charts de cobertura y calidad en OAI CONICET.
+    config:
+      tags: [viz]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [pid_dimension, pid_pattern, quality_status]
+    columns:
+      - name: pid_dimension
+        description: Dimensión PID perfilada (`dc_identifier_uri` o `dc_relation_doi`).
+        data_tests: [not_null]
+      - name: pid_label
+        description: Etiqueta legible de la dimensión PID para consumo analítico.
+        data_tests: [not_null]
+      - name: pid_pattern
+        description: Patrón clasificado dentro de la dimensión PID.
+        data_tests: [not_null]
+      - name: pattern_order
+        description: Orden sugerido del patrón para controlar la visualización en gráficos.
+        data_tests: [not_null]
+      - name: quality_status
+        description: Estado visual de calidad (`valid`, `invalid`, `missing`).
+        data_tests: [not_null]
+      - name: record_count
+        description: Cantidad de records para la combinación dimensión/patrón/estado.
+        data_tests: [not_null]
