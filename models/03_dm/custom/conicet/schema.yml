@@ -98,12 +98,78 @@ models:
         description: Fecha de publicación informada por OpenAIRE para la publicación matcheada por identificador original.
       - name: openaire_type
         description: Tipo de publicación informado por OpenAIRE para la publicación matcheada por identificador original.
+      - name: openaire_publisher
+        description: Publisher informado por OpenAIRE para la publicación matcheada.
       - name: openaire_access_right
         description: Condición de acceso principal informada por OpenAIRE para la publicación matcheada por identificador original.
       - name: openaire_access_right_uri
         description: URI de acceso principal informada por OpenAIRE para la publicación matcheada por identificador original.
+      - name: openaire_is_green
+        description: Flag OpenAIRE que indica disponibilidad por ruta green.
+      - name: openaire_is_in_diamond_journal
+        description: Flag OpenAIRE que indica pertenencia a revista diamond.
+      - name: openaire_downloads
+        description: Cantidad de descargas reportada por OpenAIRE para la publicación matcheada.
+      - name: openaire_views
+        description: Cantidad de vistas reportada por OpenAIRE para la publicación matcheada.
+      - name: openaire_citation_class
+        description: Clase de citación reportada por OpenAIRE.
       - name: openaire_citation_count
         description: Cantidad de citas informada por OpenAIRE para la publicación matcheada por identificador original.
+      - name: openaire_impulse
+        description: Métrica de impulso reportada por OpenAIRE.
+      - name: openaire_impulse_class
+        description: Clase de impulso reportada por OpenAIRE.
+      - name: openaire_influence
+        description: Métrica de influencia reportada por OpenAIRE.
+      - name: openaire_influence_class
+        description: Clase de influencia reportada por OpenAIRE.
+      - name: openaire_popularity
+        description: Métrica de popularidad reportada por OpenAIRE.
+      - name: openaire_popularity_class
+        description: Clase de popularidad reportada por OpenAIRE.
+      - name: openaire_has_arxiv
+        description: Flag OpenAIRE que indica presencia de arXiv.
+      - name: openaire_has_single_arxiv
+        description: Flag OpenAIRE que indica unicidad de arXiv.
+      - name: openaire_arxiv_count
+        description: Cantidad de arXiv asociados en OpenAIRE.
+      - name: openaire_has_doi
+        description: Flag OpenAIRE que indica presencia de DOI.
+      - name: openaire_has_single_doi
+        description: Flag OpenAIRE que indica unicidad de DOI.
+      - name: openaire_doi_count
+        description: Cantidad de DOI asociados en OpenAIRE.
+      - name: openaire_has_handle
+        description: Flag OpenAIRE que indica presencia de handle.
+      - name: openaire_has_single_handle
+        description: Flag OpenAIRE que indica unicidad de handle.
+      - name: openaire_handle_count
+        description: Cantidad de handles asociados en OpenAIRE.
+      - name: openaire_has_mag
+        description: Flag OpenAIRE que indica presencia de MAG.
+      - name: openaire_has_single_mag
+        description: Flag OpenAIRE que indica unicidad de MAG.
+      - name: openaire_mag_count
+        description: Cantidad de MAG IDs asociados en OpenAIRE.
+      - name: openaire_has_pmb
+        description: Flag OpenAIRE que indica presencia de PMB.
+      - name: openaire_has_single_pmb
+        description: Flag OpenAIRE que indica unicidad de PMB.
+      - name: openaire_pmb_count
+        description: Cantidad de PMBs asociados en OpenAIRE.
+      - name: openaire_has_pmc
+        description: Flag OpenAIRE que indica presencia de PMC.
+      - name: openaire_has_single_pmc
+        description: Flag OpenAIRE que indica unicidad de PMC.
+      - name: openaire_pmc_count
+        description: Cantidad de PMCs asociados en OpenAIRE.
+      - name: openaire_has_pmid
+        description: Flag OpenAIRE que indica presencia de PMID.
+      - name: openaire_has_single_pmid
+        description: Flag OpenAIRE que indica unicidad de PMID.
+      - name: openaire_pmid_count
+        description: Cantidad de PMIDs asociados en OpenAIRE.
 
   - name: fct_conicet_creator_item_publication
     description: >
