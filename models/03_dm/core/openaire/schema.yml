@@ -334,3 +334,6 @@ models:
         data_tests: [not_null]
       - name: original_hk
         data_tests: [not_null]
+      - name: original_id
+        description: Valor textual del identificador de origen provisto por OpenAIRE.
+        data_tests: [not_null]
