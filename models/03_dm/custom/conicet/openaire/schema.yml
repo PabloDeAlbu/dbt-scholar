@@ -4,7 +4,7 @@ models:
   - name: fct_conicet_openaire_researchproduct_publication
     description: >
       Subconjunto institucional CONICET del hecho de publicaciones OpenAIRE, filtrado por organización
-      (ROR) aplicada durante la extracción para construir una cohorte reproducible.
+      (ROR) aplicada durante la extracción para construir un subconjunto reproducible.
     config:
       tags: [conicet, dm]
     data_tests:
@@ -28,8 +28,8 @@ models:
           - not_null
           - unique
       - name: conicet_last_extract_datetime
-        description: Última fecha/hora en la que el research product fue observado en la cohorte CONICET.
+        description: Última fecha/hora en la que el research product fue observado en el subconjunto institucional CONICET.
         data_tests: [not_null]
       - name: relOrganizationId
-        description: Identificador ROR (URL) utilizado para filtrar la cohorte CONICET.
+        description: Identificador ROR (URL) utilizado para filtrar el subconjunto institucional CONICET.
         data_tests: [not_null]

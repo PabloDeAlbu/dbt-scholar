@@ -59,7 +59,7 @@ models:
         data_tests:
           - not_null
       - name: institution_ror
-        description: ROR institucional usado para definir la cohorte del repositorio UNLP.
+        description: ROR institucional usado para definir el subconjunto del repositorio UNLP.
         data_tests:
           - not_null
       - name: dc_identifier_uri

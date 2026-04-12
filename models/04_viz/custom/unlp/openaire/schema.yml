@@ -18,7 +18,7 @@ models:
         description: Identificador canónico de OpenAIRE.
         data_tests: [not_null]
       - name: organization_ror
-        description: ROR institucional usado para definir la cohorte UNLP.
+        description: ROR institucional usado para definir el subconjunto institucional UNLP.
         data_tests: [not_null]
       - name: subject_hk
         description: Clave hash del subject SDG.

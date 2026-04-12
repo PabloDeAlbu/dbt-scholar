@@ -4,7 +4,7 @@ models:
   - name: viz_unlp_dedup_batch_by_year
     description: >
       Vista agregada simple para comparar volumen anual de publicaciones entre
-      SEDICI y OpenAlex en la cohorte UNLP y así definir lotes iniciales de trabajo.
+      SEDICI y OpenAlex en el subconjunto UNLP y así definir lotes iniciales de trabajo.
     config:
       tags: [viz]
     data_tests:
@@ -42,7 +42,7 @@ models:
 
   - name: viz_unlp_openalex_dedup_export
     description: >
-      Export simple de obras OpenAlex de la cohorte UNLP en formato tabular
+      Export simple de obras OpenAlex del subconjunto UNLP en formato tabular
       compatible con el deduplicador, pensado para compararse contra SEDICI.
     config:
       tags: [viz]

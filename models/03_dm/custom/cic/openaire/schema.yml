@@ -4,7 +4,7 @@ models:
   - name: fct_cic_openaire_researchproduct_publication
     description: >
       Subconjunto institucional CIC del hecho de publicaciones OpenAIRE, filtrado por organización (ROR)
-      utilizada en la extracción para construir una cohorte reproducible.
+      utilizada en la extracción para construir un subconjunto reproducible.
     config:
       tags: [cic, dm]
     data_tests:
@@ -28,8 +28,8 @@ models:
           - not_null
           - unique
       - name: organization_ror
-        description: Identificador ROR (URL) utilizado para filtrar la cohorte CIC.
+        description: Identificador ROR (URL) utilizado para filtrar el subconjunto institucional CIC.
         data_tests: [not_null]
       - name: unlp_last_extract_datetime
-        description: Última fecha/hora en la que el research product fue observado en la cohorte (timestamp del extractor).
+        description: Última fecha/hora en la que el research product fue observado en el subconjunto institucional (timestamp del extractor).
         data_tests: [not_null]

@@ -4,7 +4,7 @@ models:
   - name: fct_unlp_openaire_researchproduct
     description: >
       Subconjunto institucional UNLP del hecho de publicaciones OpenAIRE, filtrado por ROR usado en la extracción
-      para definir una cohorte de producción académica atribuible a la institución.
+      para definir un conjunto de producción académica atribuible a la institución.
     config:
       tags: [unlp, dm]
     data_tests:
@@ -28,10 +28,10 @@ models:
           - not_null
           - unique
       - name: organization_ror
-        description: Identificador ROR (URL) utilizado para filtrar la cohorte UNLP.
+        description: Identificador ROR (URL) utilizado para filtrar el subconjunto institucional UNLP.
         data_tests: [not_null]
       - name: unlp_last_extract_datetime
-        description: Última fecha/hora en la que el research product fue observado en la cohorte UNLP.
+        description: Última fecha/hora en la que el research product fue observado en el subconjunto institucional UNLP.
         data_tests: [not_null]
       - name: sdg_count
         description: Cantidad de SDGs asociados al research product según subjects OpenAIRE.

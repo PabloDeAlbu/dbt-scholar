@@ -81,6 +81,70 @@ Modelos específicos por institución o implementación:
 
 Si un modelo depende de reglas, filtros o semántica particular de una institución, no debería ir en `core`.
 
+#### Patrón sugerido para `custom/<org>/<fuente>`
+
+En general, los modelos institucionales de `custom` deberían seguir una estructura parecida:
+
+- partir de un hecho `core` de la fuente
+- definir un subconjunto institucional explícito
+- agregar sólo el contexto o enriquecimiento necesario para consumo institucional
+- exponer una interfaz estable para capas posteriores sin reabrir lógica cruda en `viz`
+
+Regla práctica por fuente:
+
+- `custom/<org>/openalex`: partir de `fct_openalex_work_publication` y definir el subconjunto institucional con `fct_openalex_work_extraction` cuando exista extracción institucional explícita por `institutions.ror`
+- `custom/<org>/dspacedb` o `custom/<org>/dspacedb5`: partir de `fct_dspacedb_item_publication` o `fct_dspacedb5_item_publication`, filtrar por `institution_ror` y agregar metadatos institucionales desde los facts core de metadata
+- `custom/<org>/oai`: partir de `fct_oai_record_publication`, filtrar por `repository_identifier` e `institution_ror`, y agregar bridges institucionales sólo cuando aporten semántica local
+- `custom/<org>/openaire`: partir de `fct_openaire_researchproduct_publication` o de la extracción core correspondiente, filtrando por el criterio institucional efectivamente usado en la carga
+
+Conviene que estos modelos tengan CTEs reconocibles:
+
+- `base`: subconjunto institucional derivado de `core`
+- `context` o `extract`: primera y última observación temporal del subconjunto
+- `enrichment`: metadatos o bridges necesarios para el caso institucional
+- `final`: interfaz estable para consumo aguas abajo
+
+#### Convención operativa de ejecución
+
+Además del patrón de modelado, conviene documentar un selector operativo estable por fuente institucional. La idea es que, ante una nueva carga upstream, el equipo pueda refrescar la cadena relevante sin tener que reconstruir mentalmente todo el DAG.
+
+Regla práctica:
+
+- si cambió sólo la lógica de un modelo institucional, correr desde el subárbol de `custom/<org>/<fuente>`
+- si entró nueva data de una fuente y ese selector ya recompone la cadena `core` necesaria, usar igualmente el selector de `custom/<org>/<fuente>` como comando operativo recomendado
+- si una carga nueva no se propaga correctamente desde ese selector, subir el punto de entrada al primer modelo `core` que consolida esa fuente
+
+Ejemplo operativo vigente:
+
+- para refrescar OpenAlex de UNLP, usar `dbt run --target dw_sedici -s +models/03_dm/custom/unlp/openalex/`
+
+La convención buscada es distinguir dos planos:
+
+- el patrón semántico del modelo, que define de qué hechos y dimensiones parte
+- el selector operativo recomendado, que define desde dónde conviene ejecutar una recarga real
+
+No conviene cambiar un stream de ejecución que ya funciona bien sólo para hacerlo más "puro" desde el punto de vista conceptual.
+
+Qué debería quedar en `core`:
+
+- hechos base por fuente
+- dimensiones y bridges reutilizables
+- parsing o normalización genérica de fechas, PIDs y tipos
+- contexto técnico de extracción reutilizable entre instituciones
+
+Qué debería quedar en `custom/<org>`:
+
+- filtros por `institution_ror`, `repository_identifier` o `_filter_value`
+- naming institucional
+- selección de atributos relevantes para una institución
+- bridges o aplanados que sólo tienen sentido en ese subconjunto institucional
+
+Qué evitar en `viz`:
+
+- redefinir el subconjunto institucional
+- volver a cruzar contra metadata cruda si eso ya fue resuelto en `dm`
+- duplicar lógica de parseo o reconciliación que debería vivir en `core` o `custom`
+
 ### `models/04_viz`
 
 Salidas orientadas a consumo analítico o visualización. En general esta capa debería depender de `dm` y evitar reimplementar lógica de negocio pesada.
@@ -123,6 +187,7 @@ Cada conjunto coherente de modelos debería tener su documentación y tests cerc
 - En modelos transversales de `dm`, distinguir relación bibliográfica de contexto de extracción.
 - En OpenAlex y OpenAIRE, `institution_ror` puede representar el ROR usado para recuperar la entidad y no una afiliación intrínseca de la publicación.
 - En `ldg`, conservar explícitamente el contexto técnico cuando aplique, por ejemplo `_source_label`, `_institution_ror`, `_extract_datetime`, `_load_datetime`.
+- Si un subconjunto institucional depende de cómo fue hecha la extracción upstream, esa definición debe respetarse en `custom` y no inferirse de otra tabla sólo porque parece equivalente.
 
 ## Convención de commits
 

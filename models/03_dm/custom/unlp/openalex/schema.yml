@@ -36,7 +36,7 @@ models:
       - name: institution_display_name
         description: Nombre de despliegue de la institución en OpenAlex.
       - name: institution_ror
-        description: ROR de la institución utilizado para definir la cohorte UNLP.
+        description: ROR de la institución utilizado para definir el subconjunto institucional de UNLP.
         data_tests: [not_null]
       - name: unlp_first_seen_datetime
         description: Primera fecha de carga en la que la obra fue observada afiliada a UNLP.
