@@ -45,54 +45,6 @@ WITH ir_base AS (
       AND withdrawn = FALSE
 ),
 
-ir_doi AS (
-    SELECT DISTINCT
-        item_hk,
-        NULLIF(BTRIM(pid_value), '') AS doi_normalized
-    FROM ir_base
-    CROSS JOIN LATERAL REGEXP_SPLIT_TO_TABLE(COALESCE(doi, ''), '[|]') AS pid_value
-    WHERE NULLIF(BTRIM(pid_value), '') IS NOT NULL
-),
-
-ir_doi_stats AS (
-    SELECT
-        doi_normalized,
-        COUNT(DISTINCT item_hk) AS ir_item_count
-    FROM ir_doi
-    GROUP BY doi_normalized
-),
-
-openalex_doi AS (
-    SELECT
-        work_hk,
-        work_id,
-        doi AS doi_normalized
-    FROM {{ ref('fct_unlp_openalex_work_publication') }}
-    WHERE doi IS NOT NULL
-      AND TRIM(doi) <> ''
-),
-
-openalex_doi_stats AS (
-    SELECT
-        doi_normalized,
-        COUNT(DISTINCT work_hk) AS openalex_work_count
-    FROM openalex_doi
-    GROUP BY doi_normalized
-),
-
-unique_doi_match AS (
-    SELECT
-        ir_doi.item_hk,
-        openalex_doi.work_hk,
-        openalex_doi.doi_normalized
-    FROM ir_doi
-    INNER JOIN openalex_doi USING (doi_normalized)
-    INNER JOIN ir_doi_stats USING (doi_normalized)
-    INNER JOIN openalex_doi_stats USING (doi_normalized)
-    WHERE ir_doi_stats.ir_item_count = 1
-      AND openalex_doi_stats.openalex_work_count = 1
-),
-
 openalex_enrichment AS (
     SELECT
         match.item_hk,
@@ -113,9 +65,76 @@ openalex_enrichment AS (
         oa.fulltext_origin AS openalex_fulltext_origin,
         oa.cited_by_count AS openalex_cited_by_count,
         oa.fwci AS openalex_fwci
-    FROM unique_doi_match AS match
+    FROM {{ ref('brg_unlp_publication_doi') }} AS match
     INNER JOIN {{ ref('fct_unlp_openalex_work_publication') }} AS oa
         ON oa.work_hk = match.work_hk
+    WHERE match.is_unique_match
+),
+
+unique_originalid_match AS (
+    SELECT
+        item_hk,
+        original_id AS openaire_original_id,
+        researchproduct_hk,
+        researchproduct_id
+    FROM {{ ref('brg_unlp_publication_originalid') }}
+    WHERE is_unique_match
+),
+
+openaire_enrichment AS (
+    SELECT
+        match.item_hk,
+        match.openaire_original_id,
+        match.researchproduct_hk AS openaire_researchproduct_hk,
+        match.researchproduct_id AS openaire_researchproduct_id,
+        publication.unlp_first_extract_datetime AS openaire_first_extract_datetime,
+        publication.unlp_last_extract_datetime AS openaire_last_extract_datetime,
+        publication.organization_ror AS openaire_organization_ror,
+        publication.publication_date AS openaire_publication_date,
+        publication.type AS openaire_type,
+        publication.main_title AS openaire_title,
+        publication.publisher AS openaire_publisher,
+        publication.best_access_right AS openaire_access_right,
+        publication.best_access_right_uri AS openaire_access_right_uri,
+        publication.is_green AS openaire_is_green,
+        publication.is_in_diamond_journal AS openaire_is_in_diamond_journal,
+        publication.downloads AS openaire_downloads,
+        publication.views AS openaire_views,
+        publication.citation_class AS openaire_citation_class,
+        publication.citation_count AS openaire_citation_count,
+        publication.impulse AS openaire_impulse,
+        publication.impulse_class AS openaire_impulse_class,
+        publication.influence AS openaire_influence,
+        publication.influence_class AS openaire_influence_class,
+        publication.popularity AS openaire_popularity,
+        publication.popularity_class AS openaire_popularity_class,
+        publication.has_arxiv AS openaire_has_arxiv,
+        publication.has_single_arxiv AS openaire_has_single_arxiv,
+        publication.arxiv_count AS openaire_arxiv_count,
+        publication.has_doi AS openaire_has_doi,
+        publication.has_single_doi AS openaire_has_single_doi,
+        publication.doi_count AS openaire_doi_count,
+        publication.has_handle AS openaire_has_handle,
+        publication.has_single_handle AS openaire_has_single_handle,
+        publication.handle_count AS openaire_handle_count,
+        publication.has_mag AS openaire_has_mag,
+        publication.has_single_mag AS openaire_has_single_mag,
+        publication.mag_count AS openaire_mag_count,
+        publication.has_pmb AS openaire_has_pmb,
+        publication.has_single_pmb AS openaire_has_single_pmb,
+        publication.pmb_count AS openaire_pmb_count,
+        publication.has_pmc AS openaire_has_pmc,
+        publication.has_single_pmc AS openaire_has_single_pmc,
+        publication.pmc_count AS openaire_pmc_count,
+        publication.has_pmid AS openaire_has_pmid,
+        publication.has_single_pmid AS openaire_has_single_pmid,
+        publication.pmid_count AS openaire_pmid_count,
+        publication.has_sdg AS openaire_has_sdg,
+        publication.sdg_count AS openaire_sdg_count,
+        publication.sdg_values AS openaire_sdg_values
+    FROM unique_originalid_match AS match
+    INNER JOIN {{ ref('fct_unlp_openaire_researchproduct') }} AS publication
+        USING (researchproduct_hk)
 ),
 
 final AS (
@@ -178,9 +197,60 @@ final AS (
         oa.openalex_has_fulltext,
         oa.openalex_fulltext_origin,
         oa.openalex_cited_by_count,
-        oa.openalex_fwci
+        oa.openalex_fwci,
+
+        (openaire.openaire_researchproduct_hk IS NOT NULL) AS matched_by_unique_original_id,
+        openaire.openaire_original_id,
+        openaire.openaire_researchproduct_hk,
+        openaire.openaire_researchproduct_id,
+        openaire.openaire_first_extract_datetime,
+        openaire.openaire_last_extract_datetime,
+        openaire.openaire_organization_ror,
+        openaire.openaire_publication_date,
+        openaire.openaire_type,
+        openaire.openaire_title,
+        openaire.openaire_publisher,
+        openaire.openaire_access_right,
+        openaire.openaire_access_right_uri,
+        openaire.openaire_is_green,
+        openaire.openaire_is_in_diamond_journal,
+        openaire.openaire_downloads,
+        openaire.openaire_views,
+        openaire.openaire_citation_class,
+        openaire.openaire_citation_count,
+        openaire.openaire_impulse,
+        openaire.openaire_impulse_class,
+        openaire.openaire_influence,
+        openaire.openaire_influence_class,
+        openaire.openaire_popularity,
+        openaire.openaire_popularity_class,
+        openaire.openaire_has_arxiv,
+        openaire.openaire_has_single_arxiv,
+        openaire.openaire_arxiv_count,
+        openaire.openaire_has_doi,
+        openaire.openaire_has_single_doi,
+        openaire.openaire_doi_count,
+        openaire.openaire_has_handle,
+        openaire.openaire_has_single_handle,
+        openaire.openaire_handle_count,
+        openaire.openaire_has_mag,
+        openaire.openaire_has_single_mag,
+        openaire.openaire_mag_count,
+        openaire.openaire_has_pmb,
+        openaire.openaire_has_single_pmb,
+        openaire.openaire_pmb_count,
+        openaire.openaire_has_pmc,
+        openaire.openaire_has_single_pmc,
+        openaire.openaire_pmc_count,
+        openaire.openaire_has_pmid,
+        openaire.openaire_has_single_pmid,
+        openaire.openaire_pmid_count,
+        openaire.openaire_has_sdg,
+        openaire.openaire_sdg_count,
+        openaire.openaire_sdg_values
     FROM ir_base AS ir
     LEFT JOIN openalex_enrichment AS oa USING (item_hk)
+    LEFT JOIN openaire_enrichment AS openaire USING (item_hk)
 )
 
 SELECT * FROM final

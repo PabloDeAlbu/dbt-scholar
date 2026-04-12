@@ -5,9 +5,9 @@ models:
     description: >
       Hecho institucional principal de publicaciones UNLP, basado en
       `fct_unlp_ir_item_publication` como universo del repositorio institucional
-      y enriquecido por DOI exacto y único contra
-      `fct_unlp_openalex_work_publication`. Este modelo representa publicaciones
-      del IR y no un universo deduplicado general entre todas las fuentes.
+      y enriquecido con OpenAlex por DOI exacto y único y con OpenAIRE por
+      identificador original del repositorio. Este modelo representa
+      publicaciones del IR y no un universo deduplicado general entre todas las fuentes.
     config:
       tags: [unlp, dm]
     columns:
@@ -53,3 +53,71 @@ models:
         description: Clave hash del work OpenAlex enlazado por DOI único, cuando existe.
       - name: openalex_work_id
         description: Identificador canónico del work OpenAlex enlazado, cuando existe.
+      - name: matched_by_unique_original_id
+        description: Indica si la publicación fue enriquecida por un match de identificador original contra OpenAIRE.
+        data_tests: [not_null]
+      - name: openaire_original_id
+        description: Identificador original del repositorio expuesto por OpenAIRE y usado en el match.
+      - name: openaire_researchproduct_hk
+        description: Clave hash del research product OpenAIRE enlazado por identificador original, cuando existe.
+        data_tests:
+          - relationships:
+              to: ref('fct_unlp_openaire_researchproduct')
+              field: researchproduct_hk
+              config:
+                where: "openaire_researchproduct_hk is not null"
+      - name: openaire_researchproduct_id
+        description: Identificador canónico del research product OpenAIRE enlazado, cuando existe.
+
+  - name: brg_unlp_publication_originalid
+    description: >
+      Bridge de superposición entre publicaciones UNLP del IR y OpenAIRE usando
+      el handle institucional extraído desde `original_id`.
+    config:
+      tags: [unlp, dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_hk, researchproduct_hk, handle_normalized]
+    columns:
+      - name: item_hk
+        data_tests: [not_null]
+      - name: item_id
+        data_tests: [not_null]
+      - name: researchproduct_hk
+        data_tests: [not_null]
+      - name: researchproduct_id
+        data_tests: [not_null]
+      - name: original_id
+        description: Identificador original expuesto por OpenAIRE.
+        data_tests: [not_null]
+      - name: handle_normalized
+        description: Handle SEDICI normalizado (`10915/...`) usado para el match.
+        data_tests: [not_null]
+      - name: is_unique_match
+        description: Flag que indica unicidad 1 a 1 del match por handle.
+        data_tests: [not_null]
+
+  - name: brg_unlp_publication_doi
+    description: >
+      Bridge de superposición entre publicaciones UNLP del IR y OpenAlex usando
+      DOI exacto normalizado.
+    config:
+      tags: [unlp, dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_hk, work_hk, doi_normalized]
+    columns:
+      - name: item_hk
+        data_tests: [not_null]
+      - name: item_id
+        data_tests: [not_null]
+      - name: work_hk
+        data_tests: [not_null]
+      - name: work_id
+        data_tests: [not_null]
+      - name: doi_normalized
+        description: DOI normalizado usado para el match con OpenAlex.
+        data_tests: [not_null]
+      - name: is_unique_match
+        description: Flag que indica unicidad 1 a 1 del match por DOI.
+        data_tests: [not_null]
