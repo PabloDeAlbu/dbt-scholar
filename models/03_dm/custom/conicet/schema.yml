@@ -19,7 +19,12 @@ models:
               field: record_hk
       - name: record_id
         description: Identificador OAI-PMH original, preservado como identificador de negocio actual.
-        data_tests: [not_null, unique]
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('fct_conicet_oai_record_publication')
+              field: record_id
       - name: source_system
         description: Source system desde el cual se resuelve la publicación canónica.
         data_tests: [not_null]
@@ -81,6 +86,12 @@ models:
         description: Identificador original del repositorio expuesto por OpenAIRE y usado en el match único.
       - name: openaire_researchproduct_hk
         description: Clave hash de la publicación OpenAIRE asociada por match único de identificador original.
+        data_tests:
+          - relationships:
+              to: ref('fct_conicet_openaire_researchproduct_publication')
+              field: researchproduct_hk
+              config:
+                where: "openaire_researchproduct_hk is not null"
       - name: openaire_researchproduct_id
         description: Identificador de negocio de la publicación OpenAIRE asociada por match único de identificador original.
       - name: openaire_publication_date
@@ -244,6 +255,39 @@ models:
         data_tests: [not_null]
       - name: is_unique_match
         description: Flag que indica match 1 a 1 entre OAI y OpenAIRE para ese DOI.
+        data_tests: [not_null]
+      - name: match_rule
+        description: Regla de matching aplicada.
+        data_tests: [not_null]
+
+  - name: brg_conicet_publication_originalid
+    description: >
+      Bridge de superposición entre publicaciones CONICET OAI y OpenAIRE usando
+      el identificador original del repositorio (`record_id = original_id`).
+      Conserva flags de unicidad para aislar matches 1 a 1 y reutilizarlos en
+      `fct_conicet_publication`.
+    config:
+      tags: [conicet, dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [record_hk, researchproduct_hk, original_id]
+    columns:
+      - name: record_hk
+        data_tests: [not_null]
+      - name: record_id
+        data_tests: [not_null]
+      - name: researchproduct_hk
+        data_tests: [not_null]
+      - name: researchproduct_id
+        data_tests: [not_null]
+      - name: original_id
+        description: Identificador original del repositorio expuesto por OpenAIRE.
+        data_tests: [not_null]
+      - name: openaire_match_count
+        description: Cantidad de research products OpenAIRE que comparten ese `original_id`.
+        data_tests: [not_null]
+      - name: is_unique_match
+        description: Flag que indica unicidad 1 a 1 del match por identificador original.
         data_tests: [not_null]
       - name: match_rule
         description: Regla de matching aplicada.
