@@ -3,8 +3,9 @@ version: 2
 models:
   - name: fct_unlp_openalex_work
     description: >
-      Subconjunto institucional UNLP del hecho de obras de OpenAlex, definido por la
-      afiliación institucional de la obra al ROR de la Universidad Nacional de La Plata.
+      Subconjunto institucional UNLP del hecho de works de OpenAlex,
+      definido por el subconjunto extraído con el filtro
+      `institutions.ror = https://ror.org/01tjs6929`.
     config:
       tags: [unlp, dm]
     data_tests:
@@ -38,9 +39,9 @@ models:
       - name: institution_ror
         description: ROR de la institución utilizado para definir el subconjunto institucional de UNLP.
         data_tests: [not_null]
-      - name: unlp_first_seen_datetime
-        description: Primera fecha de carga en la que la obra fue observada afiliada a UNLP.
+      - name: unlp_first_extract_datetime
+        description: Primera fecha/hora de extracción observada para el work en el subconjunto institucional de UNLP.
         data_tests: [not_null]
-      - name: unlp_last_seen_datetime
-        description: Última fecha de carga en la que la obra fue observada afiliada a UNLP.
+      - name: unlp_last_extract_datetime
+        description: Última fecha/hora de extracción observada para el work en el subconjunto institucional de UNLP.
         data_tests: [not_null]

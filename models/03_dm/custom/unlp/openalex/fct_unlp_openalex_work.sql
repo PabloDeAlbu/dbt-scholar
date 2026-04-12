@@ -1,27 +1,36 @@
 {%- set unlp_ror = 'https://ror.org/01tjs6929' -%}
 
-WITH unlp_work_seen AS (
+WITH unlp_extract AS (
     SELECT
         work_hk,
+        MIN(extract_datetime) AS unlp_first_extract_datetime,
+        MAX(extract_datetime) AS unlp_last_extract_datetime
+    FROM {{ ref('fct_openalex_work_extraction') }}
+    WHERE _filter_param = 'institutions.ror'
+      AND _filter_value = '{{ unlp_ror }}'
+    GROUP BY work_hk
+),
+
+unlp_institution AS (
+    SELECT
         institution_hk,
-        MAX(ror) AS institution_ror,
-        MIN(load_datetime) AS unlp_first_seen_datetime,
-        MAX(load_datetime) AS unlp_last_seen_datetime
-    FROM {{ ref('stg_openalex_work_institution') }}
+        institution_id,
+        institution_display_name,
+        ror AS institution_ror
+    FROM {{ ref('dim_openalex_institution') }}
     WHERE ror = '{{ unlp_ror }}'
-    GROUP BY work_hk, institution_hk
 ),
 
 base AS (
     SELECT
         fct.work_hk,
         fct.work_id,
-        unlp_work_seen.institution_hk,
-        dim_institution.institution_id,
-        dim_institution.institution_display_name,
-        unlp_work_seen.institution_ror,
-        unlp_work_seen.unlp_first_seen_datetime,
-        unlp_work_seen.unlp_last_seen_datetime,
+        unlp_institution.institution_hk,
+        unlp_institution.institution_id,
+        unlp_institution.institution_display_name,
+        unlp_institution.institution_ror,
+        unlp_extract.unlp_first_extract_datetime,
+        unlp_extract.unlp_last_extract_datetime,
 
         dim_work.title,
         dim_work.type,
@@ -61,11 +70,10 @@ base AS (
         fct.apc_paid_currency,
         fct.apc_paid_value,
         fct.apc_paid_value_usd
-    FROM {{ ref('fct_openalex_work_publication') }} fct
-    INNER JOIN unlp_work_seen USING (work_hk)
-    INNER JOIN {{ ref('dim_openalex_work') }} dim_work USING (work_hk)
-    INNER JOIN {{ ref('dim_openalex_institution') }} dim_institution
-        ON dim_institution.institution_hk = unlp_work_seen.institution_hk
+    FROM {{ ref('fct_openalex_work_publication') }} AS fct
+    INNER JOIN unlp_extract USING (work_hk)
+    INNER JOIN {{ ref('dim_openalex_work') }} AS dim_work USING (work_hk)
+    CROSS JOIN unlp_institution
 )
 
 SELECT * FROM base
