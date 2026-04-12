@@ -59,18 +59,46 @@ dim_access_right AS (
     GROUP BY brg.record_hk
 ),
 
-unique_doi_match AS (
+openaire_originalid AS (
     SELECT
-        record_hk,
-        researchproduct_hk,
-        researchproduct_id
-    FROM {{ ref('brg_conicet_publication_doi') }}
-    WHERE is_unique_match
+        publication.researchproduct_hk,
+        publication.researchproduct_id,
+        original.original_id
+    FROM {{ ref('fct_conicet_openaire_researchproduct_publication') }} AS publication
+    INNER JOIN {{ ref('brg_openaire_researchproduct_originalid') }} AS bridge
+        USING (researchproduct_hk)
+    INNER JOIN {{ ref('stg_openaire_researchproduct_originalid') }} AS original
+        ON original.researchproduct_hk = bridge.researchproduct_hk
+       AND original.original_hk = bridge.original_hk
+    WHERE original.original_id LIKE 'oai:ri.conicet.gov.ar:%'
+),
+
+originalid_match_count AS (
+    SELECT
+        original_id,
+        COUNT(DISTINCT researchproduct_hk) AS openaire_researchproduct_count
+    FROM openaire_originalid
+    GROUP BY original_id
+),
+
+unique_originalid_match AS (
+    SELECT
+        base.record_hk,
+        openaire_originalid.original_id AS openaire_original_id,
+        openaire_originalid.researchproduct_hk,
+        openaire_originalid.researchproduct_id
+    FROM base
+    INNER JOIN openaire_originalid
+        ON openaire_originalid.original_id = base.record_id
+    INNER JOIN originalid_match_count
+        ON originalid_match_count.original_id = openaire_originalid.original_id
+    WHERE originalid_match_count.openaire_researchproduct_count = 1
 ),
 
 openaire_enrichment AS (
     SELECT
         match.record_hk,
+        match.openaire_original_id,
         match.researchproduct_hk AS openaire_researchproduct_hk,
         match.researchproduct_id AS openaire_researchproduct_id,
         publication.publication_date AS openaire_publication_date,
@@ -78,7 +106,7 @@ openaire_enrichment AS (
         publication.best_access_right AS openaire_access_right,
         publication.best_access_right_uri AS openaire_access_right_uri,
         publication.citation_count AS openaire_citation_count
-    FROM unique_doi_match AS match
+    FROM unique_originalid_match AS match
     INNER JOIN {{ ref('fct_conicet_openaire_researchproduct_publication') }} AS publication
         USING (researchproduct_hk)
 ),
@@ -113,7 +141,8 @@ final AS (
         base.subject_subarea,
         base.fos_code_level_1 AS subject_code,
         base.mult_fos_flag AS has_multiple_subject_assignments,
-        (openaire_enrichment.openaire_researchproduct_hk IS NOT NULL) AS matched_by_unique_doi,
+        (openaire_enrichment.openaire_researchproduct_hk IS NOT NULL) AS matched_by_unique_original_id,
+        openaire_enrichment.openaire_original_id,
         openaire_enrichment.openaire_researchproduct_hk,
         openaire_enrichment.openaire_researchproduct_id,
         openaire_enrichment.openaire_publication_date,
