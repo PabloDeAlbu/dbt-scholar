@@ -3,33 +3,53 @@ version: 2
 models:
   - name: fct_unlp_publication
     description: >
-      Hecho consolidado de publicaciones UNLP que cruza ítems del repositorio institucional con
-      publicaciones OpenAIRE por PID normalizados, priorizando DOI y luego handle. La resolución de
-      metadatos y PIDs del IR se toma exclusivamente desde `fct_unlp_ir_item_publication`, sin volver
-      a resolver cruces directo contra los bridges crudos de DSpace 5. Este modelo no debe interpretarse
-      como un universo deduplicado canónico entre IR y OpenAIRE: el match por PID identifica coincidencias
-      entre conjuntos, pero no garantiza deduplicación global. Para análisis OpenAIRE-first usar
-      `fct_unlp_openaire_publication_ir_match_by_pid`.
+      Hecho institucional principal de publicaciones UNLP, basado en
+      `fct_unlp_ir_item_publication` como universo del repositorio institucional
+      y enriquecido por DOI exacto y único contra
+      `fct_unlp_openalex_work_publication`. Este modelo representa publicaciones
+      del IR y no un universo deduplicado general entre todas las fuentes.
     config:
       tags: [unlp, dm]
     columns:
       - name: publication_hk
-        description: Identificador técnico del registro consolidado.
+        description: Identificador técnico de la publicación institucional, alineado al `item_hk` del IR.
         data_tests: [not_null, unique]
-      - name: publication_source
-        description: Origen del registro consolidado (`matched`, `ir_only`, `openaire_only`).
-        data_tests: [not_null]
-      - name: has_ir
-        description: Indica si la publicación tiene contraparte en el repositorio institucional.
-        data_tests: [not_null]
-      - name: has_openaire
-        description: Indica si la publicación tiene contraparte en OpenAIRE.
-        data_tests: [not_null]
-      - name: match_scheme
-        description: Esquema del PID usado para el match, si existe.
-      - name: match_pid
-        description: PID normalizado usado para el match, si existe.
       - name: item_hk
-        description: Clave hash del ítem del IR, cuando existe.
-      - name: researchproduct_hk
-        description: Clave hash del research product OpenAIRE, cuando existe.
+        description: Clave hash del ítem del repositorio institucional.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('fct_unlp_ir_item_publication')
+              field: item_hk
+      - name: item_id
+        description: ID original del ítem en DSpace 5.
+        data_tests: [not_null]
+      - name: source_system
+        description: Sistema fuente base del hecho institucional.
+        data_tests: [not_null]
+      - name: institutional_uri
+        description: URI institucional de citación del ítem en el repositorio.
+        data_tests: [not_null]
+      - name: publication_date
+        description: Fecha de publicación declarada en el IR.
+      - name: publication_year
+        description: Año derivado de `publication_date` cuando existe.
+      - name: title
+        description: Título principal de la publicación en el IR.
+      - name: publication_type
+        description: Tipología declarada para la publicación en el IR.
+      - name: has_doi
+        description: Flag que indica si el ítem tiene al menos un DOI normalizado.
+        data_tests: [not_null]
+      - name: doi
+        description: DOI normalizados declarados en el IR, concatenados con `|`.
+      - name: matched_by_unique_doi
+        description: Indica si la publicación fue enriquecida por un match DOI exacto y único contra OpenAlex.
+        data_tests: [not_null]
+      - name: match_doi
+        description: DOI normalizado usado para el enriquecimiento con OpenAlex, cuando existe.
+      - name: openalex_work_hk
+        description: Clave hash del work OpenAlex enlazado por DOI único, cuando existe.
+      - name: openalex_work_id
+        description: Identificador canónico del work OpenAlex enlazado, cuando existe.

@@ -18,7 +18,7 @@ base AS (
         publication_year,
         publication_date,
         doi
-    FROM {{ ref('fct_unlp_openalex_work') }}
+    FROM {{ ref('fct_unlp_openalex_work_publication') }}
 )
 
 SELECT

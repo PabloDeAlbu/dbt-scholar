@@ -12,7 +12,7 @@ openalex AS (
     SELECT
         EXTRACT(YEAR FROM publication_year)::int AS publication_year,
         'openalex'::text AS source_system
-    FROM {{ ref('fct_unlp_openalex_work') }}
+    FROM {{ ref('fct_unlp_openalex_work_publication') }}
     WHERE publication_year IS NOT NULL
 ),
 

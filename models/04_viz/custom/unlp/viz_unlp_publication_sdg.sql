@@ -16,8 +16,8 @@ WITH base AS (
         unlp_first_extract_datetime,
         unlp_last_extract_datetime,
         sdg_values
-    FROM {{ ref('fct_unlp_publication') }}
-    WHERE publication_source = 'matched'
+    FROM {{ ref('fct_unlp_openaire_publication_ir_match_by_pid') }}
+    WHERE has_ir_pid_match = TRUE
       AND has_sdg = TRUE
       AND sdg_values IS NOT NULL
 ),

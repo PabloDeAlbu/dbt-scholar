@@ -1,9 +1,6 @@
 WITH base AS (
     SELECT
         publication_hk,
-        publication_source,
-        has_ir,
-        has_openaire,
         has_sdg,
         item_hk,
         item_id,
@@ -23,16 +20,15 @@ WITH base AS (
         unlp_last_extract_datetime,
         COALESCE(sdg_count, 0) AS sdg_count,
         sdg_values
-    FROM {{ ref('fct_unlp_publication') }}
-    WHERE has_ir = TRUE
+    FROM {{ ref('fct_unlp_openaire_publication_ir_match_by_pid') }}
+    WHERE has_ir_pid_match = TRUE
+      AND item_hk IS NOT NULL
 ),
 
 final AS (
     SELECT
         base.publication_hk,
-        base.publication_source,
-        base.has_ir,
-        base.has_openaire,
+        TRUE AS has_ir,
         base.has_sdg,
         base.item_hk,
         base.item_id,

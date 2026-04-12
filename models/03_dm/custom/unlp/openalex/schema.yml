@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: fct_unlp_openalex_work
+  - name: fct_unlp_openalex_work_publication
     description: >
       Subconjunto institucional UNLP del hecho de works de OpenAlex,
       definido por el subconjunto extraído con el filtro
