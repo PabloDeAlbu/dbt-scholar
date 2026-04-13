@@ -1,0 +1,65 @@
+version: 2
+
+models:
+  - name: ldg_unlp_centros_conicet
+    description: >
+      Normalización mínima del seed curado de comunidades CONICET-UNLP con mapeo a
+      comunidad/colección de SEDICI. Conserva una fila por `set_spec` y excluye filas
+      manuales de totales, separadores y otros sets sin destino SEDICI explícito.
+    config:
+      tags: [unlp]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: "sedici_article_count >= 0"
+      - dbt_utils.expression_is_true:
+          expression: "pdf_share_pct is null OR (pdf_share_pct >= 0 AND pdf_share_pct <= 100)"
+    columns:
+      - name: set_spec
+        description: Identificador `setSpec` OAI-PMH de la comunidad CONICET relevada.
+        data_tests:
+          - not_null
+          - unique
+      - name: set_name
+        description: Nombre descriptivo del set/comunidad según el relevamiento manual.
+        data_tests:
+          - not_null
+      - name: sedici_collection_uri
+        description: Handle/URI de la comunidad o colección de SEDICI asociada al centro.
+        data_tests:
+          - not_null
+      - name: faculty
+        description: Unidad académica UNLP asociada en el relevamiento manual.
+      - name: pdf_share_pct
+        description: Porcentaje de documentos con PDF, normalizado a valor numérico.
+      - name: sedici_article_count
+        description: Cantidad de artículos actualmente presentes en SEDICI para el centro.
+      - name: manual_status
+        description: Estado o anotación manual breve asociada al centro.
+      - name: ingest_note
+        description: Nota manual sobre potencial incorporación o situación de carga.
+
+  - name: ldg_unlp_conicet_imported_item
+    description: >
+      Normalización mínima del relevamiento manual de ítems SEDICI ya importados
+      desde tandas de incorporación de CONICET. Conserva una fila por par
+      `batch_name + mapfile_item_key` y expone el `sedici_item_id` para
+      exclusión o auditoría aguas abajo.
+    config:
+      tags: [unlp]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [batch_name, mapfile_item_key]
+    columns:
+      - name: batch_name
+        description: Nombre de la tanda/mapfile de importación manual.
+        data_tests:
+          - not_null
+      - name: mapfile_item_key
+        description: Clave secuencial del mapfile (`item_001`, `item_002`, etc.).
+        data_tests:
+          - not_null
+      - name: sedici_item_id
+        description: Identificador numérico del ítem en SEDICI ya importado.
+        data_tests:
+          - not_null
+          - unique

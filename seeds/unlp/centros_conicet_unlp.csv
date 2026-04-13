@@ -1,0 +1,42 @@
+set_spec,pdf_share_pct,set_name,sedici_collection_uri,faculty,sedici_article_count,manual_status,ingest_note
+,,,,,,,
+,,,,,,,
+com_11336_139,"27,16049383",CENTRO DE INVEST.OPTICAS (I),http://sedici.unlp.edu.ar/handle/10915/92916,,0,,
+com_11336_147,"84,21052632",INST.DE INVEST.EN HUMANIDADES Y CS SOCIALES,http://sedici.unlp.edu.ar/handle/10915/59889,Humanidades,6,,*
+com_11336_133,"34,66257669",CENTRO DE INVEST.GEOLOGICAS (I),http://sedici.unlp.edu.ar/handle/10915/87332,Ciencias Naturales y Museo,8,,*
+com_11336_141,"83,52713178",INST.DE ASTROFISICA LA PLATA,http://sedici.unlp.edu.ar/handle/10915/86797,Ciencias Astronómicas y Geofísicas,39,,Ya se importo a SEDICI
+com_11336_155,"59,09090909",INST. DE ESTUDIOS INMUNOLOGICOS Y FISIOPATOLOGICOS,http://sedici.unlp.edu.ar/handle/10915/86911,Exactas,6,,*
+com_11336_127,"33,33333333",CENTRO DE INVEST.CARDIOVASCULARES (I),http://sedici.unlp.edu.ar/handle/10915/87262,Cs Medicas,6,,*
+com_11336_153,"46,93251534",INST.DE GENETICA VET ING FERNANDO NOEL DULOUT,http://sedici.unlp.edu.ar/handle/10915/85416,Ciencias Naturales y Museo,30,,*
+com_11336_149,"57,30027548",INST.DE FISICA LA PLATA,http://sedici.unlp.edu.ar/handle/10915/86802,Exactas,127,,*
+com_11336_151,"49,43820225",INST.FISICA DE LIQUIDOS Y SIST.BIOLOGICOS (I),http://sedici.unlp.edu.ar/handle/10915/86775,Exactas,31,,*
+com_11336_159,"40,1459854",INST.MULTIDISCIPL.DE BIOLOGIA CELULAR (I),http://sedici.unlp.edu.ar/handle/10915/85152,Exactas,28,,*
+com_11336_135,"18,25192802","CENTRO DE INV EN CS.APLICADAS ""DR.JORGE J.RONCO""",http://sedici.unlp.edu.ar/handle/10915/73160,Exactas,38,,*
+com_11336_129,"25,95573441",CENTRO DE INV EN CRIOTECNOLOGIA DE ALIMENTOS (I),http://sedici.unlp.edu.ar/handle/10915/67059,Exactas,76,,*
+com_11336_157,"39,75308642","INST.DE LIMNOLOGIA ""DR. RAUL A. RINGUELET""",http://sedici.unlp.edu.ar/handle/10915/67181,Ciencias Naturales y Museo,108,,*
+com_11336_165,"27,71822358",INST.DE INV.FISICOQUIMICAS TEORICAS Y APLIC.,http://sedici.unlp.edu.ar/handle/10915/74891,Exactas,157,,*
+com_11336_137,"30,06535948",CENT.DE INV EN FERMENTACIONES INDUSTRIALES (I),http://sedici.unlp.edu.ar/handle/10915/65471,Exactas,44,,*
+com_11336_121,"42,82511211",CENTRO DE EST.PARASITOL.Y DE VECTORES (I),http://sedici.unlp.edu.ar/handle/10915/73450,Ciencias Naturales y Museo,263,,Ya se importo a SEDICI
+com_11336_161,"42,1875",INST.DE FISIOLOGIA VEGETAL,http://sedici.unlp.edu.ar/handle/10915/74321,Ciencias Agrarias y Forestales,84,,
+com_11336_123,"21,42857143","CENTRO DE QUIMICA INORGANICA ""DR. PEDRO J. AYMONINO""",http://sedici.unlp.edu.ar/handle/10915/75001,Exactas,83,,
+com_11336_119,"48,14814815",CENTRO DE ENDOCRINOLOGIA EXP.Y APLICADA (I),http://sedici.unlp.edu.ar/handle/10915/73646,Cs Medicas,49,,
+com_11336_163,"38,84297521",INST.DE INVEST.BIOQUIMICAS DE LA PLATA,http://sedici.unlp.edu.ar/handle/10915/73455,Cs Medicas,89,,
+com_11336_145,"41,52542373",INST.DE BIOTECNOLOGIA Y BIOLOGIA MOLECULAR,http://sedici.unlp.edu.ar/handle/10915/76483,Exactas,106,,
+com_11336_131,"28,81355932",CENTRO DE INV EN TECNOLOGIA DE PINTURAS (I),http://sedici.unlp.edu.ar/handle/10915/75492,Ingenieria,59,,
+com_11336_14329,"17,85714286","INSTITUTO DE INVESTIGACIONES EN ELECTRONICA, CONTROL Y PROCESAMIENTO DE SEÑALES",http://sedici.unlp.edu.ar/handle/10915/60640,Ingenieria,21,,
+com_11336_125,"21,05263158",CENTRO TECNOL.DE REC.MINERALES Y CERAMICA (I),http://sedici.unlp.edu.ar/handle/10915/75001,Exactas,83,,
+com_11336_48294,,CENTRO DE INVESTIGACIONES DEL MEDIO AMBIENTE,http://sedici.unlp.edu.ar/handle/10915/95060,Exactas,0,,
+com_11336_48300,,INSTITUTO DE INVESTIGACIONES Y POLITICAS DEL AMBIENTE CONSTRUIDO,http://sedici.unlp.edu.ar/handle/10915/55263,Arquitectura,18,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+OTROS SETS,,,,,,,
+com_11336_169,"47,81071526",AREA DE INFLUENCIA CTRO.CIENTIFICO TECNOL.CONICET - LA PLATA,,,,Todos con filiacion UNLP,
+com_11336_118,"48,9080283",CTRO.CIENTIFICO TECNOL.CONICET - LA PLATA,,,,Todos con filiacion UNLP ,
+col_11336_170,"47,76859504",Articulos(CCT - LA PLATA),,,,,
+col_11336_90073,,Capítulos de libros(CCT - LA PLATA),,,,,
+col_11336_89765,,Libros(CCT - LA PLATA),,,,,
+col_11336_73627,"51,06382979",Tesis(CCT - LA PLATA),,,,,
+,,,,,,,
+,,,,,,,
+Tenemos 1595 documentos que no estan dentro del CCT - La Plata y que tienen filiacion UNLP,,,,,,,

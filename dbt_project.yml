@@ -37,6 +37,9 @@ models:
       coar:
         +schema: coar
         +tags: [coar]
+      unlp:
+        +schema: unlp
+        +tags: [unlp]
       dspacedb:
         +schema: dspacedb
         +tags: [dspacedb]
@@ -178,6 +181,24 @@ seeds:
     openalex:
       +schema: openalex
       +tags: [openalex]
+    unlp:
+      +schema: unlp
+      +tags: [unlp]
+      centros_conicet_unlp:
+        +column_types:
+          set_spec: text
+          pdf_share_pct: text
+          set_name: text
+          sedici_collection_uri: text
+          faculty: text
+          sedici_article_count: text
+          manual_status: text
+          ingest_note: text
+      conicet_sedici_imported_items:
+        +column_types:
+          batch_name: text
+          mapfile_item_key: text
+          sedici_item_id: integer
     oai:
       +schema: oai
       +tags: [oai]
