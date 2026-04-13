@@ -118,6 +118,21 @@ openaire_enrichment AS (
         USING (researchproduct_hk)
 ),
 
+fil_enrichment AS (
+    SELECT
+        record_hk,
+        has_fil,
+        fil_count,
+        fil_author_count,
+        has_unlp_fil,
+        unlp_fil_count,
+        unlp_fil_author_count,
+        has_cic_fil,
+        cic_fil_count,
+        cic_fil_author_count
+    FROM {{ ref('brg_conicet_publication_fil') }}
+),
+
 final AS (
     SELECT
         base.record_hk,
@@ -148,6 +163,15 @@ final AS (
         base.subject_subarea,
         base.fos_code_level_1 AS subject_code,
         base.mult_fos_flag AS has_multiple_subject_assignments,
+        COALESCE(fil_enrichment.has_fil, false) AS has_fil,
+        COALESCE(fil_enrichment.fil_count, 0) AS fil_count,
+        COALESCE(fil_enrichment.fil_author_count, 0) AS fil_author_count,
+        COALESCE(fil_enrichment.has_unlp_fil, false) AS has_unlp_fil,
+        COALESCE(fil_enrichment.unlp_fil_count, 0) AS unlp_fil_count,
+        COALESCE(fil_enrichment.unlp_fil_author_count, 0) AS unlp_fil_author_count,
+        COALESCE(fil_enrichment.has_cic_fil, false) AS has_cic_fil,
+        COALESCE(fil_enrichment.cic_fil_count, 0) AS cic_fil_count,
+        COALESCE(fil_enrichment.cic_fil_author_count, 0) AS cic_fil_author_count,
         (openaire_enrichment.openaire_researchproduct_hk IS NOT NULL) AS matched_by_unique_original_id,
         openaire_enrichment.openaire_original_id,
         openaire_enrichment.openaire_researchproduct_hk,
@@ -193,6 +217,7 @@ final AS (
     FROM base
     LEFT JOIN dim_publication_type USING (record_hk)
     LEFT JOIN dim_access_right USING (record_hk)
+    LEFT JOIN fil_enrichment USING (record_hk)
     LEFT JOIN openaire_enrichment USING (record_hk)
 )
 

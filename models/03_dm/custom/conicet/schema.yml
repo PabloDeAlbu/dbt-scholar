@@ -77,6 +77,33 @@ models:
       - name: has_multiple_subject_assignments
         description: Flag de auditoría para publicaciones con múltiples subjects FOS antes del aplanado.
         data_tests: [not_null]
+      - name: has_fil
+        description: Flag que indica presencia de al menos una descripción `Fil:` asociada al registro.
+        data_tests: [not_null]
+      - name: fil_count
+        description: Cantidad total de descripciones `Fil:` asociadas al registro.
+        data_tests: [not_null]
+      - name: fil_author_count
+        description: Cantidad de autores distintos detectados en las descripciones `Fil:`.
+        data_tests: [not_null]
+      - name: has_unlp_fil
+        description: Flag que indica si alguna afiliación parseada menciona a la UNLP.
+        data_tests: [not_null]
+      - name: unlp_fil_count
+        description: Cantidad de afiliaciones parseadas que mencionan a la UNLP.
+        data_tests: [not_null]
+      - name: unlp_fil_author_count
+        description: Cantidad de autores distintos con afiliación UNLP detectada en `Fil:`.
+        data_tests: [not_null]
+      - name: has_cic_fil
+        description: Flag que indica si alguna afiliación parseada menciona a la CIC o Comisión de Investigaciones Científicas.
+        data_tests: [not_null]
+      - name: cic_fil_count
+        description: Cantidad de afiliaciones parseadas que mencionan a la CIC.
+        data_tests: [not_null]
+      - name: cic_fil_author_count
+        description: Cantidad de autores distintos con afiliación CIC detectada en `Fil:`.
+        data_tests: [not_null]
       - name: matched_by_unique_original_id
         description: >
           Flag que indica si la publicación OAI pudo enriquecerse con OpenAIRE mediante
@@ -207,6 +234,34 @@ models:
           - not_null
           - unique
       - name: record_hk
+        data_tests: [not_null]
+
+  - name: brg_conicet_publication_fil
+    description: >
+      Bridge agregado a grano `record_hk` con métricas y flags derivadas de las
+      descripciones `Fil:` parseadas, incluyendo presencia de afiliaciones UNLP y CIC.
+    config:
+      tags: [conicet, dm]
+    columns:
+      - name: record_hk
+        data_tests: [not_null, unique]
+      - name: has_fil
+        data_tests: [not_null]
+      - name: fil_count
+        data_tests: [not_null]
+      - name: fil_author_count
+        data_tests: [not_null]
+      - name: has_unlp_fil
+        data_tests: [not_null]
+      - name: unlp_fil_count
+        data_tests: [not_null]
+      - name: unlp_fil_author_count
+        data_tests: [not_null]
+      - name: has_cic_fil
+        data_tests: [not_null]
+      - name: cic_fil_count
+        data_tests: [not_null]
+      - name: cic_fil_author_count
         data_tests: [not_null]
 
   - name: dim_conicet_item_type
