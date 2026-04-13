@@ -9,7 +9,7 @@ renamed AS (
     SELECT 
         "setSpec"::text as set_id,
         "setName"::text as set_name,
-        _load_datetime::timestamp
+        "load_datetime"::timestamp as _load_datetime
     FROM source
 ),
 ghost_record AS (

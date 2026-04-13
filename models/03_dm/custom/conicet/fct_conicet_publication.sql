@@ -59,6 +59,16 @@ dim_access_right AS (
     GROUP BY brg.record_hk
 ),
 
+record_set AS (
+    SELECT
+        brg.record_hk,
+        STRING_AGG(DISTINCT dim.set_id, '|' ORDER BY dim.set_id) AS set_spec
+    FROM {{ ref('brg_oai_record_set') }} brg
+    INNER JOIN {{ ref('dim_oai_set') }} dim
+        USING (set_hk)
+    GROUP BY brg.record_hk
+),
+
 unique_originalid_match AS (
     SELECT
         record_hk,
@@ -153,6 +163,7 @@ final AS (
         dim_access_right.access_right_uri,
         base.repository_identifier,
         base.institution_ror,
+        record_set.set_spec,
         base.dc_identifier_uri AS institutional_uri,
         base.dc_relation_doi AS doi,
         base.doi_audit_string,
@@ -217,6 +228,7 @@ final AS (
     FROM base
     LEFT JOIN dim_publication_type USING (record_hk)
     LEFT JOIN dim_access_right USING (record_hk)
+    LEFT JOIN record_set USING (record_hk)
     LEFT JOIN fil_enrichment USING (record_hk)
     LEFT JOIN openaire_enrichment USING (record_hk)
 )

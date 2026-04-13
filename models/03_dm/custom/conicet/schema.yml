@@ -52,6 +52,10 @@ models:
         description: Identificador del repositorio OAI que origina el registro.
       - name: institution_ror
         description: ROR institucional asociado al contexto de extracción.
+      - name: set_spec
+        description: >
+          `setSpec` OAI-PMH desde el cual se recuperó el record. Si un mismo registro
+          está asociado a más de un set, los valores distintos se concatenan con `|`.
       - name: institutional_uri
         description: URI institucional canónica de la publicación en el repositorio.
         data_tests:
