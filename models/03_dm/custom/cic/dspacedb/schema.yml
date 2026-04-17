@@ -3,9 +3,7 @@ version: 2
 models:
   - name: fct_cic_dspacedb_item_publication
     description: >
-      Hecho institucional de items publicados en CIC DIGITAL, construido sobre
-      `fct_dspacedb_item_publication` y enriquecido con metadatos institucionales como
-      `dc.title`, `dc.date.available` y `dcterms.issued` desde la capa core de metadatos.
+      Hecho de items publicados en CIC DIGITAL, construido sobre `fct_dspacedb_item_publication`
     config:
       tags: [cic, dm]
     data_tests:
@@ -18,6 +16,8 @@ models:
         data_tests: [not_null, unique]
       - name: item_id
         description: Identificador legado del item, disponible sólo cuando el dump lo conserva.
+      - name: item_url
+        description: URL canónica del item en la UI de CIC DIGITAL construida como `base_url/items/{item_uuid}/`.
       - name: institution_ror
         data_tests: [not_null]
       - name: owning_collection_title
@@ -27,17 +27,18 @@ models:
               config:
                 severity: warn
       - name: dc_date_available
-        description: Fecha parseada de disponibilidad del item en el repositorio a partir de `dc.date.available`.
-      - name: dc_date_available_raw
         description: Valores crudos observados para `dc.date.available`, concatenados para auditoría.
+        data_tests: [not_null]
       - name: dcterms_issued
-        description: Fecha parseada de publicación del item a partir de `dcterms.issued`.
-      - name: dcterms_issued_raw
         description: Valores crudos observados para `dcterms.issued`, concatenados para auditoría.
+        data_tests: [not_null]
       - name: dc_title
-        description: Valor preferido de `dc.title`.
-      - name: dc_title_raw
         description: Valores crudos observados para `dc.title`, concatenados para auditoría.
+      - name: cic_parent_type
+        description: Valores crudos observados para `cic.parentType`, concatenados para auditoría.
+      - name: dc_type
+        description: Valores crudos observados para `dc.type`, concatenados para auditoría.
+        data_tests: [not_null]
 
   - name: fct_cic_dspacedb_eperson
     description: >

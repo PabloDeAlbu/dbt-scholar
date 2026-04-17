@@ -22,33 +22,30 @@ metadatafield_title AS (
     SELECT
         metadatafield_hk
     FROM {{ ref('fct_dspacedb_item_metadata') }}
-    WHERE short_id = 'dc'
-      AND element = 'title'
-      AND COALESCE(qualifier, '') IN ('', '!UNKNOWN')
+    WHERE metadatafield_fullname = 'dc.title'
     GROUP BY 1
 ),
 
-metadatafield_dates AS (
+metadatafield_type AS (
     SELECT
-        metadatafield_hk,
-        short_id,
-        element,
-        qualifier
+        metadatafield_hk
     FROM {{ ref('fct_dspacedb_item_metadata') }}
-    WHERE (short_id = 'dc' AND element = 'date' AND qualifier = 'available')
-       OR (
-           short_id = 'dcterms'
-           AND element = 'issued'
-           AND COALESCE(qualifier, '') IN ('', '!UNKNOWN')
-       )
-    GROUP BY 1, 2, 3, 4
+    WHERE metadatafield_fullname = 'dc.type'
+    GROUP BY 1
+),
+
+metadatafield_parent_type AS (
+    SELECT
+        metadatafield_hk
+    FROM {{ ref('fct_dspacedb_item_metadata') }}
+    WHERE metadatafield_fullname = 'cic.parentType'
+    GROUP BY 1
 ),
 
 title_agg AS (
     SELECT
         base.item_uuid,
-        MIN(mv.text_value) AS dc_title,
-        STRING_AGG(DISTINCT mv.text_value, '|' ORDER BY mv.text_value) AS dc_title_raw
+        STRING_AGG(DISTINCT mv.text_value, '|' ORDER BY mv.text_value) AS dc_title
     FROM base
     JOIN {{ ref('fct_dspacedb_item_metadata') }} AS mv
         ON base.item_uuid = mv.item_uuid
@@ -59,75 +56,88 @@ title_agg AS (
     GROUP BY base.item_uuid
 ),
 
-raw_dates AS (
+type_agg AS (
     SELECT
         base.item_uuid,
-        md.short_id,
-        md.element,
-        md.qualifier,
-        mv.text_value
+        STRING_AGG(DISTINCT mv.text_value, '|' ORDER BY mv.text_value) AS dc_type
     FROM base
     JOIN {{ ref('fct_dspacedb_item_metadata') }} AS mv
-        ON base.item_hk = mv.item_hk
-    JOIN metadatafield_dates AS md
-        ON mv.metadatafield_hk = md.metadatafield_hk
+        ON base.item_uuid = mv.item_uuid
+    JOIN metadatafield_type AS mft
+        ON mv.metadatafield_hk = mft.metadatafield_hk
     WHERE mv.text_value IS NOT NULL
       AND mv.text_value <> '!UNKNOWN'
+      AND NULLIF(BTRIM(mv.text_value), '') IS NOT NULL
+    GROUP BY base.item_uuid
 ),
 
-parsed_dates AS (
+parent_type_agg AS (
     SELECT
-        item_uuid,
-        short_id,
-        element,
-        qualifier,
-        text_value AS raw_value,
-        {{ str_to_date('text_value') }} AS parsed_date
-    FROM raw_dates
+        base.item_uuid,
+        STRING_AGG(DISTINCT mv.text_value, '|' ORDER BY mv.text_value) AS cic_parent_type
+    FROM base
+    JOIN {{ ref('fct_dspacedb_item_metadata') }} AS mv
+        ON base.item_uuid = mv.item_uuid
+    JOIN metadatafield_parent_type AS mfpt
+        ON mv.metadatafield_hk = mfpt.metadatafield_hk
+    WHERE mv.text_value IS NOT NULL
+      AND mv.text_value <> '!UNKNOWN'
+      AND NULLIF(BTRIM(mv.text_value), '') IS NOT NULL
+    GROUP BY base.item_uuid
 ),
 
-date_available AS (
+date_raw AS (
     SELECT
-        item_uuid,
-        MIN(parsed_date) AS dc_date_available,
-        STRING_AGG(DISTINCT raw_value, '|' ORDER BY raw_value) AS dc_date_available_raw
-    FROM parsed_dates
-    WHERE short_id = 'dc'
-      AND element = 'date'
-      AND qualifier = 'available'
-      AND parsed_date <> DATE '9999-12-31'
-    GROUP BY item_uuid
+        base.item_uuid,
+        mv.metadatafield_fullname,
+        STRING_AGG(DISTINCT mv.text_value, '|' ORDER BY mv.text_value) AS raw_value
+    FROM base
+    JOIN {{ ref('fct_dspacedb_item_metadata') }} AS mv
+        ON base.item_uuid = mv.item_uuid
+       AND base.institution_ror = mv.institution_ror
+    WHERE mv.text_value IS NOT NULL
+      AND mv.text_value <> '!UNKNOWN'
+      AND mv.metadatafield_fullname IN ('dc.date.available', 'dcterms.issued')
+      AND NULLIF(BTRIM(mv.text_value), '') IS NOT NULL
+    GROUP BY base.item_uuid, mv.metadatafield_fullname
 ),
 
-date_issued AS (
+date_available_raw AS (
     SELECT
         item_uuid,
-        MIN(parsed_date) AS dcterms_issued,
-        STRING_AGG(DISTINCT raw_value, '|' ORDER BY raw_value) AS dcterms_issued_raw
-    FROM parsed_dates
-    WHERE short_id = 'dcterms'
-      AND element = 'issued'
-      AND COALESCE(qualifier, '') IN ('', '!UNKNOWN')
-      AND parsed_date <> DATE '9999-12-31'
-    GROUP BY item_uuid
+        raw_value AS dc_date_available
+    FROM date_raw
+    WHERE metadatafield_fullname = 'dc.date.available'
+),
+
+date_issued_raw AS (
+    SELECT
+        item_uuid,
+        raw_value AS dcterms_issued
+    FROM date_raw
+    WHERE metadatafield_fullname = 'dcterms.issued'
 ),
 
 final AS (
     SELECT
         base.*,
+        REGEXP_REPLACE(base.base_url, '/+$', '') || '/items/' || base.item_uuid || '/' AS item_url,
         owning.owning_collection_title,
-        available.dc_date_available,
-        available.dc_date_available_raw,
-        issued.dcterms_issued,
-        issued.dcterms_issued_raw,
+        available_raw.dc_date_available,
+        issued_raw.dcterms_issued,
         title.dc_title,
-        title.dc_title_raw
+        parent_type.cic_parent_type,
+        type.dc_type
     FROM base
     LEFT JOIN owning_collection AS owning
         USING (item_uuid)
-    LEFT JOIN date_available AS available
+    INNER JOIN type_agg AS type
         USING (item_uuid)
-    LEFT JOIN date_issued AS issued
+    LEFT JOIN parent_type_agg AS parent_type
+        USING (item_uuid)
+    LEFT JOIN date_available_raw AS available_raw
+        USING (item_uuid)
+    LEFT JOIN date_issued_raw AS issued_raw
         USING (item_uuid)
     LEFT JOIN title_agg AS title
         USING (item_uuid)
