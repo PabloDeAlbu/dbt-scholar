@@ -9,7 +9,7 @@ models:
       - name: item_hk
         data_tests: [not_null, unique]
       - name: item_id
-        data_tests: [not_null]
+        description: Identificador legado del item cuando el origen dump todavía lo expone.
       - name: load_datetime
         data_tests: [not_null]
 
@@ -57,6 +57,18 @@ models:
       - name: collection_hk
         data_tests: [not_null, unique]
       - name: collection_uuid
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+
+  - name: latest_sat_dspacedb_community
+    description: Estado más reciente de `sat_dspacedb_community`, a grano `community_hk`.
+    config:
+      tags: [dspacedb, dm]
+    columns:
+      - name: community_hk
+        data_tests: [not_null, unique]
+      - name: community_uuid
         data_tests: [not_null]
       - name: load_datetime
         data_tests: [not_null]
@@ -110,6 +122,35 @@ models:
         data_tests: [not_null]
       - name: collection_title
         description: Título o nombre visible de la colección en DSpace.
+      - name: collection_url
+        description: URL canónica de la colección en la UI DSpace.
+      - name: community_uuid
+        description: UUID de la comunidad asociada a la colección.
+      - name: community_title
+        description: Título o nombre visible de la comunidad asociada a la colección.
+      - name: community_url
+        description: URL canónica de la comunidad en la UI DSpace.
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+
+  - name: dim_dspacedb_community
+    description: >
+      Dimensión de communities contextualizadas por repositorio e institución para la rama
+      `dspacedb`. Resuelve `community_title` desde metadatos históricos y usa `base_url +
+      institution_ror` como scope técnico estable.
+    config:
+      tags: [dspacedb, dm]
+    columns:
+      - name: community_hk
+        data_tests: [not_null, unique]
+      - name: community_uuid
+        data_tests: [not_null]
+      - name: community_title
+        description: Título o nombre visible de la comunidad en DSpace.
+      - name: community_url
+        description: URL canónica de la comunidad en la UI DSpace.
       - name: source_label
         data_tests: [not_null]
       - name: institution_ror
@@ -147,13 +188,15 @@ models:
       es `base_url + institution_ror`.
     config:
       tags: [dspacedb, dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_uuid, base_url, institution_ror]
     columns:
       - name: item_id
         description: Identificador legado del item, conservado si existe por compatibilidad.
-        data_tests: [not_null]
       - name: item_uuid
         description: UUID canónico del item en DSpace 7+.
-        data_tests: [not_null, unique]
+        data_tests: [not_null]
       - name: source_label
         data_tests: [not_null]
       - name: institution_ror

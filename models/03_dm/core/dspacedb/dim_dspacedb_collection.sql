@@ -13,6 +13,29 @@ WITH base AS (
         USING (collection_hk)
 ),
 
+collection_community AS (
+    SELECT
+        collection_hk,
+        community_uuid,
+        community_title,
+        community_url
+    FROM (
+        SELECT
+            lnk.collection_hk,
+            com.community_uuid,
+            com.community_title,
+            com.community_url,
+            ROW_NUMBER() OVER (
+                PARTITION BY lnk.collection_hk
+                ORDER BY com.community_title NULLS LAST, com.community_uuid
+            ) AS rn
+        FROM {{ ref('link_dspacedb_community_collection') }} AS lnk
+        INNER JOIN {{ ref('dim_dspacedb_community') }} AS com
+            USING (community_hk)
+    ) ranked
+    WHERE rn = 1
+),
+
 collection_title AS (
     SELECT
         base.collection_hk,
@@ -38,11 +61,17 @@ final AS (
         base.collection_id,
         base.collection_uuid,
         title.collection_title,
+        REGEXP_REPLACE(base.base_url, '/+$', '') || '/collections/' || base.collection_uuid || '/' AS collection_url,
+        com.community_uuid,
+        com.community_title,
+        com.community_url,
         base.base_url,
         base.source_label,
         base.institution_ror
     FROM base
     LEFT JOIN collection_title AS title
+        USING (collection_hk)
+    LEFT JOIN collection_community AS com
         USING (collection_hk)
 )
 

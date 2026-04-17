@@ -2,20 +2,51 @@
 
 WITH base AS (
     SELECT *
-    FROM {{ ref('fct_dspacedb_item_publication') }}
-    WHERE institution_ror = 'https://ror.org/02s7sax82'
+    FROM (
+        SELECT
+            pub.*,
+            ROW_NUMBER() OVER (
+                PARTITION BY pub.item_uuid
+                ORDER BY
+                    pub.last_extract_datetime DESC NULLS LAST,
+                    pub.last_load_datetime DESC NULLS LAST,
+                    pub.first_extract_datetime DESC NULLS LAST,
+                    pub.base_url,
+                    pub.source_label
+            ) AS rn
+        FROM {{ ref('fct_dspacedb_item_publication') }} AS pub
+        WHERE pub.institution_ror = 'https://ror.org/02s7sax82'
+    ) ranked
+    WHERE rn = 1
 ),
 
 owning_collection AS (
     SELECT
-        base.item_uuid,
-        MIN(col.collection_title) AS owning_collection_title
-    FROM base
-    LEFT JOIN {{ ref('dim_dspacedb_collection') }} AS col
-        ON base.owning_collection = col.collection_uuid
-       AND base.base_url = col.base_url
-       AND base.institution_ror = col.institution_ror
-    GROUP BY base.item_uuid
+        item_uuid,
+        owning_collection_uuid,
+        owning_collection_title,
+        owning_collection_url,
+        owning_community_title,
+        owning_community_url
+    FROM (
+        SELECT
+            base.item_uuid,
+            col.collection_uuid AS owning_collection_uuid,
+            col.collection_title AS owning_collection_title,
+            col.collection_url AS owning_collection_url,
+            col.community_title AS owning_community_title,
+            col.community_url AS owning_community_url,
+            ROW_NUMBER() OVER (
+                PARTITION BY base.item_uuid
+                ORDER BY col.collection_title NULLS LAST, col.collection_uuid
+            ) AS rn
+        FROM base
+        LEFT JOIN {{ ref('dim_dspacedb_collection') }} AS col
+            ON base.owning_collection = col.collection_uuid
+           AND base.base_url = col.base_url
+           AND base.institution_ror = col.institution_ror
+    ) ranked
+    WHERE rn = 1
 ),
 
 metadatafield_title AS (
@@ -122,7 +153,10 @@ final AS (
     SELECT
         base.*,
         REGEXP_REPLACE(base.base_url, '/+$', '') || '/items/' || base.item_uuid || '/' AS item_url,
+        owning.owning_collection_url,
         owning.owning_collection_title,
+        owning.owning_community_title,
+        owning.owning_community_url,
         available_raw.dc_date_available,
         issued_raw.dcterms_issued,
         title.dc_title,

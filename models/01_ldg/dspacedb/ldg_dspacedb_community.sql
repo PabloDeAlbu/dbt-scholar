@@ -10,6 +10,7 @@ renamed AS (
         uuid AS community_uuid,
         admin,
         logo_bitstream_id,
+        context.base_url AS _base_url,
         context.source_label AS _source_label,
         context.institution_ror AS _institution_ror,
         context.extract_datetime AS _extract_datetime,
@@ -20,9 +21,10 @@ renamed AS (
 ghost_record AS (
     SELECT
         -1 AS community_id,
-        '!UNKNOWN' AS community_uuid,
-        false AS admin,
-        -1 AS logo_bitstream_id,
+        '00000000-0000-0000-0000-000000000000'::uuid AS community_uuid,
+        '00000000-0000-0000-0000-000000000000'::uuid AS admin,
+        '00000000-0000-0000-0000-000000000000'::uuid AS logo_bitstream_id,
+        '!UNKNOWN' AS _base_url,
         '!UNKNOWN' AS _source_label,
         '!UNKNOWN' AS _institution_ror,
         '1900-01-01'::timestamp AS _extract_datetime,

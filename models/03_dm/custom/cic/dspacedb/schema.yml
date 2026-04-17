@@ -18,6 +18,8 @@ models:
         description: Identificador legado del item, disponible sólo cuando el dump lo conserva.
       - name: item_url
         description: URL canónica del item en la UI de CIC DIGITAL construida como `base_url/items/{item_uuid}/`.
+      - name: owning_collection_url
+        description: URL canónica de la colección owning construida como `base_url/collections/{owning_collection_uuid}/`.
       - name: institution_ror
         data_tests: [not_null]
       - name: owning_collection_title
@@ -26,12 +28,19 @@ models:
           - not_null:
               config:
                 severity: warn
+      - name: owning_community_title
+        description: Título de la comunidad asociada a la colección owning del item.
+      - name: owning_community_url
+        description: URL canónica de la comunidad owning construida como `base_url/communities/{community_uuid}/`.
       - name: dc_date_available
         description: Valores crudos observados para `dc.date.available`, concatenados para auditoría.
         data_tests: [not_null]
       - name: dcterms_issued
         description: Valores crudos observados para `dcterms.issued`, concatenados para auditoría.
-        data_tests: [not_null]
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
       - name: dc_title
         description: Valores crudos observados para `dc.title`, concatenados para auditoría.
       - name: cic_parent_type

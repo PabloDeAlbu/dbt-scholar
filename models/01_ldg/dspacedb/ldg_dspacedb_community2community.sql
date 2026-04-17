@@ -8,6 +8,7 @@ renamed AS (
     SELECT
         parent_comm_id AS parent_comm_uuid,
         child_comm_id AS child_comm_uuid,
+        context.base_url AS _base_url,
         context.source_label AS _source_label,
         context.institution_ror AS _institution_ror,
         context.extract_datetime AS _extract_datetime,
@@ -19,6 +20,7 @@ ghost_record AS (
     SELECT
         -1 AS parent_comm_uuid,
         -1 AS child_comm_uuid,
+        '!UNKNOWN' AS _base_url,
         '!UNKNOWN' AS _source_label,
         '!UNKNOWN' AS _institution_ror,
         '1900-01-01'::timestamp AS _extract_datetime,

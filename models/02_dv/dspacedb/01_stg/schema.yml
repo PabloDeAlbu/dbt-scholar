@@ -20,6 +20,29 @@ models:
       - name: collection_hk
         description: Hash key de la colección contextualizada por repositorio e institución.
 
+  - name: stg_dspacedb_community
+    description: >
+      Staging model para communities DSpace contextualizadas por repositorio e institución.
+    columns:
+      - name: community_bk
+        description: Business key de la comunidad contextualizada por repositorio e institución.
+      - name: community_hk
+        description: Hash key de la comunidad contextualizada por repositorio e institución.
+
+  - name: stg_dspacedb_community2collection
+    description: >
+      Staging model estructural de la relación community-collection para `dspacedb`.
+    columns:
+      - name: community_collection_hk
+        description: Hash key estable de la relación comunidad-colección.
+
+  - name: stg_dspacedb_community2community
+    description: >
+      Staging model estructural de la jerarquía entre communities para `dspacedb`.
+    columns:
+      - name: community_community_hk
+        description: Hash key estable de la relación parent-child entre comunidades.
+
   - name: stg_dspacedb_collection__extract
     description: >
       Staging model de eventos de extracción de collections DSpace. Construye `extract_cdk` para

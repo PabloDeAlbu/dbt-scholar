@@ -17,6 +17,14 @@ models:
       - name: collection_uuid
         description: UUID canónico de la colección en DSpace.
 
+  - name: sat_dspacedb_community
+    description: Satélite histórico de atributos operativos de la comunidad para la rama `dspacedb`.
+    columns:
+      - name: community_hk
+        description: Hash key de la comunidad contextualizada por repositorio e institución.
+      - name: community_uuid
+        description: UUID canónico de la comunidad en DSpace.
+
   - name: sat_dspacedb_collection__extract
     description: >
       Satélite multi-activo de observaciones de extracción por colección contextualizada por
