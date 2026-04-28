@@ -14,7 +14,7 @@ openalex AS (
         work_hk,
         work_id,
         doi 
-    FROM {{ref('dim_openalex_work')}}
+    FROM {{ref('dim_openalex_work_pid')}}
 )
 
 SELECT * 

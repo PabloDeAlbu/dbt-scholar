@@ -1,8 +1,8 @@
 WITH base AS (
     SELECT
-        dim_work.type,
+        work.type,
         COUNT(*) AS works_count
-    FROM {{ ref('dim_openalex_work') }} dim_work
+    FROM {{ ref('fct_openalex_work_publication') }} work
     GROUP BY 1
 ),
 with_totals AS (

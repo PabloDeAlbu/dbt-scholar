@@ -245,24 +245,24 @@ openalex_publication AS (
         pub.work_hk AS entity_hk,
         pub.work_id::text AS entity_id,
         extract.institution_ror::text AS institution_ror,
-        dim_work.publication_date AS publication_date,
+        pub.publication_date AS publication_date,
         COALESCE(
             CASE
-                WHEN dim_work.publication_date IS NOT NULL THEN EXTRACT(YEAR FROM dim_work.publication_date)::integer
+                WHEN pub.publication_date IS NOT NULL THEN EXTRACT(YEAR FROM pub.publication_date)::integer
             END,
             CASE
-                WHEN dim_work.publication_year IS NOT NULL THEN EXTRACT(YEAR FROM dim_work.publication_year)::integer
+                WHEN pub.publication_year IS NOT NULL THEN EXTRACT(YEAR FROM pub.publication_year)::integer
             END
         ) AS publication_year,
-        NULLIF(dim_work.doi, '-')::text AS doi,
-        dim_work.title::text AS title,
-        dim_work.type::text AS publication_type,
+        NULLIF(pid.doi, '-')::text AS doi,
+        pub.title::text AS title,
+        pub.type::text AS publication_type,
         extract.extract_datetime AS extract_datetime,
         sat_work.load_datetime AS load_datetime
     FROM {{ ref('fct_openalex_work_publication') }} pub
-    INNER JOIN {{ ref('dim_openalex_work') }} dim_work
-        USING (work_hk)
     INNER JOIN {{ ref('latest_sat_openalex_work') }} sat_work
+        USING (work_hk)
+    LEFT JOIN {{ ref('dim_openalex_work_pid') }} pid
         USING (work_hk)
     LEFT JOIN openalex_extraction_context AS extract
         ON pub.work_hk = extract.entity_hk

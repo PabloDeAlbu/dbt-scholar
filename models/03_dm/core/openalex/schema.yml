@@ -89,10 +89,10 @@ models:
       - name: display_name
         description: Etiqueta del tópico.
 
-  - name: dim_openalex_work
+  - name: dim_openalex_work_pid
     description: >
-      Dimensión de obras (works) OpenAlex con metadatos bibliográficos esenciales y PIDs normalizados
-      (con placeholders '-' cuando no hay valor).
+      Perfil de PIDs por work OpenAlex, con identificadores normalizados y flags
+      de presencia para cada esquema soportado.
     config:
       tags: [dm]
     data_tests:
@@ -107,20 +107,32 @@ models:
           - relationships:
               to: ref('hub_openalex_work')
               field: work_hk
-      - name: work_id
-        description: Identificador canónico de OpenAlex para la obra.
-        data_tests: [not_null, unique]
       - name: doi
         description: DOI sin prefijo https://doi.org/ o '-' si no hay.
       - name: has_doi
         description: Flag que indica presencia de DOI.
         data_tests: [not_null]
+      - name: mag
+        description: Identificador MAG o '-' si no hay.
+      - name: has_mag
+        description: Flag que indica presencia de MAG.
+        data_tests: [not_null]
+      - name: pmcid
+        description: PMCID o '-' si no hay.
+      - name: has_pmcid
+        description: Flag que indica presencia de PMCID.
+        data_tests: [not_null]
+      - name: pmid
+        description: PMID o '-' si no hay.
+      - name: has_pmid
+        description: Flag que indica presencia de PMID.
+        data_tests: [not_null]
 
   - name: fct_openalex_work_publication
     description: >
-      Hecho de obras de OpenAlex con métricas agregadas (citas, FWCI, percentiles,
-      y costos APC cuando aplica). Complementa a `dim_openalex_work`, que concentra
-      los metadatos bibliográficos y PIDs.
+      Hecho canónico de works OpenAlex a grano `work_hk`, con metadatos
+      bibliográficos del work, señales OA, campos biblio y métricas agregadas
+      (citas, FWCI, percentiles y costos APC cuando aplica).
     config:
       tags: [dm]
     columns:

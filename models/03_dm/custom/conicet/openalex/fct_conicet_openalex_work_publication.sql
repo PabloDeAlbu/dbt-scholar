@@ -32,26 +32,31 @@ base AS (
         conicet_extract.conicet_first_extract_datetime,
         conicet_extract.conicet_last_extract_datetime,
 
-        dim_work.title,
-        dim_work.type,
-        dim_work.publication_year,
-        dim_work.publication_date,
-        dim_work.has_fulltext,
-        dim_work.fulltext_origin,
-        dim_work.is_retracted,
-        dim_work.is_paratext,
-        dim_work.any_repository_has_fulltext,
-        dim_work.is_oa,
-        dim_work.oa_status,
-        dim_work.oa_url,
-        dim_work.doi,
-        dim_work.mag,
-        dim_work.pmcid,
-        dim_work.pmid,
-        dim_work.has_doi,
-        dim_work.has_mag,
-        dim_work.has_pmcid,
-        dim_work.has_pmid,
+        fct.title,
+        fct.type,
+        fct.publication_year,
+        fct.publication_date,
+        fct.language,
+        fct.has_fulltext,
+        fct.fulltext_origin,
+        fct.is_retracted,
+        fct.is_paratext,
+        fct.any_repository_has_fulltext,
+        fct.is_oa,
+        fct.oa_status,
+        fct.oa_url,
+        fct.biblio_first_page,
+        fct.biblio_issue,
+        fct.biblio_last_page,
+        fct.biblio_volume,
+        pid.doi,
+        pid.mag,
+        pid.pmcid,
+        pid.pmid,
+        pid.has_doi,
+        pid.has_mag,
+        pid.has_pmcid,
+        pid.has_pmid,
 
         fct.countries_distinct_count,
         fct.institutions_distinct_count,
@@ -72,7 +77,7 @@ base AS (
         fct.apc_paid_value_usd
     FROM {{ ref('fct_openalex_work_publication') }} fct
     INNER JOIN conicet_extract USING (work_hk)
-    INNER JOIN {{ ref('dim_openalex_work') }} dim_work USING (work_hk)
+    LEFT JOIN {{ ref('dim_openalex_work_pid') }} pid USING (work_hk)
     CROSS JOIN conicet_institution
 )
 
