@@ -1,0 +1,110 @@
+version: 2
+
+models:
+  - name: base_unlp_scholar_audit_candidate
+    description: >
+      Base reusable de publicaciones SEDICI elegibles para auditoría manual de
+      cobertura en Google Scholar. Parte de `fct_unlp_publication` para
+      conservar el grano 1 fila por item IR y reutilizar los enriquecimientos
+      conciliados con OpenAIRE y OpenAlex.
+    config:
+      tags: [viz, unlp]
+
+  - name: int_unlp_scholar_audit_recent_items
+    description: >
+      Escenario de auditoría orientado a publicaciones ingresadas
+      recientemente en SEDICI.
+    config:
+      tags: [viz, unlp]
+
+  - name: int_unlp_scholar_audit_openaire_visible
+    description: >
+      Escenario de auditoría para items con match único contra OpenAIRE por
+      `original_id`.
+    config:
+      tags: [viz, unlp]
+
+  - name: int_unlp_scholar_audit_openalex_doi_visible
+    description: >
+      Escenario de auditoría para items con DOI y match único contra OpenAlex.
+    config:
+      tags: [viz, unlp]
+
+  - name: int_unlp_scholar_audit_high_value_no_pid
+    description: >
+      Escenario de auditoría para items sin DOI pero con handle institucional,
+      útiles para observar cobertura con metadatos más débiles.
+    config:
+      tags: [viz, unlp]
+
+  - name: int_unlp_scholar_audit_legacy_backfile
+    description: >
+      Escenario de auditoría para backfile histórico de SEDICI con más de cinco
+      años desde la fecha de accession.
+    config:
+      tags: [viz, unlp]
+
+  - name: viz_unlp_scholar_audit_queue_candidate
+    description: >
+      Cola candidata de items UNLP para auditoría manual de cobertura en Google
+      Scholar. El modelo arma cinco escenarios de muestreo y devuelve hasta 10
+      items por escenario para alimentar un seed o una planilla operativa.
+    config:
+      tags: [viz, unlp]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [audit_scenario, selection_order]
+    columns:
+      - name: audit_scenario
+        description: Estrato de muestreo usado para priorizar la auditoría manual.
+        data_tests: [not_null]
+      - name: cohort_rule
+        description: Regla textual resumida que explica por qué el item cayó en el escenario.
+        data_tests: [not_null]
+      - name: selection_order
+        description: Orden de selección dentro del escenario; el modelo conserva hasta 10 filas por escenario.
+        data_tests: [not_null]
+      - name: item_hk
+        description: Clave hash del item institucional.
+        data_tests: [not_null]
+      - name: item_id
+        description: ID original del item en DSpace 5.
+        data_tests: [not_null]
+      - name: institutional_uri
+        description: URI/handle institucional del item usada luego para la observación manual.
+        data_tests: [not_null]
+      - name: title
+        description: Título principal del item en SEDICI.
+        data_tests: [not_null]
+      - name: publication_year
+        description: Año derivado de `date_issued` cuando existe.
+      - name: publication_type
+        description: Valor declarado en `dc.type`.
+      - name: date_issued
+        description: Fecha declarada de publicación del item.
+      - name: date_accessioned
+        description: Fecha de alta del item en el repositorio.
+      - name: author_count
+        description: Cantidad de autores distintos detectados para el item.
+      - name: has_doi
+        description: Flag que indica si el item declara al menos un DOI normalizado.
+      - name: doi_count
+        description: Cantidad de DOI normalizados detectados.
+      - name: doi
+        description: DOI normalizados del item concatenados con `|`.
+      - name: has_handle
+        description: Flag que indica si el item expone al menos un handle normalizado.
+      - name: handle_count
+        description: Cantidad de handles normalizados detectados.
+      - name: handle
+        description: Handles normalizados del item concatenados con `|`.
+      - name: matched_by_unique_doi
+        description: Señal auxiliar tomada de `fct_unlp_publication` para identificar items visibles en OpenAlex por DOI.
+      - name: matched_by_unique_original_id
+        description: Señal auxiliar tomada de `fct_unlp_publication` para identificar items visibles en OpenAIRE.
+      - name: owning_collection_title
+        description: Título de la colección dueña del item.
+      - name: owning_community_title
+        description: Título de la comunidad inmediata de la colección dueña.
+      - name: owning_root_community_title
+        description: Título de la comunidad raíz de la rama dueña del item.
