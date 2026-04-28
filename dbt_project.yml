@@ -164,6 +164,22 @@ models:
         unlp:
           +schema: unlp
           +tags: [unlp]
+          00_base:
+            +schema: unlp_base
+          conicet_center_candidate:
+            +schema: unlp_conicet_center_candidate
+          dspace5db:
+            +schema: unlp_dspace5db
+          legacy:
+            +schema: unlp_legacy
+          openaire:
+            +schema: unlp_openaire
+          sedici:
+            +schema: unlp_sedici
+          sedici_openalex:
+            +schema: unlp_sedici_openalex
+          sedici_scholar_coverage:
+            +schema: unlp_sedici_scholar_coverage
 seeds:
   dbt_scholar:
     coar:
@@ -199,9 +215,6 @@ seeds:
           batch_name: text
           mapfile_item_key: text
           sedici_item_id: integer
-    oai:
-      +schema: oai
-      +tags: [oai]
 
 data_tests:
   +store_failures: true

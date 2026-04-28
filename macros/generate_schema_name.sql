@@ -11,7 +11,7 @@
   {%- elif path.startswith('models/03_dm/') -%}
     dm_{{ trimmed_name }}
   {%- elif path.startswith('models/04_viz/') -%}
-    dm_{{ trimmed_name }}
+    viz_{{ trimmed_name }}
   {%- elif path.startswith('models/sources/') -%}
     dv_{{ trimmed_name }}
   {%- elif path.startswith('models/marts/') and trimmed_name != '' -%}
