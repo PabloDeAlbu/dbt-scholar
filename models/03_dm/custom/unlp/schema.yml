@@ -1,45 +1,6 @@
 version: 2
 
 models:
-  - name: fct_unlp_conicet_publication_candidate
-    description: >
-      Hecho operativo a grano publicación CONICET por centro/set UNLP-CONICET
-      relevado manualmente. Parte de `fct_conicet_publication`, restringe a los
-      `setSpec` mapeados a centros UNLP-CONICET y agrega contexto operativo para
-      screening, incluyendo disponibilidad en acceso abierto.
-    config:
-      tags: [unlp, dm]
-    data_tests:
-      - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [record_hk, set_spec]
-    columns:
-      - name: record_hk
-        description: Clave hash del registro OAI de CONICET evaluado como candidato.
-        data_tests:
-          - not_null
-          - relationships:
-              to: ref('fct_conicet_publication')
-              field: record_hk
-      - name: record_id
-        description: Identificador OAI-PMH del registro CONICET.
-        data_tests: [not_null]
-      - name: set_spec
-        description: >
-          `setSpec` del centro CONICET-UNLP usado como eje operativo.
-        data_tests: [not_null]
-      - name: set_name
-        description: Nombre del centro/comunidad relevado manualmente.
-        data_tests: [not_null]
-      - name: sedici_collection_uri
-        description: Handle/URI de la comunidad o colección objetivo en SEDICI.
-        data_tests: [not_null]
-      - name: is_in_unlp_conicet_center
-        description: Flag afirmativo que indica pertenencia al universo manualmente relevado de centros CONICET-UNLP.
-        data_tests: [not_null]
-      - name: is_open_access_candidate
-        description: Flag que indica disponibilidad en acceso abierto según OAI y/o OpenAIRE.
-        data_tests: [not_null]
-
   - name: fct_unlp_publication
     description: >
       Hecho institucional principal de publicaciones UNLP, basado en
@@ -49,6 +10,11 @@ models:
       publicaciones del IR y no un universo deduplicado general entre todas las fuentes.
     config:
       tags: [unlp, dm]
+    data_tests:
+      - dbt_utils.equal_rowcount:
+          compare_model: ref('fct_unlp_ir_item_publication')
+          config:
+            where: "discoverable = true and in_archive = true and withdrawn = false"
     columns:
       - name: publication_hk
         description: Identificador técnico de la publicación institucional, alineado al `item_hk` del IR.
@@ -65,24 +31,91 @@ models:
         description: ID original del ítem en DSpace 5.
         data_tests: [not_null]
       - name: source_system
-        description: Sistema fuente base del hecho institucional.
+        description: Sistema fuente base del hecho institucional; en este modelo vale `ir`.
+        data_tests: [not_null]
+      - name: source_label
+        description: Etiqueta técnica de la fuente de extracción del repositorio.
+        data_tests: [not_null]
+      - name: institution_ror
+        description: ROR institucional usado para definir el subconjunto UNLP del repositorio.
         data_tests: [not_null]
       - name: institutional_uri
         description: URI institucional de citación del ítem en el repositorio.
         data_tests: [not_null]
+      - name: dc_identifier_uri_raw
+        description: Valores crudos observados para `dc.identifier.uri` concatenados para auditoría.
       - name: publication_date
         description: Fecha de publicación declarada en el IR.
       - name: publication_year
         description: Año derivado de `publication_date` cuando existe.
+      - name: date_accessioned
+        description: Fecha de alta del ítem en el repositorio institucional.
       - name: title
         description: Título principal de la publicación en el IR.
+      - name: subtitle
+        description: Títulos alternativos o subtítulos concatenados con `|`.
       - name: publication_type
         description: Tipología declarada para la publicación en el IR.
+      - name: description
+        description: Descripciones o abstracts concatenados con `|`.
+      - name: subject
+        description: Subjects declarados para la publicación, concatenados con `|`.
+      - name: subtype
+        description: Subtipos SEDICI concatenados con `|`.
+      - name: author
+        description: Autores declarados en el IR, concatenados con `|`.
+      - name: author_count
+        description: Cantidad de autores distintos detectados para la publicación.
+        data_tests: [not_null]
+      - name: issn
+        description: ISSN declarados para la publicación, concatenados con `|`.
+      - name: isbn
+        description: ISBN declarados para la publicación, concatenados con `|`.
       - name: has_doi
         description: Flag que indica si el ítem tiene al menos un DOI normalizado.
         data_tests: [not_null]
+      - name: doi_count
+        description: Cantidad de DOI normalizados detectados en los metadatos del IR.
+        data_tests: [not_null]
       - name: doi
         description: DOI normalizados declarados en el IR, concatenados con `|`.
+      - name: has_handle
+        description: Flag que indica si el ítem tiene al menos un handle normalizado.
+        data_tests: [not_null]
+      - name: handle_count
+        description: Cantidad de handles normalizados detectados en los metadatos del IR.
+        data_tests: [not_null]
+      - name: handle
+        description: Handles normalizados declarados en el IR, concatenados con `|`.
+      - name: owningcollection_hk
+        description: Hash key de la colección dueña del ítem dentro del scope institucional.
+      - name: owning_collection_title
+        description: Título preferido de la colección dueña.
+      - name: owning_community_hk
+        description: Hash key de la comunidad inmediata de la colección dueña.
+      - name: owning_community_id
+        description: Identificador original de la comunidad inmediata de la colección dueña.
+      - name: owning_community_title
+        description: Título preferido de la comunidad inmediata de la colección dueña.
+      - name: owning_root_community_hk
+        description: Hash key de la comunidad raíz de la rama de la colección dueña.
+      - name: owning_root_community_id
+        description: Identificador original de la comunidad raíz de la rama de la colección dueña.
+      - name: owning_root_community_title
+        description: Título preferido de la comunidad raíz de la rama de la colección dueña.
+      - name: owning_community_path_ids
+        description: Camino jerárquico de IDs desde la raíz hasta la comunidad dueña.
+      - name: owning_community_path_titles
+        description: Camino jerárquico de títulos desde la raíz hasta la comunidad dueña.
+      - name: discoverable
+        description: Flag operativo heredado de DSpace 5 que indica si el ítem es descubrible.
+        data_tests: [not_null]
+      - name: in_archive
+        description: Flag operativo heredado de DSpace 5 que indica si el ítem está archivado.
+        data_tests: [not_null]
+      - name: withdrawn
+        description: Flag operativo heredado de DSpace 5 que indica si el ítem fue retirado.
+        data_tests: [not_null]
       - name: matched_by_unique_doi
         description: Indica si la publicación fue enriquecida por un match DOI exacto y único contra OpenAlex.
         data_tests: [not_null]
@@ -92,6 +125,34 @@ models:
         description: Clave hash del work OpenAlex enlazado por DOI único, cuando existe.
       - name: openalex_work_id
         description: Identificador canónico del work OpenAlex enlazado, cuando existe.
+      - name: openalex_publication_date
+        description: Fecha de publicación informada por OpenAlex para el work enlazado.
+      - name: openalex_publication_year
+        description: Año de publicación informado por OpenAlex para el work enlazado.
+      - name: openalex_type
+        description: Tipología de OpenAlex del work enlazado.
+      - name: openalex_title
+        description: Título de OpenAlex del work enlazado.
+      - name: openalex_institution_ror
+        description: ROR institucional asociado al extracto UNLP de OpenAlex.
+      - name: openalex_first_extract_datetime
+        description: Primera fecha-hora en que el work enlazado fue observado en el extracto UNLP de OpenAlex.
+      - name: openalex_last_extract_datetime
+        description: Última fecha-hora en que el work enlazado fue observado en el extracto UNLP de OpenAlex.
+      - name: openalex_is_oa
+        description: Flag de acceso abierto informado por OpenAlex.
+      - name: openalex_oa_status
+        description: Estado OA informado por OpenAlex.
+      - name: openalex_oa_url
+        description: URL OA preferida informada por OpenAlex.
+      - name: openalex_has_fulltext
+        description: Flag que indica disponibilidad de full text según OpenAlex.
+      - name: openalex_fulltext_origin
+        description: Origen del full text según OpenAlex.
+      - name: openalex_cited_by_count
+        description: Cantidad de citas recibidas según OpenAlex.
+      - name: openalex_fwci
+        description: Field-Weighted Citation Impact informado por OpenAlex.
       - name: matched_by_unique_original_id
         description: Indica si la publicación fue enriquecida por un match de identificador original contra OpenAIRE.
         data_tests: [not_null]
@@ -107,6 +168,96 @@ models:
                 where: "openaire_researchproduct_hk is not null"
       - name: openaire_researchproduct_id
         description: Identificador canónico del research product OpenAIRE enlazado, cuando existe.
+      - name: openaire_first_extract_datetime
+        description: Primera fecha-hora en que el research product enlazado fue observado en el extracto UNLP de OpenAIRE.
+      - name: openaire_last_extract_datetime
+        description: Última fecha-hora en que el research product enlazado fue observado en el extracto UNLP de OpenAIRE.
+      - name: openaire_organization_ror
+        description: ROR organizacional asociado al registro OpenAIRE enlazado.
+      - name: openaire_publication_date
+        description: Fecha de publicación informada por OpenAIRE.
+      - name: openaire_type
+        description: Tipología informada por OpenAIRE.
+      - name: openaire_title
+        description: Título principal informado por OpenAIRE.
+      - name: openaire_publisher
+        description: Publisher informado por OpenAIRE.
+      - name: openaire_access_right
+        description: Mejor acceso declarado por OpenAIRE para el registro enlazado.
+      - name: openaire_access_right_uri
+        description: URI del mejor acceso declarado por OpenAIRE.
+      - name: openaire_is_green
+        description: Flag que indica si OpenAIRE clasifica el registro como green OA.
+      - name: openaire_is_in_diamond_journal
+        description: Flag que indica si OpenAIRE lo clasifica dentro de una revista diamond.
+      - name: openaire_downloads
+        description: Descargas informadas por OpenAIRE.
+      - name: openaire_views
+        description: Vistas informadas por OpenAIRE.
+      - name: openaire_citation_class
+        description: Clase de citación calculada por OpenAIRE.
+      - name: openaire_citation_count
+        description: Cantidad de citas informada por OpenAIRE.
+      - name: openaire_impulse
+        description: Métrica `impulse` informada por OpenAIRE.
+      - name: openaire_impulse_class
+        description: Clase de `impulse` informada por OpenAIRE.
+      - name: openaire_influence
+        description: Métrica `influence` informada por OpenAIRE.
+      - name: openaire_influence_class
+        description: Clase de `influence` informada por OpenAIRE.
+      - name: openaire_popularity
+        description: Métrica `popularity` informada por OpenAIRE.
+      - name: openaire_popularity_class
+        description: Clase de `popularity` informada por OpenAIRE.
+      - name: openaire_has_arxiv
+        description: Flag que indica presencia de identificadores arXiv en OpenAIRE.
+      - name: openaire_has_single_arxiv
+        description: Flag que indica unicidad de identificador arXiv en OpenAIRE.
+      - name: openaire_arxiv_count
+        description: Cantidad de identificadores arXiv observados en OpenAIRE.
+      - name: openaire_has_doi
+        description: Flag que indica presencia de DOI en OpenAIRE.
+      - name: openaire_has_single_doi
+        description: Flag que indica unicidad de DOI en OpenAIRE.
+      - name: openaire_doi_count
+        description: Cantidad de DOI observados en OpenAIRE.
+      - name: openaire_has_handle
+        description: Flag que indica presencia de handle en OpenAIRE.
+      - name: openaire_has_single_handle
+        description: Flag que indica unicidad de handle en OpenAIRE.
+      - name: openaire_handle_count
+        description: Cantidad de handles observados en OpenAIRE.
+      - name: openaire_has_mag
+        description: Flag que indica presencia de identificadores MAG en OpenAIRE.
+      - name: openaire_has_single_mag
+        description: Flag que indica unicidad de identificadores MAG en OpenAIRE.
+      - name: openaire_mag_count
+        description: Cantidad de identificadores MAG observados en OpenAIRE.
+      - name: openaire_has_pmb
+        description: Flag que indica presencia de identificadores PMB en OpenAIRE.
+      - name: openaire_has_single_pmb
+        description: Flag que indica unicidad de identificadores PMB en OpenAIRE.
+      - name: openaire_pmb_count
+        description: Cantidad de identificadores PMB observados en OpenAIRE.
+      - name: openaire_has_pmc
+        description: Flag que indica presencia de identificadores PMC en OpenAIRE.
+      - name: openaire_has_single_pmc
+        description: Flag que indica unicidad de identificadores PMC en OpenAIRE.
+      - name: openaire_pmc_count
+        description: Cantidad de identificadores PMC observados en OpenAIRE.
+      - name: openaire_has_pmid
+        description: Flag que indica presencia de PMID en OpenAIRE.
+      - name: openaire_has_single_pmid
+        description: Flag que indica unicidad de PMID en OpenAIRE.
+      - name: openaire_pmid_count
+        description: Cantidad de PMID observados en OpenAIRE.
+      - name: openaire_has_sdg
+        description: Flag que indica presencia de SDGs asociados en OpenAIRE.
+      - name: openaire_sdg_count
+        description: Cantidad de SDGs asociados en OpenAIRE.
+      - name: openaire_sdg_values
+        description: Valores SDG asociados al registro enlazado en OpenAIRE.
 
   - name: brg_unlp_publication_originalid
     description: >
