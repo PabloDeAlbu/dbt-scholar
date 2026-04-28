@@ -1,0 +1,80 @@
+version: 2
+
+models:
+  - name: viz_unlp_conicet_publication_candidate
+    description: >
+      Dataset operativo a grano publicación CONICET por centro/set UNLP-CONICET
+      relevado manualmente. Parte de `fct_conicet_publication`, restringe a los
+      `setSpec` mapeados a centros UNLP-CONICET y agrega contexto operativo para
+      screening, incluyendo disponibilidad en acceso abierto.
+    config:
+      tags: [viz, unlp]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [record_hk, set_spec]
+    columns:
+      - name: record_hk
+        description: Clave hash del registro OAI de CONICET evaluado como candidato.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('fct_conicet_publication')
+              field: record_hk
+      - name: record_id
+        description: Identificador OAI-PMH del registro CONICET.
+        data_tests: [not_null]
+      - name: set_spec
+        description: >
+          `setSpec` del centro CONICET-UNLP usado como eje operativo.
+        data_tests: [not_null]
+      - name: set_name
+        description: Nombre del centro/comunidad relevado manualmente.
+        data_tests: [not_null]
+      - name: sedici_collection_uri
+        description: Handle/URI de la comunidad o colección objetivo en SEDICI.
+        data_tests: [not_null]
+      - name: is_in_unlp_conicet_center
+        description: Flag afirmativo que indica pertenencia al universo manualmente relevado de centros CONICET-UNLP.
+        data_tests: [not_null]
+      - name: is_open_access_candidate
+        description: Flag que indica disponibilidad en acceso abierto según OAI y/o OpenAIRE.
+        data_tests: [not_null]
+
+  - name: viz_unlp_conicet_center_candidate_summary
+    description: >
+      Resumen agregado por centro/comunidad CONICET-UNLP para priorizar screening
+      de publicaciones candidatas. Se apoya en `viz_unlp_conicet_publication_candidate`
+      y expone volumen total, volumen en acceso abierto y rango temporal observado.
+    config:
+      tags: [viz, unlp]
+    columns:
+      - name: set_spec
+        description: >
+          `setSpec` OAI-PMH del centro CONICET-UNLP.
+        data_tests:
+          - not_null
+          - unique
+      - name: set_name
+        description: Nombre descriptivo del centro/comunidad.
+        data_tests: [not_null]
+      - name: sedici_collection_uri
+        description: Handle/URI de la comunidad o colección objetivo en SEDICI.
+        data_tests: [not_null]
+      - name: resource_count
+        description: Cantidad total de publicaciones observadas en el centro.
+        data_tests: [not_null]
+      - name: open_access_count
+        description: Cantidad de publicaciones marcadas como candidatas en acceso abierto.
+        data_tests: [not_null]
+      - name: open_access_ratio_pct
+        description: Porcentaje de publicaciones OA sobre el total del centro.
+      - name: first_publication_year
+        description: Primer año de publicación observado para el centro.
+      - name: last_publication_year
+        description: Último año de publicación observado para el centro.
+      - name: calculated_sedici_publication_count
+        description: >
+          Cantidad de publicaciones actualmente observadas en SEDICI para la
+          comunidad objetivo, calculada automáticamente desde el árbol de
+          comunidades del IR UNLP.
+        data_tests: [not_null]

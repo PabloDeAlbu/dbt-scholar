@@ -8,7 +8,7 @@ WITH base AS (
         is_open_access_candidate,
         pdf_share_pct,
         sedici_article_count
-    FROM {{ ref('fct_unlp_conicet_publication_candidate') }}
+    FROM {{ ref('viz_unlp_conicet_publication_candidate') }}
 ),
 
 sedici_center_handle AS (
