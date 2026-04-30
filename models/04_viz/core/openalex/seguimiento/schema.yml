@@ -1,0 +1,60 @@
+version: 2
+
+models:
+  - name: viz_openalex_work_extraction_seguimiento
+    description: >
+      Vista analítica de seguimiento de extracciones OpenAlex a nivel evento-work,
+      enriquecida con título y año de publicación para inspección operativa.
+    config:
+      tags: [viz]
+    columns:
+      - name: extract_cdk
+        description: Identificador único del evento de extracción.
+        data_tests: [not_null, unique]
+      - name: work_hk
+        description: Clave hash del work extraído.
+        data_tests: [not_null]
+      - name: work_id
+        description: Identificador canónico del work en OpenAlex.
+        data_tests: [not_null]
+      - name: _filter_param
+        description: Parámetro de filtro aplicado a la extracción.
+      - name: _filter_value
+        description: Valor del filtro aplicado a la extracción.
+      - name: _filter_value_label
+        description: Label descriptivo del filtro cuando aplica.
+      - name: extract_datetime
+        description: Timestamp lógico de extracción.
+        data_tests: [not_null]
+      - name: load_datetime
+        description: Timestamp técnico de carga del evento.
+        data_tests: [not_null]
+
+  - name: viz_openalex_work_extraction_resumen
+    description: >
+      Resumen diario por filtro de las extracciones OpenAlex, útil para monitoreo
+      del universo recuperado y rango temporal de publicación.
+    config:
+      tags: [viz]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [_filter_param, _filter_value, extract_date]
+    columns:
+      - name: _filter_param
+        description: Parámetro de filtro aplicado.
+        data_tests: [not_null]
+      - name: _filter_value
+        description: Valor técnico del filtro aplicado.
+        data_tests: [not_null]
+      - name: filter_label
+        description: Label legible del filtro o fallback al valor técnico.
+        data_tests: [not_null]
+      - name: extract_date
+        description: Fecha calendario de la extracción.
+        data_tests: [not_null]
+      - name: works_count
+        description: Cantidad de eventos de extracción observados.
+        data_tests: [not_null]
+      - name: distinct_works_count
+        description: Cantidad de works distintos extraídos.
+        data_tests: [not_null]

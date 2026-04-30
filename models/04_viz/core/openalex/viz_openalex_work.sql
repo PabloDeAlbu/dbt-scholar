@@ -19,14 +19,14 @@ WITH base AS (
         fct.biblio_issue,
         fct.biblio_last_page,
         fct.biblio_volume,
-        pid.doi,
-        pid.mag,
-        pid.pmcid,
-        pid.pmid,
-        pid.has_doi,
-        pid.has_mag,
-        pid.has_pmcid,
-        pid.has_pmid,
+        fct.doi,
+        fct.mag,
+        fct.pmcid,
+        fct.pmid,
+        fct.has_doi,
+        fct.has_mag,
+        fct.has_pmcid,
+        fct.has_pmid,
         fct.countries_distinct_count,
         fct.institutions_distinct_count,
         fct.fwci,
@@ -45,7 +45,6 @@ WITH base AS (
         fct.apc_paid_value,
         fct.apc_paid_value_usd
     FROM {{ ref('fct_openalex_work_publication') }} fct
-    LEFT JOIN {{ ref('dim_openalex_work_pid') }} pid USING (work_hk)
 )
 
 SELECT * FROM base
