@@ -1,10 +1,11 @@
 version: 2
 
 models:
-  - name: fct_cic_openalex_work
+  - name: fct_cic_openalex_work_publication
     description: >
-      Subconjunto institucional CIC del hecho de obras de OpenAlex, definido por la
-      extracción del subconjunto institucional con el filtro `institutions.ror = https://ror.org/02s7sax82`.
+      Subconjunto institucional CIC del hecho de publications de OpenAlex,
+      definido por el subconjunto extraído con el filtro
+      `institutions.ror = https://ror.org/02s7sax82`.
     config:
       tags: [cic, dm]
     data_tests:

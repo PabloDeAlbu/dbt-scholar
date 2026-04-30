@@ -149,6 +149,36 @@ models:
           - relationships:
               to: ref('hub_openalex_work')
               field: work_hk
+      - name: source_display_name
+        description: Source principal tomado de `primary_location.source.display_name`.
+      - name: issn
+        description: ISSN-L del source principal tomado de `primary_location.source.issn_l`.
+      - name: pages
+        description: Páginas del work derivadas de `biblio.first_page` y `biblio.last_page`.
+      - name: language
+        description: Idioma informado por OpenAlex para el work.
+      - name: license
+        description: Licencia tomada de `primary_location.license`.
+      - name: topics
+        description: Topics OpenAlex agregados para el work y concatenados con `|`.
+      - name: authors
+        description: Autores OpenAlex agregados para el work y concatenados con `|`.
+      - name: doi
+        description: DOI normalizado del work o `null` si no está disponible.
+      - name: has_doi
+        description: Flag que indica presencia de DOI.
+      - name: mag
+        description: Identificador MAG del work o `null` si no está disponible.
+      - name: has_mag
+        description: Flag que indica presencia de MAG.
+      - name: pmcid
+        description: PMCID del work o `null` si no está disponible.
+      - name: has_pmcid
+        description: Flag que indica presencia de PMCID.
+      - name: pmid
+        description: PMID del work o `null` si no está disponible.
+      - name: has_pmid
+        description: Flag que indica presencia de PMID.
       - name: cited_by_count
         description: Cantidad de citas según OpenAlex.
       - name: fwci
@@ -222,3 +252,23 @@ models:
         data_tests: [not_null]
       - name: primarytopic_score
         description: Score de asignación del tópico primario.
+
+  - name: brg_openalex_work_primarylocation
+    description: >
+      Bridge obra–source principal (`primary_location`) con atributos propios de
+      esa relación, incluyendo licencia e identificadores del source principal.
+    config:
+      tags: [dm]
+    columns:
+      - name: work_hk
+        data_tests: [not_null, unique]
+      - name: source_hk
+        data_tests: [not_null]
+      - name: source_display_name
+        description: Nombre del source asociado a `primary_location`.
+      - name: source_issn_l
+        description: ISSN-L del source asociado a `primary_location`.
+      - name: license
+        description: Licencia informada en `primary_location`.
+      - name: license_id
+        description: Identificador de licencia informado en `primary_location`.
