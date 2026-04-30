@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: viz_unlp_sedici_openalex_dedup_csv1
+    description: >
+      Export tabular de OpenAlex (subconjunto UNLP) en formato compatible con el
+      primer CSV del flujo de deduplicación de Sedici.
+    config:
+      tags: [viz]
+    columns:
+      - name: id
+        description: Identificador canónico del work en OpenAlex.
+        data_tests: [not_null]
+      - name: title
+        description: Título principal del work.
+      - name: author
+        description: Autores agregados del work.
+      - name: date
+        description: Fecha de publicación textual o año cuando no hay fecha completa.
+      - name: doi
+        description: DOI del work cuando está disponible.
+      - name: type
+        description: Tipo de work informado por OpenAlex.
+
+  - name: viz_unlp_sedici_openalex_dedup_csv2
+    description: >
+      Export tabular de ítems SEDICI/IR UNLP en formato compatible con el segundo
+      CSV del flujo de deduplicación contra OpenAlex.
+    config:
+      tags: [viz]
+    columns:
+      - name: id
+        description: URI institucional principal (`dc.identifier.uri`) del ítem en SEDICI.
+        data_tests: [not_null]
+      - name: date
+        description: Fecha emitida textual del ítem cuando está disponible.
+      - name: subject
+        description: Subjects agregados del ítem.
+      - name: author
+        description: Autores agregados del ítem.
+      - name: doi
+        description: DOI agregado del ítem cuando está disponible.
+      - name: doi_
+        description: DOI expandido a URL, conservando multiplicidad separada por `|`.
+      - name: handle
+        description: Handle/URI institucional principal del ítem en SEDICI.
+      - name: citation
+        description: Reservado para cita textual; actualmente se exporta `null`.
