@@ -40,3 +40,33 @@ models:
       - name: work_count
         description: Distinct works extracted from OpenAlex for the timestamp and institution.
         data_tests: [not_null]
+
+  - name: fct_openalex_work_author_coverage_fby_instsror
+    description: >
+      Audit view by `institutions.ror`, aggregated at extraction timestamp and
+      institution level to measure author-link coverage over the extracted
+      OpenAlex work universe. This makes visible when `brg_openalex_work_author`
+      is materially less complete than `fct_openalex_work_extraction`.
+    config:
+      tags: [audit, openalex]
+    columns:
+      - name: extract_datetime
+        data_tests: [not_null]
+      - name: institution_id
+        description: Canonical OpenAlex institution identifier.
+      - name: institution_ror
+        description: ROR used by the extraction method to retrieve data from OpenAlex.
+        data_tests: [not_null]
+      - name: institution_display_name
+        description: Institution display name.
+      - name: extracted_work_count
+        description: Distinct works extracted from OpenAlex for the timestamp and institution.
+        data_tests: [not_null]
+      - name: work_with_authors_count
+        description: Distinct extracted works that have at least one link in `brg_openalex_work_author`.
+        data_tests: [not_null]
+      - name: work_without_authors_count
+        description: Distinct extracted works that have no links in `brg_openalex_work_author`.
+        data_tests: [not_null]
+      - name: author_coverage_ratio
+        description: Share of extracted works with at least one linked author.

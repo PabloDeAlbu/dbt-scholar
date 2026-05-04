@@ -11,16 +11,17 @@ WITH base AS (
         doi,
         type
     FROM {{ ref('fct_unlp_openalex_work_publication') }}
+    WHERE EXTRACT(YEAR FROM publication_year) = 2026
 )
 
 SELECT
     base.title,
     base.work_id AS id,
     base.authors AS author,
+    base.publication_date,
     CASE
-        WHEN base.publication_date IS NOT NULL THEN base.publication_date::text
         WHEN base.publication_year IS NOT NULL THEN EXTRACT(YEAR FROM base.publication_year)::int::text
-    END AS date,
+    END AS publication_year,
     base.doi,
     base.type
 FROM base

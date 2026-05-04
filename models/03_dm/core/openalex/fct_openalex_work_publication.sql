@@ -5,14 +5,31 @@ WITH latest_sat_work AS (
 
 author AS (
     SELECT
-        brg.work_hk,
+        author_name.work_hk,
         STRING_AGG(
-            DISTINCT dim_author.display_name::text,
-            '|' ORDER BY dim_author.display_name::text
+            author_name.display_name::text,
+            '|' ORDER BY author_name.author_position_sort_key, author_name.display_name::text
         ) AS authors
-    FROM {{ ref('brg_openalex_work_author') }} brg
-    INNER JOIN {{ ref('dim_openalex_author') }} dim_author USING (author_hk)
-    GROUP BY brg.work_hk
+    FROM (
+        SELECT DISTINCT
+            brg.work_hk,
+            COALESCE(
+                brg.canonical_display_name,
+                brg.fallback_display_name
+            ) AS display_name,
+            CASE brg.author_position
+                WHEN 'first' THEN 1
+                WHEN 'middle' THEN 2
+                WHEN 'last' THEN 3
+                ELSE 4
+            END AS author_position_sort_key
+        FROM {{ ref('brg_openalex_work_author_enriched') }} brg
+        WHERE COALESCE(
+            brg.canonical_display_name,
+            brg.fallback_display_name
+        ) IS NOT NULL
+    ) author_name
+    GROUP BY author_name.work_hk
 ),
 
 topic AS (
