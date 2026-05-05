@@ -185,7 +185,7 @@ author AS (
     JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
       ON mv.item_id = b.item_id
      AND mv.institution_ror = b.institution_ror
-    WHERE mv.metadatafield_fullname = 'sedici.creator.person'
+    WHERE mv.metadatafield_fullname = 'sedici.creator.person' OR mv.metadatafield_fullname = 'sedici.creator.corporate'
     GROUP BY b.item_hk
 ),
 
