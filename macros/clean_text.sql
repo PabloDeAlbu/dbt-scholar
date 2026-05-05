@@ -1,19 +1,22 @@
 {% macro clean_text(field) %}
-TRIM(
-    REGEXP_REPLACE(
-        REPLACE(
+COALESCE(
+    TRIM(
+        REGEXP_REPLACE(
             REPLACE(
                 REPLACE(
-                    REPLACE({{ field }}, chr(8232), ' '),
-                    chr(8233), ' '
+                    REPLACE(
+                        REPLACE({{ field }}::text, chr(8232), ' '),
+                        chr(8233), ' '
+                    ),
+                    chr(160), ' '
                 ),
-                chr(160), ' '
+                chr(65279), ''
             ),
-            chr(65279), ''
-        ),
-        '\s+',
-        ' ',
-        'g'
-    )
+            '\s+',
+            ' ',
+            'g'
+        )
+    ),
+    ''
 )
 {% endmacro %}
