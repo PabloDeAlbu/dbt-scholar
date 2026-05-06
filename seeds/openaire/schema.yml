@@ -1,0 +1,17 @@
+version: 2
+
+seeds:
+  - name: seed_openaire_researchproduct_type
+    description: >
+      Vocabulario versionado de `ResearchProduct.type` en OpenAIRE.
+      Sigue `dnet:result_typologies` y agrega un registro técnico `!UNKNOWN`
+      para conservar compatibilidad con el ghost record del landing.
+    columns:
+      - name: type
+        data_tests: [not_null, unique]
+      - name: label
+        data_tests: [not_null]
+      - name: sort_order
+        data_tests: [not_null]
+      - name: is_controlled_vocabulary
+        data_tests: [not_null]

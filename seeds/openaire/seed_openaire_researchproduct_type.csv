@@ -1,0 +1,6 @@
+type,label,vocabulary_code,vocabulary_url,term_url,sort_order,is_controlled_vocabulary
+!UNKNOWN,!UNKNOWN,,,,0,false
+publication,publication,dnet:result_typologies,https://api.openaire.eu/vocabularies/dnet:result_typologies,https://api.openaire.eu/vocabularies/dnet:result_typologies/publication,1,true
+dataset,dataset,dnet:result_typologies,https://api.openaire.eu/vocabularies/dnet:result_typologies,https://api.openaire.eu/vocabularies/dnet:result_typologies/dataset,2,true
+software,software,dnet:result_typologies,https://api.openaire.eu/vocabularies/dnet:result_typologies,https://api.openaire.eu/vocabularies/dnet:result_typologies/software,3,true
+other,other,dnet:result_typologies,https://api.openaire.eu/vocabularies/dnet:result_typologies,https://api.openaire.eu/vocabularies/dnet:result_typologies/other,4,true

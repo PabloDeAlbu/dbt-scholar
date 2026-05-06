@@ -51,6 +51,20 @@ models:
           - not_null
           - unique
 
+  - name: dim_openaire_researchproduct_type
+    description: >
+      Dimensión del tipo principal de research product según el vocabulario
+      `dnet:result_typologies` de OpenAIRE.
+    config:
+      tags: [dm]
+    columns:
+      - name: researchproduct_type
+        data_tests: [not_null, unique]
+      - name: researchproduct_type_label
+        data_tests: [not_null]
+      - name: researchproduct_type_uri
+        description: URI del término en el vocabulario de OpenAIRE, cuando aplica.
+
   - name: fct_openaire_researchproduct_publication
     description: >
       Hecho de publicaciones OpenAIRE en su estado más reciente (1 fila por researchproduct_hk),
@@ -75,6 +89,15 @@ models:
         data_tests: [not_null]
       - name: publication_date
         description: Fecha de publicación provista por OpenAIRE (si está disponible).
+      - name: type
+        description: Tipo principal del research product según `dnet:result_typologies`.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_openaire_researchproduct_type')
+              field: researchproduct_type
+      - name: type_uri
+        description: URI del término de tipo principal en el vocabulario de OpenAIRE.
       - name: best_access_right_uri
         description: URI de la mejor clasificación de derechos de acceso (si está disponible).
 

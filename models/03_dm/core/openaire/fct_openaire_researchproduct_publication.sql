@@ -3,6 +3,11 @@
 WITH latest_rp AS (
     SELECT *
     FROM {{ ref('latest_sat_openaire_researchproduct') }}
+),
+
+dim_type AS (
+    SELECT *
+    FROM {{ ref('dim_openaire_researchproduct_type') }}
 )
 
 SELECT
@@ -11,7 +16,8 @@ SELECT
     sat_rp.load_datetime,
     sat_rp.publication_date,
     sat_rp.embargo_end_date,
-    sat_rp.type,
+    dim_type.researchproduct_type AS type,
+    dim_type.researchproduct_type_uri AS type_uri,
     sat_rp.main_title,
     sat_rp.language_code,
     sat_rp.language_label,
@@ -41,3 +47,5 @@ SELECT
     dim_rp.researchproduct_hk
 FROM {{ ref('dim_openaire_researchproduct') }} dim_rp
 INNER JOIN latest_rp sat_rp USING (researchproduct_hk)
+LEFT JOIN dim_type
+    ON sat_rp.type = dim_type.researchproduct_type
