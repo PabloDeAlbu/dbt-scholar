@@ -39,19 +39,3 @@ models:
         data_tests: [not_null]
       - name: publication_year
         description: Año derivado de `date_issued` cuando está disponible.
-
-  - name: viz_unlp_openalex_dedup_export
-    description: >
-      Export simple de obras OpenAlex del subconjunto UNLP en formato tabular
-      compatible con el deduplicador, pensado para compararse contra SEDICI.
-    config:
-      tags: [viz]
-    columns:
-      - name: source_id
-        description: Identificador canónico de la obra en OpenAlex.
-        data_tests: [not_null]
-      - name: source_system
-        description: Origen del registro exportado.
-        data_tests: [not_null]
-      - name: publication_year
-        description: Año de publicación informado por OpenAlex.
