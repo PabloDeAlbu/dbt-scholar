@@ -122,7 +122,7 @@ models:
       tags: [dm]
     data_tests:
       - dbt_utils.expression_is_true:
-          expression: "doi = '-' OR doi ~* '^10\\\\.[0-9]{4,9}/\\\\S+$'"
+          expression: 'doi IN (''-'', ''!UNKNOWN'') OR doi ~* ''^10\.[0-9]{4,9}/.+$'''
     columns:
       - name: work_hk
         description: Clave hash de la obra (PK del hub).

@@ -22,6 +22,7 @@ with source as (
 	        {{ safe_cast(map_work_topic_relation, 'subfield.id', 'text', alias='subfield_id', col_names=map_work_topic_col_names, default_mode='ghost') }},
 	        _load_datetime::timestamp
 	    from source
+        where nullif(btrim(topic_id::text), '') is not null
 	),
 	ghost_record as (
     select
