@@ -98,6 +98,22 @@ models:
       - name: display_name
         description: Etiqueta del tópico.
 
+  - name: dim_openalex_work_type
+    description: >
+      Dimensión de tipos de work de OpenAlex según el vocabulario oficial de
+      `work types`, con mapeo a COAR cuando está disponible.
+    config:
+      tags: [dm]
+    columns:
+      - name: work_type
+        description: Valor canónico del tipo de work en OpenAlex.
+        data_tests: [not_null, unique]
+      - name: work_type_label
+        description: Etiqueta textual del tipo según OpenAlex.
+        data_tests: [not_null]
+      - name: resource_type_uri
+        description: URI COAR asociada al tipo de work cuando existe mapeo.
+
   - name: dim_openalex_work_pid
     description: >
       Perfil de PIDs por work OpenAlex, con identificadores normalizados y flags
@@ -166,6 +182,15 @@ models:
         description: Páginas del work derivadas de `biblio.first_page` y `biblio.last_page`.
       - name: language
         description: Idioma informado por OpenAlex para el work.
+      - name: type
+        description: Tipo principal del work según el vocabulario oficial de OpenAlex.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_openalex_work_type')
+              field: work_type
+      - name: type_coar_uri
+        description: URI COAR mapeada desde el tipo de work cuando está disponible.
       - name: license
         description: Licencia tomada de `primary_location.license`.
       - name: topics

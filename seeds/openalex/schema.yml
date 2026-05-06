@@ -1,0 +1,18 @@
+version: 2
+
+seeds:
+  - name: seed_openalex_work_type
+    description: >
+      Vocabulario versionado de tipos de work de OpenAlex, alineado con la
+      documentación oficial de `work types` y con los valores observados en el
+      payload local del proyecto. Incluye mapeo a COAR cuando está disponible
+      y un registro técnico `!UNKNOWN` para compatibilidad con el ghost record.
+    columns:
+      - name: type
+        data_tests: [not_null, unique]
+      - name: label
+        data_tests: [not_null]
+      - name: sort_order
+        data_tests: [not_null]
+      - name: is_controlled_vocabulary
+        data_tests: [not_null]

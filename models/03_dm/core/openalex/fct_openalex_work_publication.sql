@@ -3,6 +3,11 @@ WITH latest_sat_work AS (
     FROM {{ ref('latest_sat_openalex_work') }}
 ),
 
+dim_type AS (
+    SELECT *
+    FROM {{ ref('dim_openalex_work_type') }}
+),
+
 author AS (
     SELECT
         author_name.work_hk,
@@ -72,7 +77,8 @@ final AS (
         hub_work.work_id,
         hub_work.work_hk,
         sat_work.title,
-        sat_work.type,
+        dim_type.work_type AS type,
+        dim_type.resource_type_uri AS type_coar_uri,
         CASE
             WHEN sat_work.publication_year IS NOT NULL THEN TO_DATE(sat_work.publication_year::text, 'YYYY')
         END AS publication_year,
@@ -131,6 +137,8 @@ final AS (
         sat_work.apc_paid_value_usd
     FROM {{ ref('hub_openalex_work') }} hub_work
     INNER JOIN latest_sat_work sat_work USING (work_hk)
+    LEFT JOIN dim_type
+        ON sat_work.type = dim_type.work_type
     LEFT JOIN author USING (work_hk)
     LEFT JOIN topic USING (work_hk)
     LEFT JOIN pid USING (work_hk)

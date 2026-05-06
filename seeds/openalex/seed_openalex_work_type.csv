@@ -1,0 +1,18 @@
+type,label,vocabulary_url,label_es,coar_uri,sort_order,is_controlled_vocabulary
+!UNKNOWN,!UNKNOWN,,,,0,false
+article,article,https://developers.openalex.org/api-reference/work-types,ARTÍCULO,http://purl.org/coar/resource_type/c_6501,1,true
+book,book,https://developers.openalex.org/api-reference/work-types,LIBRO,http://purl.org/coar/resource_type/c_2f33,2,true
+book-chapter,book-chapter,https://developers.openalex.org/api-reference/work-types,CAPÍTULO DE LIBRO,http://purl.org/coar/resource_type/c_3248,3,true
+dataset,dataset,https://developers.openalex.org/api-reference/work-types,CONJUNTO DE DATOS,http://purl.org/coar/resource_type/c_ddb1,4,true
+dissertation,dissertation,https://developers.openalex.org/api-reference/work-types,TESIS DOCTORAL,http://purl.org/coar/resource_type/c_db06,5,true
+editorial,editorial,https://developers.openalex.org/api-reference/work-types,EDITORIAL,http://purl.org/coar/resource_type/c_b239,6,true
+erratum,erratum,https://developers.openalex.org/api-reference/work-types,CORRIGENDA,http://purl.org/coar/resource_type/c_7acd,7,true
+letter,letter,https://developers.openalex.org/api-reference/work-types,CARTA,http://purl.org/coar/resource_type/c_0857,8,true
+other,other,https://developers.openalex.org/api-reference/work-types,OTROS,http://purl.org/coar/resource_type/c_1843,9,true
+paratext,paratext,https://developers.openalex.org/api-reference/work-types,OTROS,http://purl.org/coar/resource_type/c_1843,10,true
+peer-review,peer-review,https://developers.openalex.org/api-reference/work-types,REVISIÓN POR PARES,http://purl.org/coar/resource_type/H9BQ-739P,11,true
+preprint,preprint,https://developers.openalex.org/api-reference/work-types,ARTÍCULO PRELIMINAR,http://purl.org/coar/resource_type/c_816b,12,true
+reference-entry,reference-entry,https://developers.openalex.org/api-reference/work-types,,,13,true
+report,report,https://developers.openalex.org/api-reference/work-types,INFORME,http://purl.org/coar/resource_type/c_93fc,14,true
+retraction,retraction,https://developers.openalex.org/api-reference/work-types,,,15,true
+review,review,https://developers.openalex.org/api-reference/work-types,RESEÑA,http://purl.org/coar/resource_type/c_efa0,16,true
