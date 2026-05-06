@@ -1,18 +1,18 @@
 {{ config(materialized='table') }}
 
 {%- set yaml_metadata -%}
-source_model: 'ldg_openalex_work_author'
+source_model: 'ldg_openalex_work_authorship'
 derived_columns:
   source: "!OPENALEX"
   load_datetime: _load_datetime
 hashed_columns:
   work_hk: work_id
   author_hk: author_id
-  work_author_hk:
+  authorship_hk: authorship_id
+  work_authorship_hk:
   - work_id
-  - work_author_identity
-  - author_position
-  work_author_hashdiff:
+  - authorship_id
+  authorship_hashdiff:
     is_hashdiff: true
     columns:
       - author_display_name

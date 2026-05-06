@@ -12,3 +12,15 @@ models:
           Hash key for the extraction event.
           It identifies the extracted record by work, extraction time,
           and filter values.
+  - name: stg_openalex_work_authorship
+    columns:
+      - name: work_hk
+        data_tests: [not_null]
+      - name: author_hk
+        data_tests: [not_null]
+      - name: authorship_hk
+        data_tests: [not_null]
+      - name: work_authorship_hk
+        data_tests: [not_null]
+      - name: authorship_id
+        data_tests: [not_null]
