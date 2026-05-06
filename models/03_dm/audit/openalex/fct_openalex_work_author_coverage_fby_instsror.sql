@@ -11,7 +11,7 @@ WITH extracted AS (
 
 author_presence AS (
     SELECT DISTINCT work_hk
-    FROM {{ ref('brg_openalex_work_author') }}
+    FROM {{ ref('brg_openalex_work_authorship') }}
 ),
 
 base AS (

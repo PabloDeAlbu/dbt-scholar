@@ -208,6 +208,20 @@ models:
       - name: author_hk
         data_tests: [not_null]
 
+  - name: brg_openalex_work_authorship
+    description: Bridge obra-authorship-autor para conservar la granularidad observada en el payload de OpenAlex.
+    config:
+      tags: [dm]
+    columns:
+      - name: work_authorship_hk
+        data_tests: [not_null]
+      - name: work_hk
+        data_tests: [not_null]
+      - name: author_hk
+        data_tests: [not_null]
+      - name: authorship_hk
+        data_tests: [not_null]
+
   - name: brg_openalex_work_author_enriched
     description: >
       Bridge obra–autor enriquecido con nombre canónico desde `dim_openalex_author`
