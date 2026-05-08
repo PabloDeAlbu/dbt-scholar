@@ -45,3 +45,9 @@ models:
       - name: unlp_last_extract_datetime
         description: Última fecha/hora de extracción observada para el work en el subconjunto institucional de UNLP.
         data_tests: [not_null]
+      - name: doi_count
+        description: Cantidad de DOIs distintos asociados al work en OpenAlex.
+        data_tests: [not_null]
+      - name: has_multiple_doi
+        description: Flag que indica si el work tiene más de un DOI asociado en OpenAlex.
+        data_tests: [not_null]

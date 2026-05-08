@@ -21,6 +21,15 @@ unlp_institution AS (
     WHERE ror = '{{ unlp_ror }}'
 ),
 
+doi_stats AS (
+    SELECT
+        work_hk,
+        COUNT(DISTINCT doi_hk) AS doi_count,
+        (COUNT(DISTINCT doi_hk) > 1) AS has_multiple_doi
+    FROM {{ ref('link_openalex_work_doi') }}
+    GROUP BY work_hk
+),
+
 base AS (
     SELECT
         unlp_institution.institution_hk,
@@ -29,9 +38,12 @@ base AS (
         unlp_institution.institution_ror,
         unlp_extract.unlp_first_extract_datetime,
         unlp_extract.unlp_last_extract_datetime,
+        COALESCE(doi_stats.doi_count, 0) AS doi_count,
+        COALESCE(doi_stats.has_multiple_doi, FALSE) AS has_multiple_doi,
         fct.*
     FROM {{ ref('fct_openalex_work_publication') }} AS fct
     INNER JOIN unlp_extract USING (work_hk)
+    LEFT JOIN doi_stats USING (work_hk)
     CROSS JOIN unlp_institution
 )
 
