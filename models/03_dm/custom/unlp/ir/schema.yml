@@ -228,6 +228,97 @@ models:
       - name: last_load_datetime
         description: Última carga en la que el usuario quedó observado dentro del scope UNLP.
 
+  - name: dim_unlp_ir_author
+    description: >
+      Dimensión de autores observados en los metadatos del repositorio UNLP.
+      Agrupa autores por `authority` cuando existe control de autoridades y, en
+      caso contrario, por nombre normalizado dentro del scope institucional.
+    config:
+      tags: [unlp, dm]
+    columns:
+      - name: ir_author_hk
+        description: Clave hash estable del autor IR dentro del scope UNLP.
+        data_tests: [not_null, unique]
+      - name: author_bk
+        description: Clave de negocio usada para agrupar por authority o por nombre normalizado.
+        data_tests: [not_null, unique]
+      - name: author_name_preferred
+        description: Variante textual preferida del autor, tomada como mínimo ordenable entre los valores observados.
+        data_tests: [not_null]
+      - name: author_name_normalized
+        description: Nombre del autor normalizado para fines de matching.
+        data_tests: [not_null]
+      - name: author_type
+        description: Tipo de autor según el metadato de origen (`person` o `corporate`).
+        data_tests: [not_null]
+      - name: authority
+        description: Clave de autoridad DSpace cuando el autor está controlado.
+      - name: has_authority_control
+        description: Flag que indica presencia de control de autoridades en el autor.
+        data_tests: [not_null]
+      - name: observed_name_variant_count
+        description: Cantidad de variantes textuales observadas para el mismo autor agrupado.
+        data_tests: [not_null]
+      - name: item_count
+        description: Cantidad de items UNLP en los que aparece el autor.
+        data_tests: [not_null]
+      - name: institution_ror
+        description: ROR institucional del repositorio UNLP.
+        data_tests: [not_null]
+
+  - name: brg_unlp_ir_item_author
+    description: >
+      Puente item-autor del repositorio UNLP a nivel de ocurrencia de metadato.
+      Conserva el texto original del autor y los campos técnicos asociados,
+      incluyendo `authority`, `confidence` y `place`.
+    config:
+      tags: [unlp, dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_hk, metadata_value_id]
+    columns:
+      - name: item_hk
+        description: Clave hash del item institucional.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('fct_unlp_ir_item_publication')
+              field: item_hk
+      - name: item_id
+        description: ID original del item en DSpace 5.
+        data_tests: [not_null]
+      - name: ir_author_hk
+        description: Clave hash del autor IR enlazado.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_unlp_ir_author')
+              field: ir_author_hk
+      - name: metadata_value_id
+        description: Identificador técnico de la ocurrencia de metadato del autor.
+        data_tests: [not_null]
+      - name: metadatafield_fullname
+        description: Campo de metadato de origen del autor.
+        data_tests: [not_null]
+      - name: author_type
+        description: Tipo de autor derivado del metadato (`person` o `corporate`).
+        data_tests: [not_null]
+      - name: author_name_raw
+        description: Texto del autor tal como fue cargado en el repositorio.
+        data_tests: [not_null]
+      - name: author_name_normalized
+        description: Texto del autor normalizado para matching.
+        data_tests: [not_null]
+      - name: authority
+        description: Clave de autoridad DSpace asociada a la ocurrencia, cuando existe.
+      - name: has_authority_control
+        description: Flag que indica si la ocurrencia tiene authority no nula.
+        data_tests: [not_null]
+      - name: confidence
+        description: Valor de confidence del control de autoridades en DSpace.
+      - name: author_place
+        description: Orden/posición cruda del valor de metadato dentro del item.
+
   - name: dim_unlp_ir_item_type
     description: Dimensión auxiliar de tipologías declaradas en `dc.type` (repositorio UNLP).
     config:
