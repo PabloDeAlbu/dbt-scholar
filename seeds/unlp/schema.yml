@@ -1,0 +1,17 @@
+version: 2
+
+seeds:
+  - name: seed_unlp_scholar_dependency_domain
+    description: >
+      Mapping curado de dominios verificados de Google Scholar observados para
+      perfiles UNLP. Define la dependencia legible y su facultad o unidad madre
+      para agrupar y visualizar autores por estructura institucional.
+    columns:
+      - name: dependency_domain
+        data_tests: [not_null, unique]
+      - name: dependency_domain_label
+        data_tests: [not_null]
+      - name: dependency_name
+        data_tests: [not_null]
+      - name: faculty_name
+        data_tests: [not_null]

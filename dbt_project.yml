@@ -215,6 +215,20 @@ seeds:
           batch_name: text
           mapfile_item_key: text
           sedici_item_id: integer
+      unlp_ir_scholar_author_manual_map:
+        +column_types:
+          authority: text
+          ir_author_hk: text
+          scholar_user_id: text
+          review_status: text
+          review_note: text
+          reviewer: text
+      seed_unlp_scholar_dependency_domain:
+        +column_types:
+          dependency_domain: text
+          dependency_domain_label: text
+          dependency_name: text
+          faculty_name: text
 
 data_tests:
   +store_failures: true
