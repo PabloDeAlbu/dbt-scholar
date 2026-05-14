@@ -8,17 +8,17 @@ sources:
       - name: map_researchproduct_alternateidentifier
         columns:
           - name: id
-            tests: [not_null]
+            data_tests: [not_null]
           - name: scheme
-            tests: [not_null]
+            data_tests: [not_null]
           - name: value
-            tests: [not_null]
+            data_tests: [not_null]
           - name: _load_datetime
-            tests: [not_null]
+            data_tests: [not_null]
       - name: map_researchproduct_author
         columns: 
           - name: id
-            tests: [not_null]
+            data_tests: [not_null]
           - name: fullName
             quote: true
           - name: name
@@ -31,22 +31,22 @@ sources:
           - name: pid.provenance
             quote: true
           - name: _load_datetime
-            tests: [not_null]
+            data_tests: [not_null]
 
       - name: map_researchproduct_collectedfrom
         columns:
           - name: researchproduct_id
-            tests: [not_null]
+            data_tests: [not_null]
           - name: datasource_id
-            tests: [not_null]
+            data_tests: [not_null]
           - name: value
-            tests: [not_null]
+            data_tests: [not_null]
           - name: _load_datetime
-            tests: [not_null]
+            data_tests: [not_null]
       - name: map_researchproduct_instance
         columns:
           - name: id
-            tests: [not_null]
+            data_tests: [not_null]
           - name: license
           - name: publicationDate
           - name: refereed
@@ -55,7 +55,7 @@ sources:
           - name: scheme
           - name: value
           - name: _load_datetime
-            tests: [not_null]
+            data_tests: [not_null]
           - name: accessRight.code
             quote: true
           - name: accessRight.label
@@ -79,68 +79,68 @@ sources:
       - name: map_researchproduct_originalid
         columns:
           - name: id
-            tests: [not_null]
+            data_tests: [not_null]
           - name: originalIds
             quote: true
-            tests: [not_null]
+            data_tests: [not_null]
           - name: _load_datetime
-            tests: [not_null]
+            data_tests: [not_null]
       - name: map_researchproduct_organization
         columns:
           - name: researchproduct_id
-            tests: [not_null]
+            data_tests: [not_null]
           - name: organization_id
-            tests: [not_null]
+            data_tests: [not_null]
           - name: _load_datetime
-            tests: [not_null]
+            data_tests: [not_null]
       - name: map_researchproduct_pid
         columns:
           - name: id
-            tests: [not_null]
+            data_tests: [not_null]
           - name: scheme
-            tests: [not_null]
+            data_tests: [not_null]
           - name: value
-            tests: [not_null]
+            data_tests: [not_null]
           - name: _load_datetime
-            tests: [not_null]
+            data_tests: [not_null]
       - name: map_researchproduct_subject
         columns:
           - name: id
-            tests: [not_null]
+            data_tests: [not_null]
           - name: provenance
           - name: subject.scheme
             quote: true
-            tests: [not_null]
+            data_tests: [not_null]
           - name: subject.value
             quote: true
-            tests: [not_null]
+            data_tests: [not_null]
           - name: _load_datetime
-            tests: [not_null]
+            data_tests: [not_null]
       - name: map_researchproduct_source
         columns:
           - name: id
-            tests: [not_null]
+            data_tests: [not_null]
           - name: sources
-            tests: [not_null]
+            data_tests: [not_null]
           - name: _load_datetime
-            tests: [not_null]
+            data_tests: [not_null]
       - name: researchproduct
         columns:
         - name: id
-          tests: [not_null, unique]
+          data_tests: [not_null, unique]
         - name: type
-          tests: [not_null]
+          data_tests: [not_null]
         - name: language_code
         - name: language_label
         - name: _load_datetime
-          tests: [not_null]
+          data_tests: [not_null]
         - name: openAccessColor
           quote: true
         - name: publiclyFunded
           quote: true
         - name: mainTitle
           quote: true
-          tests:
+          data_tests:
             - not_null:
                 config:
                   severity: warn
@@ -180,19 +180,19 @@ sources:
       - name: organization
         columns:
           - name: organization_id
-            tests: [not_null, unique]
+            data_tests: [not_null, unique]
           - name: acronym
           - name: legalName
             quote: true
           - name: _load_datetime
-            tests: [not_null]
+            data_tests: [not_null]
       - name: map_organization_pid
         columns:
           - name: organization_id
-            tests: [not_null]
+            data_tests: [not_null]
           - name: pid_scheme
-            tests: [not_null]
+            data_tests: [not_null]
           - name: pid_value
-            tests: [not_null]
+            data_tests: [not_null]
           - name: _load_datetime
-            tests: [not_null]
+            data_tests: [not_null]

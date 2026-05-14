@@ -14,20 +14,20 @@ sources:
           una observación de perfil por archivo/corrida.
         columns:
           - name: source_file
-            tests: [not_null]
+            data_tests: [not_null]
           - name: source_system
-            tests: [not_null]
+            data_tests: [not_null]
           - name: entity_type
-            tests: [not_null]
+            data_tests: [not_null]
           - name: name
-            tests: [not_null]
+            data_tests: [not_null]
           - name: profile_url
-            tests: [not_null]
+            data_tests: [not_null]
           - name: user
             quote: true
-            tests: [not_null]
+            data_tests: [not_null]
           - name: _load_datetime
-            tests: [not_null]
+            data_tests: [not_null]
 
 models:
   - name: ldg_unlp_centros_conicet
