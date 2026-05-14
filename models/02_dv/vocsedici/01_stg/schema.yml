@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: stg_vocsedici_person
+    columns:
+      - name: person_hk
+        data_tests: [not_null]
+      - name: person_bk
+        data_tests: [not_null]
+
+  - name: stg_vocsedici_institution
+    columns:
+      - name: institution_hk
+        data_tests: [not_null]
+      - name: institution_bk
+        data_tests: [not_null]
+
+  - name: stg_vocsedici_person_affiliation
+    columns:
+      - name: person_hk
+        data_tests: [not_null]
+      - name: institution_hk
+        data_tests: [not_null]
+      - name: person_institution_hk
+        data_tests: [not_null]
+      - name: paragraph_id
+        data_tests: [not_null]

@@ -1,0 +1,630 @@
+version: 2
+
+sources:
+  - name: vocsedici
+    description: >
+      Extracción cruda de VOC Sedici desde Drupal cargada a landing por Kedro.
+      Esta capa conserva tablas operativas casi sin transformación para que los
+      joins y normalizaciones de negocio se resuelvan después en dbt.
+    schema: ldg_vocsedici
+    tables:
+      - name: node
+        description: >
+          Tabla base de entidades `node` de Drupal. Expone el identificador del
+          nodo y su revisión vigente para anclar el resto de las tablas de
+          campos.
+        columns:
+          - name: nid
+            description: Identificador numérico estable del nodo en Drupal.
+            data_tests: [not_null, unique]
+          - name: vid
+            description: Identificador de la revisión vigente referenciada por el nodo.
+            data_tests: [not_null]
+          - name: type
+            description: Tipo de contenido Drupal asociado al nodo.
+            data_tests: [not_null]
+
+      - name: node_field_data
+        description: >
+          Atributos principales del nodo por idioma en la tabla operativa de
+          Drupal. Suele contener el título, estado de publicación y otras
+          banderas de la versión actual.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [nid, langcode]
+        columns:
+          - name: nid
+            description: Identificador del nodo en Drupal.
+            data_tests: [not_null]
+          - name: vid
+            description: Revisión del nodo a la que pertenecen estos datos principales.
+            data_tests: [not_null]
+          - name: type
+            description: Tipo de contenido Drupal asociado al nodo.
+            data_tests: [not_null]
+          - name: langcode
+            description: Código de idioma de la fila almacenada en Drupal.
+            data_tests: [not_null]
+
+      - name: paragraphs_item
+        description: >
+          Tabla base de entidades `paragraph` de Drupal para modelar bloques
+          embebidos de afiliación y otros componentes asociados a nodos.
+        columns:
+          - name: id
+            description: Identificador numérico estable del paragraph.
+            data_tests: [not_null, unique]
+          - name: revision_id
+            description: Identificador de la revisión vigente del paragraph.
+            data_tests: [not_null]
+          - name: type
+            description: Tipo de paragraph Drupal.
+            data_tests: [not_null]
+
+      - name: paragraphs_item_field_data
+        description: >
+          Atributos principales del paragraph por idioma. En VOC Sedici se usa
+          para vincular el paragraph de afiliación con su nodo padre.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [id, langcode]
+        columns:
+          - name: id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: type
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+
+      - name: paragraph__field_persona_id
+        description: Campo Drupal `field_persona_id` sobre paragraphs de afiliación.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: paragraph__field_institucion
+        description: Campo Drupal `field_institucion` con referencia al nodo institución.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: paragraph__field_fecha_inicio
+        description: Campo Drupal `field_fecha_inicio` con fecha de inicio de afiliación.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: paragraph__field_fecha_fin
+        description: Campo Drupal `field_fecha_fin` con fecha de fin de afiliación.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: node__field_nombre
+        description: Campo Drupal `field_nombre` con el nombre cargado en VOC Sedici.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            description: Identificador del nodo dueño del valor del campo.
+            data_tests: [not_null]
+          - name: revision_id
+            description: Revisión del nodo vinculada al valor almacenado.
+            data_tests: [not_null]
+          - name: langcode
+            description: Idioma del valor del campo en Drupal.
+            data_tests: [not_null]
+          - name: delta
+            description: Posición del valor dentro del campo cuando admite múltiples valores.
+            data_tests: [not_null]
+
+      - name: node__field_apellido
+        description: Campo Drupal `field_apellido` con el apellido cargado en VOC Sedici.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: node__field_orcid
+        description: Campo Drupal `field_orcid` con identificadores ORCID crudos.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: node__field_mail
+        description: Campo Drupal `field_mail` con direcciones de correo cargadas en VOC Sedici.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: node__field_dni
+        description: Campo Drupal `field_dni` con números de documento crudos.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: node__field_cuit
+        description: Campo Drupal `field_cuit` con CUIT crudos.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: node__field_telefono
+        description: Campo Drupal `field_telefono` con teléfonos cargados en VOC Sedici.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: node__field_direcci_n
+        description: >
+          Campo Drupal `field_dirección` con domicilios o direcciones tal como
+          fueron cargados en la fuente.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: node__field_google_scholar
+        description: Campo Drupal `field_google_scholar` con URLs o identificadores de Google Scholar.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: node__field_researchgate
+        description: Campo Drupal `field_researchgate` con URLs o identificadores de ResearchGate.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: node__field_old_id
+        description: Campo Drupal `field_old_id` con identificadores legados o previos de VOC Sedici.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: node__field_filiacion
+        description: Campo Drupal `field_filiacion` con la filiación textual declarada en VOC Sedici.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: node__field_nombre_institucion
+        description: Campo Drupal `field_nombre_institucion` con el nombre institucional principal.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: node__field_nombre_institucion_variant
+        description: >
+          Campo Drupal `field_nombre_institucion_variant` con variantes
+          textuales del nombre de la institución.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: node__field_abreviatura
+        description: Campo Drupal `field_abreviatura` con abreviaturas institucionales.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: node__field_id_pidu
+        description: Campo Drupal `field_id_pidu` con identificadores PIDU crudos.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: node__field_id_termino
+        description: Campo Drupal `field_id_termino` con identificadores de término o taxonomía.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+      - name: node__field_padre
+        description: Campo Drupal `field_padre` con referencias jerárquicas padre-hijo en la fuente.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns: [entity_id, langcode, delta]
+        columns:
+          - name: entity_id
+            data_tests: [not_null]
+          - name: revision_id
+            data_tests: [not_null]
+          - name: langcode
+            data_tests: [not_null]
+          - name: delta
+            data_tests: [not_null]
+
+models:
+  - name: ldg_vocsedici_node
+    description: >
+      Normalización mínima de la tabla base `node` de Drupal para VOC Sedici.
+      Expone una fila por nodo con claves técnicas, tipo de contenido y fechas
+      principales en tipos consistentes.
+    columns:
+      - name: node_id
+        description: Identificador numérico del nodo en Drupal.
+        data_tests: [not_null, unique]
+      - name: revision_id
+        description: Identificador de la revisión actual del nodo.
+        data_tests: [not_null]
+      - name: node_type
+        description: Tipo de contenido Drupal del nodo.
+        data_tests: [not_null]
+      - name: _load_datetime
+        description: Fecha-hora de carga en landing.
+        data_tests: [not_null]
+
+  - name: ldg_vocsedici_node_field_data
+    description: >
+      Normalización mínima de `node_field_data` para conservar los atributos
+      principales del nodo por idioma con casts homogéneos.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [node_id, langcode]
+    columns:
+      - name: node_id
+        description: Identificador del nodo en Drupal.
+        data_tests: [not_null]
+      - name: revision_id
+        description: Revisión del nodo representada en la fila.
+        data_tests: [not_null]
+      - name: node_type
+        description: Tipo de contenido Drupal del nodo.
+        data_tests: [not_null]
+      - name: langcode
+        description: Idioma de la fila del nodo.
+        data_tests: [not_null]
+      - name: _load_datetime
+        description: Fecha-hora de carga en landing.
+        data_tests: [not_null]
+
+  - name: ldg_vocsedici_node__field_nombre
+    description: >
+      Normalización mínima del campo Drupal `field_nombre`. Conserva el grano
+      por nodo, idioma y posición del valor.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [node_id, langcode, delta]
+    columns:
+      - name: node_id
+        description: Nodo dueño del valor del campo.
+        data_tests: [not_null]
+      - name: revision_id
+        description: Revisión del nodo vinculada al valor.
+        data_tests: [not_null]
+      - name: langcode
+        description: Idioma del valor del campo.
+        data_tests: [not_null]
+      - name: delta
+        description: Posición del valor dentro del campo.
+        data_tests: [not_null]
+      - name: nombre
+        description: Valor textual normalizado del nombre.
+      - name: _load_datetime
+        description: Fecha-hora de carga en landing.
+        data_tests: [not_null]
+
+  - name: ldg_vocsedici_node__field_apellido
+    description: >
+      Normalización mínima del campo Drupal `field_apellido`. Conserva el grano
+      por nodo, idioma y posición del valor.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [node_id, langcode, delta]
+    columns:
+      - name: node_id
+        description: Nodo dueño del valor del campo.
+        data_tests: [not_null]
+      - name: revision_id
+        description: Revisión del nodo vinculada al valor.
+        data_tests: [not_null]
+      - name: langcode
+        description: Idioma del valor del campo.
+        data_tests: [not_null]
+      - name: delta
+        description: Posición del valor dentro del campo.
+        data_tests: [not_null]
+      - name: apellido
+        description: Valor textual normalizado del apellido.
+      - name: _load_datetime
+        description: Fecha-hora de carga en landing.
+        data_tests: [not_null]
+
+  - name: ldg_vocsedici_paragraphs_item
+    description: >
+      Normalización mínima de la tabla base `paragraphs_item` de Drupal para
+      VOC Sedici.
+    columns:
+      - name: paragraph_id
+        data_tests: [not_null, unique]
+      - name: revision_id
+        data_tests: [not_null]
+      - name: paragraph_type
+        data_tests: [not_null]
+      - name: _load_datetime
+        data_tests: [not_null]
+
+  - name: ldg_vocsedici_paragraphs_item_field_data
+    description: >
+      Normalización mínima de `paragraphs_item_field_data` para exponer el nodo
+      padre y el campo padre del paragraph.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [paragraph_id, langcode]
+    columns:
+      - name: paragraph_id
+        data_tests: [not_null]
+      - name: revision_id
+        data_tests: [not_null]
+      - name: paragraph_type
+        data_tests: [not_null]
+      - name: langcode
+        data_tests: [not_null]
+      - name: parent_id
+        data_tests: [not_null]
+      - name: parent_type
+        data_tests: [not_null]
+      - name: parent_field_name
+        data_tests: [not_null]
+      - name: _load_datetime
+        data_tests: [not_null]
+
+  - name: ldg_vocsedici_paragraph__field_persona_id
+    description: >
+      Normalización mínima del campo Drupal `field_persona_id` para paragraphs
+      de afiliación.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [paragraph_id, langcode, delta]
+    columns:
+      - name: paragraph_id
+        data_tests: [not_null]
+      - name: revision_id
+        data_tests: [not_null]
+      - name: langcode
+        data_tests: [not_null]
+      - name: delta
+        data_tests: [not_null]
+      - name: _load_datetime
+        data_tests: [not_null]
+
+  - name: ldg_vocsedici_paragraph__field_institucion
+    description: >
+      Normalización mínima del campo Drupal `field_institucion` para paragraphs
+      de afiliación.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [paragraph_id, langcode, delta]
+    columns:
+      - name: paragraph_id
+        data_tests: [not_null]
+      - name: revision_id
+        data_tests: [not_null]
+      - name: langcode
+        data_tests: [not_null]
+      - name: delta
+        data_tests: [not_null]
+      - name: institution_node_id
+        data_tests: [not_null]
+      - name: _load_datetime
+        data_tests: [not_null]
+
+  - name: ldg_vocsedici_paragraph__field_fecha_inicio
+    description: >
+      Normalización mínima del campo Drupal `field_fecha_inicio` para vigencia
+      de afiliaciones.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [paragraph_id, langcode, delta]
+    columns:
+      - name: paragraph_id
+        data_tests: [not_null]
+      - name: revision_id
+        data_tests: [not_null]
+      - name: langcode
+        data_tests: [not_null]
+      - name: delta
+        data_tests: [not_null]
+      - name: _load_datetime
+        data_tests: [not_null]
+
+  - name: ldg_vocsedici_paragraph__field_fecha_fin
+    description: >
+      Normalización mínima del campo Drupal `field_fecha_fin` para vigencia de
+      afiliaciones.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [paragraph_id, langcode, delta]
+    columns:
+      - name: paragraph_id
+        data_tests: [not_null]
+      - name: revision_id
+        data_tests: [not_null]
+      - name: langcode
+        data_tests: [not_null]
+      - name: delta
+        data_tests: [not_null]
+      - name: _load_datetime
+        data_tests: [not_null]

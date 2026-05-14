@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: dim_vocsedici_persona
+    description: >
+      Dimensión base de personas VOC Sedici construida directamente desde el
+      staging normalizado, sin resolver todavía deduplicación ni cruces con
+      otras fuentes.
+    columns:
+      - name: persona_id
+        data_tests: [not_null, unique]
+      - name: persona_bk
+        data_tests: [not_null]
+      - name: nombre_completo
+        description: Nombre visible consolidado a partir de nombre y apellido.
+
+  - name: dim_vocsedici_institucion
+    description: >
+      Dimensión base de instituciones VOC Sedici construida desde el staging
+      normalizado, conservando la granularidad de nodo Drupal.
+    columns:
+      - name: institucion_id
+        data_tests: [not_null, unique]
+      - name: institucion_bk
+        data_tests: [not_null]
+      - name: nombre_institucion
+        description: Nombre principal de la institución en VOC Sedici.

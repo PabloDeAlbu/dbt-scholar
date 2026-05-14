@@ -61,6 +61,9 @@ models:
       openalex:
         +schema: openalex
         +tags: [openalex]
+      vocsedici:
+        +schema: vocsedici
+        +tags: [vocsedici]
     02_dv:
       coar:
         +schema: coar
@@ -86,6 +89,9 @@ models:
       openalex:
         +schema: openalex
         +tags: [openalex]
+      vocsedici:
+        +schema: vocsedici
+        +tags: [vocsedici]
     03_dm:
       audit:
         +schema: audit
