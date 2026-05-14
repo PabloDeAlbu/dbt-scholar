@@ -1,3 +1,58 @@
 version: 2
 
-models: []
+models:
+  - name: viz_unlp_ir_metadatafield_distribution
+    description: >
+      Agregado orientado a visualización para analizar la distribución de
+      metadatos del repositorio UNLP a nivel de campo. Resume cantidad de
+      ocurrencias, items alcanzados, cardinalidad de valores y diversidad de
+      `dc.type` y `sedici.subtype` observada para cada metadato.
+    config:
+      tags: [unlp, viz]
+    columns:
+      - name: metadatafield_hk
+        description: Clave hash del campo de metadato dentro del scope UNLP.
+        data_tests: [not_null]
+      - name: metadatafield_fullname
+        description: Nombre completo canónico del campo (`schema.element.qualifier`).
+        data_tests: [not_null]
+      - name: metadata_schema_short_id
+        description: Prefijo corto del esquema de metadatos.
+        data_tests: [not_null]
+      - name: element
+        description: Elemento del campo de metadato.
+        data_tests: [not_null]
+      - name: qualifier
+        description: Qualifier del campo, cuando existe.
+      - name: metadata_value_count
+        description: Cantidad de ocurrencias de metadato en el grupo.
+        data_tests: [not_null]
+      - name: item_count
+        description: Cantidad de items distintos alcanzados por el grupo.
+        data_tests: [not_null]
+      - name: item_id_count
+        description: Cantidad de `item_id` distintos alcanzados por el grupo.
+        data_tests: [not_null]
+      - name: distinct_text_value_count
+        description: Cantidad de valores textuales distintos no vacíos observados en el grupo.
+        data_tests: [not_null]
+      - name: blank_text_value_count
+        description: Cantidad de ocurrencias del grupo con `text_value` vacío o nulo.
+        data_tests: [not_null]
+      - name: authority_controlled_value_count
+        description: Cantidad de ocurrencias del grupo con authority no nula.
+        data_tests: [not_null]
+      - name: distinct_dc_type_count
+        description: Cantidad de valores distintos de `dc.type` entre los items que presentan el metadato.
+        data_tests: [not_null]
+      - name: distinct_sedici_subtype_count
+        description: Cantidad de valores distintos de `sedici.subtype` entre los items que presentan el metadato.
+        data_tests: [not_null]
+      - name: min_date_accessioned
+        description: Fecha mínima de accessioned observada en el grupo.
+      - name: max_date_accessioned
+        description: Fecha máxima de accessioned observada en el grupo.
+      - name: min_date_issued
+        description: Fecha mínima de emisión observada en el grupo.
+      - name: max_date_issued
+        description: Fecha máxima de emisión observada en el grupo.

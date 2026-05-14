@@ -1,21 +1,34 @@
-WITH
+{{ config(materialized='table') }}
+
+WITH base AS (
+    SELECT item_hk
+    FROM {{ ref('fct_dspacedb5_item_publication') }}
+    WHERE institution_ror = 'https://ror.org/01tjs6929'
+      AND discoverable = TRUE
+      AND in_archive = TRUE
+      AND withdrawn = FALSE
+),
+id AS (
+    SELECT DISTINCT
+        b.item_hk
+    FROM base AS b
+    INNER JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
+        USING (item_hk)
+    WHERE mv.metadatafield_fullname = 'dc.identifier.uri'
+      AND mv.text_value ~ '^https?://sedici[.]unlp[.]edu[.]ar/handle/10915'
+),
 dc_type AS (
     SELECT DISTINCT
+        b.item_hk,
         mv.text_value
-    FROM {{ ref('brg_dspace5_item_metadatavalue') }} bridge_i_mv
-    INNER JOIN {{ ref('dim_dspace5_metadatavalue') }} mv USING (metadatavalue_hk)
-    WHERE
-        bridge_i_mv.metadatafield_fullname = 'dc.type'
-),
-subtype AS (
-    SELECT
-        bridge_i_mv.item_hk,
-        mv.text_value
-    FROM {{ ref('brg_dspace5_item_metadatavalue') }} bridge_i_mv
-    INNER JOIN {{ ref('dim_dspace5_metadatavalue') }} mv USING (metadatavalue_hk)
-    WHERE
-        bridge_i_mv.metadatafield_fullname = 'sedici.subtype'
-),
+    FROM base AS b
+    INNER JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
+        USING (item_hk)
+    WHERE mv.metadatafield_fullname = 'dc.type'
+      AND NULLIF(TRIM(mv.text_value), '') IS NOT NULL
+)
 
-
-SELECT * FROM dc_type
+SELECT DISTINCT dc_type.text_value
+FROM dc_type
+INNER JOIN id
+    USING (item_hk)

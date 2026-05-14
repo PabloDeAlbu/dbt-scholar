@@ -221,7 +221,7 @@ ir_doi_raw AS (
     JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
       ON mv.item_id = b.item_id
      AND mv.institution_ror = b.institution_ror
-    WHERE mv.metadatafield_fullname IN ('dc.identifier.uri', 'sedici.identifier.other')
+    WHERE mv.metadatafield_fullname IN ('dc.identifier.uri', 'sedici.identifier.other', 'sedici.identifier.doi')
 ),
 
 ir_doi_pid AS (

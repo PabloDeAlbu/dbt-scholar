@@ -48,7 +48,7 @@ models:
           - not_null
           - unique
           - relationships:
-              to: ref('fct_dspace5_item')
+              to: ref('fct_dspacedb5_item_publication')
               field: item_hk
       - name: item_id
         description: ID original del ítem en DSpace 5.
@@ -261,6 +261,103 @@ models:
         data_tests: [not_null]
       - name: item_count
         description: Cantidad de items UNLP en los que aparece el autor.
+        data_tests: [not_null]
+      - name: institution_ror
+        description: ROR institucional del repositorio UNLP.
+        data_tests: [not_null]
+
+  - name: dim_unlp_ir_metadatafield
+    description: >
+      Dimensión de campos de metadatos efectivamente observados en los items del
+      repositorio UNLP. El grano es `metadatafield_hk`, que preserva la
+      distinción entre esquema, elemento y qualifier; por eso resulta más útil
+      que una dimensión al nivel `metadataschema` para búsquedas como
+      `sedici.identifier.doi`.
+    config:
+      tags: [unlp, dm]
+    columns:
+      - name: metadatafield_hk
+        description: Clave hash estable del campo de metadato dentro del scope UNLP.
+        data_tests: [not_null, unique]
+      - name: metadatafield_fullname
+        description: Nombre completo canónico del campo (`schema.element.qualifier`).
+        data_tests: [not_null]
+      - name: metadata_schema_short_id
+        description: Prefijo corto del esquema de metadatos, por ejemplo `dc` o `sedici`.
+        data_tests: [not_null]
+      - name: element
+        description: Elemento del campo de metadato.
+        data_tests: [not_null]
+      - name: qualifier
+        description: Qualifier del campo, cuando existe.
+      - name: item_count
+        description: Cantidad de items UNLP en los que aparece al menos una vez el campo.
+        data_tests: [not_null]
+      - name: metadata_value_count
+        description: Cantidad de ocurrencias técnicas (`metadata_value_id`) observadas para el campo.
+        data_tests: [not_null]
+      - name: source_label
+        description: Etiqueta técnica de la fuente DSpace 5 del scope UNLP.
+        data_tests: [not_null]
+      - name: institution_ror
+        description: ROR institucional del repositorio UNLP.
+        data_tests: [not_null]
+
+  - name: brg_unlp_ir_item_metadatafield
+    description: >
+      Puente item-campo de metadato del repositorio UNLP a nivel de ocurrencia
+      técnica de metadato. Sirve para filtrar items por campos específicos como
+      `sedici.identifier.doi` y conservar el valor textual original junto con
+      `authority`, `confidence` y `place`.
+    config:
+      tags: [unlp, dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_hk, metadata_value_id]
+    columns:
+      - name: item_hk
+        description: Clave hash del item institucional.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('fct_unlp_ir_item_publication')
+              field: item_hk
+      - name: item_id
+        description: ID original del item en DSpace 5.
+        data_tests: [not_null]
+      - name: metadata_value_id
+        description: Identificador técnico de la ocurrencia de metadato.
+        data_tests: [not_null]
+      - name: metadatafield_hk
+        description: Clave hash del campo de metadato.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_unlp_ir_metadatafield')
+              field: metadatafield_hk
+      - name: metadatafield_fullname
+        description: Nombre completo canónico del campo (`schema.element.qualifier`).
+        data_tests: [not_null]
+      - name: metadata_schema_short_id
+        description: Prefijo corto del esquema de metadatos del campo observado.
+        data_tests: [not_null]
+      - name: element
+        description: Elemento del campo de metadato.
+        data_tests: [not_null]
+      - name: qualifier
+        description: Qualifier del campo, cuando existe.
+      - name: text_value
+        description: Valor textual crudo del metadato tal como fue observado en DSpace.
+      - name: text_lang
+        description: Idioma declarado para el valor del metadato, cuando existe.
+      - name: place
+        description: Orden/posición cruda del valor de metadato dentro del item.
+      - name: authority
+        description: Clave de autoridad DSpace asociada a la ocurrencia, cuando existe.
+      - name: confidence
+        description: Valor de confidence del control de autoridades en DSpace.
+      - name: source_label
+        description: Etiqueta técnica de la fuente DSpace 5 del scope UNLP.
         data_tests: [not_null]
       - name: institution_ror
         description: ROR institucional del repositorio UNLP.
