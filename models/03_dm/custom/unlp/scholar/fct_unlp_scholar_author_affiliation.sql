@@ -8,9 +8,7 @@ WITH organization AS (
     SELECT
         organization_ror,
         organization_name,
-        openaire_organization_hk,
         openaire_organization_id,
-        openalex_institution_hk,
         openalex_institution_id,
         has_openaire,
         has_openalex
@@ -29,7 +27,6 @@ dependency_map AS (
 
 author AS (
     SELECT
-        scholar_author_hk,
         scholar_user_id,
         author_name,
         profile_url,
@@ -38,10 +35,7 @@ author AS (
         has_unlp_verified_email,
         mentions_unlp_affiliation,
         is_unlp_profile,
-        COALESCE(current_cited_by_count::int, 0) AS current_cited_by_count,
-        observation_count,
-        first_seen_datetime,
-        last_seen_datetime
+        COALESCE(cited_by_count::int, 0) AS cited_by_count
     FROM {{ ref('dim_unlp_scholar_author') }}
 ),
 
@@ -71,7 +65,6 @@ author_with_dependency AS (
 
 final AS (
     SELECT
-        author.scholar_author_hk,
         author.scholar_user_id,
         author.author_name,
         author.profile_url,
@@ -80,9 +73,7 @@ final AS (
         '{{ scholar_org_profile_url }}'::text AS scholar_org_profile_url,
         organization.organization_ror,
         organization.organization_name,
-        organization.openaire_organization_hk,
         organization.openaire_organization_id,
-        organization.openalex_institution_hk,
         organization.openalex_institution_id,
         organization.has_openaire,
         organization.has_openalex,
@@ -105,10 +96,7 @@ final AS (
         author.is_unlp_profile,
         TRUE AS is_primary_affiliation,
         'scholar_org_directory'::text AS affiliation_source,
-        author.current_cited_by_count,
-        author.observation_count,
-        author.first_seen_datetime,
-        author.last_seen_datetime
+        author.cited_by_count
     FROM author_with_dependency AS author
     CROSS JOIN organization
     LEFT JOIN dependency_map
@@ -116,4 +104,4 @@ final AS (
 )
 
 SELECT * FROM final
-ORDER BY current_cited_by_count DESC
+ORDER BY cited_by_count DESC

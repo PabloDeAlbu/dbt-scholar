@@ -3,20 +3,20 @@ version: 2
 models:
   - name: dim_unlp_scholar_author
     description: >
-      Dimensión inicial de autores Google Scholar asociados a UNLP. Consolida
-      una fila por `scholar_user_id` usando la última observación disponible del
-      perfil y conserva métricas simples de seguimiento histórico.
+      Dimensión de autores Google Scholar asociados a UNLP. Materializa una
+      fila por `scholar_user_id` tomando una observación representativa del
+      perfil desde `ldg_unlp_scholar_author`, sin modelar histórico.
     config:
       tags: [unlp, dm, scholar]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [scholar_user_id]
     columns:
-      - name: scholar_author_hk
-        description: Clave hash estable del perfil de Scholar.
-        data_tests: [not_null, unique]
       - name: scholar_user_id
         description: Identificador del perfil en Google Scholar.
         data_tests: [not_null, unique]
       - name: author_name
-        description: Nombre visible del perfil en la última observación.
+        description: Nombre visible del perfil.
         data_tests: [not_null]
       - name: profile_url
         description: URL canónica del perfil de Scholar.
@@ -32,10 +32,8 @@ models:
       - name: is_unlp_profile
         description: Flag compuesto para perfilar pertenencia institucional usando email o afiliación.
         data_tests: [not_null]
-      - name: current_cited_by_count
-        description: Cantidad de citas reportada por Scholar en la última observación.
-      - name: cited_by_growth_since_first_seen
-        description: Diferencia entre la cita actual y la mínima observada desde la primera carga.
+      - name: cited_by_count
+        description: Cantidad de citas reportada por Scholar en la observación seleccionada.
       - name: interests_json
         description: Intereses del perfil en formato JSONB normalizado.
       - name: interests
@@ -43,117 +41,14 @@ models:
       - name: interest_count
         description: Cantidad de intereses declarados en el perfil.
         data_tests: [not_null]
-      - name: observation_count
-        description: Cantidad de observaciones históricas disponibles para el perfil.
-        data_tests: [not_null]
-      - name: first_seen_datetime
-        description: Primera fecha-hora en que el perfil fue observado en la tabla cruda.
-        data_tests: [not_null]
-      - name: last_seen_datetime
-        description: Última fecha-hora observada para el perfil.
-        data_tests: [not_null]
-
-  - name: brg_unlp_ir_author_scholar_author
-    description: >
-      Puente de matching entre autores del repositorio UNLP y perfiles de
-      Google Scholar. En la versión actual conserva solo matches exactos por
-      nombre preferido o por variantes observadas del IR, para privilegiar
-      precisión y trazabilidad antes de incorporar heurísticas más laxas.
-    config:
-      tags: [unlp, dm, scholar]
-    data_tests:
-      - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [ir_author_hk, scholar_author_hk]
-    columns:
-      - name: ir_author_hk
-        description: Clave hash del autor IR.
-        data_tests:
-          - not_null
-          - relationships:
-              to: ref('dim_unlp_ir_author')
-              field: ir_author_hk
-      - name: scholar_author_hk
-        description: Clave hash del autor Scholar.
-        data_tests:
-          - not_null
-          - relationships:
-              to: ref('dim_unlp_scholar_author')
-              field: scholar_author_hk
-      - name: ir_author_name
-        description: Nombre preferido del autor en el IR.
-        data_tests: [not_null]
-      - name: scholar_author_name
-        description: Nombre visible del perfil Scholar.
-        data_tests: [not_null]
-      - name: authority
-        description: Clave de autoridad DSpace del autor IR cuando existe.
-      - name: has_authority_control
-        description: Flag que indica si el autor IR está controlado por authority.
-        data_tests: [not_null]
-      - name: scholar_user_id
-        description: Identificador del perfil en Google Scholar.
-        data_tests: [not_null]
-      - name: is_unlp_profile
-        description: Flag compuesto de pertenencia institucional derivado del perfil Scholar.
-        data_tests: [not_null]
-      - name: match_method
-        description: Método usado para generar el match.
-        data_tests: [not_null]
-      - name: match_score
-        description: Score heurístico del matching según el método aplicado.
-        data_tests: [not_null]
-      - name: scholar_match_count_for_ir_author
-        description: Cantidad de perfiles Scholar que matchean con el autor IR.
-        data_tests: [not_null]
-      - name: ir_match_count_for_scholar_author
-        description: Cantidad de autores IR que matchean con el perfil Scholar.
-        data_tests: [not_null]
-      - name: is_unique_match
-        description: Flag que indica unicidad del match en ambos sentidos.
-        data_tests: [not_null]
-
-  - name: brg_unlp_ir_author_scholar_author_curated
-    description: >
-      Puente curado manualmente entre autores del IR UNLP y perfiles de Google
-      Scholar, construido a partir del seed
-      `unlp_ir_scholar_author_manual_map`. Solo incluye filas aprobadas.
-    config:
-      tags: [unlp, dm, scholar]
-    data_tests:
-      - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [ir_author_hk, scholar_author_hk]
-    columns:
-      - name: ir_author_hk
-        description: Clave hash del autor IR resuelta desde `authority` o `ir_author_hk`.
-        data_tests:
-          - not_null
-          - relationships:
-              to: ref('dim_unlp_ir_author')
-              field: ir_author_hk
-      - name: scholar_author_hk
-        description: Clave hash del autor Scholar.
-        data_tests:
-          - not_null
-          - relationships:
-              to: ref('dim_unlp_scholar_author')
-              field: scholar_author_hk
-      - name: authority
-        description: Authority del autor IR cuando existe.
-      - name: ir_author_name
-        description: Nombre preferido del autor en el IR.
-        data_tests: [not_null]
-      - name: scholar_user_id
-        description: Identificador del perfil en Google Scholar.
-        data_tests: [not_null]
-      - name: scholar_author_name
-        description: Nombre visible del perfil Scholar.
-        data_tests: [not_null]
-      - name: review_status
-        description: Estado del seed manual; en este modelo debe ser `approved`.
-        data_tests: [not_null]
-      - name: match_method
-        description: Método del match; en este modelo vale `manual_seed`.
-        data_tests: [not_null]
+      - name: source_system
+        description: Sistema fuente informado en la observación seleccionada.
+      - name: entity_type
+        description: Tipo de entidad informado en la observación seleccionada.
+      - name: source_file
+        description: Archivo fuente del que proviene la observación seleccionada.
+      - name: load_datetime
+        description: Fecha-hora de carga de la observación seleccionada.
 
   - name: fct_unlp_scholar_author_affiliation
     description: >
@@ -166,15 +61,8 @@ models:
       tags: [unlp, dm, scholar]
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [scholar_author_hk, organization_ror]
+          combination_of_columns: [scholar_user_id, organization_ror]
     columns:
-      - name: scholar_author_hk
-        description: Clave hash del autor Scholar.
-        data_tests:
-          - not_null
-          - relationships:
-              to: ref('dim_unlp_scholar_author')
-              field: scholar_author_hk
       - name: scholar_user_id
         description: Identificador del perfil en Google Scholar.
         data_tests: [not_null]
