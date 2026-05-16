@@ -2,26 +2,65 @@ version: 2
 
 models:
   - name: stg_vocsedici_person
+    description: >
+      Staging base de personas VOC Sedici a grano de nodo Drupal. Por ahora
+      reexpone el nodo persona desde `ldg_vocsedici_node` sin enriquecimientos
+      de negocio.
     columns:
-      - name: person_hk
+      - name: person_node_id
         data_tests: [not_null]
-      - name: person_bk
+      - name: revision_id
+        data_tests: [not_null]
+      - name: node_uuid
+        data_tests: [not_null]
+      - name: langcode
+        data_tests: [not_null]
+      - name: is_published
+        data_tests: [not_null]
+      - name: load_datetime
         data_tests: [not_null]
 
   - name: stg_vocsedici_institution
+    description: >
+      Staging base de instituciones VOC Sedici a grano de nodo Drupal. Por
+      ahora reexpone el nodo institucional desde `ldg_vocsedici_node` sin
+      enriquecimientos de negocio.
     columns:
-      - name: institution_hk
+      - name: institution_node_id
         data_tests: [not_null]
-      - name: institution_bk
+      - name: revision_id
+        data_tests: [not_null]
+      - name: node_uuid
+        data_tests: [not_null]
+      - name: langcode
+        data_tests: [not_null]
+      - name: is_published
+        data_tests: [not_null]
+      - name: load_datetime
         data_tests: [not_null]
 
   - name: stg_vocsedici_person_affiliation
+    description: >
+      Staging de afiliaciones persona-institución de VOC Sedici construido a
+      partir de paragraphs Drupal de tipo `filiacion`. Cada fila representa una
+      afiliación operacional identificada por `paragraph_id`.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [paragraph_id]
     columns:
-      - name: person_hk
-        data_tests: [not_null]
-      - name: institution_hk
-        data_tests: [not_null]
-      - name: person_institution_hk
-        data_tests: [not_null]
       - name: paragraph_id
+        description: Identificador operativo del paragraph Drupal que materializa la afiliación.
+        data_tests: [not_null, unique]
+      - name: person_node_id
+        description: Nodo persona finalmente resuelto para la afiliación.
+        data_tests: [not_null]
+      - name: institution_node_id
+        description: Nodo institución referenciado por la afiliación.
+        data_tests: [not_null]
+      - name: person_parent_node_id
+        description: Nodo persona padre del paragraph de afiliación en Drupal.
+      - name: person_field_node_id
+        description: Nodo persona referido explícitamente en `field_persona_id`, cuando existe.
+      - name: person_resolution_rule
+        description: Regla usada para resolver la persona entre `parent_id` y `field_persona_id`.
         data_tests: [not_null]

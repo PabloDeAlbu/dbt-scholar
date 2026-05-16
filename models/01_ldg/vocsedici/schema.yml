@@ -512,6 +512,33 @@ models:
         description: Fecha-hora de carga en landing.
         data_tests: [not_null]
 
+  - name: ldg_vocsedici_node__field_padre
+    description: >
+      Normalización mínima del campo Drupal `field_padre`. Conserva el grano
+      por nodo, idioma y posición del valor para exponer la relación
+      jerárquica entre instituciones.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [node_id, langcode, delta]
+    columns:
+      - name: node_id
+        description: Nodo institución hijo dueño del valor del campo.
+        data_tests: [not_null]
+      - name: revision_id
+        description: Revisión del nodo vinculada al valor.
+        data_tests: [not_null]
+      - name: langcode
+        description: Idioma del valor del campo.
+        data_tests: [not_null]
+      - name: delta
+        description: Posición del valor dentro del campo.
+        data_tests: [not_null]
+      - name: parent_institution_node_id
+        description: Identificador del nodo institución padre referenciado por la fuente.
+      - name: _load_datetime
+        description: Fecha-hora de carga en landing.
+        data_tests: [not_null]
+
   - name: ldg_vocsedici_paragraphs_item
     description: >
       Normalización mínima de la tabla base `paragraphs_item` de Drupal para
@@ -567,6 +594,8 @@ models:
         data_tests: [not_null]
       - name: delta
         data_tests: [not_null]
+      - name: persona_node_id
+        description: Identificador del nodo persona referenciado explícitamente por el paragraph.
       - name: _load_datetime
         data_tests: [not_null]
 
@@ -587,6 +616,7 @@ models:
       - name: delta
         data_tests: [not_null]
       - name: institution_node_id
+        description: Identificador del nodo institución apuntado por el paragraph.
         data_tests: [not_null]
       - name: _load_datetime
         data_tests: [not_null]
@@ -607,6 +637,8 @@ models:
         data_tests: [not_null]
       - name: delta
         data_tests: [not_null]
+      - name: fecha_inicio
+        description: Fecha de inicio cargada en el paragraph de afiliación.
       - name: _load_datetime
         data_tests: [not_null]
 
@@ -626,5 +658,7 @@ models:
         data_tests: [not_null]
       - name: delta
         data_tests: [not_null]
+      - name: fecha_fin
+        description: Fecha de fin cargada en el paragraph de afiliación.
       - name: _load_datetime
         data_tests: [not_null]

@@ -7,21 +7,83 @@ models:
       staging normalizado, sin resolver todavía deduplicación ni cruces con
       otras fuentes.
     columns:
-      - name: persona_id
+      - name: person_node_id
         data_tests: [not_null, unique]
-      - name: persona_bk
-        data_tests: [not_null]
       - name: nombre_completo
         description: Nombre visible consolidado a partir de nombre y apellido.
 
   - name: dim_vocsedici_institucion
     description: >
       Dimensión base de instituciones VOC Sedici construida desde el staging
-      normalizado, conservando la granularidad de nodo Drupal.
+      base, conservando la granularidad de nodo Drupal y exponiendo la
+      jerarquía institucional para el árbol de UNLP cuando existe.
     columns:
-      - name: institucion_id
+      - name: institution_node_id
         data_tests: [not_null, unique]
-      - name: institucion_bk
-        data_tests: [not_null]
       - name: nombre_institucion
         description: Nombre principal de la institución en VOC Sedici.
+      - name: parent_institution_node_id
+        description: Identificador de la institución padre inmediata según `field_padre`.
+      - name: nombre_institucion_padre
+        description: Nombre principal de la institución padre inmediata.
+      - name: pertenece_arbol_unlp
+        description: Flag que indica si la institución pertenece al árbol cuya raíz es `Universidad Nacional de La Plata`.
+      - name: nivel_arbol_unlp
+        description: Distancia jerárquica desde la raíz UNLP; la raíz vale 0.
+      - name: raiz_unlp_node_id
+        description: Identificador del nodo raíz UNLP para las instituciones que pertenecen a ese árbol.
+      - name: raiz_unlp_nombre
+        description: Nombre del nodo raíz UNLP para las instituciones que pertenecen a ese árbol.
+      - name: unidad_principal_unlp_node_id
+        description: Primer nodo hijo de UNLP en la ruta jerárquica de la institución.
+      - name: unidad_principal_unlp_nombre
+        description: Nombre del primer nodo hijo de UNLP en la ruta jerárquica de la institución.
+      - name: jerarquia_unlp
+        description: Ruta jerárquica textual desde UNLP hasta la institución, separada por ` > `.
+
+  - name: fct_vocsedici_persona_afiliacion
+    description: >
+      Fact table de afiliaciones persona-institución de VOC Sedici. Expone una
+      fila por afiliación Drupal (`paragraph_id`) y enlaza las dimensiones
+      `dim_vocsedici_persona` y `dim_vocsedici_institucion` junto con la
+      vigencia temporal observada en la fuente.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [paragraph_id]
+    columns:
+      - name: paragraph_id
+        description: Identificador operativo del paragraph Drupal que representa la afiliación.
+        data_tests: [not_null, unique]
+      - name: person_node_id
+        description: Identificador de la persona VOC Sedici en la dimensión.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_vocsedici_persona')
+              field: person_node_id
+      - name: institution_node_id
+        description: Identificador de la institución VOC Sedici en la dimensión.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_vocsedici_institucion')
+              field: institution_node_id
+      - name: person_parent_node_id
+        description: Nodo persona padre del paragraph de afiliación en Drupal.
+      - name: person_field_node_id
+        description: Nodo persona referido explícitamente en `field_persona_id`, cuando existe.
+      - name: person_resolution_rule
+        description: Regla operativa usada para resolver la persona de la afiliación.
+        data_tests: [not_null]
+      - name: fecha_inicio
+        description: Fecha de inicio observada en la afiliación Drupal.
+      - name: fecha_fin
+        description: Fecha de fin observada en la afiliación Drupal.
+      - name: esta_vigente_hoy
+        description: Flag derivado de `fecha_inicio` y `fecha_fin` respecto de la fecha actual.
+        data_tests: [not_null]
+      - name: fecha_creacion_afiliacion
+        description: Fecha de creación técnica del paragraph de afiliación en Drupal.
+      - name: vigente_desde
+        description: Mejor estimación del inicio de vigencia técnica de la afiliación.
+        data_tests: [not_null]
