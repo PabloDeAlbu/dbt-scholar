@@ -1,34 +1,33 @@
 {{ config(materialized='table') }}
 
-WITH base AS (
-    SELECT item_hk
-    FROM {{ ref('fct_dspacedb5_item_publication') }}
-    WHERE institution_ror = 'https://ror.org/01tjs6929'
-      AND discoverable = TRUE
-      AND in_archive = TRUE
-      AND withdrawn = FALSE
-),
-id AS (
+WITH
+distinct_type AS (
     SELECT DISTINCT
-        b.item_hk
-    FROM base AS b
-    INNER JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
-        USING (item_hk)
-    WHERE mv.metadatafield_fullname = 'dc.identifier.uri'
-      AND mv.text_value ~ '^https?://sedici[.]unlp[.]edu[.]ar/handle/10915'
+        type AS text_value
+    FROM {{ ref('fct_unlp_ir_item_publication') }}
+    WHERE NULLIF(TRIM(type), '') IS NOT NULL
 ),
-dc_type AS (
-    SELECT DISTINCT
-        b.item_hk,
-        mv.text_value
-    FROM base AS b
-    INNER JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
-        USING (item_hk)
-    WHERE mv.metadatafield_fullname = 'dc.type'
-      AND NULLIF(TRIM(mv.text_value), '') IS NOT NULL
+typed AS (
+    SELECT
+        dt.text_value,
+        seed.label_es AS resource_type_label_es,
+        seed.coar_uri AS resource_type_uri,
+        (seed.type IS NOT NULL) AS matches_seed_mapping
+    FROM distinct_type AS dt
+    LEFT JOIN {{ ref('seed_sedici-types2coar-types') }} AS seed
+      ON LOWER(BTRIM(dt.text_value)) = LOWER(BTRIM(seed.type))
 )
 
-SELECT DISTINCT dc_type.text_value
-FROM dc_type
-INNER JOIN id
-    USING (item_hk)
+SELECT
+    text_value,
+    resource_type_label_es,
+    resource_type_uri,
+    matches_seed_mapping,
+    CASE
+        WHEN resource_type_uri = 'http://purl.org/coar/resource_type/c_2f33' THEN 'book'
+        WHEN resource_type_uri = 'http://purl.org/coar/resource_type/c_46ec' THEN 'thesis'
+        WHEN LOWER(text_value) LIKE '%libro%' THEN 'book'
+        WHEN LOWER(text_value) LIKE '%tesis%' THEN 'thesis'
+        ELSE 'other'
+    END AS item_type_group
+FROM typed

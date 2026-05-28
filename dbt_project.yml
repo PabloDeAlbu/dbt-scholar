@@ -46,12 +46,6 @@ models:
       dspacedb5:
         +schema: dspacedb5
         +tags: [dspacedb5]
-      dspace:
-        +schema: dspace
-        +tags: [dspace]
-      dspace5:
-        +schema: dspace5
-        +tags: [dspace5]
       oai:
         +schema: oai
         +tags: [oai]
@@ -74,12 +68,6 @@ models:
       dspacedb5:
         +schema: dspacedb5
         +tags: [dspacedb5]
-      dspace:
-        +schema: dspace
-        +tags: [dspace]
-      dspace5:
-        +schema: dspace5
-        +tags: [dspace5]
       oai:
         +schema: oai
         +tags: [oai]
@@ -119,12 +107,6 @@ models:
         dspacedb5:
           +schema: dspacedb5
           +tags: [dspacedb5]
-        dspace:
-          +schema: dspace
-          +tags: [dspace]
-        dspace5:
-          +schema: dspace5
-          +tags: [dspace5]
         oai:
           +schema: oai
           +tags: [oai]

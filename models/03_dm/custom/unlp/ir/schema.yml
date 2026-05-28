@@ -417,7 +417,11 @@ models:
         description: Orden/posición cruda del valor de metadato dentro del item.
 
   - name: dim_unlp_ir_item_type
-    description: Dimensión auxiliar de tipologías declaradas en `dc.type` (repositorio UNLP).
+    description: >
+      Dimensión auxiliar de tipologías declaradas en `dc.type` para el universo
+      curado de `fct_unlp_ir_item_publication`. Funciona como capa de matching
+      contra seeds de tipos Sedici, análoga al uso de seeds de mapeo COAR en
+      otras partes del proyecto.
     config:
       tags: [unlp, dm]
     columns:
@@ -425,3 +429,18 @@ models:
         description: Valor textual de `dc.type`.
         data_tests:
           - not_null
+          - unique
+      - name: resource_type_label_es
+        description: Etiqueta COAR en español resuelta desde el seed de tipos Sedici, cuando existe mapeo.
+      - name: resource_type_uri
+        description: URI COAR resuelta desde el seed de tipos Sedici, cuando existe mapeo.
+      - name: matches_seed_mapping
+        description: Flag que indica si el valor de `dc.type` encontró mapeo exacto en el seed de tipos Sedici.
+        data_tests:
+          - not_null
+      - name: item_type_group
+        description: Clasificación operativa resumida del tipo (`book`, `thesis`, `other`).
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['book', 'thesis', 'other']
