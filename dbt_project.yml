@@ -154,10 +154,6 @@ models:
             +schema: unlp_openaire
           sedici:
             +schema: unlp_sedici
-          sedici_openalex:
-            +schema: unlp_sedici_openalex
-          sedici_scholar_coverage:
-            +schema: unlp_sedici_scholar_coverage
 seeds:
   dbt_scholar:
     coar:
