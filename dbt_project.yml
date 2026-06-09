@@ -189,12 +189,12 @@ seeds:
           batch_name: text
           mapfile_item_key: text
           sedici_item_id: integer
-      seed_unlp_scholar_dependency_domain:
+      seed_unlp_domain_unit_map:
         +column_types:
           dependency_domain: text
           dependency_domain_label: text
           dependency_name: text
-          faculty_name: text
+          parent_unit_name: text
 
 data_tests:
   +store_failures: true

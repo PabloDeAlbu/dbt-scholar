@@ -90,13 +90,14 @@ models:
           `ing.unlp.edu.ar -> ing` y `unlp.edu.ar -> unlp`.
       - name: dependency_name
         description: >
-          Nombre legible de la dependencia o unidad académica asociado a
+          Nombre legible de la dependencia específica asociado a
           `dependency_domain`, resuelto desde el seed
-          `seed_unlp_scholar_dependency_domain`.
-      - name: faculty_name
+          `seed_unlp_domain_unit_map`.
+      - name: parent_unit_name
         description: >
-          Facultad o unidad madre asociada a la dependencia, resuelta desde el
-          seed `seed_unlp_scholar_dependency_domain`.
+          Unidad institucional superior asociada a la dependencia, resuelta
+          desde el seed `seed_unlp_domain_unit_map`. Puede ser una
+          facultad, la UNLP u otra unidad madre según corresponda.
       - name: organization_ror
         description: ROR institucional de UNLP.
         data_tests:

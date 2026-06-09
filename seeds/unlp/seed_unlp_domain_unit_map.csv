@@ -1,4 +1,4 @@
-dependency_domain,dependency_domain_label,dependency_name,faculty_name
+dependency_domain,dependency_domain_label,dependency_name,parent_unit_name
 unlp.edu.ar,unlp,Universidad Nacional de La Plata,Universidad Nacional de La Plata
 fcnym.unlp.edu.ar,fcnym,Facultad de Ciencias Naturales y Museo,Facultad de Ciencias Naturales y Museo
 fahce.unlp.edu.ar,fahce,Facultad de Humanidades y Ciencias de la Educacion,Facultad de Humanidades y Ciencias de la Educacion

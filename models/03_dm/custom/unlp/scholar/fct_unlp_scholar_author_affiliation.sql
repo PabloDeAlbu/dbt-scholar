@@ -21,8 +21,8 @@ dependency_map AS (
         dependency_domain,
         dependency_domain_label,
         dependency_name,
-        faculty_name
-    FROM {{ ref('seed_unlp_scholar_dependency_domain') }}
+        parent_unit_name
+    FROM {{ ref('seed_unlp_domain_unit_map') }}
 ),
 
 author AS (
@@ -90,7 +90,7 @@ final AS (
                 ELSE author.dependency_domain
             END
         ) AS dependency_name,
-        dependency_map.faculty_name,
+        dependency_map.parent_unit_name,
         author.has_unlp_verified_email,
         author.mentions_unlp_affiliation,
         author.is_unlp_profile,
