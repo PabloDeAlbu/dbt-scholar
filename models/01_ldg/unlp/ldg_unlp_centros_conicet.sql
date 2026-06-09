@@ -2,7 +2,7 @@
 
 WITH source AS (
     SELECT *
-    FROM {{ ref('centros_conicet_unlp') }}
+    FROM {{ ref('seed_centros_conicet_unlp') }}
 ),
 
 renamed AS (

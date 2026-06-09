@@ -5,7 +5,7 @@ models:
     description: >
       Dimensión de autores Google Scholar asociados a UNLP. Materializa una
       fila por `scholar_user_id` tomando una observación representativa del
-      perfil desde `ldg_unlp_scholar_author`, sin modelar histórico.
+      perfil desde `ldg_gs_author`, sin modelar histórico.
     config:
       tags: [unlp, dm, scholar]
     data_tests:

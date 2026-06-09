@@ -37,6 +37,9 @@ models:
       coar:
         +schema: coar
         +tags: [coar]
+      gs:
+        +schema: gs
+        +tags: [gs]
       unlp:
         +schema: unlp
         +tags: [unlp]
@@ -81,19 +84,6 @@ models:
         +schema: vocsedici
         +tags: [vocsedici]
     03_dm:
-      audit:
-        +schema: audit
-        +tags: [audit]
-        oai:
-          +tags: [oai]
-        dspacedb:
-          +tags: [dspacedb]
-        dspacedb5:
-          +tags: [dspacedb5]
-        openaire:
-          +tags: [openaire]
-        openalex:
-          +tags: [openalex]
       core:
         # Models in models/03_dm/core/ root build in dm_core.
         # Subdirectories can override +schema and build in dm_<subschema>.
@@ -188,7 +178,7 @@ seeds:
     unlp:
       +schema: unlp
       +tags: [unlp]
-      centros_conicet_unlp:
+      seed_centros_conicet_unlp:
         +column_types:
           set_spec: text
           pdf_share_pct: text
@@ -198,19 +188,11 @@ seeds:
           sedici_article_count: text
           manual_status: text
           ingest_note: text
-      conicet_sedici_imported_items:
+      seed_conicet_sedici_imported_items:
         +column_types:
           batch_name: text
           mapfile_item_key: text
           sedici_item_id: integer
-      unlp_ir_scholar_author_manual_map:
-        +column_types:
-          authority: text
-          ir_author_hk: text
-          scholar_user_id: text
-          review_status: text
-          review_note: text
-          reviewer: text
       seed_unlp_scholar_dependency_domain:
         +column_types:
           dependency_domain: text
