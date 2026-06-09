@@ -56,3 +56,23 @@ models:
       - name: load_datetime
         data_tests:
           - not_null
+
+  - name: audit_openaire_researchproduct_extract_duplicates
+    description: >
+      Auditoría de filas duplicadas observadas en la fuente cruda de OpenAIRE para la misma
+      combinación de research product, criterio de extracción y timestamps técnicos.
+    config:
+      tags: [audit, openaire]
+    columns:
+      - name: researchproduct_id
+        data_tests: [not_null]
+      - name: _filter_param
+        data_tests: [not_null]
+      - name: _filter_value
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+      - name: extract_datetime
+        data_tests: [not_null]
+      - name: row_count
+        data_tests: [not_null]

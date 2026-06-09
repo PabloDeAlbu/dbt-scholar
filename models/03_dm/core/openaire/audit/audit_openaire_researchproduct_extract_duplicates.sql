@@ -30,4 +30,3 @@ agg AS (
 SELECT *
 FROM agg
 WHERE row_count > 1
-
