@@ -1,0 +1,166 @@
+version: 2
+
+models:
+  - name: viz_unlp_sedici_14365_libros
+    description: >
+      Cruce operativo del listado de libros de cátedra FDA contra
+      `fct_unlp_ir_item_publication`, buscando candidatos de linkeo exacto por
+      título normalizado.
+    config:
+      tags: [viz, unlp]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [seed_row_id, item_hk]
+    columns:
+      - name: seed_row_id
+        description: Identificador técnico de la fila del seed.
+        data_tests: [not_null]
+      - name: id_koha
+        description: Identificador del registro en Koha dentro del listado de origen.
+      - name: seed_title
+        description: Título del listado usado para el cruce por texto.
+        data_tests: [not_null]
+      - name: seed_author
+        description: Autor principal informado por el listado cuando existe.
+      - name: seed_year_raw
+        description: Año o referencia temporal cruda tomada del listado de origen.
+      - name: titulo_completo
+        description: Columna original del seed `libros_catedra_fda_koha_sedici_cruce_2026`.
+      - name: autor_100a
+        description: Columna original del seed `libros_catedra_fda_koha_sedici_cruce_2026`.
+      - name: serie
+        description: Columna original del seed `libros_catedra_fda_koha_sedici_cruce_2026`.
+      - name: lugar
+        description: Columna original del seed `libros_catedra_fda_koha_sedici_cruce_2026`.
+      - name: editor
+        description: Columna original del seed `libros_catedra_fda_koha_sedici_cruce_2026`.
+      - name: fecha
+        description: Columna original del seed `libros_catedra_fda_koha_sedici_cruce_2026`.
+      - name: seed_title_match_key
+        description: Clave de texto normalizada usada para comparar el título del seed.
+      - name: seed_title_base_match_key
+        description: Clave de texto normalizada del título base del seed antes de `:` o `/`.
+      - name: item_hk
+        description: Hash key del ítem SEDICI candidato al match.
+      - name: item_id
+        description: ID original del ítem candidato en DSpace 5.
+      - name: institutional_uri
+        description: Handle/URI institucional del ítem candidato.
+      - name: ir_title
+        description: Título del ítem SEDICI que matcheó por título normalizado.
+      - name: ir_author
+        description: Autores del ítem SEDICI candidato.
+      - name: ir_type
+        description: Tipo `dc.type` del ítem SEDICI candidato.
+      - name: ir_subtype
+        description: Subtipo Sedici del ítem SEDICI candidato.
+      - name: date_issued
+        description: Fecha de publicación normalizada del ítem SEDICI candidato.
+      - name: date_accessioned
+        description: Fecha de alta en SEDICI del ítem candidato.
+      - name: isbn
+        description: ISBN declarados para el ítem SEDICI candidato.
+      - name: doi
+        description: DOI declarados para el ítem SEDICI candidato.
+      - name: owning_collection_title
+        description: Colección dueña del ítem SEDICI candidato.
+      - name: owning_community_title
+        description: Comunidad dueña inmediata del ítem SEDICI candidato.
+      - name: owning_root_community_title
+        description: Comunidad raíz de la rama dueña del ítem SEDICI candidato.
+      - name: ir_title_match_key
+        description: Clave de texto normalizada del título IR usada en el join.
+      - name: ir_title_base_match_key
+        description: Clave de texto normalizada del título base IR antes de `:` o `/`.
+      - name: title_match_strategy
+        description: Estrategia que produjo el match (`full` o `base`).
+      - name: title_match_count
+        description: Cantidad de candidatos SEDICI encontrados para la fila del seed.
+        data_tests: [not_null]
+      - name: title_match_rank
+        description: Orden del candidato dentro de cada fila del seed.
+      - name: has_title_match
+        description: Flag que indica si la fila del seed tuvo al menos un candidato por título.
+        data_tests: [not_null]
+
+  - name: viz_unlp_sedici_14365_tesis
+    description: >
+      Cruce operativo del listado de tesis FDA contra
+      `fct_unlp_ir_item_publication`, buscando candidatos de linkeo exacto por
+      título normalizado.
+    config:
+      tags: [viz, unlp]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [seed_row_id, item_hk]
+    columns:
+      - name: seed_row_id
+        description: Identificador técnico de la fila del seed.
+        data_tests: [not_null]
+      - name: id_koha
+        description: Identificador del registro en Koha dentro del listado de origen.
+      - name: seed_title
+        description: Título del listado usado para el cruce por texto.
+        data_tests: [not_null]
+      - name: seed_author
+        description: Autor principal informado por el listado cuando existe.
+      - name: seed_year_raw
+        description: Año o referencia temporal cruda tomada del listado de origen.
+      - name: titulo
+        description: Columna original del seed `tesis_fda_koha_sedici_cruce_2026`.
+      - name: autor
+        description: Columna original del seed `tesis_fda_koha_sedici_cruce_2026`.
+      - name: anio_publicacion
+        description: Columna original del seed `tesis_fda_koha_sedici_cruce_2026`.
+      - name: tipo_tesis
+        description: Columna original del seed `tesis_fda_koha_sedici_cruce_2026`.
+      - name: institucion
+        description: Columna original del seed `tesis_fda_koha_sedici_cruce_2026`.
+      - name: anio_titulo
+        description: Columna original del seed `tesis_fda_koha_sedici_cruce_2026`.
+      - name: seed_title_match_key
+        description: Clave de texto normalizada usada para comparar el título del seed.
+      - name: seed_title_base_match_key
+        description: Clave de texto normalizada del título base del seed antes de `:` o `/`.
+      - name: item_hk
+        description: Hash key del ítem SEDICI candidato al match.
+      - name: item_id
+        description: ID original del ítem candidato en DSpace 5.
+      - name: institutional_uri
+        description: Handle/URI institucional del ítem candidato.
+      - name: ir_title
+        description: Título del ítem SEDICI que matcheó por título normalizado.
+      - name: ir_author
+        description: Autores del ítem SEDICI candidato.
+      - name: ir_type
+        description: Tipo `dc.type` del ítem SEDICI candidato.
+      - name: ir_subtype
+        description: Subtipo Sedici del ítem SEDICI candidato.
+      - name: date_issued
+        description: Fecha de publicación normalizada del ítem SEDICI candidato.
+      - name: date_accessioned
+        description: Fecha de alta en SEDICI del ítem candidato.
+      - name: isbn
+        description: ISBN declarados para el ítem SEDICI candidato.
+      - name: doi
+        description: DOI declarados para el ítem SEDICI candidato.
+      - name: owning_collection_title
+        description: Colección dueña del ítem SEDICI candidato.
+      - name: owning_community_title
+        description: Comunidad dueña inmediata del ítem SEDICI candidato.
+      - name: owning_root_community_title
+        description: Comunidad raíz de la rama dueña del ítem SEDICI candidato.
+      - name: ir_title_match_key
+        description: Clave de texto normalizada del título IR usada en el join.
+      - name: ir_title_base_match_key
+        description: Clave de texto normalizada del título base IR antes de `:` o `/`.
+      - name: title_match_strategy
+        description: Estrategia que produjo el match (`full` o `base`).
+      - name: title_match_count
+        description: Cantidad de candidatos SEDICI encontrados para la fila del seed.
+        data_tests: [not_null]
+      - name: title_match_rank
+        description: Orden del candidato dentro de cada fila del seed.
+      - name: has_title_match
+        description: Flag que indica si la fila del seed tuvo al menos un candidato por título.
+        data_tests: [not_null]

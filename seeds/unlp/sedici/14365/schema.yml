@@ -1,0 +1,42 @@
+version: 2
+
+seeds:
+  - name: libros_catedra_fda_koha_sedici_cruce_2026
+    description: >
+      Listado adjunto de libros de cátedra FDA/Artes usado para cruzar contra
+      SEDICI y apoyar el doble linkeo con el catálogo.
+    columns:
+      - name: id_koha
+        description: Identificador del registro en Koha.
+      - name: titulo_completo
+        description: Título completo del registro en el catálogo.
+      - name: autor_100a
+        description: Autor principal tal como figura en el campo MARC 100a.
+      - name: serie
+        description: Serie o colección declarada en el listado.
+      - name: lugar
+        description: Lugar de edición declarado en el listado.
+      - name: editor
+        description: Editorial declarada en el listado.
+      - name: fecha
+        description: Año o fecha declarada en el listado.
+
+  - name: tesis_fda_koha_sedici_cruce_2026
+    description: >
+      Listado adjunto de tesis FDA/Artes usado para cruzar contra SEDICI y
+      apoyar el doble linkeo con el catálogo.
+    columns:
+      - name: id_koha
+        description: Identificador del registro en Koha.
+      - name: titulo
+        description: Título del registro en el catálogo.
+      - name: autor
+        description: Autor principal del registro.
+      - name: anio_publicacion
+        description: Año de publicación informado por el listado.
+      - name: tipo_tesis
+        description: Tipo o carrera de tesis declarada en el listado.
+      - name: institucion
+        description: Institución declarada en el listado.
+      - name: anio_titulo
+        description: Año de titulación o referencia temporal asociada al título.
