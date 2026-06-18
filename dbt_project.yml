@@ -37,9 +37,9 @@ models:
       coar:
         +schema: coar
         +tags: [coar]
-      gs:
-        +schema: gs
-        +tags: [gs]
+      google_scholar:
+        +schema: google_scholar
+        +tags: [google_scholar]
       unlp:
         +schema: unlp
         +tags: [unlp]

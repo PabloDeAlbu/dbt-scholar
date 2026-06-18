@@ -1,12 +1,12 @@
 version: 2
 
 sources:
-  - name: gs
+  - name: google_scholar
     description: >
       Extracción tabular de Google Scholar a nivel de perfiles de autor
       observados para UNLP. La tabla conserva observaciones crudas por corrida y
       se usa como insumo inicial para seguimiento institucional de perfiles.
-    schema: ldg_gs
+    schema: ldg_google_scholar
     tables:
       - name: author
         description: >
@@ -30,13 +30,13 @@ sources:
             data_tests: [not_null]
 
 models:
-  - name: ldg_gs_author
+  - name: ldg_google_scholar_author
     description: >
       Normalización mínima de perfiles de Google Scholar observados para UNLP.
       Conserva el historial de observaciones por perfil y parsea señales
       operativas como dominio de email verificado, intereses y afiliación.
     config:
-      tags: [gs, unlp]
+      tags: [google_scholar, unlp]
     data_tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns: [scholar_user_id, load_datetime, source_file]

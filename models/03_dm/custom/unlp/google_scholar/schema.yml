@@ -1,13 +1,13 @@
 version: 2
 
 models:
-  - name: dim_unlp_scholar_author
+  - name: dim_unlp_google_scholar_author
     description: >
       Dimensión de autores Google Scholar asociados a UNLP. Materializa una
       fila por `scholar_user_id` tomando una observación representativa del
-      perfil desde `ldg_gs_author`, sin modelar histórico.
+      perfil desde `ldg_google_scholar_author`, sin modelar histórico.
     config:
-      tags: [unlp, dm, scholar]
+      tags: [unlp, dm, google_scholar]
     data_tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns: [scholar_user_id]
@@ -50,15 +50,15 @@ models:
       - name: load_datetime
         description: Fecha-hora de carga de la observación seleccionada.
 
-  - name: fct_unlp_scholar_author_affiliation
+  - name: fct_unlp_google_scholar_author_affiliation
     description: >
       Fact table de afiliación institucional para perfiles Google Scholar de
-      UNLP. Materializa una fila por autor de `dim_unlp_scholar_author`
+      UNLP. Materializa una fila por autor de `dim_unlp_google_scholar_author`
       asociándolo a la organización UNLP, tomando como evidencia operativa el
       directorio institucional de Scholar (`org=18050997564342690566`) y
       enriqueciendo el label desde `dim_organization` vía ROR.
     config:
-      tags: [unlp, dm, scholar]
+      tags: [unlp, dm, google_scholar]
     data_tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns: [scholar_user_id, organization_ror]

@@ -36,7 +36,7 @@ author AS (
         mentions_unlp_affiliation,
         is_unlp_profile,
         COALESCE(cited_by_count::int, 0) AS cited_by_count
-    FROM {{ ref('dim_unlp_scholar_author') }}
+    FROM {{ ref('dim_unlp_google_scholar_author') }}
 ),
 
 author_with_dependency AS (
