@@ -10,6 +10,8 @@
     dv_{{ trimmed_name }}
   {%- elif path.startswith('models/03_dm/') -%}
     dm_{{ trimmed_name }}
+  {%- elif path.startswith('models/04_org/') -%}
+    dm_{{ trimmed_name }}
   {%- elif path.startswith('models/04_viz/') -%}
     viz_{{ trimmed_name }}
   {%- elif path.startswith('models/sources/') -%}

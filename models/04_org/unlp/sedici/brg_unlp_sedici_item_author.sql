@@ -1,22 +1,44 @@
 {{ config(materialized='table') }}
 
-WITH author_observation AS (
+WITH metadata_base AS (
     SELECT
-        item.item_hk,
-        item.item_id,
-        item.source_label,
-        item.institution_ror,
+        item_hk,
+        metadata_value_id,
+        metadatafield_fullname,
+        text_value AS author_name_raw,
+        authority,
+        confidence,
+        place
+    FROM {{ ref('fct_dspacedb5_item_metadata') }}
+    WHERE institution_ror = 'https://ror.org/01tjs6929'
+      AND metadatafield_fullname IN ('sedici.creator.person', 'sedici.creator.corporate')
+      AND NULLIF(TRIM(text_value), '') IS NOT NULL
+),
+
+item_scope AS (
+    SELECT
+        item_hk,
+        item_id,
+        source_label,
+        institution_ror
+    FROM {{ ref('fct_unlp_sedici_item_publication') }}
+),
+
+author_observation AS (
+    SELECT
+        item_scope.item_hk,
+        item_scope.item_id,
+        item_scope.source_label,
+        item_scope.institution_ror,
         metadata.metadata_value_id,
         metadata.metadatafield_fullname,
-        metadata.text_value AS author_name_raw,
+        metadata.author_name_raw,
         metadata.authority,
         metadata.confidence,
         metadata.place
-    FROM {{ ref('fct_unlp_ir_item_publication') }} AS item
-    INNER JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS metadata
+    FROM metadata_base AS metadata
+    INNER JOIN item_scope
         USING (item_hk)
-    WHERE metadata.metadatafield_fullname IN ('sedici.creator.person', 'sedici.creator.corporate')
-      AND NULLIF(TRIM(metadata.text_value), '') IS NOT NULL
 ),
 
 normalized AS (
@@ -60,40 +82,24 @@ normalized AS (
     FROM author_observation
 ),
 
-aggregated AS (
-    SELECT
-        author_bk,
-        MIN(author_name_raw) AS author_name_preferred,
-        MIN(author_name_normalized) AS author_name_normalized,
-        MIN(author_type) AS author_type,
-        MIN(authority) AS authority,
-        BOOL_OR(authority IS NOT NULL) AS has_authority_control,
-        MIN(confidence) AS min_confidence,
-        MAX(confidence) AS max_confidence,
-        COUNT(DISTINCT author_name_raw)::integer AS observed_name_variant_count,
-        COUNT(DISTINCT item_hk)::integer AS item_count,
-        MIN(source_label) AS source_label,
-        MIN(institution_ror) AS institution_ror
-    FROM normalized
-    GROUP BY author_bk
-),
-
 final AS (
     SELECT
-        {{ automate_dv.hash(columns='author_bk', alias='ir_author_hk') }},
-        author_bk,
-        author_name_preferred,
-        author_name_normalized,
+        item_hk,
+        item_id,
+        {{ automate_dv.hash(columns='author_bk', alias='sedici_author_hk') }},
+        metadata_value_id,
+        metadatafield_fullname,
         author_type,
+        author_name_raw,
+        author_name_normalized,
         authority,
-        has_authority_control,
-        min_confidence,
-        max_confidence,
-        observed_name_variant_count,
-        item_count,
+        (authority IS NOT NULL) AS has_authority_control,
+        confidence,
+        place AS author_place,
         source_label,
         institution_ror
-    FROM aggregated
+    FROM normalized
 )
 
-SELECT * FROM final
+SELECT *
+FROM final

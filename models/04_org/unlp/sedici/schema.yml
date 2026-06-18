@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: fct_unlp_sedici_item_publication
+    description: >
+      Hecho institucional fuente-específico de publicaciones SEDICI/UNLP a
+      nivel de ítem, construido sobre `fct_dspacedb5_item_publication` con
+      filtro institucional y enriquecido con metadatos descriptivos, PIDs
+      normalizados y contexto técnico del ítem. Es la base institucional
+      canónica de SEDICI para el modelado organizacional de UNLP.

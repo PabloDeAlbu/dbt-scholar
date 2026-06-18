@@ -51,7 +51,7 @@ submitter_activity AS (
         MAX(last_extract_datetime) AS last_submitter_extract_datetime,
         MIN(first_load_datetime) AS first_submitter_load_datetime,
         MAX(last_load_datetime) AS last_submitter_load_datetime
-    FROM {{ ref('fct_unlp_ir_item_publication') }}
+    FROM {{ ref('fct_unlp_sedici_item_publication') }}
     WHERE submitter_id IS NOT NULL
       AND submitter_id <> -1
     GROUP BY submitter_id

@@ -127,10 +127,12 @@ models:
       - name: institution_ror
         data_tests: [not_null]
 
-  - name: fct_dspacedb5_item_community
+  - name: brg_dspacedb5_item_community
     description: >
-      Hecho analítico item-colección-comunidad para DSpace 5. Permite agrupar ítems por comunidad
-      inmediata o comunidad raíz y filtrar por ramas jerárquicas específicas.
+      Bridge analítica item-colección-comunidad para DSpace 5. Representa la
+      pertenencia de cada ítem publicado a sus colecciones y comunidades
+      asociadas, y permite agrupar por comunidad inmediata o raíz y filtrar por
+      ramas jerárquicas específicas.
     config:
       tags: [dspacedb5, dm]
     data_tests:

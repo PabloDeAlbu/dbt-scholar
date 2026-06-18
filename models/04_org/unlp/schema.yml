@@ -4,20 +4,20 @@ models:
   - name: fct_unlp_publication
     description: >
       Hecho institucional principal de publicaciones UNLP, basado en
-      `fct_unlp_ir_item_publication` como universo del repositorio institucional
+      `fct_unlp_sedici_item_publication` como universo del repositorio institucional
       y enriquecido con OpenAlex por DOI exacto y único y con OpenAIRE por
       identificador original del repositorio. Este modelo representa
-      publicaciones del IR y no un universo deduplicado general entre todas las fuentes.
+      publicaciones de SEDICI y no un universo deduplicado general entre todas las fuentes.
     config:
       tags: [unlp, dm]
     data_tests:
       - dbt_utils.equal_rowcount:
-          compare_model: ref('fct_unlp_ir_item_publication')
+          compare_model: ref('fct_unlp_sedici_item_publication')
           config:
             where: "discoverable = true and in_archive = true and withdrawn = false"
     columns:
       - name: publication_hk
-        description: Identificador técnico de la publicación institucional, alineado al `item_hk` del IR.
+        description: Identificador técnico de la publicación institucional, alineado al `item_hk` de SEDICI.
         data_tests: [not_null, unique]
       - name: item_hk
         description: Clave hash del ítem del repositorio institucional.
@@ -25,13 +25,13 @@ models:
           - not_null
           - unique
           - relationships:
-              to: ref('fct_unlp_ir_item_publication')
+              to: ref('fct_unlp_sedici_item_publication')
               field: item_hk
       - name: item_id
         description: ID original del ítem en DSpace 5.
         data_tests: [not_null]
       - name: source_system
-        description: Sistema fuente base del hecho institucional; en este modelo vale `ir`.
+        description: Sistema fuente base del hecho institucional; en este modelo vale `sedici`.
         data_tests: [not_null]
       - name: source_label
         description: Etiqueta técnica de la fuente de extracción del repositorio.
@@ -45,17 +45,17 @@ models:
       - name: dc_identifier_uri_raw
         description: Valores crudos observados para `dc.identifier.uri` concatenados para auditoría.
       - name: publication_date
-        description: Fecha de publicación declarada en el IR.
+        description: Fecha de publicación declarada en SEDICI.
       - name: publication_year
         description: Año derivado de `publication_date` cuando existe.
       - name: date_accessioned
         description: Fecha de alta del ítem en el repositorio institucional.
       - name: title
-        description: Título principal de la publicación en el IR.
+        description: Título principal de la publicación en SEDICI.
       - name: subtitle
         description: Títulos alternativos o subtítulos concatenados con `|`.
       - name: publication_type
-        description: Tipología declarada para la publicación en el IR.
+        description: Tipología declarada para la publicación en SEDICI.
       - name: description
         description: Descripciones o abstracts concatenados con `|`.
       - name: subject
@@ -63,7 +63,7 @@ models:
       - name: subtype
         description: Subtipos SEDICI concatenados con `|`.
       - name: author
-        description: Autores declarados en el IR, concatenados con `|`.
+        description: Autores declarados en SEDICI, concatenados con `|`.
       - name: author_count
         description: Cantidad de autores distintos detectados para la publicación.
         data_tests: [not_null]
@@ -75,18 +75,18 @@ models:
         description: Flag que indica si el ítem tiene al menos un DOI normalizado.
         data_tests: [not_null]
       - name: doi_count
-        description: Cantidad de DOI normalizados detectados en los metadatos del IR.
+        description: Cantidad de DOI normalizados detectados en los metadatos de SEDICI.
         data_tests: [not_null]
       - name: doi
-        description: DOI normalizados declarados en el IR, concatenados con `|`.
+        description: DOI normalizados declarados en SEDICI, concatenados con `|`.
       - name: has_handle
         description: Flag que indica si el ítem tiene al menos un handle normalizado.
         data_tests: [not_null]
       - name: handle_count
-        description: Cantidad de handles normalizados detectados en los metadatos del IR.
+        description: Cantidad de handles normalizados detectados en los metadatos de SEDICI.
         data_tests: [not_null]
       - name: handle
-        description: Handles normalizados declarados en el IR, concatenados con `|`.
+        description: Handles normalizados declarados en SEDICI, concatenados con `|`.
       - name: owningcollection_hk
         description: Hash key de la colección dueña del ítem dentro del scope institucional.
       - name: owning_collection_title

@@ -5,7 +5,7 @@ WITH ir_handle AS (
         item_hk,
         item_id,
         NULLIF(BTRIM(handle_value), '') AS handle_normalized
-    FROM {{ ref('fct_unlp_ir_item_publication') }}
+    FROM {{ ref('fct_unlp_sedici_item_publication') }}
     CROSS JOIN LATERAL REGEXP_SPLIT_TO_TABLE(COALESCE(handle, ''), '[|]') AS handle_value
     WHERE NULLIF(BTRIM(handle_value), '') IS NOT NULL
 ),

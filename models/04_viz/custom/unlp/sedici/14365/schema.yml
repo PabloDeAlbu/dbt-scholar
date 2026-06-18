@@ -4,7 +4,7 @@ models:
   - name: viz_unlp_sedici_14365_libros
     description: >
       Cruce operativo del listado de libros de cátedra FDA contra
-      `fct_unlp_ir_item_publication`, buscando candidatos de linkeo exacto por
+      `fct_unlp_sedici_item_publication`, buscando candidatos de linkeo exacto por
       título normalizado.
     config:
       tags: [viz, unlp]
@@ -86,7 +86,7 @@ models:
   - name: viz_unlp_sedici_14365_tesis
     description: >
       Cruce operativo del listado de tesis FDA contra
-      `fct_unlp_ir_item_publication`, buscando candidatos de linkeo exacto por
+      `fct_unlp_sedici_item_publication`, buscando candidatos de linkeo exacto por
       título normalizado.
     config:
       tags: [viz, unlp]

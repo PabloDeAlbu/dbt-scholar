@@ -4,14 +4,17 @@ WITH publication AS (
     SELECT *
     FROM {{ ref('fct_dspacedb5_item_publication') }}
 ),
+
 item_collection AS (
     SELECT *
     FROM {{ ref('brg_dspacedb5_item_collection') }}
 ),
+
 collection_dim AS (
     SELECT *
     FROM {{ ref('dim_dspacedb5_collection') }}
 ),
+
 collection_community AS (
     SELECT
         collection_hk,
@@ -22,6 +25,7 @@ collection_community AS (
         ) AS rn
     FROM {{ ref('stg_dspacedb5_community2collection') }}
 ),
+
 collection_community_dedup AS (
     SELECT
         collection_hk,
@@ -29,10 +33,12 @@ collection_community_dedup AS (
     FROM collection_community
     WHERE rn = 1
 ),
+
 community_dim AS (
     SELECT *
     FROM {{ ref('dim_dspacedb5_community') }}
 ),
+
 final AS (
     SELECT
         p.item_hk,
@@ -58,15 +64,16 @@ final AS (
         ic.collection_hk = p.owningcollection_hk AS is_owning_collection,
         p.source_label,
         p.institution_ror
-    FROM publication p
-    JOIN item_collection ic
+    FROM publication AS p
+    JOIN item_collection AS ic
         USING (item_hk)
-    LEFT JOIN collection_dim cd
+    LEFT JOIN collection_dim AS cd
         USING (collection_hk)
-    LEFT JOIN collection_community_dedup cc
+    LEFT JOIN collection_community_dedup AS cc
         USING (collection_hk)
-    LEFT JOIN community_dim cmd
+    LEFT JOIN community_dim AS cmd
         USING (community_hk)
 )
 
-SELECT * FROM final
+SELECT *
+FROM final

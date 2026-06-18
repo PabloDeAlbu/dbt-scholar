@@ -84,41 +84,81 @@ models:
         +schema: vocsedici
         +tags: [vocsedici]
     03_dm:
-      core:
-        # Models in models/03_dm/core/ root build in dm_core.
-        # Subdirectories can override +schema and build in dm_<subschema>.
-        +schema: core
-        coar:
-          +schema: coar
-          +tags: [coar]
+      # Nuevo layout objetivo: modelos dimensionales globales por fuente
+      # directamente bajo `models/03_dm/<fuente>/`.
+      coar:
+        +schema: coar
+        +tags: [coar]
+      dspacedb:
+        +schema: dspacedb
+        +tags: [dspacedb]
+      dspacedb5:
+        +schema: dspacedb5
+        +tags: [dspacedb5]
+      oai:
+        +schema: oai
+        +tags: [oai]
+      openaire:
+        +schema: openaire
+        +tags: [openaire]
+      openalex:
+        +schema: openalex
+        +tags: [openalex]
+
+    04_org:
+      # Nuevo layout objetivo: vistas institucionales por organización y fuente
+      # bajo `models/04_org/<org>/<fuente>/`, materializando en schemas `dm_*`.
+      cic:
+        +schema: cic
+        +tags: [cic]
         dspacedb:
-          +schema: dspacedb
-          +tags: [dspacedb]
-        dspacedb5:
-          +schema: dspacedb5
-          +tags: [dspacedb5]
-        oai:
-          +schema: oai
-          +tags: [oai]
-        openaire:
-          +schema: openaire
-          +tags: [openaire]
-        openalex:
-          +schema: openalex
-          +tags: [openalex]
-      custom:
-        cic:
           +schema: cic
-          +tags: [cic]
-        conicet:
+          +tags: [cic, dspacedb]
+        openalex:
+          +schema: cic
+          +tags: [cic, openalex]
+        openaire:
+          +schema: cic
+          +tags: [cic, openaire]
+      conicet:
+        +schema: conicet
+        +tags: [conicet]
+        audit:
           +schema: conicet
-          +tags: [conicet]
-        smn:
+          +tags: [conicet, audit]
+        oai:
+          +schema: conicet
+          +tags: [conicet, oai]
+        openalex:
+          +schema: conicet
+          +tags: [conicet, openalex]
+        openaire:
+          +schema: conicet
+          +tags: [conicet, openaire]
+      smn:
+        +schema: smn
+        +tags: [smn]
+        dspace5db:
           +schema: smn
-          +tags: [smn]
-        unlp:
+          +tags: [smn, dspace5db]
+      unlp:
+        +schema: unlp
+        +tags: [unlp]
+        google_scholar:
+          +schema: unlp_google_scholar
+          +tags: [unlp, google_scholar]
+        openalex:
+          +schema: unlp_openalex
+          +tags: [unlp, openalex]
+        openaire:
+          +schema: unlp_openaire
+          +tags: [unlp, openaire]
+        sedici:
+          +schema: unlp_sedici
+          +tags: [unlp, sedici]
+        vocsedici:
           +schema: unlp
-          +tags: [unlp]
+          +tags: [unlp, vocsedici]
     04_viz:
       core:
         audit:
@@ -133,12 +173,6 @@ models:
           +schema: openalex
           +tags: [openalex]
       custom:
-        cic:
-          +schema: cic
-          +tags: [cic]
-        conicet:
-          +schema: conicet
-          +tags: [conicet]
         unlp:
           +schema: unlp
           +tags: [unlp]
@@ -148,8 +182,6 @@ models:
             +schema: unlp_conicet_center_candidate
           dspace5db:
             +schema: unlp_dspace5db
-          legacy:
-            +schema: unlp_legacy
           openaire:
             +schema: unlp_openaire
           sedici:

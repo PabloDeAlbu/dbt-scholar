@@ -2,7 +2,7 @@
 
 WITH item_community AS (
     SELECT *
-    FROM {{ ref('fct_unlp_ir_item_community') }}
+    FROM {{ ref('brg_unlp_sedici_item_community') }}
 ),
 
 item_publication AS (
@@ -13,7 +13,7 @@ item_publication AS (
         owning_root_community_hk,
         owning_root_community_id,
         owning_root_community_title
-    FROM {{ ref('fct_unlp_ir_item_publication') }}
+    FROM {{ ref('fct_unlp_sedici_item_publication') }}
 ),
 
 final AS (

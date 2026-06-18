@@ -4,7 +4,7 @@ WITH sedici AS (
     SELECT
         EXTRACT(YEAR FROM date_issued)::int AS publication_year,
         'sedici'::text AS source_system
-    FROM {{ ref('fct_unlp_ir_item_publication') }}
+    FROM {{ ref('fct_unlp_sedici_item_publication') }}
     WHERE date_issued IS NOT NULL
 ),
 

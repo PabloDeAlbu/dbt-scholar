@@ -90,7 +90,7 @@ ir_base AS (
             ),
             ''
         ) AS ir_title_base_match_key
-    FROM {{ ref('fct_unlp_ir_item_publication') }}
+    FROM {{ ref('fct_unlp_sedici_item_publication') }}
     WHERE title IS NOT NULL
       AND LOWER(COALESCE(type, '')) LIKE '%tesis%'
 ),

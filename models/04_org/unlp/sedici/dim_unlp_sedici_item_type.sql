@@ -1,12 +1,12 @@
 {{ config(materialized='table') }}
 
-WITH
-distinct_type AS (
+WITH distinct_type AS (
     SELECT DISTINCT
         type AS text_value
-    FROM {{ ref('fct_unlp_ir_item_publication') }}
+    FROM {{ ref('fct_unlp_sedici_item_publication') }}
     WHERE NULLIF(TRIM(type), '') IS NOT NULL
 ),
+
 typed AS (
     SELECT
         dt.text_value,

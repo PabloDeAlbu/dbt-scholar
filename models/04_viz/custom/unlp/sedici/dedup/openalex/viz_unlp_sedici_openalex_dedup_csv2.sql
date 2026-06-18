@@ -14,7 +14,7 @@ WITH base AS (
         {{ clean_text('doi') }} AS doi,
         {{ clean_text('handle') }} AS handle,
         {{ clean_text('isbn') }} AS isbn
-    FROM {{ ref('fct_unlp_ir_item_publication') }}
+    FROM {{ ref('fct_unlp_sedici_item_publication') }}
 ),
 
 final AS (

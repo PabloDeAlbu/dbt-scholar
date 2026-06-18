@@ -1,0 +1,21 @@
+version: 2
+
+seeds:
+  - name: seed_sedici_gs_site_repository_examples
+    description: >
+      Relevamiento colaborativo del equipo SEDICI sobre ejemplos de
+      repositorios con presencia en Google Scholar usando búsquedas `site:`
+      como proxy operativo de cobertura. Surge de una planilla compartida
+      interna y se usa como insumo para benchmarking, seguimiento comparativo
+      y detección de caídas o subas visibles en Scholar, no como fuente
+      exhaustiva ni histórica.
+    columns:
+      - name: Repositorio
+        data_tests: [not_null]
+      - name: Version
+      - name: Cantidad total
+      - name: Cantidad GS
+      - name: Porcentaje
+      - name: Observaciones
+      - name: SSR
+      - name: GS desde que empezamos a ver

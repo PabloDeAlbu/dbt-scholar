@@ -14,7 +14,7 @@ WITH base AS (
         issn,
         description,
         dc_identifier_uri AS institutional_uri
-    FROM {{ ref('fct_unlp_ir_item_publication') }}
+    FROM {{ ref('fct_unlp_sedici_item_publication') }}
 )
 
 SELECT

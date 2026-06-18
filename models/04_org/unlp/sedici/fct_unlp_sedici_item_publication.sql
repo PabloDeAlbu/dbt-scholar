@@ -23,7 +23,7 @@ owning_community AS (
             PARTITION BY item_hk
             ORDER BY community_path_titles, community_id, collection_id
         ) AS rn
-    FROM {{ ref('fct_unlp_ir_item_community') }}
+    FROM {{ ref('brg_unlp_sedici_item_community') }}
     WHERE is_owning_collection
 ),
 
@@ -228,12 +228,12 @@ ir_doi_pid AS (
     SELECT DISTINCT
         item_hk,
         REGEXP_REPLACE(
-            SUBSTRING(raw_value FROM '(10\.[0-9]{4,9}/[^[:space:]<>|";]+)'),
-            '[\.\),;:]+$',
+            SUBSTRING(raw_value FROM '(10\\.[0-9]{4,9}/[^[:space:]<>|\";]+)'),
+            '[\\.\\),;:]+$',
             ''
         ) AS pid_value
     FROM ir_doi_raw
-    WHERE SUBSTRING(raw_value FROM '(10\.[0-9]{4,9}/[^[:space:]<>|";]+)') IS NOT NULL
+    WHERE SUBSTRING(raw_value FROM '(10\\.[0-9]{4,9}/[^[:space:]<>|\";]+)') IS NOT NULL
 ),
 
 ir_handle_pid AS (
@@ -259,7 +259,7 @@ ir_pid_agg AS (
     GROUP BY item_hk
 ),
 
-final AS (
+final_raw AS (
     SELECT
         b.item_hk,
         b.item_id,
@@ -355,7 +355,72 @@ final AS (
     WHERE b.discoverable = TRUE
       AND b.in_archive = TRUE
       AND b.withdrawn = FALSE
+),
 
+final_ranked AS (
+    SELECT
+        final_raw.*,
+        ROW_NUMBER() OVER (
+            PARTITION BY LOWER(REGEXP_REPLACE(final_raw.dc_identifier_uri, '^https?://[^/]+/handle/', ''))
+            ORDER BY
+                final_raw.last_modified DESC NULLS LAST,
+                final_raw.last_load_datetime DESC NULLS LAST,
+                final_raw.item_id DESC
+        ) AS handle_rn
+    FROM final_raw
 )
 
-SELECT * FROM final
+SELECT
+    item_hk,
+    item_id,
+    source_label,
+    institution_ror,
+    submitter_id,
+    owning_collection,
+    collections_count,
+    last_modified,
+    first_extract_datetime,
+    last_extract_datetime,
+    first_load_datetime,
+    last_load_datetime,
+    dc_identifier_uri,
+    dc_identifier_uri_raw,
+    date_accessioned_raw,
+    date_accessioned,
+    dc_date_available_raw,
+    dc_date_available,
+    date_issued_raw,
+    date_issued,
+    dc_date_issued,
+    dc_date_issued_raw,
+    title,
+    subtitle,
+    type,
+    description,
+    subject,
+    subtype,
+    author,
+    author_count,
+    issn,
+    isbn,
+    doi_count,
+    handle_count,
+    has_doi,
+    has_handle,
+    doi,
+    handle,
+    owningcollection_hk,
+    owning_collection_title,
+    owning_community_hk,
+    owning_community_id,
+    owning_community_title,
+    owning_root_community_hk,
+    owning_root_community_id,
+    owning_root_community_title,
+    owning_community_path_ids,
+    owning_community_path_titles,
+    in_archive,
+    withdrawn,
+    discoverable
+FROM final_ranked
+WHERE handle_rn = 1

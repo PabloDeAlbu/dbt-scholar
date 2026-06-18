@@ -19,7 +19,7 @@ WITH ir_base AS (
         in_archive,
         withdrawn,
         discoverable
-    FROM {{ ref('fct_unlp_ir_item_publication') }}
+    FROM {{ ref('fct_unlp_sedici_item_publication') }}
     WHERE in_archive = TRUE AND withdrawn = FALSE
 ),
 

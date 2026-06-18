@@ -5,7 +5,7 @@ WITH ir_base AS (
         item_hk,
         item_id,
         doi
-    FROM {{ ref('fct_unlp_ir_item_publication') }}
+    FROM {{ ref('fct_unlp_sedici_item_publication') }}
     WHERE discoverable = TRUE
       AND in_archive = TRUE
       AND withdrawn = FALSE

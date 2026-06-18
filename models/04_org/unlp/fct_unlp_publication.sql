@@ -1,6 +1,6 @@
 {{ config(materialized='table') }}
 
-WITH ir_base AS (
+WITH sedici_base AS (
     SELECT
         item_hk,
         item_id,
@@ -39,7 +39,7 @@ WITH ir_base AS (
         in_archive,
         withdrawn,
         discoverable
-    FROM {{ ref('fct_unlp_ir_item_publication') }}
+    FROM {{ ref('fct_unlp_sedici_item_publication') }}
     WHERE discoverable = TRUE
       AND in_archive = TRUE
       AND withdrawn = FALSE
@@ -142,7 +142,7 @@ final AS (
         ir.item_hk AS publication_hk,
         ir.item_hk,
         ir.item_id,
-        'ir'::text AS source_system,
+        'sedici'::text AS source_system,
         ir.source_label,
         ir.institution_ror,
         ir.dc_identifier_uri AS institutional_uri,
@@ -248,7 +248,7 @@ final AS (
         openaire.openaire_has_sdg,
         openaire.openaire_sdg_count,
         openaire.openaire_sdg_values
-    FROM ir_base AS ir
+    FROM sedici_base AS ir
     LEFT JOIN openalex_enrichment AS oa USING (item_hk)
     LEFT JOIN openaire_enrichment AS openaire USING (item_hk)
 )

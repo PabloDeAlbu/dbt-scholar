@@ -1,0 +1,160 @@
+version: 2
+
+models:
+  - name: dim_unlp_publication_dedup_type
+    description: >
+      Mapeo centralizado de tipos documentales crudos de SEDICI y OpenAlex hacia
+      un tipo textual común para la etapa de deduplicación. Reutiliza los mapeos
+      existentes a COAR y colapsa solo equivalencias necesarias, como artículos
+      y tesis doctorales.
+    columns:
+      - name: source
+        description: Fuente a la que aplica el mapeo.
+        data_tests: [not_null]
+      - name: type_raw
+        description: Valor documental original observado en la fuente.
+        data_tests: [not_null]
+      - name: type_coar_uri
+        description: URI COAR asociada al tipo cuando existe mapeo.
+      - name: type
+        description: Tipo documental común expuesto a la capa dedup.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [source, type_raw]
+
+  - name: fct_unlp_sedici_dedup_publication
+    description: >
+      Conjunto estable y normalizado de publicaciones SEDICI/UNLP a grano una
+      fila por publicación, preparado para consumo posterior desde Kedro en
+      procesos de deduplicación. Actualmente parte de
+      `fct_unlp_sedici_item_publication`. Preserva como `id` el handle
+      institucional estable `10915/...` y agrega autores, DOI, ISBN e ISSN
+      antes de exponer la salida final.
+    columns:
+      - name: source
+        description: Origen fijo del registro; en este modelo vale `sedici`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['sedici']
+      - name: id
+        description: >
+          Handle institucional del ítem en formato `10915/...`, derivado de
+          `dc.identifier.uri`.
+        data_tests: [not_null, unique]
+      - name: publication_year
+        description: Año de publicación derivado de la fecha priorizada del modelo analítico institucional.
+      - name: type_raw
+        description: Tipo documental crudo tal como llega desde SEDICI.
+      - name: title
+        description: Título normalizado con `trim` y colapso de espacios.
+      - name: subtitle
+        description: Subtítulo o títulos alternativos concatenados cuando existen.
+      - name: type
+        description: Tipo documental normalizado bajo un vocabulario textual común basado en COAR.
+      - name: author
+        description: Lista de autores separada por `|`, sin duplicados y preservando `author_place` cuando está disponible.
+      - name: date
+        description: Año de publicación en formato texto `YYYY`.
+      - name: doi
+        description: DOI normalizados en lowercase y sin prefijos URL o `doi:`.
+      - name: isbn
+        description: ISBN distintos concatenados con `|`.
+      - name: issn
+        description: ISSN distintos concatenados con `|`.
+      - name: description
+        description: Descripción o resumen con saltos de línea y espacios repetidos colapsados.
+      - name: dedup_eligible
+        description: >
+          Vale `true` cuando el registro tiene título, tipo normalizado, autor
+          y año; los no elegibles permanecen en la salida para auditoría.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_sedici_dedup_publication_publication_year_range
+          expression: "publication_year is null or publication_year between 1500 and 2100"
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_sedici_dedup_publication_date_format
+          expression: "date is null or date ~ '^[0-9]{4}$'"
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_sedici_dedup_publication_date_matches_year
+          expression: "publication_year is null or date is null or publication_year::text = date"
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_sedici_dedup_publication_eligible_has_title
+          expression: "dedup_eligible = false or title is not null"
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_sedici_dedup_publication_eligible_has_type
+          expression: "dedup_eligible = false or type is not null"
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_sedici_dedup_publication_eligible_has_author
+          expression: "dedup_eligible = false or author is not null"
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_sedici_dedup_publication_eligible_has_year
+          expression: "dedup_eligible = false or publication_year is not null"
+
+  - name: fct_unlp_openalex_dedup_publication
+    description: >
+      Conjunto estable y normalizado de publicaciones OpenAlex del subconjunto
+      UNLP, a grano una fila por work, preparado para deduplicación posterior.
+      Parte de `fct_unlp_openalex_work_publication`, conserva como `id` el
+      `work_id` estable y agrega autores con un orden determinista por bucket
+      `first/middle/last` porque el mart actual no expone una secuencia más fina.
+    columns:
+      - name: source
+        description: Origen fijo del registro; en este modelo vale `openalex`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['openalex']
+      - name: id
+        description: Identificador canónico estable del work en OpenAlex.
+        data_tests: [not_null, unique]
+      - name: publication_year
+        description: Año de publicación tomado del modelo analítico institucional de OpenAlex.
+      - name: type_raw
+        description: Tipo documental crudo tal como llega desde OpenAlex.
+      - name: title
+        description: Título normalizado con `trim` y colapso de espacios.
+      - name: subtitle
+        description: Campo no disponible en OpenAlex dentro de esta preparación; se devuelve `null`.
+      - name: type
+        description: Tipo documental normalizado bajo un vocabulario textual común basado en COAR.
+      - name: author
+        description: Lista de autores separada por `|`, sin duplicados, con orden determinista por bucket de autoría.
+      - name: date
+        description: Año de publicación en formato texto `YYYY`.
+      - name: doi
+        description: DOI normalizados en lowercase y sin prefijos URL o `doi:`.
+      - name: isbn
+        description: Campo no disponible en OpenAlex dentro de esta preparación; se devuelve `null`.
+      - name: issn
+        description: ISSN distintos concatenados con `|`.
+      - name: description
+        description: Campo no disponible en OpenAlex dentro de esta preparación; se devuelve `null`.
+      - name: dedup_eligible
+        description: >
+          Vale `true` cuando el registro tiene título, tipo normalizado, autor
+          y año; los no elegibles permanecen en la salida para auditoría.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_openalex_dedup_publication_publication_year_range
+          expression: "publication_year is null or publication_year between 1800 and 2100"
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_openalex_dedup_publication_date_format
+          expression: "date is null or date ~ '^[0-9]{4}$'"
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_openalex_dedup_publication_date_matches_year
+          expression: "publication_year is null or date is null or publication_year::text = date"
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_openalex_dedup_publication_eligible_has_title
+          expression: "dedup_eligible = false or title is not null"
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_openalex_dedup_publication_eligible_has_type
+          expression: "dedup_eligible = false or type is not null"
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_openalex_dedup_publication_eligible_has_author
+          expression: "dedup_eligible = false or author is not null"
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_openalex_dedup_publication_eligible_has_year
+          expression: "dedup_eligible = false or publication_year is not null"

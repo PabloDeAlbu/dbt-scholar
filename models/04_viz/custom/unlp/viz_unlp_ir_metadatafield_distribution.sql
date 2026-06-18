@@ -17,8 +17,8 @@ WITH base AS (
         NULLIF(TRIM(bridge.text_lang), '') AS text_lang,
         NULLIF(TRIM(bridge.authority), '') AS authority,
         bridge.confidence
-    FROM {{ ref('brg_unlp_ir_item_metadatafield') }} AS bridge
-    INNER JOIN {{ ref('fct_unlp_ir_item_publication') }} AS publication
+    FROM {{ ref('brg_unlp_sedici_item_metadatafield') }} AS bridge
+    INNER JOIN {{ ref('fct_unlp_sedici_item_publication') }} AS publication
         USING (item_hk)
 ),
 
