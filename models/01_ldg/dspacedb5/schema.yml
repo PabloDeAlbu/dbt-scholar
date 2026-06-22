@@ -21,12 +21,12 @@ sources:
       - name: metadatavalue
 
 models:
-  - name: ldg_dspacedb5_context
+  - name: ldg_dspacedb5__context
     description: >
-      Contexto activo del dump DSpace 5 utilizado para inyectar `base_url`, `source_label`,
-      `institution_ror`, `extract_datetime` y `load_datetime` sobre las tablas crudas de
-      `ldg_dspacedb5`. `base_url` se parametriza con `vars` en `dbt_project.yml`, se normaliza a
-      minúsculas y sin protocolo, y por compatibilidad también se expone como `source_label`.
+      Contexto técnico del dump DSpace 5 para `ldg_dspacedb5`. Debe ejecutarse
+      con `--vars` para fijar `base_url`, `institution_ror`,
+      `extract_datetime` y `load_datetime`. Ejemplo:
+      `dbt run --select models/01_ldg/dspacedb5 --vars '{dspacedb5_base_url: "sedici.unlp.edu.ar", dspacedb5_institution_ror: "https://ror.org/01tjs6929", dspacedb5_extract_datetime: "2026-06-22", dspacedb5_load_datetime: "2026-06-22 10:30:00"}'`
     columns:
       - name: base_url
         data_tests: [not_null]
@@ -42,10 +42,8 @@ models:
 
   - name: ldg_dspacedb5_item
     description: >
-      Capa landing normalizada para items DSpace 5 con contexto explícito de repositorio e
-      institución inyectado desde `vars` del proyecto. En `ldg` los metadatos técnicos de ingestión
-      se conservan con prefijo `_` (`_source_label`, `_institution_ror`, `_extract_datetime`,
-      `_load_datetime`) para distinguirlos de los atributos de negocio.
+      Items DSpace 5 normalizados en landing, con contexto técnico de fuente e
+      ingestión en campos con prefijo `_`.
     columns:
       - name: item_id
         data_tests:
@@ -66,3 +64,55 @@ models:
         description: Fecha/hora técnica de carga conservada con prefijo `_` en landing.
         data_tests:
           - not_null
+
+  - name: ldg_dspacedb5_bitstream
+    description: >
+      Bitstreams DSpace 5 normalizados en landing, con contexto técnico de
+      fuente e ingestión.
+
+  - name: ldg_dspacedb5_bundle2bitstream
+    description: >
+      Relación bundle-bitstream de DSpace 5 normalizada en landing.
+
+  - name: ldg_dspacedb5_collection
+    description: >
+      Colecciones DSpace 5 normalizadas en landing, con claves operativas y
+      responsables del workflow.
+
+  - name: ldg_dspacedb5_collection2item
+    description: >
+      Relación colección-item de DSpace 5 normalizada en landing.
+
+  - name: ldg_dspacedb5_community
+    description: >
+      Comunidades DSpace 5 normalizadas en landing.
+
+  - name: ldg_dspacedb5_community2collection
+    description: >
+      Relación comunidad-colección de DSpace 5 normalizada en landing.
+
+  - name: ldg_dspacedb5_community2community
+    description: >
+      Relación jerárquica entre comunidades DSpace 5 normalizada en landing.
+
+  - name: ldg_dspacedb5_handle
+    description: >
+      Handles DSpace 5 normalizados en landing, con referencia al recurso
+      asociado.
+
+  - name: ldg_dspacedb5_item2bundle
+    description: >
+      Relación item-bundle de DSpace 5 normalizada en landing.
+
+  - name: ldg_dspacedb5_metadatafieldregistry
+    description: >
+      Registro de campos de metadatos DSpace 5 normalizado en landing.
+
+  - name: ldg_dspacedb5_metadataschemaregistry
+    description: >
+      Registro de esquemas de metadatos DSpace 5 normalizado en landing.
+
+  - name: ldg_dspacedb5_metadatavalue
+    description: >
+      Valores de metadatos DSpace 5 normalizados en landing, con referencia al
+      recurso y al campo de metadato asociado.

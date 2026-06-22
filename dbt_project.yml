@@ -240,13 +240,11 @@ vars:
     dspacedb_institution_ror: "https://ror.org/02s7sax82"
 
     # Valores requeridos para dumps `dspacedb5`.
-    # Ejemplo unlp:
-    dspacedb5_base_url: "sedici.unlp.edu.ar"
-    dspacedb5_institution_ror: "https://ror.org/01tjs6929"
-    dspacedb5_extract_datetime: "2026-04-06"
-    #dspacedb5_base_url: "REPLACE ME"
-    #dspacedb5_institution_ror: "REPLACE ME"
-    #dspacedb5_extract_datetime: "REPLACE ME"
+    # Deben pisarse por CLI con `--vars`.
+    dspacedb5_base_url: "__REQUIRED__"
+    dspacedb5_institution_ror: "__REQUIRED__"
+    dspacedb5_extract_datetime: "__REQUIRED__"
+    dspacedb5_load_datetime: "__REQUIRED__"
 
     # Ejemplo oai con conicet:
     oai_repository_identifier: "ri.conicet.gov.ar"

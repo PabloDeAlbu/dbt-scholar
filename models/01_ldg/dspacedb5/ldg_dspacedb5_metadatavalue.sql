@@ -2,35 +2,35 @@ WITH source AS (
   SELECT * FROM {{ source('dspacedb5', 'metadatavalue') }}
 ),
 context AS (
-  SELECT * FROM {{ ref('ldg_dspacedb5_context') }}
+  SELECT * FROM {{ ref('ldg_dspacedb5__context') }}
 ),
 renamed AS (
   SELECT
-    metadata_value_id,
-    resource_id,
-    metadata_field_id,
-    text_value,
-    text_lang,
-    place,
-    authority,
-    confidence,
-    resource_type_id,
-    context.source_label AS _source_label,
-    context.institution_ror AS _institution_ror,
-    context.institution_ror || '||' || context.source_label AS _repository_scope,
-    context.institution_ror || '||' || context.source_label || '||' || metadata_value_id::text AS metadatavalue_bk,
-    context.institution_ror || '||' || context.source_label || '||' || metadata_field_id::text AS metadatafield_bk,
-    context.institution_ror || '||' || context.source_label || '||' || resource_id::text AS resource_bk,
-    context.extract_datetime AS _extract_datetime,
-    context.load_datetime AS _load_datetime
+    metadata_value_id::text AS metadata_value_id,
+    resource_id::text AS resource_id,
+    metadata_field_id::text AS metadata_field_id,
+    text_value::text AS text_value,
+    text_lang::text AS text_lang,
+    place::integer AS place,
+    authority::text AS authority,
+    confidence::integer AS confidence,
+    resource_type_id::integer AS resource_type_id,
+    context.source_label::text AS _source_label,
+    context.institution_ror::text AS _institution_ror,
+    (context.institution_ror || '||' || context.source_label)::text AS _repository_scope,
+    (context.institution_ror || '||' || context.source_label || '||' || metadata_value_id::text)::text AS metadatavalue_bk,
+    (context.institution_ror || '||' || context.source_label || '||' || metadata_field_id::text)::text AS metadatafield_bk,
+    (context.institution_ror || '||' || context.source_label || '||' || resource_id::text)::text AS resource_bk,
+    context.extract_datetime::timestamp AS _extract_datetime,
+    context.load_datetime::timestamp AS _load_datetime
   FROM source
   CROSS JOIN context
 ),
 ghost_record AS (
   SELECT
-    -1 AS metadata_value_id,
-    -1 AS resource_id,
-    -1 AS metadata_field_id,
+    '-1'::text AS metadata_value_id,
+    '-1'::text AS resource_id,
+    '-1'::text AS metadata_field_id,
     '!UNKNOWN' AS text_value,
     '!UNKNOWN' AS text_lang,
     -1 AS place,

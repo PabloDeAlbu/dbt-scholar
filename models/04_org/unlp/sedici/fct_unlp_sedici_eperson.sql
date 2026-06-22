@@ -6,7 +6,7 @@ WITH context AS (
         institution_ror,
         extract_datetime,
         load_datetime
-    FROM {{ ref('ldg_dspacedb5_context') }}
+    FROM {{ ref('ldg_dspacedb5__context') }}
     WHERE institution_ror = 'https://ror.org/01tjs6929'
 ),
 

@@ -2,22 +2,22 @@ WITH source AS (
   SELECT * FROM {{ source('dspacedb5', 'metadatafieldregistry') }}
 ),
 context AS (
-  SELECT * FROM {{ ref('ldg_dspacedb5_context') }}
+  SELECT * FROM {{ ref('ldg_dspacedb5__context') }}
 ),
 renamed AS (
   SELECT
-    metadata_field_id,
-    metadata_schema_id,
-    element,
-    qualifier,
-    scope_note,
-    context.source_label AS _source_label,
-    context.institution_ror AS _institution_ror,
-    context.institution_ror || '||' || context.source_label AS _repository_scope,
-    context.institution_ror || '||' || context.source_label || '||' || metadata_field_id::text AS metadatafield_bk,
-    context.institution_ror || '||' || context.source_label || '||' || metadata_schema_id::text AS metadataschema_bk,
-    context.extract_datetime AS _extract_datetime,
-    context.load_datetime AS _load_datetime
+    metadata_field_id::bigint AS metadata_field_id,
+    metadata_schema_id::bigint AS metadata_schema_id,
+    element::text AS element,
+    qualifier::text AS qualifier,
+    scope_note::text AS scope_note,
+    context.source_label::text AS _source_label,
+    context.institution_ror::text AS _institution_ror,
+    (context.institution_ror || '||' || context.source_label)::text AS _repository_scope,
+    (context.institution_ror || '||' || context.source_label || '||' || metadata_field_id::text)::text AS metadatafield_bk,
+    (context.institution_ror || '||' || context.source_label || '||' || metadata_schema_id::text)::text AS metadataschema_bk,
+    context.extract_datetime::timestamp AS _extract_datetime,
+    context.load_datetime::timestamp AS _load_datetime
   FROM source
   CROSS JOIN context
 ),

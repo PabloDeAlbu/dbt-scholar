@@ -2,23 +2,23 @@ WITH source AS (
   SELECT * FROM {{ source('dspacedb5', 'bitstream') }}
 ),
 context AS (
-  SELECT * FROM {{ ref('ldg_dspacedb5_context') }}
+  SELECT * FROM {{ ref('ldg_dspacedb5__context') }}
 ),
 renamed AS (
   SELECT
-    bitstream_id,
-    bitstream_format_id,
-    size_bytes,
-    checksum,
-    checksum_algorithm,
-    internal_id,
-    deleted,
-    store_number,
-    sequence_id,
-    context.source_label AS _source_label,
-    context.institution_ror AS _institution_ror,
-    context.extract_datetime AS _extract_datetime,
-    context.load_datetime AS _load_datetime
+    bitstream_id::bigint AS bitstream_id,
+    bitstream_format_id::bigint AS bitstream_format_id,
+    size_bytes::bigint AS size_bytes,
+    checksum::text AS checksum,
+    checksum_algorithm::text AS checksum_algorithm,
+    internal_id::text AS internal_id,
+    deleted::boolean AS deleted,
+    store_number::integer AS store_number,
+    sequence_id::bigint AS sequence_id,
+    context.source_label::text AS _source_label,
+    context.institution_ror::text AS _institution_ror,
+    context.extract_datetime::timestamp AS _extract_datetime,
+    context.load_datetime::timestamp AS _load_datetime
   FROM source
   CROSS JOIN context
 ),

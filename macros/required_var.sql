@@ -4,7 +4,7 @@
     {%- if execute and (
         value is none
         or (value is string and value | trim == '')
-        or normalized in ['REPLACEME', 'REPLACE ME']
+        or normalized in ['REPLACEME', 'REPLACE ME', '__REQUIRED__']
     ) -%}
         {{ exceptions.raise_compiler_error(
             "Required dbt var '" ~ var_name ~ "' is not configured. " ~
