@@ -24,7 +24,7 @@ raw_dates AS (
         md.qualifier,
         mv.text_value
     FROM base
-    JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
+    JOIN {{ ref('brg_dspacedb5_item_metadatavalue') }} AS mv
         USING (item_hk)
     JOIN metadatafield_dates AS md
         USING (metadatafield_hk)
@@ -68,7 +68,7 @@ dc_type AS (
         base.item_hk,
         STRING_AGG(DISTINCT md.text_value, '|' ORDER BY md.text_value) AS dc_type
     FROM base
-    JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS md
+    JOIN {{ ref('brg_dspacedb5_item_metadatavalue') }} AS md
         USING (item_hk)
     WHERE md.metadatafield_fullname = 'dc.type'
       AND md.text_value IS NOT NULL

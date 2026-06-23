@@ -17,7 +17,7 @@ id AS (
     SELECT DISTINCT
         b.item_hk
     FROM base AS b
-    INNER JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
+    INNER JOIN {{ ref('brg_dspacedb5_item_metadatavalue') }} AS mv
         USING (item_hk)
     WHERE mv.metadatafield_fullname = 'dc.identifier.uri'
       AND mv.text_value ~ '^https?://sedici[.]unlp[.]edu[.]ar/handle/10915'
@@ -27,7 +27,7 @@ dc_type AS (
     SELECT DISTINCT
         b.item_hk
     FROM base AS b
-    INNER JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
+    INNER JOIN {{ ref('brg_dspacedb5_item_metadatavalue') }} AS mv
         USING (item_hk)
     WHERE mv.metadatafield_fullname = 'dc.type'
       AND NULLIF(TRIM(mv.text_value), '') IS NOT NULL
@@ -56,7 +56,7 @@ metadata_observation AS (
         metadata.metadata_value_id,
         metadata.item_hk
     FROM item_scope AS scope
-    INNER JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS metadata
+    INNER JOIN {{ ref('brg_dspacedb5_item_metadatavalue') }} AS metadata
         USING (item_hk)
     WHERE metadata.institution_ror = 'https://ror.org/01tjs6929'
 ),

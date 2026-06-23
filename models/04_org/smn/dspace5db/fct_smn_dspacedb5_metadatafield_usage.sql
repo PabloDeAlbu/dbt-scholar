@@ -19,7 +19,7 @@ smn_metadata AS (
         md.element,
         md.qualifier,
         md.metadata_value_id
-    FROM {{ ref('fct_dspacedb5_item_metadata') }} AS md
+    FROM {{ ref('brg_dspacedb5_item_metadatavalue') }} AS md
     INNER JOIN smn_items AS smn
         USING (item_hk)
 ),

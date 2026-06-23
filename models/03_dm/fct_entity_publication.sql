@@ -92,7 +92,7 @@ dspacedb5_item_title AS (
         source_label,
         institution_ror,
         MIN(text_value) AS title
-    FROM {{ ref('fct_dspacedb5_item_metadata') }}
+    FROM {{ ref('brg_dspacedb5_item_metadatavalue') }}
     WHERE metadatafield_fullname = 'dc.title'
       AND text_value IS NOT NULL
     GROUP BY item_hk, source_label, institution_ror
@@ -104,7 +104,7 @@ dspacedb5_item_type AS (
         source_label,
         institution_ror,
         MIN(text_value) AS publication_type
-    FROM {{ ref('fct_dspacedb5_item_metadata') }}
+    FROM {{ ref('brg_dspacedb5_item_metadatavalue') }}
     WHERE metadatafield_fullname = 'dc.type'
       AND text_value IS NOT NULL
     GROUP BY item_hk, source_label, institution_ror
@@ -123,7 +123,7 @@ dspacedb5_item_date_issued AS (
                 THEN {{ str_to_date('text_value') }}
             END
         ) AS publication_date
-    FROM {{ ref('fct_dspacedb5_item_metadata') }}
+    FROM {{ ref('brg_dspacedb5_item_metadatavalue') }}
     WHERE metadatafield_fullname = 'dc.date.issued'
       AND text_value IS NOT NULL
     GROUP BY item_hk, source_label, institution_ror

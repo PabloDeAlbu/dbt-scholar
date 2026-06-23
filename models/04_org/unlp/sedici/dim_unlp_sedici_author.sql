@@ -13,7 +13,7 @@ WITH author_observation AS (
         metadata.confidence,
         metadata.place
     FROM {{ ref('fct_unlp_sedici_item_publication') }} AS item
-    INNER JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS metadata
+    INNER JOIN {{ ref('brg_dspacedb5_item_metadatavalue') }} AS metadata
         USING (item_hk)
     WHERE metadata.institution_ror = 'https://ror.org/01tjs6929'
       AND metadata.metadatafield_fullname IN ('sedici.creator.person', 'sedici.creator.corporate')

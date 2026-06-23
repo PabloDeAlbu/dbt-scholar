@@ -5,6 +5,41 @@ WITH base AS (
     FROM {{ ref('fct_dspacedb5_item_publication') }}
     WHERE institution_ror = 'https://ror.org/01tjs6929'
 ),
+metadata_usage AS (
+    SELECT
+        b.item_hk,
+        mu.item_id,
+        mu.metadatafield_hk,
+        mu.metadatafield_fullname,
+        mu.preferred_text_value,
+        mu.ordered_text_values,
+        mu.distinct_nonempty_text_value_count,
+        mu.min_ymd_text_value,
+        mu.min_ym_text_value,
+        mu.min_year_text_value
+    FROM base AS b
+    JOIN {{ ref('fct_dspacedb5_item_metadatafield_usage') }} AS mu
+        USING (item_hk)
+    WHERE mu.metadatafield_fullname IN (
+        'dc.identifier.uri',
+        'dc.date.accessioned',
+        'dc.date.available',
+        'dc.date.issued',
+        'dc.type',
+        'dc.title',
+        'dc.title.alternative',
+        'dc.description.abstract',
+        'dc.description',
+        'dc.subject',
+        'sedici.subtype',
+        'sedici.creator.person',
+        'sedici.creator.corporate',
+        'sedici.identifier.issn',
+        'sedici.identifier.isbn',
+        'sedici.identifier.other',
+        'sedici.identifier.doi'
+    )
+),
 
 owning_community AS (
     SELECT
@@ -29,199 +64,137 @@ owning_community AS (
 
 id AS (
     SELECT
-        b.item_hk,
-        MIN(mv.text_value) AS dc_identifier_uri,
-        STRING_AGG(DISTINCT mv.text_value, '|' ORDER BY mv.text_value) AS dc_identifier_uri_raw
-    FROM base AS b
-    JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
-      ON mv.item_id = b.item_id
-     AND mv.institution_ror = b.institution_ror
-    WHERE mv.metadatafield_fullname = 'dc.identifier.uri'
-      AND mv.text_value ~ '^https?://sedici[.]unlp[.]edu[.]ar/handle/10915'
-    GROUP BY b.item_hk
+        item_hk,
+        MIN(value) AS dc_identifier_uri,
+        STRING_AGG(DISTINCT value, '|' ORDER BY value) AS dc_identifier_uri_raw
+    FROM (
+        SELECT
+            mu.item_hk,
+            BTRIM(value) AS value
+        FROM metadata_usage AS mu
+        CROSS JOIN LATERAL UNNEST(STRING_TO_ARRAY(COALESCE(mu.ordered_text_values, ''), '|')) AS value
+        WHERE mu.metadatafield_fullname = 'dc.identifier.uri'
+    ) AS raw
+    WHERE value ~ '^https?://sedici[.]unlp[.]edu[.]ar/handle/10915'
+    GROUP BY item_hk
 ),
 
 date_accessioned AS (
     SELECT
-        b.item_hk,
-        MIN(mv.text_value) FILTER (
-            WHERE mv.text_value ~ '^[0-9]{4}[-/](0[1-9]|1[0-2])[-/](0[1-9]|[12][0-9]|3[01])'
-        ) AS date_ymd_any,
-        MIN(mv.text_value) FILTER (
-            WHERE mv.text_value ~ '^[0-9]{4}[-/](0[1-9]|1[0-2])$'
-        ) AS date_ym_any,
-        MIN(mv.text_value) FILTER (
-            WHERE mv.text_value ~ '^[0-9]{4}$'
-        ) AS year_only,
-        STRING_AGG(DISTINCT mv.text_value, '|' ORDER BY mv.text_value) AS raw_values
-    FROM base AS b
-    JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
-      ON mv.item_id = b.item_id
-     AND mv.institution_ror = b.institution_ror
-    WHERE mv.metadatafield_fullname = 'dc.date.accessioned'
-    GROUP BY b.item_hk
+        item_hk,
+        min_ymd_text_value AS date_ymd_any,
+        min_ym_text_value AS date_ym_any,
+        min_year_text_value AS year_only,
+        ordered_text_values AS raw_values
+    FROM metadata_usage
+    WHERE metadatafield_fullname = 'dc.date.accessioned'
 ),
 
 date_available AS (
     SELECT
-        b.item_hk,
-        MIN(mv.text_value) FILTER (
-            WHERE mv.text_value ~ '^[0-9]{4}[-/](0[1-9]|1[0-2])[-/](0[1-9]|[12][0-9]|3[01])'
-        ) AS date_ymd_any,
-        MIN(mv.text_value) FILTER (
-            WHERE mv.text_value ~ '^[0-9]{4}[-/](0[1-9]|1[0-2])$'
-        ) AS date_ym_any,
-        MIN(mv.text_value) FILTER (
-            WHERE mv.text_value ~ '^[0-9]{4}$'
-        ) AS year_only,
-        STRING_AGG(DISTINCT mv.text_value, '|' ORDER BY mv.text_value) AS raw_values
-    FROM base AS b
-    JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
-      ON mv.item_id = b.item_id
-     AND mv.institution_ror = b.institution_ror
-    WHERE mv.metadatafield_fullname = 'dc.date.available'
-    GROUP BY b.item_hk
+        item_hk,
+        min_ymd_text_value AS date_ymd_any,
+        min_ym_text_value AS date_ym_any,
+        min_year_text_value AS year_only,
+        ordered_text_values AS raw_values
+    FROM metadata_usage
+    WHERE metadatafield_fullname = 'dc.date.available'
 ),
 
 date_issued AS (
     SELECT
-        b.item_hk,
-        MIN(mv.text_value) FILTER (
-            WHERE mv.text_value ~ '^[0-9]{4}[-/](0[1-9]|1[0-2])[-/](0[1-9]|[12][0-9]|3[01])'
-        ) AS date_ymd_any,
-        MIN(mv.text_value) FILTER (
-            WHERE mv.text_value ~ '^[0-9]{4}[-/](0[1-9]|1[0-2])$'
-        ) AS date_ym_any,
-        MIN(mv.text_value) FILTER (
-            WHERE mv.text_value ~ '^[0-9]{4}$'
-        ) AS year_only,
-        STRING_AGG(DISTINCT mv.text_value, '|' ORDER BY mv.text_value) AS raw_values
-    FROM base AS b
-    JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
-      ON mv.item_id = b.item_id
-     AND mv.institution_ror = b.institution_ror
-    WHERE mv.metadatafield_fullname = 'dc.date.issued'
-    GROUP BY b.item_hk
+        item_hk,
+        min_ymd_text_value AS date_ymd_any,
+        min_ym_text_value AS date_ym_any,
+        min_year_text_value AS year_only,
+        ordered_text_values AS raw_values
+    FROM metadata_usage
+    WHERE metadatafield_fullname = 'dc.date.issued'
 ),
 
 dc_type AS (
     SELECT
-        b.item_hk,
-        MIN(mv.text_value)::text AS type
-    FROM base AS b
-    JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
-      ON mv.item_id = b.item_id
-     AND mv.institution_ror = b.institution_ror
-    WHERE mv.metadatafield_fullname = 'dc.type'
-    GROUP BY b.item_hk
+        item_hk,
+        preferred_text_value::text AS type
+    FROM metadata_usage
+    WHERE metadatafield_fullname = 'dc.type'
 ),
 
 title AS (
     SELECT
-        b.item_hk,
-        MIN(mv.text_value)::text AS title
-    FROM base AS b
-    JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
-      ON mv.item_id = b.item_id
-     AND mv.institution_ror = b.institution_ror
-    WHERE mv.metadatafield_fullname = 'dc.title'
-    GROUP BY b.item_hk
+        item_hk,
+        preferred_text_value::text AS title
+    FROM metadata_usage
+    WHERE metadatafield_fullname = 'dc.title'
 ),
 
 subtitle AS (
     SELECT
-        b.item_hk,
-        STRING_AGG(DISTINCT mv.text_value::text, '|' ORDER BY mv.text_value::text) AS subtitle
-    FROM base AS b
-    JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
-      ON mv.item_id = b.item_id
-     AND mv.institution_ror = b.institution_ror
-    WHERE mv.metadatafield_fullname = 'dc.title.alternative'
-    GROUP BY b.item_hk
+        item_hk,
+        ordered_text_values::text AS subtitle
+    FROM metadata_usage
+    WHERE metadatafield_fullname = 'dc.title.alternative'
 ),
 
 description AS (
     SELECT
-        b.item_hk,
-        STRING_AGG(DISTINCT mv.text_value::text, '|' ORDER BY mv.text_value::text) AS description
-    FROM base AS b
-    JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
-      ON mv.item_id = b.item_id
-     AND mv.institution_ror = b.institution_ror
-    WHERE mv.metadatafield_fullname IN ('dc.description.abstract', 'dc.description')
-    GROUP BY b.item_hk
+        item_hk,
+        STRING_AGG(ordered_text_values::text, '|' ORDER BY metadatafield_fullname) AS description
+    FROM metadata_usage
+    WHERE metadatafield_fullname IN ('dc.description.abstract', 'dc.description')
+    GROUP BY item_hk
 ),
 
 subject AS (
     SELECT
-        b.item_hk,
-        STRING_AGG(DISTINCT mv.text_value::text, '|' ORDER BY mv.text_value::text) AS subject
-    FROM base AS b
-    JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
-      ON mv.item_id = b.item_id
-     AND mv.institution_ror = b.institution_ror
-    WHERE mv.metadatafield_fullname = 'dc.subject'
-    GROUP BY b.item_hk
+        item_hk,
+        ordered_text_values::text AS subject
+    FROM metadata_usage
+    WHERE metadatafield_fullname = 'dc.subject'
 ),
 
 subtype AS (
     SELECT
-        b.item_hk,
-        STRING_AGG(DISTINCT mv.text_value::text, '|' ORDER BY mv.text_value::text) AS subtype
-    FROM base AS b
-    JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
-      ON mv.item_id = b.item_id
-     AND mv.institution_ror = b.institution_ror
-    WHERE mv.metadatafield_fullname = 'sedici.subtype'
-    GROUP BY b.item_hk
+        item_hk,
+        ordered_text_values::text AS subtype
+    FROM metadata_usage
+    WHERE metadatafield_fullname = 'sedici.subtype'
 ),
 
 author AS (
     SELECT
-        b.item_hk,
-        STRING_AGG(DISTINCT mv.text_value::text, '|' ORDER BY mv.text_value::text) AS author,
-        COUNT(DISTINCT NULLIF(TRIM(mv.text_value::text), ''))::int AS author_count
-    FROM base AS b
-    JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
-      ON mv.item_id = b.item_id
-     AND mv.institution_ror = b.institution_ror
-    WHERE mv.metadatafield_fullname = 'sedici.creator.person' OR mv.metadatafield_fullname = 'sedici.creator.corporate'
-    GROUP BY b.item_hk
+        item_hk,
+        STRING_AGG(ordered_text_values::text, '|' ORDER BY metadatafield_fullname) AS author,
+        SUM(distinct_nonempty_text_value_count)::int AS author_count
+    FROM metadata_usage
+    WHERE metadatafield_fullname IN ('sedici.creator.person', 'sedici.creator.corporate')
+    GROUP BY item_hk
 ),
 
 issn AS (
     SELECT
-        b.item_hk,
-        STRING_AGG(DISTINCT mv.text_value::text, '|' ORDER BY mv.text_value::text) AS issn
-    FROM base AS b
-    JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
-      ON mv.item_id = b.item_id
-     AND mv.institution_ror = b.institution_ror
-    WHERE mv.metadatafield_fullname = 'sedici.identifier.issn'
-    GROUP BY b.item_hk
+        item_hk,
+        ordered_text_values::text AS issn
+    FROM metadata_usage
+    WHERE metadatafield_fullname = 'sedici.identifier.issn'
 ),
 
 isbn AS (
     SELECT
-        b.item_hk,
-        STRING_AGG(DISTINCT mv.text_value::text, '|' ORDER BY mv.text_value::text) AS isbn
-    FROM base AS b
-    JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
-      ON mv.item_id = b.item_id
-     AND mv.institution_ror = b.institution_ror
-    WHERE mv.metadatafield_fullname = 'sedici.identifier.isbn'
-    GROUP BY b.item_hk
+        item_hk,
+        ordered_text_values::text AS isbn
+    FROM metadata_usage
+    WHERE metadatafield_fullname = 'sedici.identifier.isbn'
 ),
 
 ir_doi_raw AS (
     SELECT
-        b.item_hk,
-        LOWER(mv.text_value)::text AS raw_value
-    FROM base AS b
-    JOIN {{ ref('fct_dspacedb5_item_metadata') }} AS mv
-      ON mv.item_id = b.item_id
-     AND mv.institution_ror = b.institution_ror
-    WHERE mv.metadatafield_fullname IN ('dc.identifier.uri', 'sedici.identifier.other', 'sedici.identifier.doi')
+        mu.item_hk,
+        LOWER(BTRIM(value))::text AS raw_value
+    FROM metadata_usage AS mu
+    CROSS JOIN LATERAL UNNEST(STRING_TO_ARRAY(COALESCE(mu.ordered_text_values, ''), '|')) AS value
+    WHERE mu.metadatafield_fullname IN ('dc.identifier.uri', 'sedici.identifier.other', 'sedici.identifier.doi')
+      AND BTRIM(value) <> ''
 ),
 
 ir_doi_pid AS (

@@ -14,7 +14,7 @@ WITH metadata_base AS (
         place,
         authority,
         confidence
-    FROM {{ ref('fct_dspacedb5_item_metadata') }}
+    FROM {{ ref('brg_dspacedb5_item_metadatavalue') }}
     WHERE institution_ror = 'https://ror.org/01tjs6929'
 ),
 

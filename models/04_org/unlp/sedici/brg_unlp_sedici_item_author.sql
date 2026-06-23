@@ -9,7 +9,7 @@ WITH metadata_base AS (
         authority,
         confidence,
         place
-    FROM {{ ref('fct_dspacedb5_item_metadata') }}
+    FROM {{ ref('brg_dspacedb5_item_metadatavalue') }}
     WHERE institution_ror = 'https://ror.org/01tjs6929'
       AND metadatafield_fullname IN ('sedici.creator.person', 'sedici.creator.corporate')
       AND NULLIF(TRIM(text_value), '') IS NOT NULL

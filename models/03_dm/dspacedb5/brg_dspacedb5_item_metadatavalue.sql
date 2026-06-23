@@ -1,28 +1,92 @@
-{{ config(materialized='table') }}
+{{ config(
+    materialized='table',
+    indexes=[
+        {'columns': ['item_hk', 'metadatavalue_hk'], 'unique': true},
+        {'columns': ['item_hk', 'metadatafield_fullname']},
+        {'columns': ['item_id', 'institution_ror', 'metadatafield_fullname']}
+    ],
+    post_hook=[
+        "analyze {{ this }}"
+    ]
+) }}
 
-WITH base AS (
+WITH resource_metadatavalue AS (
+    SELECT DISTINCT
+        tl.metadatavalue_hk,
+        tl.resource_hk AS item_hk
+    FROM {{ ref('tlink_dspacedb5_metadatavalue_resource') }} AS tl
+    WHERE tl.resource_type_id = 2
+),
+item_scope AS (
     SELECT
-        hub_i.item_bk,
-        mf.metadatafield_fullname,
-        mf.short_id,
-        mf.element,
-        mf.qualifier,
+        item_hk,
+        SPLIT_PART(item_bk, '||', 1) AS institution_ror,
+        SPLIT_PART(item_bk, '||', 2) AS source_label,
+        SPLIT_PART(item_bk, '||', 3)::bigint AS item_id
+    FROM {{ ref('hub_dspacedb5_item') }}
+),
+metadatavalue_scope AS (
+    SELECT
+        hub_mv.metadatavalue_hk,
+        SPLIT_PART(hub_mv.metadatavalue_bk, '||', 3)::bigint AS metadata_value_id,
         sat_mv.text_value,
         sat_mv.text_lang,
         sat_mv.place,
         sat_mv.authority,
         sat_mv.confidence,
-        mf.metadatafield_hk,
-        lnk_mv_r.resource_hk AS item_hk,
-        lnk_mv_r.metadatavalue_hk
-    FROM {{ ref('hub_dspacedb5_item') }} hub_i
-    JOIN {{ ref('tlink_dspacedb5_metadatavalue_resource') }} lnk_mv_r
-        ON hub_i.item_hk = lnk_mv_r.resource_hk
-    JOIN {{ ref('link_dspacedb5_metadatavalue_metadatafield') }} lnk_mv_mf USING (metadatavalue_hk)
-    JOIN {{ ref('dim_dspacedb5_metadatafield') }} mf USING (metadatafield_hk)
+        sat_mv.load_datetime
+    FROM {{ ref('hub_dspacedb5_metadatavalue') }} AS hub_mv
     JOIN {{ latest_satellite(ref('sat_dspacedb5_metadatavalue'), 'metadatavalue_hk', order_column='load_datetime') }} AS sat_mv
         USING (metadatavalue_hk)
-    WHERE lnk_mv_r.resource_type_id = 2
+),
+metadatafield_scope AS (
+    SELECT
+        hub_mf.metadatafield_hk,
+        SPLIT_PART(hub_mf.metadatafield_bk, '||', 3)::bigint AS metadata_field_id,
+        mf.metadatafield_fullname,
+        mf.short_id,
+        mf.element,
+        mf.qualifier
+    FROM {{ ref('hub_dspacedb5_metadatafieldregistry') }} AS hub_mf
+    JOIN {{ ref('dim_dspacedb5_metadatafield') }} AS mf
+        USING (metadatafield_hk)
+),
+relation_scope AS (
+    SELECT
+        rm.item_hk,
+        lnk.metadatavalue_hk,
+        lnk.metadatafield_hk
+    FROM resource_metadatavalue AS rm
+    JOIN {{ ref('link_dspacedb5_metadatavalue_metadatafield') }} AS lnk
+        USING (metadatavalue_hk)
+),
+final AS (
+    SELECT
+        rel.item_hk,
+        item.item_id,
+        item.source_label,
+        item.institution_ror,
+        rel.metadatavalue_hk,
+        rel.metadatafield_hk,
+        mv.metadata_value_id,
+        mf.metadata_field_id,
+        mf.metadatafield_fullname,
+        mf.short_id,
+        mf.element,
+        mf.qualifier,
+        mv.text_value,
+        mv.text_lang,
+        mv.place,
+        mv.authority,
+        mv.confidence,
+        mv.load_datetime
+    FROM relation_scope AS rel
+    JOIN item_scope AS item
+        USING (item_hk)
+    JOIN metadatavalue_scope AS mv
+        USING (metadatavalue_hk)
+    JOIN metadatafield_scope AS mf
+        USING (metadatafield_hk)
 )
 
-SELECT * FROM base
+SELECT * FROM final

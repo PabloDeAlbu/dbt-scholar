@@ -15,6 +15,70 @@ models:
     config:
       tags: [dspacedb5, dm]
 
+  - name: brg_dspacedb5_item_metadatavalue
+    description: >
+      Bridge de item con valores de metadatos y su campo asociado, construido desde DV para la
+      rama `dspacedb5`.
+    config:
+      tags: [dspacedb5, dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_hk, metadatavalue_hk]
+    columns:
+      - name: item_hk
+        data_tests: [not_null]
+      - name: item_id
+        data_tests: [not_null]
+      - name: metadatavalue_hk
+        data_tests: [not_null]
+      - name: metadata_value_id
+        data_tests: [not_null]
+      - name: metadatafield_hk
+        data_tests: [not_null]
+      - name: metadata_field_id
+        data_tests: [not_null]
+      - name: metadatafield_fullname
+        data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+
+  - name: fct_dspacedb5_item_metadatafield_usage
+    description: >
+      Hecho agregado de uso de campos de metadatos por ítem para la rama `dspacedb5`.
+      Resume una fila por `item_hk + metadatafield_hk` con conteos y valores textuales
+      agregados para acelerar consumos analíticos que no necesitan el nivel atómico de
+      `brg_dspacedb5_item_metadatavalue`.
+    config:
+      tags: [dspacedb5, dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_hk, metadatafield_hk]
+    columns:
+      - name: item_hk
+        data_tests: [not_null]
+      - name: item_id
+        data_tests: [not_null]
+      - name: metadatafield_hk
+        data_tests: [not_null]
+      - name: metadatafield_fullname
+        data_tests: [not_null]
+      - name: metadatafield_name
+        data_tests: [not_null]
+      - name: metadata_field_id
+        data_tests: [not_null]
+      - name: metadata_value_count
+        data_tests: [not_null]
+      - name: metadata_value_id_count
+        data_tests: [not_null]
+      - name: distinct_nonempty_text_value_count
+        data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+
   - name: dim_dspacedb5_collection
     description: >
       Dimensión de colecciones DSpace 5 contextualizadas por repositorio e institución, con título
@@ -72,17 +136,6 @@ models:
       - name: item_hk
         data_tests: [not_null]
       - name: load_datetime
-        data_tests: [not_null]
-
-  - name: latest_sat_dspacedb5_item_metadatavalue
-    description: >
-      Estado más reciente de `sat_dspacedb5_item_metadatavalue`, a grano `item_metadatavalue_hk`.
-    config:
-      tags: [dspacedb5, dm]
-    columns:
-      - name: item_metadatavalue_hk
-        data_tests: [not_null, unique]
-      - name: metadata_value_id
         data_tests: [not_null]
 
   - name: fct_dspacedb5_item_extraction
@@ -161,17 +214,3 @@ models:
         data_tests: [not_null]
       - name: metadatafield_hk
         data_tests: [not_null, unique]
-
-  - name: fct_dspacedb5_item_metadata
-    description: >
-      Hecho core de metadatos observados por item para la rama `dspacedb5`. Expone el último valor
-      conocido por `item_hk + metadata_value_id` sobre el histórico persistido en DV.
-    config:
-      tags: [dspacedb5, dm]
-    columns:
-      - name: item_hk
-        data_tests: [not_null]
-      - name: metadata_value_id
-        data_tests: [not_null]
-      - name: metadatafield_fullname
-        data_tests: [not_null]
