@@ -1,0 +1,70 @@
+version: 2
+
+models:
+  - name: link_dspacedb5_metadatafield_metadataschema
+    description: >
+      Link entre campos de metadato y esquemas de metadato contextualizados para la rama
+      `dspacedb5`.
+    columns:
+      - name: metadatafield_metadataschema_hk
+        description: Hash key estable de la relación campo-esquema.
+        data_tests: [not_null, unique]
+      - name: metadatafield_hk
+        description: Hash key del campo de metadato relacionado.
+        data_tests: [not_null]
+      - name: metadataschema_hk
+        description: Hash key del esquema de metadato relacionado.
+        data_tests: [not_null]
+      - name: load_datetime
+        description: Fecha/hora de carga observada para el alta del link.
+        data_tests: [not_null]
+      - name: source
+        description: Etiqueta de la fuente que originó el registro.
+        data_tests: [not_null]
+
+  - name: link_dspacedb5_metadatavalue_metadatafield
+    description: >
+      Link entre valores de metadato y campos de metadato contextualizados para la rama
+      `dspacedb5`.
+    columns:
+      - name: metadatavalue_metadatafield_hk
+        description: Hash key estable de la relación valor-campo de metadato.
+        data_tests: [not_null, unique]
+      - name: metadatavalue_hk
+        description: Hash key del valor de metadato relacionado.
+        data_tests: [not_null]
+      - name: metadatafield_hk
+        description: Hash key del campo de metadato relacionado.
+        data_tests: [not_null]
+      - name: load_datetime
+        description: Fecha/hora de carga observada para el alta del link.
+        data_tests: [not_null]
+      - name: source
+        description: Etiqueta de la fuente que originó el registro.
+        data_tests: [not_null]
+
+  - name: tlink_dspacedb5_metadatavalue_resource
+    description: >
+      Transactional link entre un valor de metadato y el recurso referenciado por ese valor,
+      contextualizado para la rama `dspacedb5`.
+    columns:
+      - name: metadatavalue_resource_hk
+        description: Hash key estable de la relación valor de metadato-recurso.
+        data_tests: [not_null, unique]
+      - name: metadatavalue_hk
+        description: Hash key del valor de metadato relacionado.
+        data_tests: [not_null]
+      - name: resource_hk
+        description: Hash key del recurso relacionado.
+        data_tests: [not_null]
+      - name: resource_type_id
+        description: Identificador del tipo del recurso referenciado.
+      - name: effective_from
+        description: Fecha efectiva observada para la relación.
+        data_tests: [not_null]
+      - name: _load_datetime
+        description: Fecha/hora de carga observada para el alta del link transaccional.
+        data_tests: [not_null]
+      - name: source
+        description: Etiqueta de la fuente que originó el registro.
+        data_tests: [not_null]

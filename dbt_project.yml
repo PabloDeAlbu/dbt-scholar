@@ -243,8 +243,8 @@ vars:
     # Deben pisarse por CLI con `--vars`.
     dspacedb5_base_url: "__REQUIRED__"
     dspacedb5_institution_ror: "__REQUIRED__"
-    dspacedb5_extract_datetime: "__REQUIRED__"
-    dspacedb5_load_datetime: "__REQUIRED__"
+    dspacedb5_extract_datetime: ""
+    dspacedb5_load_datetime: ""
 
     # Ejemplo oai con conicet:
     oai_repository_identifier: "ri.conicet.gov.ar"

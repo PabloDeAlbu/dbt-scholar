@@ -6,41 +6,86 @@ models:
       Staging model estructural de colecciones DSpace 5 contextualizadas por repositorio e
       institución. Deriva `collection_bk` y `collection_hk` para reutilización analítica en la
       rama `dspacedb5`.
+    columns:
+      - name: collection_bk
+        description: Business key de la colección contextualizada por repositorio e institución.
+        data_tests: [not_null, unique]
+      - name: collection_hk
+        description: Hash key de la colección contextualizada por repositorio e institución.
+        data_tests: [not_null, unique]
 
   - name: stg_dspacedb5_community
     description: >
       Staging model estructural de comunidades DSpace 5 contextualizadas por repositorio e
       institución. Deriva `community_bk` y `community_hk`.
+    columns:
+      - name: community_bk
+        description: Business key de la comunidad contextualizada por repositorio e institución.
+        data_tests: [not_null, unique]
+      - name: community_hk
+        description: Hash key de la comunidad contextualizada por repositorio e institución.
+        data_tests: [not_null, unique]
 
   - name: stg_dspacedb5_collection2item
     description: >
       Staging model de la relación colección-item en DSpace 5. Expone hash keys consistentes con
       `stg_dspacedb5_item` y `stg_dspacedb5_collection`.
+    columns:
+      - name: item_hk
+        description: Hash key del item relacionado.
+        data_tests: [not_null]
+      - name: collection_hk
+        description: Hash key de la colección relacionada.
+        data_tests: [not_null]
+      - name: collection_item_hk
+        description: Hash key estable de la relación colección-item.
+        data_tests: [not_null]
 
   - name: stg_dspacedb5_community2collection
     description: >
       Staging model de la relación comunidad-colección en DSpace 5. Expone hash keys consistentes
       con las entidades contextualizadas por repositorio.
+    columns:
+      - name: community_hk
+        description: Hash key de la comunidad relacionada.
+        data_tests: [not_null]
+      - name: collection_hk
+        description: Hash key de la colección relacionada.
+        data_tests: [not_null]
+      - name: community_collection_hk
+        description: Hash key estable de la relación comunidad-colección.
+        data_tests: [not_null]
 
   - name: stg_dspacedb5_community2community
     description: >
       Staging model de la jerarquía comunidad-padre/comunidad-hija en DSpace 5.
+    columns:
+      - name: parent_comm_hk
+        description: Hash key de la comunidad padre.
+        data_tests: [not_null]
+      - name: child_comm_hk
+        description: Hash key de la comunidad hija.
+        data_tests: [not_null]
+      - name: community_community_hk
+        description: Hash key estable de la relación comunidad padre-hija.
+        data_tests: [not_null]
 
   - name: stg_dspacedb5_item
     description: >
       Staging model para items DSpace 5 contextualizados por repositorio e institución. Construye
       la business key `item_bk` como combinación de `_institution_ror`, `_source_label` e
       `item_id`, y deriva hash keys compatibles con un DV multi-repositorio. Desde `stg` en
-      adelante, los metadatos técnicos de ingestión se exponen sin prefijo `_`
-      (`source_label`, `institution_ror`, `extract_datetime`, `load_datetime`) como forma
-      normalizada de trabajo para DV y DM.
+      adelante, los metadatos técnicos de ingestión se exponen sin prefijo `_`.
     columns:
       - name: item_bk
         description: Business key del item contextualizado por repositorio e institución.
+        data_tests: [not_null, unique]
       - name: item_hk
         description: Hash key del item contextualizado por repositorio e institución.
+        data_tests: [not_null, unique]
       - name: extract_datetime
         description: Fecha/hora de extracción normalizada.
+        data_tests: [not_null]
 
   - name: stg_dspacedb5_item__extract
     description: >
@@ -50,27 +95,7 @@ models:
     columns:
       - name: extract_cdk
         description: Hash key del evento de extracción por item y fecha de extracción.
-
-  - name: stg_dspacedb5_item_metadatavalue
-    description: >
-      Staging model estructural de la relación item-metadatovalue para `dspacedb5`. Resuelve en
-      una sola vista el join entre item, metadatavalue, metadatafieldregistry y
-      metadataschemaregistry, y estandariza `metadatafield_fullname`. Los metadatos técnicos de
-      ingestión se consumen desde `ldg` con `_` y se exponen aquí sin prefijo.
-    columns:
-      - name: item_bk
-        description: Business key del item contextualizado por repositorio e institución.
-      - name: metadatavalue_bk
-        description: Business key del valor de metadato contextualizado por repositorio e institución.
-      - name: source_label
-        description: Etiqueta de fuente normalizada, sin prefijo `_`, para uso en DV y DM.
-      - name: institution_ror
-        description: ROR institucional normalizado, sin prefijo `_`, para uso en DV y DM.
-      - name: extract_datetime
-        description: Fecha/hora de extracción normalizada, sin prefijo `_`, para uso en DV y DM.
-      - name: load_datetime
-        description: Fecha/hora de carga normalizada, sin prefijo `_`, para uso en DV y DM.
-      - name: metadatafield_fullname
-        description: Nombre canónico del campo de metadato.
-      - name: item_metadatavalue_extract_hk
-        description: Hash key del evento item-metadato por extracción.
+        data_tests: [not_null]
+      - name: item_hk
+        description: Hash key del item observado en la extracción.
+        data_tests: [not_null]

@@ -24,8 +24,8 @@ models:
   - name: ldg_dspacedb5__context
     description: >
       Contexto técnico del dump DSpace 5 para `ldg_dspacedb5`. Debe ejecutarse
-      con `--vars` para fijar `base_url`, `institution_ror`,
-      `extract_datetime` y `load_datetime`. Ejemplo:
+      con `--vars` para fijar al menos `base_url` e `institution_ror`. Las
+      fechas pueden pasarse explícitamente o dejarse con default. Ejemplo:
       `dbt run --select models/01_ldg/dspacedb5 --vars '{dspacedb5_base_url: "sedici.unlp.edu.ar", dspacedb5_institution_ror: "https://ror.org/01tjs6929", dspacedb5_extract_datetime: "2026-06-22", dspacedb5_load_datetime: "2026-06-22 10:30:00"}'`
     columns:
       - name: base_url

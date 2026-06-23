@@ -1,0 +1,74 @@
+version: 2
+
+models:
+  - name: hub_dspacedb5_item
+    description: >
+      Hub de items contextualizados por repositorio e institución para la rama `dspacedb5`.
+      Conserva una fila por business key estable del item.
+    columns:
+      - name: item_hk
+        description: Hash key del item contextualizado.
+        data_tests: [not_null, unique]
+      - name: item_bk
+        description: Business key contextualizada del item.
+        data_tests: [not_null, unique]
+      - name: load_datetime
+        description: Fecha/hora de carga observada para el primer alta del hub.
+        data_tests: [not_null]
+      - name: source
+        description: Etiqueta de la fuente que originó el registro.
+        data_tests: [not_null]
+
+  - name: hub_dspacedb5_metadatavalue
+    description: >
+      Hub de valores de metadato contextualizados por repositorio e institución para la rama
+      `dspacedb5`.
+    columns:
+      - name: metadatavalue_hk
+        description: Hash key del valor de metadato contextualizado.
+        data_tests: [not_null, unique]
+      - name: metadatavalue_bk
+        description: Business key contextualizada del valor de metadato.
+        data_tests: [not_null, unique]
+      - name: load_datetime
+        description: Fecha/hora de carga observada para el primer alta del hub.
+        data_tests: [not_null]
+      - name: source
+        description: Etiqueta de la fuente que originó el registro.
+        data_tests: [not_null]
+
+  - name: hub_dspacedb5_metadatafieldregistry
+    description: >
+      Hub de campos de metadato contextualizados por repositorio e institución para la rama
+      `dspacedb5`.
+    columns:
+      - name: metadatafield_hk
+        description: Hash key del campo de metadato contextualizado.
+        data_tests: [not_null, unique]
+      - name: metadatafield_bk
+        description: Business key contextualizada del campo de metadato.
+        data_tests: [not_null, unique]
+      - name: load_datetime
+        description: Fecha/hora de carga observada para el primer alta del hub.
+        data_tests: [not_null]
+      - name: source
+        description: Etiqueta de la fuente que originó el registro.
+        data_tests: [not_null]
+
+  - name: hub_dspacedb5_metadataschemaregistry
+    description: >
+      Hub de esquemas de metadato contextualizados por repositorio e institución para la rama
+      `dspacedb5`.
+    columns:
+      - name: metadataschema_hk
+        description: Hash key del esquema de metadato contextualizado.
+        data_tests: [not_null, unique]
+      - name: metadataschema_bk
+        description: Business key contextualizada del esquema de metadato.
+        data_tests: [not_null, unique]
+      - name: load_datetime
+        description: Fecha/hora de carga observada para el primer alta del hub.
+        data_tests: [not_null]
+      - name: source
+        description: Etiqueta de la fuente que originó el registro.
+        data_tests: [not_null]

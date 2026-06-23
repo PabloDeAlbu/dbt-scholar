@@ -7,8 +7,8 @@ context AS (
 renamed AS (
   SELECT
     id::bigint AS collection_item_id,
-    collection_id::text AS collection_id,
-    item_id::text AS item_id,
+    collection_id::integer AS collection_id,
+    item_id::integer AS item_id,
     context.source_label::text AS _source_label,
     context.institution_ror::text AS _institution_ror,
     context.extract_datetime::timestamp AS _extract_datetime,
@@ -19,8 +19,8 @@ renamed AS (
 ghost_record AS (
   SELECT
     -1 AS collection_item_id,
-    '-1'::text AS collection_id,
-    '-1'::text AS item_id,
+    -1 AS collection_id,
+    -1 AS item_id,
     '!UNKNOWN' AS _source_label,
     '!UNKNOWN' AS _institution_ror,
     '1900-01-01'::timestamp AS _extract_datetime,

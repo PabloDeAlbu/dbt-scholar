@@ -6,12 +6,12 @@ context AS (
 ),
 renamed AS (
   SELECT
-    item_id::text AS item_id,
-    submitter_id::text AS submitter_id,
+    item_id::integer AS item_id,
+    submitter_id::integer AS submitter_id,
     in_archive::boolean AS in_archive,
     withdrawn::boolean AS withdrawn,
     last_modified::timestamp AS last_modified,
-    owning_collection::text AS owning_collection,
+    owning_collection::integer AS owning_collection,
     discoverable::boolean AS discoverable,
     context.source_label::text AS _source_label,
     context.institution_ror::text AS _institution_ror,
@@ -25,12 +25,12 @@ renamed AS (
 ),
 ghost_record AS (
   SELECT
-    '-1'::text AS item_id,
-    '-1'::text AS submitter_id,
+    -1 AS item_id,
+    -1 AS submitter_id,
     false AS in_archive,
     false AS withdrawn,
     '1900-01-01'::timestamp AS last_modified,
-    '-1'::text AS owning_collection,
+    -1 AS owning_collection,
     false AS discoverable,
     '!UNKNOWN' AS _source_label,
     '!UNKNOWN' AS _institution_ror,

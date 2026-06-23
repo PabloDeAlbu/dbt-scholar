@@ -6,9 +6,9 @@ context AS (
 ),
 renamed AS (
   SELECT
-    metadata_value_id::text AS metadata_value_id,
-    resource_id::text AS resource_id,
-    metadata_field_id::text AS metadata_field_id,
+    metadata_value_id::integer AS metadata_value_id,
+    resource_id::integer AS resource_id,
+    metadata_field_id::integer AS metadata_field_id,
     text_value::text AS text_value,
     text_lang::text AS text_lang,
     place::integer AS place,
@@ -28,9 +28,9 @@ renamed AS (
 ),
 ghost_record AS (
   SELECT
-    '-1'::text AS metadata_value_id,
-    '-1'::text AS resource_id,
-    '-1'::text AS metadata_field_id,
+    -1 AS metadata_value_id,
+    -1 AS resource_id,
+    -1 AS metadata_field_id,
     '!UNKNOWN' AS text_value,
     '!UNKNOWN' AS text_lang,
     -1 AS place,
