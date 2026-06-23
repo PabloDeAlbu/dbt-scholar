@@ -166,31 +166,27 @@ final AS (
         stats.last_load_datetime
     FROM stats
     LEFT JOIN ordered_values AS ordered
-        USING (
-            item_hk,
-            item_id,
-            source_label,
-            institution_ror,
-            metadatafield_hk,
-            metadatafield_fullname,
-            short_id,
-            metadata_field_id,
-            element,
-            qualifier
-        )
+        ON stats.item_hk = ordered.item_hk
+       AND stats.item_id = ordered.item_id
+       AND stats.source_label = ordered.source_label
+       AND stats.institution_ror = ordered.institution_ror
+       AND stats.metadatafield_hk = ordered.metadatafield_hk
+       AND stats.metadatafield_fullname = ordered.metadatafield_fullname
+       AND stats.short_id = ordered.short_id
+       AND stats.metadata_field_id = ordered.metadata_field_id
+       AND stats.element = ordered.element
+       AND stats.qualifier IS NOT DISTINCT FROM ordered.qualifier
     LEFT JOIN preferred_values AS preferred
-        USING (
-            item_hk,
-            item_id,
-            source_label,
-            institution_ror,
-            metadatafield_hk,
-            metadatafield_fullname,
-            short_id,
-            metadata_field_id,
-            element,
-            qualifier
-        )
+        ON stats.item_hk = preferred.item_hk
+       AND stats.item_id = preferred.item_id
+       AND stats.source_label = preferred.source_label
+       AND stats.institution_ror = preferred.institution_ror
+       AND stats.metadatafield_hk = preferred.metadatafield_hk
+       AND stats.metadatafield_fullname = preferred.metadatafield_fullname
+       AND stats.short_id = preferred.short_id
+       AND stats.metadata_field_id = preferred.metadata_field_id
+       AND stats.element = preferred.element
+       AND stats.qualifier IS NOT DISTINCT FROM preferred.qualifier
 )
 
 SELECT * FROM final

@@ -2,7 +2,15 @@
     materialized='incremental',
     unique_key='extract_cdk',
     incremental_strategy='delete+insert',
-    on_schema_change='fail'
+    on_schema_change='fail',
+    indexes=[
+        {'columns': ['extract_cdk'], 'unique': true},
+        {'columns': ['item_hk', 'source_label', 'institution_ror']},
+        {'columns': ['load_datetime']}
+    ],
+    post_hook=[
+        "analyze {{ this }}"
+    ]
 ) }}
 
 WITH item_hub AS (

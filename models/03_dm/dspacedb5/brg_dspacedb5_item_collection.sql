@@ -1,4 +1,15 @@
-{{ config(materialized='table') }}
+{{ config(
+    materialized='table',
+    indexes=[
+        {'columns': ['item_hk', 'collection_hk'], 'unique': true},
+        {'columns': ['item_hk']},
+        {'columns': ['collection_hk']},
+        {'columns': ['institution_ror', 'source_label', 'item_id']}
+    ],
+    post_hook=[
+        "analyze {{ this }}"
+    ]
+) }}
 
 WITH relation_base AS (
     SELECT DISTINCT

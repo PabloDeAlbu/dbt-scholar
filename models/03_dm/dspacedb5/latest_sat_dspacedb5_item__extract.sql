@@ -1,4 +1,14 @@
-{{ config(materialized='table') }}
+{{ config(
+    materialized='table',
+    indexes=[
+        {'columns': ['item_hk', 'source_label', 'institution_ror'], 'unique': true},
+        {'columns': ['extract_cdk'], 'unique': true},
+        {'columns': ['extract_datetime']}
+    ],
+    post_hook=[
+        "analyze {{ this }}"
+    ]
+) }}
 
 -- Latest row from sat_dspacedb5_item__extract keyed by item_hk + source_label + institution_ror.
 WITH latest AS {{ latest_satellite(

@@ -1,4 +1,16 @@
-{{ config(materialized='table') }}
+{{ config(
+    materialized='table',
+    indexes=[
+        {'columns': ['item_hk', 'collection_hk'], 'unique': true},
+        {'columns': ['item_hk', 'is_owning_collection']},
+        {'columns': ['collection_hk']},
+        {'columns': ['community_hk']},
+        {'columns': ['root_community_hk']}
+    ],
+    post_hook=[
+        "analyze {{ this }}"
+    ]
+) }}
 
 WITH publication AS (
     SELECT *

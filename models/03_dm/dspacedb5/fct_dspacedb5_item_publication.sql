@@ -1,4 +1,14 @@
-{{ config(materialized='table') }}
+{{ config(
+    materialized='table',
+    indexes=[
+        {'columns': ['item_hk'], 'unique': true},
+        {'columns': ['institution_ror', 'source_label', 'item_id']},
+        {'columns': ['institution_ror', 'source_label', 'owningcollection_hk']}
+    ],
+    post_hook=[
+        "analyze {{ this }}"
+    ]
+) }}
 
 WITH item_hub AS (
     SELECT
