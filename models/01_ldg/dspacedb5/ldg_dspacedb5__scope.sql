@@ -6,7 +6,7 @@ WITH context AS (
             ''
         )::text AS base_url,
         REGEXP_REPLACE(
-            LOWER(TRIM('{{ required_var("dspacedb5_base_url") }}'::text)),
+            LOWER(TRIM('{{ required_var("dspacedb5_source_label") }}'::text)),
             '^https?://',
             ''
         )::text AS source_label,

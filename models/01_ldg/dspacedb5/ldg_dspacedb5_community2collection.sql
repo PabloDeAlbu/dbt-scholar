@@ -1,30 +1,18 @@
 WITH source AS (
   SELECT * FROM {{ source('dspacedb5', 'community2collection') }}
 ),
-context AS (
-  SELECT * FROM {{ ref('ldg_dspacedb5__context') }}
-),
 renamed AS (
   SELECT
     id::bigint AS community_collection_id,
-    community_id::text AS community_id,
-    collection_id::text AS collection_id,
-    context.source_label::text AS _source_label,
-    context.institution_ror::text AS _institution_ror,
-    context.extract_datetime::timestamp AS _extract_datetime,
-    context.load_datetime::timestamp AS _load_datetime
+    community_id::integer AS community_id,
+    collection_id::integer AS collection_id
   FROM source
-  CROSS JOIN context
 ),
 ghost_record AS (
   SELECT
-    -1 AS community_collection_id,
-    '-1'::text AS community_id,
-    '-1'::text AS collection_id,
-    '!UNKNOWN' AS _source_label,
-    '!UNKNOWN' AS _institution_ror,
-    '1900-01-01'::timestamp AS _extract_datetime,
-    '1900-01-01'::timestamp AS _load_datetime
+    -1::bigint AS community_collection_id,
+    -1::integer AS community_id,
+    -1::integer AS collection_id
 )
 
 SELECT * FROM renamed

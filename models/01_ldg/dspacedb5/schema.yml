@@ -21,17 +21,17 @@ sources:
       - name: metadatavalue
 
 models:
-  - name: ldg_dspacedb5__context
+  # ldg: castea el dump vigente y agrega contexto de integración. No calcula BK/HK DV.
+  - name: ldg_dspacedb5__scope
     description: >
-      Contexto técnico del dump DSpace 5 para `ldg_dspacedb5`. Debe ejecutarse
-      con `--vars` para fijar al menos `base_url` e `institution_ror`. Las
-      fechas pueden pasarse explícitamente o dejarse con default. Ejemplo:
-      `dbt run --select models/01_ldg/dspacedb5 --vars '{dspacedb5_base_url: "sedici.unlp.edu.ar", dspacedb5_institution_ror: "https://ror.org/01tjs6929", dspacedb5_extract_datetime: "2026-06-22", dspacedb5_load_datetime: "2026-06-22 10:30:00"}'`
+      Contexto de integración del batch DSpace 5. Fuente única para scope, extracción
+      y carga del dump vigente. Ejemplo:
+      `dbt run --select models/01_ldg/dspacedb5 --vars '{dspacedb5_source_label: "sedici", dspacedb5_base_url: "sedici.unlp.edu.ar", dspacedb5_institution_ror: "https://ror.org/01tjs6929", dspacedb5_extract_datetime: "2026-06-22", dspacedb5_load_datetime: "2026-06-22 10:30:00"}'`
     columns:
       - name: base_url
         data_tests: [not_null]
       - name: source_label
-        description: Alias compatible derivado de `base_url`.
+        description: Etiqueta de fuente del batch.
         data_tests: [not_null]
       - name: institution_ror
         data_tests: [not_null]
@@ -42,77 +42,131 @@ models:
 
   - name: ldg_dspacedb5_item
     description: >
-      Items DSpace 5 normalizados en landing, con contexto técnico de fuente e
-      ingestión en campos con prefijo `_`.
+      Tabla `item` casteada, con registro nulo.
     columns:
       - name: item_id
         data_tests:
           - not_null
-      - name: _source_label
-        description: Etiqueta técnica de la fuente en la capa landing.
-        data_tests:
-          - not_null
-      - name: _institution_ror
-        description: ROR institucional técnico inyectado en la capa landing.
-        data_tests:
-          - not_null
-      - name: _extract_datetime
-        description: Fecha/hora técnica de extracción conservada con prefijo `_` en landing.
-        data_tests:
-          - not_null
-      - name: _load_datetime
-        description: Fecha/hora técnica de carga conservada con prefijo `_` en landing.
-        data_tests:
-          - not_null
+      - name: submitter_id
+      - name: in_archive
+      - name: withdrawn
+      - name: last_modified
+      - name: owning_collection
+      - name: discoverable
 
   - name: ldg_dspacedb5_bitstream
     description: >
-      Bitstreams DSpace 5 normalizados en landing, con contexto técnico de
-      fuente e ingestión.
+      Tabla `bitstream` casteada, con registro nulo.
+    columns:
+      - name: bitstream_id
+      - name: bitstream_format_id
+      - name: size_bytes
+      - name: checksum
+      - name: checksum_algorithm
+      - name: internal_id
+      - name: deleted
+      - name: store_number
+      - name: sequence_id
 
   - name: ldg_dspacedb5_bundle2bitstream
     description: >
-      Relación bundle-bitstream de DSpace 5 normalizada en landing.
+      Tabla `bundle2bitstream` casteada, con registro nulo.
+    columns:
+      - name: id
+      - name: bundle_id
+      - name: bitstream_id
+      - name: bitstream_order
 
   - name: ldg_dspacedb5_collection
     description: >
-      Colecciones DSpace 5 normalizadas en landing, con claves operativas y
-      responsables del workflow.
+      Tabla `collection` casteada, con registro nulo.
+    columns:
+      - name: collection_id
+      - name: logo_bitstream_id
+      - name: template_item_id
+      - name: workflow_step_1
+      - name: workflow_step_2
+      - name: workflow_step_3
+      - name: submitter
+      - name: admin
 
   - name: ldg_dspacedb5_collection2item
     description: >
-      Relación colección-item de DSpace 5 normalizada en landing.
+      Tabla `collection2item` casteada, con registro nulo.
+    columns:
+      - name: collection_item_id
+      - name: collection_id
+      - name: item_id
 
   - name: ldg_dspacedb5_community
     description: >
-      Comunidades DSpace 5 normalizadas en landing.
+      Tabla `community` casteada, con registro nulo.
+    columns:
+      - name: community_id
+      - name: logo_bitstream_id
+      - name: admin
 
   - name: ldg_dspacedb5_community2collection
     description: >
-      Relación comunidad-colección de DSpace 5 normalizada en landing.
+      Tabla `community2collection` casteada, con registro nulo.
+    columns:
+      - name: community_collection_id
+      - name: community_id
+      - name: collection_id
 
   - name: ldg_dspacedb5_community2community
     description: >
-      Relación jerárquica entre comunidades DSpace 5 normalizada en landing.
+      Tabla `community2community` casteada, con registro nulo.
+    columns:
+      - name: community_community_id
+      - name: parent_comm_id
+      - name: child_comm_id
 
   - name: ldg_dspacedb5_handle
     description: >
-      Handles DSpace 5 normalizados en landing, con referencia al recurso
-      asociado.
+      Tabla `handle` casteada, con registro nulo.
+    columns:
+      - name: handle_id
+      - name: handle
+      - name: resource_type_id
+      - name: resource_id
 
   - name: ldg_dspacedb5_item2bundle
     description: >
-      Relación item-bundle de DSpace 5 normalizada en landing.
+      Tabla `item2bundle` casteada, con registro nulo.
+    columns:
+      - name: id
+      - name: item_id
+      - name: bundle_id
 
   - name: ldg_dspacedb5_metadatafieldregistry
     description: >
-      Registro de campos de metadatos DSpace 5 normalizado en landing.
+      Tabla `metadatafieldregistry` casteada, con registro nulo.
+    columns:
+      - name: metadata_field_id
+      - name: metadata_schema_id
+      - name: element
+      - name: qualifier
+      - name: scope_note
 
   - name: ldg_dspacedb5_metadataschemaregistry
     description: >
-      Registro de esquemas de metadatos DSpace 5 normalizado en landing.
+      Tabla `metadataschemaregistry` casteada, con registro nulo.
+    columns:
+      - name: metadata_schema_id
+      - name: namespace
+      - name: short_id
 
   - name: ldg_dspacedb5_metadatavalue
     description: >
-      Valores de metadatos DSpace 5 normalizados en landing, con referencia al
-      recurso y al campo de metadato asociado.
+      Tabla `metadatavalue` casteada, con registro nulo.
+    columns:
+      - name: metadata_value_id
+      - name: resource_id
+      - name: metadata_field_id
+      - name: text_value
+      - name: text_lang
+      - name: place
+      - name: authority
+      - name: confidence
+      - name: resource_type_id

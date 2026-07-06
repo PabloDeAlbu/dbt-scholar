@@ -1,9 +1,6 @@
 WITH source AS (
   SELECT * FROM {{ source('dspacedb5', 'bitstream') }}
 ),
-context AS (
-  SELECT * FROM {{ ref('ldg_dspacedb5__context') }}
-),
 renamed AS (
   SELECT
     bitstream_id::bigint AS bitstream_id,
@@ -14,29 +11,20 @@ renamed AS (
     internal_id::text AS internal_id,
     deleted::boolean AS deleted,
     store_number::integer AS store_number,
-    sequence_id::bigint AS sequence_id,
-    context.source_label::text AS _source_label,
-    context.institution_ror::text AS _institution_ror,
-    context.extract_datetime::timestamp AS _extract_datetime,
-    context.load_datetime::timestamp AS _load_datetime
+    sequence_id::bigint AS sequence_id
   FROM source
-  CROSS JOIN context
 ),
 ghost_record AS (
   SELECT
-    -1 AS bitstream_id,
-    -1 AS bitstream_format_id,
-    -1 AS size_bytes,
-    '!UNKNOWN' AS checksum,
-    '!UNKNOWN' AS checksum_algorithm,
-    '!UNKNOWN' AS internal_id,
-    false AS deleted,
-    -1 AS store_number,
-    -1 AS sequence_id,
-    '!UNKNOWN' AS _source_label,
-    '!UNKNOWN' AS _institution_ror,
-    '1900-01-01'::timestamp AS _extract_datetime,
-    '1900-01-01'::timestamp AS _load_datetime
+    -1::bigint AS bitstream_id,
+    -1::bigint AS bitstream_format_id,
+    -1::bigint AS size_bytes,
+    '!UNKNOWN'::text AS checksum,
+    '!UNKNOWN'::text AS checksum_algorithm,
+    '!UNKNOWN'::text AS internal_id,
+    false::boolean AS deleted,
+    -1::integer AS store_number,
+    -1::bigint AS sequence_id
 )
 
 SELECT * FROM renamed

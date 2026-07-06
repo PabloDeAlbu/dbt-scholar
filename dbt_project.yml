@@ -242,6 +242,7 @@ vars:
     # Valores requeridos para dumps `dspacedb5`.
     # Deben pisarse por CLI con `--vars`.
     dspacedb5_base_url: "__REQUIRED__"
+    dspacedb5_source_label: "__REQUIRED__"
     dspacedb5_institution_ror: "__REQUIRED__"
     dspacedb5_extract_datetime: ""
     dspacedb5_load_datetime: ""

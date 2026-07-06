@@ -1,9 +1,6 @@
 WITH source AS (
   SELECT * FROM {{ source('dspacedb5', 'metadatavalue') }}
 ),
-context AS (
-  SELECT * FROM {{ ref('ldg_dspacedb5__context') }}
-),
 renamed AS (
   SELECT
     metadata_value_id::integer AS metadata_value_id,
@@ -14,37 +11,20 @@ renamed AS (
     place::integer AS place,
     authority::text AS authority,
     confidence::integer AS confidence,
-    resource_type_id::integer AS resource_type_id,
-    context.source_label::text AS _source_label,
-    context.institution_ror::text AS _institution_ror,
-    (context.institution_ror || '||' || context.source_label)::text AS _repository_scope,
-    (context.institution_ror || '||' || context.source_label || '||' || metadata_value_id::text)::text AS metadatavalue_bk,
-    (context.institution_ror || '||' || context.source_label || '||' || metadata_field_id::text)::text AS metadatafield_bk,
-    (context.institution_ror || '||' || context.source_label || '||' || resource_id::text)::text AS resource_bk,
-    context.extract_datetime::timestamp AS _extract_datetime,
-    context.load_datetime::timestamp AS _load_datetime
+    resource_type_id::integer AS resource_type_id
   FROM source
-  CROSS JOIN context
 ),
 ghost_record AS (
   SELECT
-    -1 AS metadata_value_id,
-    -1 AS resource_id,
-    -1 AS metadata_field_id,
-    '!UNKNOWN' AS text_value,
-    '!UNKNOWN' AS text_lang,
-    -1 AS place,
-    '!UNKNOWN' AS authority,
-    -1 AS confidence,
-    -1 AS resource_type_id,
-    '!UNKNOWN' AS _source_label,
-    '!UNKNOWN' AS _institution_ror,
-    '!UNKNOWN||!UNKNOWN' AS _repository_scope,
-    '!UNKNOWN||!UNKNOWN||-1' AS metadatavalue_bk,
-    '!UNKNOWN||!UNKNOWN||-1' AS metadatafield_bk,
-    '!UNKNOWN||!UNKNOWN||-1' AS resource_bk,
-    '1900-01-01'::timestamp AS _extract_datetime,
-    '1900-01-01'::timestamp AS _load_datetime
+    -1::integer AS metadata_value_id,
+    -1::integer AS resource_id,
+    -1::integer AS metadata_field_id,
+    '!UNKNOWN'::text AS text_value,
+    '!UNKNOWN'::text AS text_lang,
+    -1::integer AS place,
+    '!UNKNOWN'::text AS authority,
+    -1::integer AS confidence,
+    -1::integer AS resource_type_id
 )
 
 SELECT * FROM renamed
