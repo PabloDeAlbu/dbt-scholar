@@ -5,10 +5,10 @@
 {%- set yaml_metadata -%}
 source_model: ldg_dspacedb5_metadatavalue
 derived_columns:
-  scope_bk: "{{ scope_bk }}"
+  item_id: resource_id
   metadatavalue_bk: "{{ scope_bk }} || '||' || metadata_value_id::text"
   metadatafield_bk: "{{ scope_bk }} || '||' || metadata_field_id::text"
-  resource_bk: "{{ scope_bk }} || '||' || resource_id::text"
+  item_bk: "{{ scope_bk }} || '||' || resource_id::text"
   source_label: "(SELECT source_label FROM {{ scope_relation }})"
   institution_ror: "(SELECT institution_ror FROM {{ scope_relation }})"
   base_url: "(SELECT base_url FROM {{ scope_relation }})"
@@ -19,29 +19,17 @@ derived_columns:
   start_date: "(SELECT extract_datetime FROM {{ scope_relation }})"
   end_date: "TO_DATE('9999-12-31', 'YYYY-MM-DD')"
 hashed_columns:
-  scope_hk: scope_bk
-  authority_hk: authority
+  item_hk: item_bk
   metadatavalue_hk: metadatavalue_bk
   metadatafield_hk: metadatafield_bk
-  resource_hk: resource_bk
-  metadatavalue_authority_hk:
+  item_metadatavalue_hk:
+    - item_bk
     - metadatavalue_bk
-    - authority
-  metadatavalue_resource_hk:
-    - metadatavalue_bk
-    - resource_bk
-  metadatavalue_resourcetype_hk:
-    - metadatavalue_bk
-    - resource_type_id
-  metadatavalue_metadatafield_hk:
-    - metadatavalue_bk
-    - metadatafield_bk
-  metadatavalue_hashdiff:
+  item_metadatavalue_hashdiff:
     is_hashdiff: true
     columns:
+      - item_bk
       - metadatavalue_bk
-      - resource_bk
-      - resource_type_id
       - metadatafield_bk
       - text_value
       - text_lang
@@ -52,11 +40,18 @@ hashed_columns:
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}
 
-{{ automate_dv.stage(
-    include_source_columns=true,
-    source_model=metadata_dict['source_model'],
-    derived_columns=metadata_dict['derived_columns'],
-    null_columns=none,
-    hashed_columns=metadata_dict['hashed_columns'],
-    ranked_columns=none
-) }}
+WITH staged AS (
+    {{ automate_dv.stage(
+        include_source_columns=true,
+        source_model=metadata_dict['source_model'],
+        derived_columns=metadata_dict['derived_columns'],
+        null_columns=none,
+        hashed_columns=metadata_dict['hashed_columns'],
+        ranked_columns=none
+    ) }}
+)
+
+SELECT *
+FROM staged
+WHERE resource_type_id = 2
+   OR metadata_value_id = -1

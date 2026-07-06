@@ -1,12 +1,57 @@
 version: 2
 
 models:
-  - name: sat_dspacedb5_item__extract
+  # sat: versiona observaciones. Calcula hashdiff y hashes propios del satélite.
+  - name: sat_dspacedb5__extract
     description: >
-      Satélite multi-activo de observaciones de extracción por item contextualizado por
-      repositorio e institución.
+      Satélite de extracciones del scope DSpace 5. `extract_datetime` describe
+      cuándo se observó la fuente; `load_datetime`, cuándo ingresó al DW.
+    columns:
+      - name: scope_hk
+        description: Hash key del scope observado.
+      - name: extract_cdk
+        description: Hash key del evento de extracción por scope y fecha de extracción.
+      - name: extract_datetime
+        description: Fecha de la extracción observada.
+      - name: load_datetime
+        description: Fecha de carga de la observación.
+
+  - name: sat_dspacedb5_item_metadatavalue
+    description: >
+      Satélite histórico del vínculo item-metadatavalue en DSpace 5. Persiste el último estado
+      observado de esa relación a grano `item_metadatavalue_hk`, calculando hashes dentro del
+      propio satélite.
+    columns:
+      - name: item_metadatavalue_hk
+        description: Hash key estable del vínculo item-metadatavalue.
+      - name: hashdiff
+        description: Hashdiff de los atributos descriptivos versionados para el vínculo.
+      - name: item_hk
+        description: Hash key del item asociado al valor de metadato.
+      - name: metadatavalue_hk
+        description: Hash key del valor de metadato asociado.
+      - name: metadatafield_hk
+        description: Hash key del campo de metadato asociado.
+      - name: load_datetime
+        description: Fecha de carga del estado observado.
+
+  - name: sat_dspacedb5_item__scope
+    description: >
+      Satélite de scope e identificadores operativos del item DSpace 5.
     columns:
       - name: item_hk
-        description: Hash key del item contextualizado por repositorio e institución.
-      - name: extract_datetime
-        description: Fecha/hora de la extracción observada.
+        data_tests: [not_null]
+      - name: hashdiff
+        data_tests: [not_null]
+      - name: item_id
+        data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+      - name: base_url
+        data_tests: [not_null]
+      - name: owningcollection_hk
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
