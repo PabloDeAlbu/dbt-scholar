@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  # stg: adapta ldg para DV con automate_dv.stage. Arma BKs, HKs y hashdiffs.
+  # stg: adapta ldg con scope para DV. Arma BKs, HKs y hashdiffs con automate_dv.stage.
   - name: stg_dspacedb5__scope
     description: >
       Scope del batch DSpace 5. Fuente común para contexto de repositorio,
@@ -52,6 +52,10 @@ models:
       - name: base_url
       - name: extract_datetime
       - name: load_datetime
+      - name: source
+      - name: effective_from
+      - name: start_date
+      - name: end_date
 
   - name: stg_dspacedb5_collection2item
     description: >
@@ -72,6 +76,10 @@ models:
       - name: base_url
       - name: extract_datetime
       - name: load_datetime
+      - name: source
+      - name: effective_from
+      - name: start_date
+      - name: end_date
 
   - name: stg_dspacedb5_community
     description: >
@@ -92,6 +100,10 @@ models:
       - name: base_url
       - name: extract_datetime
       - name: load_datetime
+      - name: source
+      - name: effective_from
+      - name: start_date
+      - name: end_date
 
   - name: stg_dspacedb5_community2collection
     description: >
@@ -112,6 +124,10 @@ models:
       - name: base_url
       - name: extract_datetime
       - name: load_datetime
+      - name: source
+      - name: effective_from
+      - name: start_date
+      - name: end_date
 
   - name: stg_dspacedb5_community2community
     description: >
@@ -132,6 +148,10 @@ models:
       - name: base_url
       - name: extract_datetime
       - name: load_datetime
+      - name: source
+      - name: effective_from
+      - name: start_date
+      - name: end_date
 
   - name: stg_dspacedb5_item
     description: >
@@ -223,6 +243,7 @@ models:
       - name: source_label
       - name: institution_ror
       - name: base_url
+      - name: extract_datetime
       - name: load_datetime
       - name: effective_from
       - name: start_date
@@ -246,6 +267,7 @@ models:
       - name: source_label
       - name: institution_ror
       - name: base_url
+      - name: extract_datetime
       - name: load_datetime
       - name: effective_from
       - name: start_date
@@ -284,6 +306,7 @@ models:
       - name: source_label
       - name: institution_ror
       - name: base_url
+      - name: extract_datetime
       - name: load_datetime
       - name: effective_from
       - name: start_date
