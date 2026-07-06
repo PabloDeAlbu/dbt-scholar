@@ -21,7 +21,7 @@ sources:
       - name: metadatavalue
 
 models:
-  # ldg: castea el dump vigente y agrega contexto de integración. No calcula BK/HK DV.
+  # ldg: castea el dump vigente, agrega registro nulo y scope del batch. No calcula BK/HK DV.
   - name: ldg_dspacedb5__scope
     description: >
       Contexto de integración del batch DSpace 5. Fuente única para scope, extracción
@@ -42,7 +42,7 @@ models:
 
   - name: ldg_dspacedb5_item
     description: >
-      Tabla `item` casteada, con registro nulo.
+      Tabla `item` casteada, con registro nulo y scope del batch.
     columns:
       - name: item_id
         data_tests:
@@ -56,7 +56,7 @@ models:
 
   - name: ldg_dspacedb5_bitstream
     description: >
-      Tabla `bitstream` casteada, con registro nulo.
+      Tabla `bitstream` casteada, con registro nulo y scope del batch.
     columns:
       - name: bitstream_id
       - name: bitstream_format_id
@@ -70,7 +70,7 @@ models:
 
   - name: ldg_dspacedb5_bundle2bitstream
     description: >
-      Tabla `bundle2bitstream` casteada, con registro nulo.
+      Tabla `bundle2bitstream` casteada, con registro nulo y scope del batch.
     columns:
       - name: id
       - name: bundle_id
@@ -79,7 +79,7 @@ models:
 
   - name: ldg_dspacedb5_collection
     description: >
-      Tabla `collection` casteada, con registro nulo.
+      Tabla `collection` casteada, con registro nulo y scope del batch.
     columns:
       - name: collection_id
       - name: logo_bitstream_id
@@ -92,7 +92,7 @@ models:
 
   - name: ldg_dspacedb5_collection2item
     description: >
-      Tabla `collection2item` casteada, con registro nulo.
+      Tabla `collection2item` casteada, con registro nulo y scope del batch.
     columns:
       - name: collection_item_id
       - name: collection_id
@@ -100,7 +100,7 @@ models:
 
   - name: ldg_dspacedb5_community
     description: >
-      Tabla `community` casteada, con registro nulo.
+      Tabla `community` casteada, con registro nulo y scope del batch.
     columns:
       - name: community_id
       - name: logo_bitstream_id
@@ -108,7 +108,7 @@ models:
 
   - name: ldg_dspacedb5_community2collection
     description: >
-      Tabla `community2collection` casteada, con registro nulo.
+      Tabla `community2collection` casteada, con registro nulo y scope del batch.
     columns:
       - name: community_collection_id
       - name: community_id
@@ -116,7 +116,7 @@ models:
 
   - name: ldg_dspacedb5_community2community
     description: >
-      Tabla `community2community` casteada, con registro nulo.
+      Tabla `community2community` casteada, con registro nulo y scope del batch.
     columns:
       - name: community_community_id
       - name: parent_comm_id
@@ -124,7 +124,7 @@ models:
 
   - name: ldg_dspacedb5_handle
     description: >
-      Tabla `handle` casteada, con registro nulo.
+      Tabla `handle` casteada, con registro nulo y scope del batch.
     columns:
       - name: handle_id
       - name: handle
@@ -133,7 +133,7 @@ models:
 
   - name: ldg_dspacedb5_item2bundle
     description: >
-      Tabla `item2bundle` casteada, con registro nulo.
+      Tabla `item2bundle` casteada, con registro nulo y scope del batch.
     columns:
       - name: id
       - name: item_id
@@ -141,7 +141,7 @@ models:
 
   - name: ldg_dspacedb5_metadatafieldregistry
     description: >
-      Tabla `metadatafieldregistry` casteada, con registro nulo.
+      Tabla `metadatafieldregistry` casteada, con registro nulo y scope del batch.
     columns:
       - name: metadata_field_id
       - name: metadata_schema_id
@@ -151,7 +151,7 @@ models:
 
   - name: ldg_dspacedb5_metadataschemaregistry
     description: >
-      Tabla `metadataschemaregistry` casteada, con registro nulo.
+      Tabla `metadataschemaregistry` casteada, con registro nulo y scope del batch.
     columns:
       - name: metadata_schema_id
       - name: namespace
@@ -159,7 +159,7 @@ models:
 
   - name: ldg_dspacedb5_metadatavalue
     description: >
-      Tabla `metadatavalue` casteada, con registro nulo.
+      Tabla `metadatavalue` casteada, con registro nulo y scope del batch.
     columns:
       - name: metadata_value_id
       - name: resource_id
