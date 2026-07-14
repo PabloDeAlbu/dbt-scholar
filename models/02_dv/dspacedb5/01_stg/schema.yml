@@ -166,6 +166,7 @@ models:
       - name: submitter_hk
       - name: owningcollection_hk
       - name: item_owningcollection_hk
+      - name: item_scope_hashdiff
       - name: item_hashdiff
       - name: item_id
       - name: submitter_id

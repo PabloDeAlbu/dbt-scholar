@@ -2,9 +2,11 @@
 
 WITH staged_source AS (
     SELECT
-        item_bk,
-        metadatavalue_bk,
-        metadatafield_bk,
+        item_hk,
+        metadatavalue_hk,
+        metadatafield_hk,
+        item_metadatavalue_hk,
+        item_metadatavalue_hashdiff AS hashdiff,
         item_id,
         metadata_value_id,
         metadata_field_id,
@@ -19,52 +21,10 @@ WITH staged_source AS (
         load_datetime,
         source
     FROM {{ ref('stg_dspacedb5_item_metadatavalue') }}
-    WHERE item_bk IS NOT NULL
-      AND metadatavalue_bk IS NOT NULL
-      AND metadatafield_bk IS NOT NULL
-),
-hashed_source AS (
-    SELECT
-        s0.item_id,
-        s0.metadata_value_id,
-        s0.metadata_field_id,
-        s0.text_value,
-        s0.text_lang,
-        s0.place,
-        s0.authority,
-        s0.confidence,
-        s0.source_label,
-        s0.institution_ror,
-        s0.effective_from,
-        s0.load_datetime,
-        s0.source,
-        s1.item_hk,
-        s1.metadatavalue_hk,
-        s1.metadatafield_hk,
-        s1.item_metadatavalue_hk,
-        s1.hashdiff
-    FROM staged_source AS s0
-    CROSS JOIN LATERAL (
-        SELECT
-            {{ automate_dv.hash(columns='item_bk', alias='item_hk') }},
-            {{ automate_dv.hash(columns='metadatavalue_bk', alias='metadatavalue_hk') }},
-            {{ automate_dv.hash(columns='metadatafield_bk', alias='metadatafield_hk') }},
-            {{ automate_dv.hash(columns=['item_bk', 'metadatavalue_bk'], alias='item_metadatavalue_hk') }},
-            {{ automate_dv.hash(
-                columns=[
-                    'item_bk',
-                    'metadatavalue_bk',
-                    'metadatafield_bk',
-                    'text_value',
-                    'text_lang',
-                    'place',
-                    'authority',
-                    'confidence'
-                ],
-                alias='hashdiff',
-                is_hashdiff=true
-            ) }}
-    ) AS s1
+    WHERE item_hk IS NOT NULL
+      AND metadatavalue_hk IS NOT NULL
+      AND metadatafield_hk IS NOT NULL
+      AND item_metadatavalue_hk IS NOT NULL
 ),
 {% if is_incremental() %}
 latest_records AS (
@@ -84,7 +44,7 @@ latest_records AS (
         FROM {{ this }} AS current_records
         JOIN (
             SELECT DISTINCT item_metadatavalue_hk
-            FROM hashed_source
+            FROM staged_source
         ) AS source_records
             USING (item_metadatavalue_hk)
     ) AS current_records
@@ -113,9 +73,9 @@ unique_source_records AS (
         b.source
     FROM (
         SELECT
-            hs.*,
+            ss.*,
             LAG(
-                hs.hashdiff,
+                ss.hashdiff,
                 1,
                 {% if is_incremental() %}
                 COALESCE(lr.hashdiff, {{ automate_dv.cast_binary('FFFFFFFF', quote=true) }})
@@ -123,10 +83,10 @@ unique_source_records AS (
                 {{ automate_dv.cast_binary('FFFFFFFF', quote=true) }}
                 {% endif %}
             ) OVER (
-                PARTITION BY hs.item_metadatavalue_hk
-                ORDER BY hs.load_datetime ASC, hs.effective_from ASC
+                PARTITION BY ss.item_metadatavalue_hk
+                ORDER BY ss.load_datetime ASC, ss.effective_from ASC
             ) AS prev_hashdiff
-        FROM hashed_source AS hs
+        FROM staged_source AS ss
         {% if is_incremental() %}
         LEFT JOIN latest_records AS lr
             USING (item_metadatavalue_hk)

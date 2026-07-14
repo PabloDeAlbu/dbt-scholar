@@ -1,19 +1,71 @@
 version: 2
 
 models:
-  - name: hub_dspacedb5_item
+  # hub: crea identidad estable. La historia vive en satélites.
+  - name: hub_dspacedb5__scope
     description: >
-      Hub de items contextualizados por repositorio e institución para la rama `dspacedb5`.
-      Conserva una fila por business key estable del item.
+      Hub del servicio DSpace 5 observado. Su BK debe distinguir institución,
+      etiqueta fuente y URL base.
     columns:
-      - name: item_hk
-        description: Hash key del item contextualizado.
+      - name: scope_hk
+        description: Hash key del scope de integración.
         data_tests: [not_null, unique]
-      - name: item_bk
-        description: Business key contextualizada del item.
+      - name: scope_bk
+        description: Business key del scope de integración.
         data_tests: [not_null, unique]
       - name: load_datetime
-        description: Fecha/hora de carga observada para el primer alta del hub.
+        description: Fecha de carga observada para el primer alta del hub.
+        data_tests: [not_null]
+      - name: source
+        description: Etiqueta de la fuente que originó el registro.
+        data_tests: [not_null]
+
+  - name: hub_dspacedb5_item
+    description: >
+      Hub de tabla `item` DSpace 5 contextualizada por scope.
+    columns:
+      - name: item_hk
+        description: Hash key del item.
+        data_tests: [not_null, unique]
+      - name: item_bk
+        description: Business key del item por scope.
+        data_tests: [not_null, unique]
+      - name: load_datetime
+        description: Fecha de carga observada para el primer alta del hub.
+        data_tests: [not_null]
+      - name: source
+        description: Etiqueta de la fuente que originó el registro.
+        data_tests: [not_null]
+
+  - name: hub_dspacedb5_collection
+    description: >
+      Hub de tabla `collection` DSpace 5 contextualizada por scope.
+    columns:
+      - name: collection_hk
+        description: Hash key de la colección.
+        data_tests: [not_null, unique]
+      - name: collection_bk
+        description: Business key de la colección por scope.
+        data_tests: [not_null, unique]
+      - name: load_datetime
+        description: Fecha de carga observada para el primer alta del hub.
+        data_tests: [not_null]
+      - name: source
+        description: Etiqueta de la fuente que originó el registro.
+        data_tests: [not_null]
+
+  - name: hub_dspacedb5_community
+    description: >
+      Hub de tabla `community` DSpace 5 contextualizada por scope.
+    columns:
+      - name: community_hk
+        description: Hash key de la comunidad.
+        data_tests: [not_null, unique]
+      - name: community_bk
+        description: Business key de la comunidad por scope.
+        data_tests: [not_null, unique]
+      - name: load_datetime
+        description: Fecha de carga observada para el primer alta del hub.
         data_tests: [not_null]
       - name: source
         description: Etiqueta de la fuente que originó el registro.
@@ -21,17 +73,16 @@ models:
 
   - name: hub_dspacedb5_metadatavalue
     description: >
-      Hub de valores de metadato contextualizados por repositorio e institución para la rama
-      `dspacedb5`.
+      Hub de tabla `metadatavalue` DSpace 5 contextualizada por scope.
     columns:
       - name: metadatavalue_hk
-        description: Hash key del valor de metadato contextualizado.
+        description: Hash key del valor de metadato.
         data_tests: [not_null, unique]
       - name: metadatavalue_bk
-        description: Business key contextualizada del valor de metadato.
+        description: Business key del valor de metadato por scope.
         data_tests: [not_null, unique]
       - name: load_datetime
-        description: Fecha/hora de carga observada para el primer alta del hub.
+        description: Fecha de carga observada para el primer alta del hub.
         data_tests: [not_null]
       - name: source
         description: Etiqueta de la fuente que originó el registro.
@@ -39,17 +90,16 @@ models:
 
   - name: hub_dspacedb5_metadatafieldregistry
     description: >
-      Hub de campos de metadato contextualizados por repositorio e institución para la rama
-      `dspacedb5`.
+      Hub de tabla `metadatafieldregistry` DSpace 5 contextualizada por scope.
     columns:
       - name: metadatafield_hk
-        description: Hash key del campo de metadato contextualizado.
+        description: Hash key del campo de metadato.
         data_tests: [not_null, unique]
       - name: metadatafield_bk
-        description: Business key contextualizada del campo de metadato.
+        description: Business key del campo de metadato por scope.
         data_tests: [not_null, unique]
       - name: load_datetime
-        description: Fecha/hora de carga observada para el primer alta del hub.
+        description: Fecha de carga observada para el primer alta del hub.
         data_tests: [not_null]
       - name: source
         description: Etiqueta de la fuente que originó el registro.
@@ -57,17 +107,16 @@ models:
 
   - name: hub_dspacedb5_metadataschemaregistry
     description: >
-      Hub de esquemas de metadato contextualizados por repositorio e institución para la rama
-      `dspacedb5`.
+      Hub de tabla `metadataschemaregistry` DSpace 5 contextualizada por scope.
     columns:
       - name: metadataschema_hk
-        description: Hash key del esquema de metadato contextualizado.
+        description: Hash key del esquema de metadato.
         data_tests: [not_null, unique]
       - name: metadataschema_bk
-        description: Business key contextualizada del esquema de metadato.
+        description: Business key del esquema de metadato por scope.
         data_tests: [not_null, unique]
       - name: load_datetime
-        description: Fecha/hora de carga observada para el primer alta del hub.
+        description: Fecha de carga observada para el primer alta del hub.
         data_tests: [not_null]
       - name: source
         description: Etiqueta de la fuente que originó el registro.

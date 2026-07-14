@@ -1,9 +1,9 @@
 {{ config(materialized='incremental') }}
 
 {%- set yaml_metadata -%}
-source_model: 'stg_dspacedb5_item'
-src_pk: item_hk
-src_nk: item_bk
+source_model: 'stg_dspacedb5_community'
+src_pk: community_hk
+src_nk: community_bk
 src_ldts: load_datetime
 src_source: source
 {%- endset -%}

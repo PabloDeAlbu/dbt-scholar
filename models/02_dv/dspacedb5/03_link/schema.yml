@@ -1,6 +1,82 @@
 version: 2
 
 models:
+  - name: link_dspacedb5_collection_item
+    description: Link entre tabla `collection2item` y hubs de colección e item.
+    columns:
+      - name: collection_item_hk
+        description: Hash key estable de la relación colección-item.
+        data_tests: [not_null, unique]
+      - name: collection_hk
+        description: Hash key de la colección relacionada.
+        data_tests: [not_null]
+      - name: item_hk
+        description: Hash key del item relacionado.
+        data_tests: [not_null]
+      - name: load_datetime
+        description: Fecha de carga observada para el alta del link.
+        data_tests: [not_null]
+      - name: source
+        description: Etiqueta de la fuente que originó el registro.
+        data_tests: [not_null]
+
+  - name: link_dspacedb5_community_collection
+    description: Link entre tabla `community2collection` y hubs de comunidad y colección.
+    columns:
+      - name: community_collection_hk
+        description: Hash key estable de la relación comunidad-colección.
+        data_tests: [not_null, unique]
+      - name: community_hk
+        description: Hash key de la comunidad relacionada.
+        data_tests: [not_null]
+      - name: collection_hk
+        description: Hash key de la colección relacionada.
+        data_tests: [not_null]
+      - name: load_datetime
+        description: Fecha de carga observada para el alta del link.
+        data_tests: [not_null]
+      - name: source
+        description: Etiqueta de la fuente que originó el registro.
+        data_tests: [not_null]
+
+  - name: link_dspacedb5_community_community
+    description: Link entre tabla `community2community` y hubs de comunidad padre e hija.
+    columns:
+      - name: community_community_hk
+        description: Hash key estable de la relación comunidad-comunidad.
+        data_tests: [not_null, unique]
+      - name: parent_comm_hk
+        description: Hash key de la comunidad padre.
+        data_tests: [not_null]
+      - name: child_comm_hk
+        description: Hash key de la comunidad hija.
+        data_tests: [not_null]
+      - name: load_datetime
+        description: Fecha de carga observada para el alta del link.
+        data_tests: [not_null]
+      - name: source
+        description: Etiqueta de la fuente que originó el registro.
+        data_tests: [not_null]
+
+  - name: link_dspacedb5_item_owningcollection
+    description: Link entre item y colección propietaria observada en tabla `item`.
+    columns:
+      - name: item_owningcollection_hk
+        description: Hash key estable de la relación item-colección propietaria.
+        data_tests: [not_null, unique]
+      - name: item_hk
+        description: Hash key del item relacionado.
+        data_tests: [not_null]
+      - name: owningcollection_hk
+        description: Hash key de la colección propietaria relacionada.
+        data_tests: [not_null]
+      - name: load_datetime
+        description: Fecha de carga observada para el alta del link.
+        data_tests: [not_null]
+      - name: source
+        description: Etiqueta de la fuente que originó el registro.
+        data_tests: [not_null]
+
   - name: link_dspacedb5_metadatafield_metadataschema
     description: >
       Link entre campos de metadato y esquemas de metadato contextualizados para la rama
@@ -16,7 +92,7 @@ models:
         description: Hash key del esquema de metadato relacionado.
         data_tests: [not_null]
       - name: load_datetime
-        description: Fecha/hora de carga observada para el alta del link.
+        description: Fecha de carga observada para el alta del link.
         data_tests: [not_null]
       - name: source
         description: Etiqueta de la fuente que originó el registro.
@@ -37,7 +113,7 @@ models:
         description: Hash key del campo de metadato relacionado.
         data_tests: [not_null]
       - name: load_datetime
-        description: Fecha/hora de carga observada para el alta del link.
+        description: Fecha de carga observada para el alta del link.
         data_tests: [not_null]
       - name: source
         description: Etiqueta de la fuente que originó el registro.
@@ -62,8 +138,8 @@ models:
       - name: effective_from
         description: Fecha efectiva observada para la relación.
         data_tests: [not_null]
-      - name: _load_datetime
-        description: Fecha/hora de carga observada para el alta del link transaccional.
+      - name: load_datetime
+        description: Fecha de carga observada para el alta del link transaccional.
         data_tests: [not_null]
       - name: source
         description: Etiqueta de la fuente que originó el registro.

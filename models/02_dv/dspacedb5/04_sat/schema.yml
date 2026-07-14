@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  # sat: versiona observaciones. Calcula hashdiff y hashes propios del satélite.
+  # sat: versiona observaciones desde HKs y hashdiffs preparados en stg.
   - name: sat_dspacedb5__extract
     description: >
       Satélite de extracciones del scope DSpace 5. `extract_datetime` describe
@@ -9,31 +9,69 @@ models:
     columns:
       - name: scope_hk
         description: Hash key del scope observado.
+        data_tests: [not_null]
       - name: extract_cdk
         description: Hash key del evento de extracción por scope y fecha de extracción.
+        data_tests: [not_null]
+      - name: hashdiff
+        data_tests: [not_null]
       - name: extract_datetime
         description: Fecha de la extracción observada.
+        data_tests: [not_null]
       - name: load_datetime
         description: Fecha de carga de la observación.
+        data_tests: [not_null]
+      - name: source
+        data_tests: [not_null]
+
+  - name: sat_dspacedb5_item
+    description: Satélite de estado del item DSpace 5.
+    columns:
+      - name: item_hk
+        data_tests: [not_null]
+      - name: hashdiff
+        data_tests: [not_null]
+      - name: submitter_id
+      - name: in_archive
+      - name: withdrawn
+      - name: discoverable
+      - name: last_modified
+      - name: owning_collection
+      - name: effective_from
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+      - name: source
+        data_tests: [not_null]
 
   - name: sat_dspacedb5_item_metadatavalue
     description: >
       Satélite histórico del vínculo item-metadatavalue en DSpace 5. Persiste el último estado
-      observado de esa relación a grano `item_metadatavalue_hk`, calculando hashes dentro del
-      propio satélite.
+      observado de esa relación a grano `item_metadatavalue_hk`.
     columns:
       - name: item_metadatavalue_hk
         description: Hash key estable del vínculo item-metadatavalue.
+        data_tests: [not_null]
       - name: hashdiff
         description: Hashdiff de los atributos descriptivos versionados para el vínculo.
+        data_tests: [not_null]
       - name: item_hk
         description: Hash key del item asociado al valor de metadato.
+        data_tests: [not_null]
       - name: metadatavalue_hk
         description: Hash key del valor de metadato asociado.
+        data_tests: [not_null]
       - name: metadatafield_hk
         description: Hash key del campo de metadato asociado.
+        data_tests: [not_null]
+      - name: effective_from
+        description: Fecha efectiva observada para el estado.
+        data_tests: [not_null]
       - name: load_datetime
         description: Fecha de carga del estado observado.
+        data_tests: [not_null]
+      - name: source
+        data_tests: [not_null]
 
   - name: sat_dspacedb5_item__scope
     description: >
@@ -52,6 +90,62 @@ models:
       - name: base_url
         data_tests: [not_null]
       - name: owningcollection_hk
+      - name: effective_from
         data_tests: [not_null]
       - name: load_datetime
+        data_tests: [not_null]
+      - name: source
+        data_tests: [not_null]
+
+  - name: sat_dspacedb5_metadatafieldregistry
+    description: Satélite de estado de campos de metadato DSpace 5.
+    columns:
+      - name: metadatafield_hk
+        data_tests: [not_null]
+      - name: hashdiff
+        data_tests: [not_null]
+      - name: element
+      - name: qualifier
+      - name: scope_note
+      - name: effective_from
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+      - name: source
+        data_tests: [not_null]
+
+  - name: sat_dspacedb5_metadataschemaregistry
+    description: Satélite de estado de esquemas de metadato DSpace 5.
+    columns:
+      - name: metadataschema_hk
+        data_tests: [not_null]
+      - name: hashdiff
+        data_tests: [not_null]
+      - name: namespace
+      - name: short_id
+      - name: effective_from
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+      - name: source
+        data_tests: [not_null]
+
+  - name: sat_dspacedb5_metadatavalue
+    description: Satélite de estado de valores de metadato DSpace 5.
+    columns:
+      - name: metadatavalue_hk
+        data_tests: [not_null]
+      - name: hashdiff
+        data_tests: [not_null]
+      - name: text_value
+      - name: text_lang
+      - name: resource_type_id
+      - name: place
+      - name: authority
+      - name: confidence
+      - name: effective_from
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+      - name: source
         data_tests: [not_null]

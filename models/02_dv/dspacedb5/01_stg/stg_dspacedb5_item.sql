@@ -18,6 +18,15 @@ hashed_columns:
   item_owningcollection_hk:
     - item_bk
     - owningcollection_bk
+  item_scope_hashdiff:
+    is_hashdiff: true
+    columns:
+      - item_bk
+      - item_id
+      - source_label
+      - institution_ror
+      - base_url
+      - owningcollection_bk
   item_hashdiff:
     is_hashdiff: true
     columns:
