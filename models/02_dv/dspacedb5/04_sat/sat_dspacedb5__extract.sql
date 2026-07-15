@@ -1,50 +1,30 @@
-{{ config(
-    materialized='incremental',
-    on_schema_change='append_new_columns'
-) }}
+{{ config(materialized='incremental') }}
 
-WITH staged_source AS (
-    SELECT
-        scope_hk,
-        extract_cdk,
-        extract_hashdiff AS hashdiff,
-        scope_bk,
-        institution_ror,
-        source_label,
-        base_url,
-        extract_datetime,
-        effective_from,
-        load_datetime,
-        source
-    FROM {{ ref('stg_dspacedb5__scope') }}
-    WHERE scope_bk IS NOT NULL
-      AND extract_datetime IS NOT NULL
-),
-{% if is_incremental() %}
-existing_records AS (
-    SELECT extract_cdk
-    FROM {{ this }}
-),
-{% endif %}
-unique_source_records AS (
-    SELECT DISTINCT
-        ss.scope_hk,
-        ss.extract_cdk,
-        ss.hashdiff,
-        ss.institution_ror,
-        ss.source_label,
-        ss.base_url,
-        ss.extract_datetime,
-        ss.effective_from,
-        ss.load_datetime,
-        ss.source
-    FROM staged_source AS ss
-    {% if is_incremental() %}
-    LEFT JOIN existing_records AS er
-        USING (extract_cdk)
-    WHERE er.extract_cdk IS NULL
-    {% endif %}
-)
+{%- set yaml_metadata -%}
+source_model: stg_dspacedb5__scope
+src_pk: scope_hk
+src_cdk: extract_cdk
+src_hashdiff:
+  source_column: extract_hashdiff
+  alias: hashdiff
+src_payload:
+  - institution_ror
+  - source_label
+  - base_url
+  - extract_datetime
+src_eff: effective_from
+src_ldts: load_datetime
+src_source: source
+{%- endset -%}
 
-SELECT *
-FROM unique_source_records
+{% set metadata_dict = fromyaml(yaml_metadata) %}
+
+{{ automate_dv.ma_sat(src_pk=metadata_dict["src_pk"],
+                      src_cdk=metadata_dict["src_cdk"],
+                      src_hashdiff=metadata_dict["src_hashdiff"],
+                      src_payload=metadata_dict["src_payload"],
+                      src_extra_columns=none,
+                      src_eff=metadata_dict["src_eff"],
+                      src_ldts=metadata_dict["src_ldts"],
+                      src_source=metadata_dict["src_source"],
+                      source_model=metadata_dict["source_model"]) }}

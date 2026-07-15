@@ -2,10 +2,11 @@ version: 2
 
 models:
   # sat: versiona observaciones desde HKs y hashdiffs preparados en stg.
+  # TODO: agregar la presencia item-extracción a grano `item_hk + extract_cdk`.
   - name: sat_dspacedb5__extract
     description: >
-      Satélite de extracciones del scope DSpace 5. `extract_datetime` describe
-      cuándo se observó la fuente; `load_datetime`, cuándo ingresó al DW.
+      Eventos de extracción del scope DSpace 5, a grano `scope_hk + extract_cdk`.
+      Registra cada consulta al repositorio, incluso cuando no recupera entidades.
     columns:
       - name: scope_hk
         description: Hash key del scope observado.
@@ -75,7 +76,9 @@ models:
 
   - name: sat_dspacedb5_item__scope
     description: >
-      Satélite de scope e identificadores operativos del item DSpace 5.
+      Estado del contexto del item DSpace 5, a grano histórico `item_hk`.
+      Versiona sus identificadores de repositorio y colección propietaria; no
+      representa la presencia del item en cada extracción.
     columns:
       - name: item_hk
         data_tests: [not_null]

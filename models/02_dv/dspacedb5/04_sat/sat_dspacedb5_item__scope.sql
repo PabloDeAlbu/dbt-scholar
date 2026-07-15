@@ -1,47 +1,28 @@
 {{ config(materialized='incremental') }}
 
-WITH staged_source AS (
-    SELECT
-        item_hk,
-        item_id,
-        source_label,
-        institution_ror,
-        base_url,
-        owningcollection_hk,
-        item_scope_hashdiff AS hashdiff,
-        effective_from,
-        load_datetime,
-        source
-    FROM {{ ref('stg_dspacedb5_item') }}
-    WHERE item_hk IS NOT NULL
-),
-{% if is_incremental() %}
-existing_records AS (
-    SELECT
-        item_hk,
-        hashdiff
-    FROM {{ this }}
-),
-{% endif %}
-unique_source_records AS (
-    SELECT DISTINCT
-        ss.item_hk,
-        ss.hashdiff,
-        ss.item_id,
-        ss.source_label,
-        ss.institution_ror,
-        ss.base_url,
-        ss.owningcollection_hk,
-        ss.effective_from,
-        ss.load_datetime,
-        ss.source
-    FROM staged_source AS ss
-    {% if is_incremental() %}
-    LEFT JOIN existing_records AS er
-        USING (item_hk, hashdiff)
-    WHERE er.item_hk IS NULL
-    {% endif %}
-)
+{%- set yaml_metadata -%}
+source_model: stg_dspacedb5_item
+src_pk: item_hk
+src_hashdiff:
+  source_column: item_scope_hashdiff
+  alias: hashdiff
+src_payload:
+  - item_id
+  - source_label
+  - institution_ror
+  - base_url
+  - owningcollection_hk
+src_eff: effective_from
+src_ldts: load_datetime
+src_source: source
+{%- endset -%}
 
-SELECT *
-FROM unique_source_records
+{% set metadata_dict = fromyaml(yaml_metadata) %}
+
+{{ automate_dv.sat(src_pk=metadata_dict["src_pk"],
+                   src_hashdiff=metadata_dict["src_hashdiff"],
+                   src_payload=metadata_dict["src_payload"],
+                   src_eff=metadata_dict["src_eff"],
+                   src_ldts=metadata_dict["src_ldts"],
+                   src_source=metadata_dict["src_source"],
+                   source_model=metadata_dict["source_model"]) }}
