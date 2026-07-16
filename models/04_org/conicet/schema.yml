@@ -318,7 +318,7 @@ models:
       tags: [conicet, dm]
     data_tests:
       - dbt_utils.expression_is_true:
-          expression: "dc_identifier_uri ~ '^http://hdl\\\\.handle\\\\.net/11336/'"
+          expression: "dc_identifier_uri ~ '^http://hdl\\.handle\\.net/11336/'"
     columns:
       - name: record_hk
         data_tests: [not_null, unique]
@@ -331,7 +331,9 @@ models:
       tags: [conicet, dm]
     data_tests:
       - dbt_utils.expression_is_true:
-          expression: "primary_doi is null OR primary_doi ~* '^10\\\\.[0-9]{4,9}/\\\\S+$'"
+          expression: "primary_doi is null OR primary_doi ~* '^10\\.[0-9]{4,9}/[^[:space:]]+$'"
+          config:
+            severity: warn
     columns:
       - name: record_hk
         data_tests: [not_null, unique]

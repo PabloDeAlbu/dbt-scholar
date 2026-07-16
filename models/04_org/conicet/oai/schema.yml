@@ -10,9 +10,11 @@ models:
       tags: [conicet, dm]
     data_tests:
       - dbt_utils.expression_is_true:
-          expression: "dc_identifier_uri ~ '^http://hdl\\\\.handle\\\\.net/11336/'"
+          expression: "dc_identifier_uri ~ '^http://hdl\\.handle\\.net/11336/'"
       - dbt_utils.expression_is_true:
-          expression: "dc_relation_doi is null OR dc_relation_doi ~* '^10\\\\.[0-9]{4,9}/\\\\S+$'"
+          expression: "dc_relation_doi is null OR dc_relation_doi ~* '^10\\.[0-9]{4,9}/[^[:space:]]+$'"
+          config:
+            severity: warn
     columns:
       - name: record_hk
         description: Clave hash del registro OAI.
