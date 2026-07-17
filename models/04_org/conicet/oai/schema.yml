@@ -39,7 +39,10 @@ models:
         description: Etiqueta canónica en inglés del nivel de acceso.
         data_tests: [not_null]
       - name: access_right_label_es
-        description: Etiqueta canónica en español del nivel de acceso.
+        description: >
+          Etiqueta institucional en español de la condición de acceso. Para
+          `restrictedAccess` explicita que el concepto COAR corresponde a acceso
+          solo a metadatos o registro bibliográfico.
       - name: access_right_uri
         description: URI COAR del nivel de acceso.
         data_tests: [not_null, unique]

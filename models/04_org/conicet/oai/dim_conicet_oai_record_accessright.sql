@@ -10,7 +10,11 @@ final AS (
     SELECT
         base.dc_right,
         dim.access_right_label AS access_right,
-        dim.access_right_label_es,
+        CASE
+            WHEN base.dc_right = 'info:eu-repo/semantics/restrictedAccess'
+                THEN 'SOLO METADATOS (REGISTRO BIBLIOGRÁFICO)'
+            ELSE dim.access_right_label_es
+        END AS access_right_label_es,
         dim.access_right_uri
     FROM base
     INNER JOIN {{ ref('dim_access_right') }} AS dim
