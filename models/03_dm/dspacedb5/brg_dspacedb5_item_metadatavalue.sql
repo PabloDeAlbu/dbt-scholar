@@ -3,7 +3,7 @@
     indexes=[
         {'columns': ['item_hk', 'metadatavalue_hk'], 'unique': true},
         {'columns': ['item_hk', 'metadatafield_fullname']},
-        {'columns': ['item_id', 'institution_ror', 'metadatafield_fullname']}
+        {'columns': ['item_id', 'institution_ror', 'source_label', 'base_url', 'metadatafield_fullname']}
     ],
     post_hook=[
         "analyze {{ this }}"
@@ -11,24 +11,25 @@
 ) }}
 
 WITH resource_metadatavalue AS (
-    SELECT DISTINCT
-        tl.metadatavalue_hk,
-        tl.resource_hk AS item_hk
-    FROM {{ ref('tlink_dspacedb5_metadatavalue_resource') }} AS tl
-    WHERE tl.resource_type_id = 2
+    SELECT
+        item_hk,
+        metadatavalue_hk,
+        metadatafield_hk
+    FROM {{ ref('latest_sat_dspacedb5_item_metadatavalue') }}
 ),
 item_scope AS (
     SELECT
         item_hk,
         SPLIT_PART(item_bk, '||', 1) AS institution_ror,
         SPLIT_PART(item_bk, '||', 2) AS source_label,
-        SPLIT_PART(item_bk, '||', 3)::bigint AS item_id
+        SPLIT_PART(item_bk, '||', 3) AS base_url,
+        SPLIT_PART(item_bk, '||', 4)::bigint AS item_id
     FROM {{ ref('hub_dspacedb5_item') }}
 ),
 metadatavalue_scope AS (
     SELECT
         hub_mv.metadatavalue_hk,
-        SPLIT_PART(hub_mv.metadatavalue_bk, '||', 3)::bigint AS metadata_value_id,
+        SPLIT_PART(hub_mv.metadatavalue_bk, '||', 4)::bigint AS metadata_value_id,
         sat_mv.text_value,
         sat_mv.text_lang,
         sat_mv.place,
@@ -42,7 +43,7 @@ metadatavalue_scope AS (
 metadatafield_scope AS (
     SELECT
         hub_mf.metadatafield_hk,
-        SPLIT_PART(hub_mf.metadatafield_bk, '||', 3)::bigint AS metadata_field_id,
+        SPLIT_PART(hub_mf.metadatafield_bk, '||', 4)::bigint AS metadata_field_id,
         mf.metadatafield_fullname,
         mf.short_id,
         mf.element,
@@ -53,12 +54,10 @@ metadatafield_scope AS (
 ),
 relation_scope AS (
     SELECT
-        rm.item_hk,
-        lnk.metadatavalue_hk,
-        lnk.metadatafield_hk
-    FROM resource_metadatavalue AS rm
-    JOIN {{ ref('link_dspacedb5_metadatavalue_metadatafield') }} AS lnk
-        USING (metadatavalue_hk)
+        item_hk,
+        metadatavalue_hk,
+        metadatafield_hk
+    FROM resource_metadatavalue
 ),
 final AS (
     SELECT
@@ -66,6 +65,7 @@ final AS (
         item.item_id,
         item.source_label,
         item.institution_ror,
+        item.base_url,
         rel.metadatavalue_hk,
         rel.metadatafield_hk,
         mv.metadata_value_id,

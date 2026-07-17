@@ -16,6 +16,7 @@ WITH base_metadata AS (
         item_id,
         source_label,
         institution_ror,
+        base_url,
         metadatafield_hk,
         metadatafield_fullname,
         short_id,
@@ -31,6 +32,7 @@ WITH base_metadata AS (
       AND metadata_field_id <> -1
       AND source_label <> '!UNKNOWN'
       AND institution_ror <> '!UNKNOWN'
+      AND base_url <> '!UNKNOWN'
 ),
 value_distinct AS (
     SELECT
@@ -38,6 +40,7 @@ value_distinct AS (
         item_id,
         source_label,
         institution_ror,
+        base_url,
         metadatafield_hk,
         metadatafield_fullname,
         short_id,
@@ -48,7 +51,7 @@ value_distinct AS (
         MIN(place) AS first_place
     FROM base_metadata
     WHERE text_value_clean IS NOT NULL
-    GROUP BY 1,2,3,4,5,6,7,8,9,10,11
+    GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
 ),
 ordered_values AS (
     SELECT
@@ -56,6 +59,7 @@ ordered_values AS (
         item_id,
         source_label,
         institution_ror,
+        base_url,
         metadatafield_hk,
         metadatafield_fullname,
         short_id,
@@ -64,7 +68,7 @@ ordered_values AS (
         qualifier,
         STRING_AGG(text_value_clean, '|' ORDER BY first_place NULLS LAST, text_value_clean) AS ordered_text_values
     FROM value_distinct
-    GROUP BY 1,2,3,4,5,6,7,8,9,10
+    GROUP BY 1,2,3,4,5,6,7,8,9,10,11
 ),
 preferred_values AS (
     SELECT DISTINCT ON (
@@ -72,6 +76,7 @@ preferred_values AS (
         item_id,
         source_label,
         institution_ror,
+        base_url,
         metadatafield_hk,
         metadatafield_fullname,
         short_id,
@@ -83,6 +88,7 @@ preferred_values AS (
         item_id,
         source_label,
         institution_ror,
+        base_url,
         metadatafield_hk,
         metadatafield_fullname,
         short_id,
@@ -96,6 +102,7 @@ preferred_values AS (
         item_id,
         source_label,
         institution_ror,
+        base_url,
         metadatafield_hk,
         metadatafield_fullname,
         short_id,
@@ -111,6 +118,7 @@ stats AS (
         item_id,
         source_label,
         institution_ror,
+        base_url,
         metadatafield_hk,
         metadatafield_fullname,
         CASE
@@ -138,7 +146,7 @@ stats AS (
         MIN(load_datetime) AS first_load_datetime,
         MAX(load_datetime) AS last_load_datetime
     FROM base_metadata
-    GROUP BY 1,2,3,4,5,6,7,8,9,10,11
+    GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12
 ),
 final AS (
     SELECT
@@ -146,6 +154,7 @@ final AS (
         stats.item_id,
         stats.source_label,
         stats.institution_ror,
+        stats.base_url,
         stats.metadatafield_hk,
         stats.metadatafield_fullname,
         stats.metadatafield_name,
@@ -170,6 +179,7 @@ final AS (
        AND stats.item_id = ordered.item_id
        AND stats.source_label = ordered.source_label
        AND stats.institution_ror = ordered.institution_ror
+       AND stats.base_url = ordered.base_url
        AND stats.metadatafield_hk = ordered.metadatafield_hk
        AND stats.metadatafield_fullname = ordered.metadatafield_fullname
        AND stats.short_id = ordered.short_id
@@ -181,6 +191,7 @@ final AS (
        AND stats.item_id = preferred.item_id
        AND stats.source_label = preferred.source_label
        AND stats.institution_ror = preferred.institution_ror
+       AND stats.base_url = preferred.base_url
        AND stats.metadatafield_hk = preferred.metadatafield_hk
        AND stats.metadatafield_fullname = preferred.metadatafield_fullname
        AND stats.short_id = preferred.short_id

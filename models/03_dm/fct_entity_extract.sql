@@ -73,18 +73,22 @@ dspacedb_extract AS (
 dspacedb5_extract AS (
     SELECT
         'dspacedb5'::text AS source_system,
-        'item'::text AS entity_type,
-        extract.item_hk AS entity_hk,
-        extract.item_id::text AS entity_id,
+        'scope'::text AS entity_type,
+        extract.scope_hk AS entity_hk,
+        (
+            extract.institution_ror
+            || '||' || extract.source_label
+            || '||' || extract.base_url
+        )::text AS entity_id,
         extract.extract_cdk::text AS extract_cdk,
         extract.extract_datetime,
         extract.load_datetime,
         extract.institution_ror,
-        NULL::text AS repository_identifier,
+        extract.base_url::text AS repository_identifier,
         NULL::text AS filter_param,
         NULL::text AS filter_value,
         extract.source_label::text AS source_label
-    FROM {{ ref('fct_dspacedb5_item_extraction') }} extract
+    FROM {{ ref('fct_dspacedb5_extraction') }} extract
 ),
 
 unioned AS (

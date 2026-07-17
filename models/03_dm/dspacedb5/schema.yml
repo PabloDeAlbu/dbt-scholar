@@ -1,6 +1,7 @@
 version: 2
 
 models:
+  # dm: expone datasets analíticos vigentes y trazabilidad mínima, no mecánica DV.
   - name: brg_dspacedb5_collection_metadatavalue
     description: >
       Bridge de colección con valores de metadatos y su campo asociado, construido desde DV para
@@ -18,7 +19,8 @@ models:
   - name: brg_dspacedb5_item_metadatavalue
     description: >
       Bridge de item con valores de metadatos y su campo asociado, construido desde DV para la
-      rama `dspacedb5`.
+      rama `dspacedb5`. Se apoya en el último estado conocido del vínculo item-metadatavalue para
+      evitar reconstruir la relación desde el tlink genérico recurso-metadato.
     config:
       tags: [dspacedb5, dm]
     data_tests:
@@ -42,6 +44,8 @@ models:
       - name: source_label
         data_tests: [not_null]
       - name: institution_ror
+        data_tests: [not_null]
+      - name: base_url
         data_tests: [not_null]
 
   - name: fct_dspacedb5_item_metadatafield_usage
@@ -78,6 +82,8 @@ models:
         data_tests: [not_null]
       - name: institution_ror
         data_tests: [not_null]
+      - name: base_url
+        data_tests: [not_null]
 
   - name: dim_dspacedb5_collection
     description: >
@@ -89,6 +95,12 @@ models:
       - name: collection_hk
         data_tests: [not_null, unique]
       - name: collection_id
+        data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+      - name: base_url
         data_tests: [not_null]
 
   - name: dim_dspacedb5_community
@@ -102,6 +114,12 @@ models:
         data_tests: [not_null, unique]
       - name: community_id
         data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+      - name: base_url
+        data_tests: [not_null]
 
   - name: brg_dspacedb5_item_collection
     description: >
@@ -112,6 +130,17 @@ models:
     data_tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns: [item_hk, collection_hk]
+    columns:
+      - name: item_hk
+        data_tests: [not_null]
+      - name: collection_hk
+        data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+      - name: base_url
+        data_tests: [not_null]
 
   - name: latest_sat_dspacedb5_item
     description: Estado más reciente de `sat_dspacedb5_item`, a grano `item_hk`.
@@ -123,37 +152,74 @@ models:
       - name: load_datetime
         data_tests: [not_null]
 
-  - name: latest_sat_dspacedb5_item__extract
+  - name: latest_sat_dspacedb5_item__scope
     description: >
-      Último contexto de extracción por `item_hk + source_label + institution_ror`
-      a partir de `sat_dspacedb5_item__extract`.
+      Estado más reciente del scope e identificadores operativos de item.
     config:
       tags: [dspacedb5, dm]
-    data_tests:
-      - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [item_hk, source_label, institution_ror]
     columns:
       - name: item_hk
-        data_tests: [not_null]
-      - name: load_datetime
-        data_tests: [not_null]
-
-  - name: fct_dspacedb5_item_extraction
-    description: >
-      Hecho base de eventos de extracción para items de la rama `dspacedb5`.
-      Conserva el contexto técnico de observación por repositorio e institución.
-    config:
-      tags: [dspacedb5, dm]
-    columns:
-      - name: extract_cdk
         data_tests: [not_null, unique]
-      - name: item_hk
-        data_tests: [not_null]
       - name: item_id
         data_tests: [not_null]
       - name: source_label
         data_tests: [not_null]
       - name: institution_ror
+        data_tests: [not_null]
+      - name: base_url
+        data_tests: [not_null]
+      - name: owningcollection_hk
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+
+  - name: latest_sat_dspacedb5_item_metadatavalue
+    description: >
+      Estado más reciente de `sat_dspacedb5_item_metadatavalue`, a grano
+      `item_metadatavalue_hk`.
+    config:
+      tags: [dspacedb5, dm]
+    columns:
+      - name: item_metadatavalue_hk
+        data_tests: [not_null, unique]
+      - name: item_hk
+        data_tests: [not_null]
+      - name: metadatavalue_hk
+        data_tests: [not_null]
+      - name: metadata_value_id
+        data_tests: [not_null]
+
+  - name: dim_dspacedb5_metadatavalue
+    description: >
+      Proyección vigente de valores de metadatos DSpace 5. Funciona como helper
+      para bridges y dimensiones derivadas.
+    config:
+      tags: [dspacedb5, dm]
+    columns:
+      - name: metadatavalue_hk
+        data_tests: [not_null, unique]
+      - name: text_value
+      - name: text_lang
+      - name: place
+      - name: authority
+      - name: confidence
+
+  - name: fct_dspacedb5_extraction
+    description: >
+      Hecho de extracciones por scope DSpace 5. Sirve para auditoría y
+      ventanas de observación, no para presentación final.
+    config:
+      tags: [dspacedb5, dm]
+    columns:
+      - name: extract_cdk
+        data_tests: [not_null, unique]
+      - name: scope_hk
+        data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+      - name: base_url
         data_tests: [not_null]
       - name: extract_datetime
         data_tests: [not_null]
@@ -162,10 +228,8 @@ models:
 
   - name: fct_dspacedb5_item_publication
     description: >
-      Hecho core de items publicados DSpace 5 a nivel de item contextualizado por repositorio e
-      institución. Expone el último estado conocido del item, su colección dueña hashable y la
-      cantidad de colecciones asociadas, junto con su ventana temporal de observación en las
-      extracciones.
+      Hecho vigente de publicaciones DSpace 5 a nivel item. Expone scope,
+      estado actual del item y relaciones analíticas; evita linaje fino.
     config:
       tags: [dspacedb5, dm]
     columns:
@@ -178,6 +242,8 @@ models:
       - name: source_label
         data_tests: [not_null]
       - name: institution_ror
+        data_tests: [not_null]
+      - name: base_url
         data_tests: [not_null]
 
   - name: brg_dspacedb5_item_community
@@ -197,20 +263,28 @@ models:
       - name: collection_hk
         data_tests: [not_null]
       - name: community_hk
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+      - name: base_url
+        data_tests: [not_null]
 
   - name: dim_dspacedb5_metadatafield
-    description: Dimensión de campos de metadatos contextualizados por repositorio e institución para la rama `dspacedb5`.
+    description: Dimensión de campos de metadatos DSpace 5 por scope.
     config:
       tags: [dspacedb5, dm]
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [metadatafield_fullname, source_label, institution_ror]
+          combination_of_columns: [metadatafield_fullname, source_label, institution_ror, base_url]
     columns:
       - name: metadatafield_fullname
         data_tests: [not_null]
       - name: source_label
         data_tests: [not_null]
       - name: institution_ror
+        data_tests: [not_null]
+      - name: base_url
         data_tests: [not_null]
       - name: metadatafield_hk
         data_tests: [not_null, unique]

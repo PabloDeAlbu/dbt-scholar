@@ -75,7 +75,8 @@ final AS (
         ic.collections_count,
         ic.collection_hk = p.owningcollection_hk AS is_owning_collection,
         p.source_label,
-        p.institution_ror
+        p.institution_ror,
+        p.base_url
     FROM publication AS p
     JOIN item_collection AS ic
         USING (item_hk)

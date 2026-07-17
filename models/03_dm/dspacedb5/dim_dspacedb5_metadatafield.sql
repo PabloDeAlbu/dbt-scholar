@@ -5,6 +5,7 @@ WITH base AS (
         hub_mf.metadatafield_bk,
         SPLIT_PART(hub_mf.metadatafield_bk, '||', 1) AS institution_ror,
         SPLIT_PART(hub_mf.metadatafield_bk, '||', 2) AS source_label,
+        SPLIT_PART(hub_mf.metadatafield_bk, '||', 3) AS base_url,
         sat_ms.short_id,
         sat_mf.element,
         sat_mf.qualifier,
@@ -26,12 +27,13 @@ final AS (
         metadatafield_fullname,
         source_label,
         institution_ror,
+        base_url,
         short_id,
         element,
         qualifier,
         metadatafield_hk
     FROM base
-    GROUP BY 1,2,3,4,5,6,7
+    GROUP BY 1,2,3,4,5,6,7,8
 )
 
 SELECT * FROM final

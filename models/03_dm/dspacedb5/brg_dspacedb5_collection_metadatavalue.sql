@@ -34,6 +34,7 @@ final AS (
         mf.metadatafield_hk,
         mf.source_label,
         mf.institution_ror,
+        mf.base_url,
         mv.metadatavalue_hk,
         mv.collection_hk
     FROM collection_metadata mv

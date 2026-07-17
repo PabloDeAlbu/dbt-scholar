@@ -4,7 +4,7 @@
         {'columns': ['item_hk', 'collection_hk'], 'unique': true},
         {'columns': ['item_hk']},
         {'columns': ['collection_hk']},
-        {'columns': ['institution_ror', 'source_label', 'item_id']}
+        {'columns': ['institution_ror', 'source_label', 'base_url', 'item_id']}
     ],
     post_hook=[
         "analyze {{ this }}"
@@ -18,7 +18,8 @@ WITH relation_base AS (
         collection_hk,
         collection_id,
         source_label,
-        institution_ror
+        institution_ror,
+        base_url
     FROM {{ ref('stg_dspacedb5_collection2item') }}
     WHERE item_id <> -1
       AND collection_id <> -1
@@ -38,7 +39,8 @@ final AS (
         rb.collection_id,
         c.collections_count,
         rb.source_label,
-        rb.institution_ror
+        rb.institution_ror,
+        rb.base_url
     FROM relation_base rb
     LEFT JOIN counts c
         USING (item_hk)

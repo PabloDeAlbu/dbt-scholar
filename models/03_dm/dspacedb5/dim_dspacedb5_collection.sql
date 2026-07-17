@@ -7,6 +7,7 @@ WITH collection_base AS (
         collection_id,
         source_label,
         institution_ror,
+        base_url,
         extract_datetime,
         load_datetime
     FROM {{ ref('stg_dspacedb5_collection') }}
@@ -32,6 +33,7 @@ title_candidates AS (
       AND COALESCE(mv.qualifier, '') IN ('', '!UNKNOWN')
       AND mv.source_label = c.source_label
       AND mv.institution_ror = c.institution_ror
+      AND mv.base_url = c.base_url
       AND mv.text_value IS NOT NULL
       AND mv.text_value <> '!UNKNOWN'
 ),
@@ -42,6 +44,7 @@ final AS (
         tc.collection_title,
         c.source_label,
         c.institution_ror,
+        c.base_url,
         c.extract_datetime,
         c.load_datetime
     FROM collection_base c
