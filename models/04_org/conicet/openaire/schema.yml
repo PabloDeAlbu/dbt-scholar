@@ -28,7 +28,14 @@ models:
           - not_null
           - unique
       - name: conicet_last_extract_datetime
-        description: Última fecha/hora en la que el research product fue observado en el subconjunto institucional CONICET.
+        description: >
+          Última fecha/hora de extracción informada por el lote de origen. Puede
+          ser nula cuando la fuente solo conserva la fecha de carga.
+      - name: conicet_first_load_datetime
+        description: Primera fecha/hora de carga del research product en el Data Warehouse.
+        data_tests: [not_null]
+      - name: conicet_last_load_datetime
+        description: Última fecha/hora de carga del research product en el Data Warehouse.
         data_tests: [not_null]
       - name: relOrganizationId
         description: Identificador ROR (URL) utilizado para filtrar el subconjunto institucional CONICET.

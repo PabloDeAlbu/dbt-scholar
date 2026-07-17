@@ -55,6 +55,14 @@ export_csv \
     "publication_year_type.csv" \
     "SELECT * FROM analytics_conicet.publication_year_type ORDER BY publication_year, publication_count DESC, publication_type"
 
+export_csv \
+    "publication_openaire_match_summary.csv" \
+    "SELECT * FROM analytics_conicet.publication_openaire_match_summary ORDER BY publication_count DESC"
+
+export_csv \
+    "publication_openaire_top_cited.csv" \
+    "SELECT * FROM analytics_conicet.publication_openaire_top_cited ORDER BY citation_rank"
+
 for file in "${temporary_dir}"/*.csv; do
     mv "${file}" "${output_dir}/"
 done

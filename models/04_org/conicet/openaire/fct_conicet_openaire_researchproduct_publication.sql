@@ -1,10 +1,13 @@
 WITH conicet_extract AS (
     SELECT
         researchproduct_hk,
-        MIN(load_datetime) AS conicet_first_extract_datetime,
-        MAX(load_datetime) AS conicet_last_extract_datetime
-    FROM {{ ref('fct_openaire_researchproduct_extraction_fby_relorgid') }}
-    WHERE organization_ror = 'https://ror.org/03cqe8w59'
+        MIN(extract_datetime) AS conicet_first_extract_datetime,
+        MAX(extract_datetime) AS conicet_last_extract_datetime,
+        MIN(load_datetime) AS conicet_first_load_datetime,
+        MAX(load_datetime) AS conicet_last_load_datetime
+    FROM {{ ref('fct_openaire_researchproduct_extraction') }}
+    WHERE _filter_param = 'relOrganizationId'
+      AND _filter_value = 'https://ror.org/03cqe8w59'
     GROUP BY researchproduct_hk
 ),
 
@@ -14,6 +17,8 @@ base AS (
         fct.researchproduct_id,
         conicet_first_extract_datetime,
         conicet_last_extract_datetime,
+        conicet_first_load_datetime,
+        conicet_last_load_datetime,
         'https://ror.org/03cqe8w59' AS relOrganizationId,
 
         publication_date,

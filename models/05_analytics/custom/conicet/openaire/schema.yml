@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: publication_openaire_enrichment
+    description: >
+      Base de publicaciones OAI de CONICET enriquecida mediante una correspondencia
+      única por identificador OAI original con productos de investigación de OpenAIRE.
+      Su grano es un registro OAI de CONICET.
+    columns:
+      - name: record_id
+        data_tests: [not_null, unique]
+      - name: matched_by_unique_original_id
+        description: Indica si el identificador OAI resolvió un único producto en OpenAIRE.
+        data_tests: [not_null]
+      - name: openaire_citation_count
+        description: Recuento de citas informado por OpenAIRE para el producto vinculado.
+      - name: openaire_last_load_datetime
+        description: Última fecha de carga del producto OpenAIRE en el Data Warehouse.
+
+  - name: publication_openaire_match_summary
+    description: >
+      Cobertura de correspondencia entre registros OAI de CONICET y productos de
+      OpenAIRE, con disponibilidad del recuento de citas en cada grupo.
+    columns:
+      - name: match_status
+        data_tests: [not_null, unique]
+      - name: publication_count
+        data_tests: [not_null]
+      - name: publication_share_pct
+        data_tests: [not_null]
+      - name: publication_with_citation_count
+        data_tests: [not_null]
+
+  - name: publication_openaire_top_cited
+    description: >
+      Diez publicaciones de CONICET con mayor recuento de citas informado por
+      OpenAIRE entre las correspondencias únicas por identificador OAI.
+    columns:
+      - name: citation_rank
+        data_tests: [not_null, unique]
+      - name: record_id
+        data_tests: [not_null, unique]
+      - name: openaire_citation_count
+        data_tests: [not_null]
