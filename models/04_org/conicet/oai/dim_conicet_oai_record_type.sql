@@ -15,7 +15,7 @@ final AS (
         base.dc_type,
         base.type_vocabulary,
         COALESCE(
-            mapping.label,
+            NULLIF(mapping.label, '#N/A'),
             CASE WHEN base.dc_type = 'info:eu-repo/semantics/other' THEN 'OTHER' END
         ) AS publication_type,
         COALESCE(
@@ -25,7 +25,7 @@ final AS (
             END
         ) AS publication_type_uri,
         COALESCE(
-            mapping.label_es,
+            NULLIF(mapping.label_es, '#N/A'),
             CASE WHEN base.dc_type = 'info:eu-repo/semantics/other' THEN 'OTROS' END
         ) AS publication_type_label_es,
         CASE base.type_vocabulary

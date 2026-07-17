@@ -1,0 +1,93 @@
+version: 2
+
+models:
+  - name: oai_record_publication
+    description: >
+      Base detallada de publicaciones OAI de CONICET utilizada por los productos
+      analíticos de esta capa. Su grano es un registro OAI y contiene solamente
+      columnas legibles para su entrega en una planilla de cálculo.
+    columns:
+      - name: record_id
+        description: Identificador del registro dentro del repositorio OAI.
+        data_tests: [not_null, unique]
+      - name: publication_type
+        description: Tipo documental normalizado en español.
+      - name: access_right
+        description: Condición de acceso normalizada en español.
+      - name: doi
+        description: DOI principal de la publicación, cuando está disponible.
+
+  - name: publication_summary
+    description: >
+      Resumen de cobertura del corpus OAI de CONICET. Expone el volumen total y
+      la disponibilidad de tipo documental, condición de acceso, fecha válida y DOI.
+    columns:
+      - name: publication_count
+        data_tests: [not_null]
+      - name: publication_with_type_count
+        data_tests: [not_null]
+      - name: publication_with_access_right_count
+        data_tests: [not_null]
+      - name: publication_with_valid_date_count
+        data_tests: [not_null]
+
+  - name: publication_access_right
+    description: Distribución de publicaciones CONICET por condición de acceso normalizada.
+    columns:
+      - name: access_right
+        data_tests: [not_null, unique]
+      - name: publication_count
+        data_tests: [not_null]
+      - name: publication_share_pct
+        data_tests: [not_null]
+
+  - name: publication_type
+    description: Distribución de publicaciones CONICET por tipo documental normalizado.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [publication_type, publication_type_uri]
+    columns:
+      - name: publication_type
+        data_tests: [not_null]
+      - name: publication_count
+        data_tests: [not_null]
+      - name: publication_share_pct
+        data_tests: [not_null]
+
+  - name: publication_type_access_right
+    description: >
+      Cruce entre tipo documental y condición de acceso, con porcentajes dentro
+      de cada tipo y sobre el corpus completo.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [publication_type, access_right]
+    columns:
+      - name: publication_type
+        data_tests: [not_null]
+      - name: access_right
+        data_tests: [not_null]
+      - name: publication_count
+        data_tests: [not_null]
+      - name: publication_type_share_pct
+        data_tests: [not_null]
+      - name: corpus_share_pct
+        data_tests: [not_null]
+
+  - name: publication_year_type
+    description: >
+      Serie anual de publicaciones CONICET por tipo documental, restringida a
+      fechas de publicación válidas según el contrato OAI institucional.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [publication_year, publication_type]
+    columns:
+      - name: publication_year
+        data_tests: [not_null]
+      - name: publication_type
+        data_tests: [not_null]
+      - name: publication_count
+        data_tests: [not_null]
+      - name: publication_year_count
+        data_tests: [not_null]
+      - name: publication_year_share_pct
+        data_tests: [not_null]

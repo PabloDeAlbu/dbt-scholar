@@ -186,6 +186,12 @@ models:
             +schema: unlp_openaire
           sedici:
             +schema: unlp_sedici
+    05_analytics:
+      custom:
+        conicet:
+          +schema: conicet
+          +tags: [conicet, analytics]
+          +materialized: table
 seeds:
   dbt_scholar:
     coar:
