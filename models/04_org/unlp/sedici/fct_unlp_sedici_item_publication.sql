@@ -18,7 +18,7 @@ metadata_usage AS (
         mu.min_ym_text_value,
         mu.min_year_text_value
     FROM base AS b
-    JOIN {{ ref('fct_dspacedb5_item_metadatafield_usage') }} AS mu
+    JOIN {{ ref('fct_unlp_sedici_item_metadatafield_usage') }} AS mu
         USING (item_hk)
     WHERE mu.metadatafield_fullname IN (
         'dc.identifier.uri',

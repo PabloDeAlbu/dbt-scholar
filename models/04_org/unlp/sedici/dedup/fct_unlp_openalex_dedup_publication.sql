@@ -107,10 +107,11 @@ prepared AS (
         CASE
             WHEN base.publication_year IS NOT NULL THEN EXTRACT(YEAR FROM base.publication_year)::integer
         END AS publication_year,
-        NULLIF({{ clean_text('base.type_raw') }}, '')::text AS type_raw,
+        NULLIF({{ clean_text('base.type_raw') }}, '')::text AS type,
+        NULL::text AS subtype,
         NULLIF({{ clean_text('base.title_raw') }}, '')::text AS title,
         NULL::text AS subtitle,
-        type_map.type::text AS type,
+        type_map.type_dedup::text AS type_dedup,
         author_agg.author::text AS author,
         CASE
             WHEN base.publication_year IS NOT NULL THEN LPAD(EXTRACT(YEAR FROM base.publication_year)::integer::text, 4, '0')
@@ -126,9 +127,9 @@ prepared AS (
         USING (work_hk)
     LEFT JOIN issn_agg
         USING (work_hk)
-    LEFT JOIN {{ ref('dim_unlp_publication_dedup_type') }} AS type_map
+    LEFT JOIN {{ ref('dim_unlp_sedici_item_type') }} AS type_map
         ON type_map.source = 'openalex'
-       AND LOWER(BTRIM(type_map.type_raw)) = LOWER(BTRIM(base.type_raw))
+       AND LOWER(BTRIM(type_map.type)) = LOWER(BTRIM(base.type_raw))
 ),
 
 final AS (
@@ -136,10 +137,11 @@ final AS (
         source,
         id,
         publication_year,
-        type_raw,
+        type,
+        subtype,
         title,
         subtitle,
-        type,
+        type_dedup,
         author,
         date,
         doi,
@@ -148,7 +150,7 @@ final AS (
         description,
         (
             title IS NOT NULL
-            AND type IS NOT NULL
+            AND type_dedup IS NOT NULL
             AND author IS NOT NULL
             AND publication_year IS NOT NULL
         ) AS dedup_eligible

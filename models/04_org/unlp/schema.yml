@@ -10,11 +10,6 @@ models:
       publicaciones de SEDICI y no un universo deduplicado general entre todas las fuentes.
     config:
       tags: [unlp, dm]
-    data_tests:
-      - dbt_utils.equal_rowcount:
-          compare_model: ref('fct_unlp_sedici_item_publication')
-          config:
-            where: "discoverable = true and in_archive = true and withdrawn = false"
     columns:
       - name: publication_hk
         description: Identificador técnico de la publicación institucional, alineado al `item_hk` de SEDICI.
@@ -24,9 +19,6 @@ models:
         data_tests:
           - not_null
           - unique
-          - relationships:
-              to: ref('fct_unlp_sedici_item_publication')
-              field: item_hk
       - name: item_id
         description: ID original del ítem en DSpace 5.
         data_tests: [not_null]

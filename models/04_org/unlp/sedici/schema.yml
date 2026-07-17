@@ -1,6 +1,145 @@
 version: 2
 
 models:
+  - name: dim_unlp_sedici_item_type
+    description: >
+      Dimensión tipológica para los ítems de publicación UNLP en el contexto de
+      SEDICI. Conserva `type` y `subtype` observados en la fuente y concentra
+      en `type_dedup` la clasificación reducida usada por la capa de
+      deduplicación, incluyendo el mapeo equivalente para OpenAlex.
+    columns:
+      - name: source
+        description: Fuente a la que aplica el mapeo.
+        data_tests: [not_null]
+      - name: type
+        description: Tipo documental original observado en la fuente.
+        data_tests: [not_null]
+      - name: subtype
+        description: Subtipo documental original observado en la fuente cuando existe.
+      - name: type_coar_uri
+        description: URI COAR asociada al tipo cuando existe mapeo.
+      - name: type_dedup
+        description: Tipo documental reducido usado por la capa dedup.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [source, type, subtype]
+
+  - name: dim_unlp_sedici_author
+    description: >
+      Dimensión de autores observados en los ítems SEDICI/UNLP. Consolida
+      variantes textuales y control de autoridades a nivel de autor lógico.
+    columns:
+      - name: sedici_author_hk
+        description: Hash key estable del autor lógico dentro del scope UNLP.
+        data_tests: [not_null, unique]
+      - name: author_bk
+        description: Business key del autor, basada en autoridad o nombre normalizado.
+        data_tests: [not_null]
+      - name: author_name_preferred
+        description: Variante preferida del nombre observada para el autor.
+      - name: author_name_normalized
+        description: Nombre del autor normalizado para matching interno.
+      - name: author_type
+        description: Tipo de autor observado en SEDICI (`person` o `corporate`).
+      - name: authority
+        description: Identificador de autoridad cuando existe.
+      - name: has_authority_control
+        description: Flag que indica si el autor tiene control de autoridades.
+        data_tests: [not_null]
+      - name: observed_name_variant_count
+        description: Cantidad de variantes textuales observadas para el autor.
+        data_tests: [not_null]
+      - name: item_count
+        description: Cantidad de ítems SEDICI en los que aparece el autor.
+        data_tests: [not_null]
+
+  - name: dim_unlp_sedici_metadatafield
+    description: >
+      Dimensión resumida de metadatafields efectivamente usados por el universo
+      institucional SEDICI/UNLP, restringido a ítems publicables y con handle.
+    columns:
+      - name: metadatafield_hk
+        description: Hash key del metadatafield.
+        data_tests: [not_null, unique]
+      - name: metadatafield_fullname
+        description: Nombre completo del metadatafield en notación `schema.element.qualifier`.
+        data_tests: [not_null]
+      - name: metadata_schema_short_id
+        description: Short id del schema de metadatos.
+      - name: element
+        description: Elemento del metadatafield.
+      - name: qualifier
+        description: Qualifier del metadatafield cuando existe.
+      - name: item_count
+        description: Cantidad de ítems del universo SEDICI/UNLP donde aparece el campo.
+        data_tests: [not_null]
+      - name: metadata_value_count
+        description: Cantidad de valores de metadatos observados para el campo.
+        data_tests: [not_null]
+
+  - name: brg_unlp_sedici_item_author
+    description: >
+      Bridge a grano una fila por observación de autor dentro de un ítem
+      SEDICI/UNLP. Vincula cada valor de metadato autoral con
+      `dim_unlp_sedici_author`.
+    columns:
+      - name: item_hk
+        description: Hash key del ítem SEDICI.
+        data_tests: [not_null]
+      - name: item_id
+        description: ID original del ítem en DSpace 5.
+        data_tests: [not_null]
+      - name: sedici_author_hk
+        description: Hash key del autor lógico.
+        data_tests: [not_null]
+      - name: metadata_value_id
+        description: ID original del valor de metadato autoral.
+        data_tests: [not_null]
+      - name: metadatafield_fullname
+        description: Campo autoral del que proviene la observación.
+      - name: author_type
+        description: Tipo de autor observado (`person` o `corporate`).
+      - name: author_name_raw
+        description: Valor textual original del autor.
+      - name: author_place
+        description: Posición original del autor en el ítem cuando existe.
+
+  - name: brg_unlp_sedici_item_community
+    description: >
+      Bridge fuente-específico entre ítems SEDICI/UNLP y su árbol de
+      comunidades y colecciones dentro de DSpace 5.
+
+  - name: brg_unlp_sedici_item_metadatafield
+    description: >
+      Bridge a grano una fila por valor de metadato observado dentro del
+      universo institucional SEDICI/UNLP.
+    columns:
+      - name: item_hk
+        description: Hash key del ítem SEDICI.
+        data_tests: [not_null]
+      - name: item_id
+        description: ID original del ítem en DSpace 5.
+        data_tests: [not_null]
+      - name: metadata_value_id
+        description: ID original del valor de metadato.
+        data_tests: [not_null]
+      - name: metadatafield_hk
+        description: Hash key del metadatafield.
+        data_tests: [not_null]
+      - name: metadatafield_fullname
+        description: Nombre completo del metadatafield observado.
+        data_tests: [not_null]
+      - name: text_value
+        description: Valor textual crudo del metadato.
+      - name: text_lang
+        description: Lang reportado para el valor textual cuando existe.
+      - name: place
+        description: Posición original del valor dentro del campo.
+      - name: authority
+        description: Identificador de autoridad cuando existe.
+      - name: confidence
+        description: Nivel de confianza del control de autoridades cuando existe.
+
   - name: fct_unlp_sedici_item_publication
     description: >
       Hecho institucional fuente-específico de publicaciones SEDICI/UNLP a
@@ -8,3 +147,155 @@ models:
       filtro institucional y enriquecido con metadatos descriptivos, PIDs
       normalizados y contexto técnico del ítem. Es la base institucional
       canónica de SEDICI para el modelado organizacional de UNLP.
+    columns:
+      - name: item_hk
+        description: Clave hash del ítem institucional.
+        data_tests: [not_null, unique]
+      - name: item_id
+        description: ID original del ítem en DSpace 5.
+        data_tests: [not_null]
+      - name: dc_identifier_uri
+        description: URI institucional canónica del ítem.
+        data_tests: [not_null]
+      - name: date_issued
+        description: Fecha de publicación priorizada del ítem.
+      - name: dc_date_available
+        description: Fecha de disponibilidad del ítem en el repositorio.
+      - name: type
+        description: Tipo documental crudo declarado por SEDICI.
+      - name: subtype
+        description: Subtipo SEDICI declarado para el ítem.
+      - name: title
+        description: Título principal del ítem.
+      - name: subtitle
+        description: Títulos alternativos o subtítulos concatenados.
+      - name: description
+        description: Descripciones o abstracts concatenados.
+      - name: subject
+        description: Subjects declarados para la publicación, concatenados con `|`.
+      - name: author
+        description: Autores declarados para la publicación, concatenados con `|`.
+      - name: doi
+        description: DOI normalizados declarados para el ítem, concatenados con `|`.
+      - name: issn
+        description: ISSN declarados para el ítem, concatenados con `|`.
+      - name: isbn
+        description: ISBN declarados para el ítem, concatenados con `|`.
+      - name: owning_root_community_id
+        description: Identificador de la comunidad raíz dueña.
+      - name: owning_root_community_title
+        description: Título de la comunidad raíz dueña.
+      - name: owning_community_path_titles
+        description: Camino jerárquico de títulos desde la raíz hasta la comunidad dueña.
+      - name: discoverable
+        description: Flag operativo heredado de DSpace 5 que indica si el ítem es descubrible.
+        data_tests: [not_null]
+      - name: in_archive
+        description: Flag operativo heredado de DSpace 5 que indica si el ítem está archivado.
+        data_tests: [not_null]
+      - name: withdrawn
+        description: Flag operativo heredado de DSpace 5 que indica si el ítem fue retirado.
+        data_tests: [not_null]
+
+  - name: fct_unlp_sedici_item_metadatafield_usage
+    description: >
+      Hecho agregado de uso de metadatafields a grano `item_hk +
+      metadatafield_hk` para el universo institucional SEDICI/UNLP. Filtra
+      `fct_dspacedb5_item_metadatafield_usage` al subconjunto UNLP publicado y
+      descubrible para desacoplar los consumos SEDICI de la tabla genérica de
+      `dspacedb5`.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_hk, metadatafield_hk]
+    columns:
+      - name: item_hk
+        description: Hash key del ítem SEDICI.
+        data_tests: [not_null]
+      - name: item_id
+        description: ID original del ítem en DSpace 5.
+        data_tests: [not_null]
+      - name: source_label
+        description: Etiqueta técnica de la fuente de extracción.
+        data_tests: [not_null]
+      - name: institution_ror
+        description: ROR institucional del universo filtrado.
+        data_tests: [not_null]
+      - name: metadatafield_hk
+        description: Hash key del metadatafield.
+        data_tests: [not_null]
+      - name: metadatafield_fullname
+        description: Nombre completo del metadatafield observado.
+        data_tests: [not_null]
+      - name: metadatafield_name
+        description: Nombre corto derivado de `short_id`, `element` y `qualifier`.
+        data_tests: [not_null]
+      - name: metadata_value_count
+        description: Cantidad de observaciones de metadatavalue para el item y el campo.
+        data_tests: [not_null]
+      - name: metadata_value_id_count
+        description: Cantidad de IDs de metadatavalue distintos observados para el item y el campo.
+        data_tests: [not_null]
+      - name: distinct_nonempty_text_value_count
+        description: Cantidad de valores textuales no vacíos distintos observados para el item y el campo.
+        data_tests: [not_null]
+      - name: preferred_text_value
+        description: Valor textual preferido del metadatafield para el ítem.
+      - name: ordered_text_values
+        description: Valores textuales no vacíos del campo concatenados en orden.
+
+  - name: fct_unlp_sedici_eperson
+    description: >
+      Hecho institucional de usuarios `eperson` del DSpace 5 de SEDICI/UNLP,
+      enriquecido con actividad de envío a partir de `submitter_id`.
+    columns:
+      - name: eperson_hk
+        description: Hash key estable del usuario dentro del scope UNLP.
+        data_tests: [not_null, unique]
+      - name: eperson_id
+        description: ID original del usuario en DSpace 5.
+        data_tests: [not_null]
+      - name: email
+        description: Email del usuario.
+      - name: netid
+        description: NetID del usuario cuando existe.
+      - name: submitter_flag
+        description: Indica si el usuario aparece como submitter de al menos un ítem.
+        data_tests: [not_null]
+      - name: first_item_submission_date
+        description: Primera fecha observada de envío de un ítem por el usuario.
+      - name: last_item_submission_date
+        description: Última fecha observada de envío de un ítem por el usuario.
+
+  - name: fct_unlp_sedici_root_community_summary
+    description: >
+      Resumen agregado por comunidad raíz del universo SEDICI/UNLP, útil para
+      monitoreo de cobertura institucional y volumen de publicaciones.
+    columns:
+      - name: root_community_hk
+        description: Hash key de la comunidad raíz.
+      - name: root_community_id
+        description: ID original de la comunidad raíz.
+      - name: root_community_title
+        description: Título preferido de la comunidad raíz.
+      - name: item_count
+        description: Cantidad de ítems asociados a la rama.
+        data_tests: [not_null]
+      - name: item_count_owning_collection
+        description: Cantidad de ítems en los que la rama aparece como owning collection.
+        data_tests: [not_null]
+      - name: collection_count
+        description: Cantidad de colecciones distintas bajo la rama.
+        data_tests: [not_null]
+      - name: community_count
+        description: Cantidad de comunidades distintas bajo la rama.
+        data_tests: [not_null]
+      - name: discoverable_item_count
+        description: Cantidad de ítems descubribles de la rama.
+        data_tests: [not_null]
+      - name: issued_item_count
+        description: Cantidad de ítems con fecha de emisión informada.
+        data_tests: [not_null]
+      - name: first_issued_date
+        description: Primera fecha de emisión observada en la rama.
+      - name: last_issued_date
+        description: Última fecha de emisión observada en la rama.
