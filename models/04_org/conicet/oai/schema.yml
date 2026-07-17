@@ -1,6 +1,49 @@
 version: 2
 
 models:
+  - name: dim_conicet_oai_record_type
+    description: >
+      Mapeo curado de valores `dc.type` observados en el OAI de CONICET hacia
+      tipos documentales COAR. Prioriza el vocabulario `ar-repo` sobre
+      `eu-repo` y excluye valores no tipológicos como `publishedVersion`.
+    columns:
+      - name: dc_type
+        description: Valor raw observado en `dc.type`.
+        data_tests: [not_null, unique]
+      - name: type_vocabulary
+        description: Vocabulario de origen (`ar-repo` o `eu-repo`).
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['ar-repo', 'eu-repo']
+      - name: publication_type
+        description: Etiqueta canónica del tipo documental cuando existe mapeo.
+      - name: publication_type_uri
+        description: URI COAR del tipo documental cuando existe mapeo.
+      - name: resolution_priority
+        description: Prioridad usada al resolver múltiples vocabularios; `ar-repo` precede a `eu-repo`.
+        data_tests: [not_null]
+      - name: is_publication_type
+        description: Indica si el valor representa un tipo documental resoluble.
+        data_tests: [not_null]
+
+  - name: dim_conicet_oai_record_accessright
+    description: >
+      Mapeo de los valores `dc.right` con semántica `eu-repo` observados en
+      CONICET hacia el vocabulario canónico COAR Access Rights.
+    columns:
+      - name: dc_right
+        description: Valor raw de `dc.right` usado por CONICET para indicar acceso.
+        data_tests: [not_null, unique]
+      - name: access_right
+        description: Etiqueta canónica en inglés del nivel de acceso.
+        data_tests: [not_null]
+      - name: access_right_label_es
+        description: Etiqueta canónica en español del nivel de acceso.
+      - name: access_right_uri
+        description: URI COAR del nivel de acceso.
+        data_tests: [not_null, unique]
+
   - name: fct_conicet_oai_record_publication
     description: >
       Hecho institucional CONICET a nivel de record OAI. Conserva el grano 1 fila
@@ -34,6 +77,42 @@ models:
         data_tests: [not_null]
       - name: has_multiple_dc_type
         description: Flag que indica multiplicidad de `dc.type` en el record.
+        data_tests: [not_null]
+      - name: publication_type
+        description: Tipo documental canónico resuelto con prioridad `ar-repo` y fallback `eu-repo`.
+      - name: publication_type_uri
+        description: URI COAR del tipo documental resuelto.
+      - name: publication_type_source
+        description: Vocabulario que aportó el tipo elegido (`ar-repo` o `eu-repo`).
+      - name: publication_type_count
+        description: Cantidad de tipos documentales canónicos distintos resueltos para el record.
+        data_tests: [not_null]
+      - name: has_multiple_publication_type
+        description: Indica si el record resuelve a más de un tipo documental canónico.
+        data_tests: [not_null]
+      - name: has_publication_type
+        description: Indica si el record pudo resolverse a un tipo documental canónico.
+        data_tests: [not_null]
+      - name: dc_right
+        description: Valores raw de `dc.right` heredados del hecho OAI genérico.
+      - name: dc_right_count
+        description: Cantidad de valores raw distintos de `dc.right`.
+        data_tests: [not_null]
+      - name: has_multiple_dc_right
+        description: Indica si el record tiene más de un valor raw de `dc.right`.
+        data_tests: [not_null]
+      - name: access_right
+        description: Nivel de acceso COAR resuelto desde los valores `eu-repo` de CONICET.
+      - name: access_right_uri
+        description: URI COAR del nivel de acceso resuelto.
+      - name: access_right_count
+        description: Cantidad de niveles de acceso canónicos distintos resueltos para el record.
+        data_tests: [not_null]
+      - name: has_multiple_access_right
+        description: Indica si el record resuelve a más de un nivel de acceso.
+        data_tests: [not_null]
+      - name: has_access_right
+        description: Indica si el record pudo resolverse a un nivel de acceso COAR.
         data_tests: [not_null]
       - name: repository_identifier
         description: Identificador del repositorio OAI del que proviene el registro.

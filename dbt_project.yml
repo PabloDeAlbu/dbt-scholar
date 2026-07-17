@@ -191,6 +191,9 @@ seeds:
     coar:
       +schema: coar
       +tags: [coar]
+    conicet:
+      +schema: conicet
+      +tags: [conicet]
     dspacedb:
       +schema: dspacedb
       +tags: [dspacedb]
