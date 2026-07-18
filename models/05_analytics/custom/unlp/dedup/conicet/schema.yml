@@ -1,0 +1,69 @@
+version: 2
+
+models:
+  - name: conicet_unlp_repository_target
+    description: >
+      Mapeo de sets OAI de centros CONICET-UNLP hacia comunidades vigentes de
+      SEDICI y sus rutas jerárquicas. Su grano es un set CONICET mapeado.
+    columns:
+      - name: set_spec
+        data_tests: [not_null, unique]
+      - name: target_community_id
+        data_tests: [not_null]
+      - name: target_community_path_titles
+        data_tests: [not_null]
+
+  - name: dedup_conicet_unlp_input_1
+    description: >
+      Publicaciones CONICET candidatas para UNLP, a grano publicación por comunidad
+      destino SEDICI. Conserva el contrato genérico del deduplicador y columnas de
+      contexto para preparar lotes por ruta del repositorio.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [id, target_community_id]
+    columns:
+      - name: source
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['conicet']
+      - name: id
+        data_tests: [not_null]
+      - name: target_community_id
+        data_tests: [not_null]
+      - name: target_community_path_titles
+        data_tests: [not_null]
+      - name: dedup_eligible
+        data_tests: [not_null]
+
+  - name: dedup_conicet_unlp_input_2
+    description: >
+      Publicaciones existentes en SEDICI elegibles para deduplicación, con su
+      comunidad propietaria real. Su grano es una publicación del repositorio.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [id, target_community_id]
+    columns:
+      - name: source
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['sedici']
+      - name: id
+        data_tests: [not_null]
+      - name: title
+        data_tests: [not_null]
+      - name: type
+        data_tests: [not_null]
+      - name: author
+        data_tests: [not_null]
+      - name: date
+        data_tests: [not_null]
+      - name: owning_community_id
+        data_tests: [not_null]
+      - name: owning_community_path_titles
+        data_tests: [not_null]
+      - name: target_community_id
+        data_tests: [not_null]
+      - name: target_community_path_titles
+        data_tests: [not_null]

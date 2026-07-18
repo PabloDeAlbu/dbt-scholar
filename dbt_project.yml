@@ -192,6 +192,10 @@ models:
           +schema: conicet
           +tags: [conicet, analytics]
           +materialized: table
+        unlp:
+          +schema: unlp
+          +tags: [unlp, analytics]
+          +materialized: table
 seeds:
   dbt_scholar:
     coar:
