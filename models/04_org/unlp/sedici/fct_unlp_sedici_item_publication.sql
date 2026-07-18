@@ -5,7 +5,7 @@ WITH base AS (
     FROM {{ ref('fct_dspacedb5_item_publication') }}
     WHERE institution_ror = 'https://ror.org/01tjs6929'
 ),
-metadata_usage AS (
+metadata_usage AS NOT MATERIALIZED (
     SELECT
         b.item_hk,
         mu.item_id,

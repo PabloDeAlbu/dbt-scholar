@@ -1,4 +1,13 @@
-{{ config(materialized='table') }}
+{{ config(
+    materialized='table',
+    indexes=[
+        {'columns': ['item_hk', 'metadatafield_hk'], 'unique': true},
+        {'columns': ['metadatafield_fullname', 'item_hk']}
+    ],
+    post_hook=[
+        "analyze {{ this }}"
+    ]
+) }}
 
 WITH base AS (
     SELECT
