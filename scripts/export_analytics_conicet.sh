@@ -63,6 +63,10 @@ export_csv \
     "publication_openaire_top_cited.csv" \
     "SELECT * FROM analytics_conicet.publication_openaire_top_cited ORDER BY citation_rank"
 
+export_csv \
+    "publication_openaire_citation_by_subject_area.csv" \
+    "SELECT * FROM analytics_conicet.publication_openaire_citation_by_subject_area ORDER BY openaire_citation_count DESC, subject_area"
+
 for file in "${temporary_dir}"/*.csv; do
     mv "${file}" "${output_dir}/"
 done

@@ -42,3 +42,32 @@ models:
         data_tests: [not_null, unique]
       - name: openaire_citation_count
         data_tests: [not_null]
+
+  - name: publication_openaire_citation_by_subject_area
+    description: >
+      Recuento acumulado de citas informado por OpenAIRE para las publicaciones
+      OAI de CONICET enlazadas de manera única por identificador original, agrupado
+      por el área temática del registro institucional. Su grano es un área temática.
+    columns:
+      - name: subject_area
+        description: Área temática informada por el registro OAI de CONICET.
+        data_tests: [not_null, unique]
+      - name: matched_publication_count
+        description: Cantidad de publicaciones enlazadas de manera única con OpenAIRE.
+        data_tests: [not_null]
+      - name: publication_with_citation_data_count
+        description: Cantidad de publicaciones para las que OpenAIRE informó un recuento de citas.
+        data_tests: [not_null]
+      - name: cited_publication_count
+        description: Cantidad de publicaciones con un recuento de citas mayor que cero.
+        data_tests: [not_null]
+      - name: openaire_citation_count
+        description: Suma del recuento de citas informado por OpenAIRE.
+        data_tests: [not_null]
+      - name: openaire_citation_share_pct
+        description: Participación porcentual del área en el total acumulado de citas.
+        data_tests: [not_null]
+      - name: openaire_average_citation_count
+        description: >
+          Promedio de citas entre las publicaciones para las que OpenAIRE informó
+          un recuento; no interpreta los valores nulos como cero.
