@@ -1,0 +1,96 @@
+version: 2
+
+sources:
+  - name: sedicidb
+    description: Dump completo vigente de la base de datos DSpace 5 de SEDICI.
+    schema: ldg_sedici
+    tables:
+      - name: item
+      - name: handle
+      - name: collection2item
+      - name: metadatavalue
+      - name: metadatafieldregistry
+      - name: metadataschemaregistry
+
+models:
+  - name: fct_unlp_sedicidb_metadatafield_usage
+    description: >
+      Inventario vigente de metadatafields registrados en el dump SEDICI, a
+      grano una fila por `metadata_field_id`. Incluye campos sin uso y métricas
+      de cobertura, volumen y multivaluación sobre recursos de tipo ítem.
+    columns:
+      - name: metadata_field_id
+        description: Identificador del metadatafield en DSpace 5.
+        data_tests: [not_null, unique]
+      - name: metadatafield_fullname
+        description: Nombre completo formado por schema, element y qualifier.
+        data_tests: [not_null, unique]
+      - name: item_count
+        description: Cantidad de ítems con al menos una observación del campo.
+        data_tests: [not_null]
+      - name: metadata_value_count
+        description: Cantidad total de observaciones del campo en ítems.
+        data_tests: [not_null]
+      - name: empty_metadata_value_count
+        description: Cantidad de observaciones cuyo valor textual es nulo o vacío luego de aplicar `BTRIM`.
+        data_tests: [not_null]
+      - name: distinct_nonempty_text_value_count
+        description: Cantidad de valores textuales no vacíos distintos en todo el repositorio.
+        data_tests: [not_null]
+      - name: multivalued_item_count
+        description: Cantidad de ítems con más de un valor textual distinto y no vacío para el campo.
+        data_tests: [not_null]
+      - name: item_coverage_pct
+        description: Porcentaje de ítems del dump que observan el metadatafield.
+        data_tests: [not_null]
+
+  - name: fct_unlp_sedicidb_item_publication
+    description: >
+      Inventario vigente de ítems del dump SEDICI, a grano una fila por
+      `item_id`. Conserva los estados DSpace sin filtrarlos y agrega solamente
+      métricas estructurales de handles, colecciones y metadatos. Los campos
+      descriptivos se incorporarán gradualmente en modelos posteriores.
+    columns:
+      - name: item_id
+        description: Identificador del ítem en DSpace 5.
+        data_tests: [not_null, unique]
+      - name: in_archive
+        description: Estado `in_archive` vigente en el dump; puede ser nulo en registros fuente incompletos.
+      - name: withdrawn
+        description: Estado `withdrawn` vigente en el dump; puede ser nulo en registros fuente incompletos.
+      - name: discoverable
+        description: Estado `discoverable` vigente en el dump.
+        data_tests: [not_null]
+      - name: dc_date_issued_raw
+        description: >
+          Valor válido priorizado de `dc.date.issued`, conservando la precisión
+          declarada en la fuente. Los valores inválidos no se seleccionan.
+      - name: dc_date_issued
+        description: >
+          Fecha de publicación derivada de `dc.date.issued`; completa con día
+          1 cuando la fuente informa solamente año o año-mes.
+      - name: dc_date_issued_precision
+        description: Precisión del valor seleccionado de `dc.date.issued`.
+        data_tests:
+          - accepted_values:
+              values: ['day', 'month', 'year']
+      - name: publication_year
+        description: Año derivado de `dc_date_issued` para agrupaciones y gráficos.
+      - name: dc_date_available_raw
+        description: Valor válido priorizado de `dc.date.available`.
+      - name: dc_date_available
+        description: >
+          Fecha en que el recurso quedó disponible en el repositorio según
+          `dc.date.available`; no representa necesariamente su publicación.
+      - name: handle_count
+        description: Cantidad de handles distintos asociados al ítem.
+        data_tests: [not_null]
+      - name: collections_count
+        description: Cantidad de colecciones distintas asociadas al ítem.
+        data_tests: [not_null]
+      - name: metadatafield_count
+        description: Cantidad de metadatafields distintos observados en el ítem.
+        data_tests: [not_null]
+      - name: metadata_value_count
+        description: Cantidad de observaciones de metadatos asociadas al ítem.
+        data_tests: [not_null]

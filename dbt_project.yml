@@ -156,6 +156,9 @@ models:
         sedici:
           +schema: unlp_sedici
           +tags: [unlp, sedici]
+        sedicidb:
+          +schema: unlp_sedicidb
+          +tags: [unlp, sedicidb]
         vocsedici:
           +schema: unlp
           +tags: [unlp, vocsedici]

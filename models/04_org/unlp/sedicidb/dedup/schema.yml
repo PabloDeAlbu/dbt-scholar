@@ -1,0 +1,75 @@
+version: 2
+
+models:
+  - name: fct_unlp_sedicidb_dedup_publication
+    description: >
+      Dataset SEDICI preparado para el deduplicador a grano una fila por
+      publicación. Parte del inventario vigente de `sedicidb`, restringe el
+      universo a ítems archivados, descubribles, no retirados y con handle, y
+      agrega únicamente los metadatafields requeridos por este consumo.
+    columns:
+      - name: source
+        description: Origen fijo del registro; vale `sedici`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['sedici']
+      - name: id
+        description: Handle institucional en formato `10915/...`.
+        data_tests: [not_null, unique]
+      - name: type
+        description: Primer valor por `place` de `dc.type`.
+      - name: subtype
+        description: Primer valor por `place` de `sedici.subtype`.
+      - name: date
+        description: Fecha derivada de `dc.date.issued`, limitada al rango 1500–2100.
+      - name: dc_date_available
+        description: Fecha de disponibilidad en el repositorio.
+      - name: title
+        description: Primer valor por `place` de `dc.title`, con espacios normalizados.
+      - name: subtitle
+        description: Valores de `sedici.title.subtitle` y `dc.title.alternative` unidos con `|`.
+      - name: author
+        description: >
+          Valores distintos de `sedici.creator.person`,
+          `sedici.creator.corporate` y `sedici.contributor.compiler`, unidos
+          con `|` en ese orden.
+      - name: doi
+        description: DOI extraídos y normalizados desde los campos de identificadores.
+      - name: issn
+        description: ISSN distintos unidos con `|`.
+      - name: isbn
+        description: ISBN distintos unidos con `|`.
+      - name: subject
+        description: Valores de `sedici.subject.materias` y `dc.subject` unidos con `|`.
+      - name: owning_collection
+        description: ID de la colección dueña según la tabla `item`.
+      - name: publication_year
+        description: Año derivado de `date`.
+      - name: type_dedup
+        description: Tipo reducido derivado del mapeo SEDICI a COAR.
+      - name: description
+        description: Abstracts y descripciones unidos con `|`.
+      - name: dedup_eligible
+        description: >
+          Indica que la publicación tiene título, tipo dedup, autor y año.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_sedicidb_dedup_publication_publication_year_range
+          expression: "publication_year is null or publication_year between 1500 and 2100"
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_sedicidb_dedup_publication_date_matches_year
+          expression: "publication_year is null or date is null or publication_year = extract(year from date)::integer"
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_sedicidb_dedup_publication_eligible_has_title
+          expression: "dedup_eligible = false or title is not null"
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_sedicidb_dedup_publication_eligible_has_type
+          expression: "dedup_eligible = false or type_dedup is not null"
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_sedicidb_dedup_publication_eligible_has_author
+          expression: "dedup_eligible = false or author is not null"
+      - dbt_utils.expression_is_true:
+          name: fct_unlp_sedicidb_dedup_publication_eligible_has_year
+          expression: "dedup_eligible = false or publication_year is not null"
