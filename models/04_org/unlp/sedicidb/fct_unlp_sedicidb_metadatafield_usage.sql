@@ -43,7 +43,8 @@ item_metadata_value AS (
         value.resource_id AS item_id,
         value.metadata_field_id,
         value.metadata_value_id,
-        NULLIF(BTRIM(value.text_value), '') AS text_value_clean
+        NULLIF(BTRIM(value.text_value), '') AS text_value_clean,
+        NULLIF(LOWER(BTRIM(value.text_lang)), '') AS text_lang_clean
     FROM {{ source('sedicidb', 'metadatavalue') }} AS value
     INNER JOIN item_universe AS item
         ON item.item_id = value.resource_id
@@ -71,6 +72,38 @@ field_stats AS (
         COUNT(*) FILTER (WHERE distinct_nonempty_text_value_count > 1)::bigint AS multivalued_item_count,
         MAX(distinct_nonempty_text_value_count)::bigint AS max_distinct_values_per_item
     FROM item_field_stats
+    GROUP BY metadata_field_id
+),
+
+field_text_lang_stats AS (
+    SELECT
+        metadata_field_id,
+        COUNT(*) FILTER (WHERE text_lang_clean IS NOT NULL)::bigint AS text_lang_value_count,
+        COUNT(DISTINCT text_lang_clean)::bigint AS distinct_text_lang_count
+    FROM item_metadata_value
+    GROUP BY metadata_field_id
+),
+
+field_text_lang_value_count AS (
+    SELECT
+        metadata_field_id,
+        text_lang_clean,
+        COUNT(*)::bigint AS metadata_value_count
+    FROM item_metadata_value
+    WHERE text_lang_clean IS NOT NULL
+    GROUP BY metadata_field_id, text_lang_clean
+),
+
+field_text_lang_summary AS (
+    SELECT
+        metadata_field_id,
+        STRING_AGG(text_lang_clean, '|' ORDER BY text_lang_clean) AS text_langs,
+        STRING_AGG(
+            text_lang_clean || '=' || metadata_value_count::text,
+            '|'
+            ORDER BY text_lang_clean
+        ) AS text_lang_value_counts
+    FROM field_text_lang_value_count
     GROUP BY metadata_field_id
 ),
 
@@ -105,12 +138,32 @@ final AS (
         CASE
             WHEN repository.total_item_count = 0 THEN 0::numeric
             ELSE ROUND(100.0 * COALESCE(stats.item_count, 0) / repository.total_item_count, 4)
-        END AS item_coverage_pct
+        END AS item_coverage_pct,
+        COALESCE(text_lang_stats.text_lang_value_count, 0) AS text_lang_value_count,
+        COALESCE(
+            stats.metadata_value_count - text_lang_stats.text_lang_value_count,
+            0
+        ) AS missing_text_lang_value_count,
+        CASE
+            WHEN COALESCE(stats.metadata_value_count, 0) = 0 THEN 0::numeric
+            ELSE ROUND(
+                100.0 * COALESCE(text_lang_stats.text_lang_value_count, 0)
+                / stats.metadata_value_count,
+                4
+            )
+        END AS text_lang_coverage_pct,
+        COALESCE(text_lang_stats.distinct_text_lang_count, 0) AS distinct_text_lang_count,
+        text_lang_summary.text_langs,
+        text_lang_summary.text_lang_value_counts
     FROM metadatafield AS field
     CROSS JOIN repository_stats AS repository
     LEFT JOIN field_stats AS stats
         USING (metadata_field_id)
     LEFT JOIN field_distinct_values AS distinct_values
+        USING (metadata_field_id)
+    LEFT JOIN field_text_lang_stats AS text_lang_stats
+        USING (metadata_field_id)
+    LEFT JOIN field_text_lang_summary AS text_lang_summary
         USING (metadata_field_id)
 )
 

@@ -42,18 +42,26 @@ models:
         description: ISBN distintos unidos con `|`.
       - name: subject
         description: Valores de `sedici.subject.materias` y `dc.subject` unidos con `|`.
+      - name: owning_root_community_id
+        description: ID de la comunidad raíz que contiene la colección dueña.
+      - name: owning_root_community_title
+        description: Título preferido de la comunidad raíz.
+      - name: owning_community_path_titles
+        description: Camino desde la comunidad raíz hasta la comunidad inmediata, separado con ` > `.
+      - name: owning_community_id
+        description: ID de la comunidad que contiene directamente la colección dueña.
+      - name: owning_community_title
+        description: Título preferido de la comunidad inmediata.
       - name: owning_collection
         description: ID de la colección dueña según la tabla `item`.
+      - name: owning_collection_title
+        description: Título preferido de la colección dueña.
       - name: publication_year
         description: Año derivado de `date`.
       - name: type_dedup
         description: Tipo reducido derivado del mapeo SEDICI a COAR.
       - name: description
         description: Abstracts y descripciones unidos con `|`.
-      - name: dedup_eligible
-        description: >
-          Indica que la publicación tiene título, tipo dedup, autor y año.
-        data_tests: [not_null]
     data_tests:
       - dbt_utils.expression_is_true:
           name: fct_unlp_sedicidb_dedup_publication_publication_year_range
@@ -62,14 +70,8 @@ models:
           name: fct_unlp_sedicidb_dedup_publication_date_matches_year
           expression: "publication_year is null or date is null or publication_year = extract(year from date)::integer"
       - dbt_utils.expression_is_true:
-          name: fct_unlp_sedicidb_dedup_publication_eligible_has_title
-          expression: "dedup_eligible = false or title is not null"
-      - dbt_utils.expression_is_true:
-          name: fct_unlp_sedicidb_dedup_publication_eligible_has_type
-          expression: "dedup_eligible = false or type_dedup is not null"
-      - dbt_utils.expression_is_true:
-          name: fct_unlp_sedicidb_dedup_publication_eligible_has_author
-          expression: "dedup_eligible = false or author is not null"
-      - dbt_utils.expression_is_true:
-          name: fct_unlp_sedicidb_dedup_publication_eligible_has_year
-          expression: "dedup_eligible = false or publication_year is not null"
+          name: fct_unlp_sedicidb_dedup_publication_path_starts_at_root
+          expression: >
+            owning_root_community_title is null
+            or owning_community_path_titles = owning_root_community_title
+            or owning_community_path_titles like owning_root_community_title || ' > %'

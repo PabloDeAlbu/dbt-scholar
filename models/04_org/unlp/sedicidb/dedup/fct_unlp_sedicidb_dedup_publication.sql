@@ -2,7 +2,6 @@
     materialized='table',
     indexes=[
         {'columns': ['id'], 'unique': true},
-        {'columns': ['dedup_eligible']},
         {'columns': ['publication_year']}
     ],
     post_hook=[
@@ -30,6 +29,69 @@ metadatafield AS (
     FROM {{ source('sedicidb', 'metadatafieldregistry') }} AS field
     INNER JOIN {{ source('sedicidb', 'metadataschemaregistry') }} AS schema_registry
         USING (metadata_schema_id)
+),
+
+collection_title_value AS (
+    SELECT
+        value.resource_id AS collection_id,
+        value.metadata_value_id,
+        NULLIF({{ clean_text('value.text_value') }}, '') AS collection_title,
+        NULLIF(LOWER(BTRIM(value.text_lang)), '') AS text_lang,
+        value.place
+    FROM {{ source('sedicidb', 'metadatavalue') }} AS value
+    INNER JOIN metadatafield AS field
+        USING (metadata_field_id)
+    WHERE field.metadatafield_fullname = 'dc.title'
+      AND value.resource_type_id = 3
+),
+
+collection_title_ranked AS (
+    SELECT
+        *,
+        ROW_NUMBER() OVER (
+            PARTITION BY collection_id
+            ORDER BY
+                (text_lang IS NULL) DESC,
+                text_lang,
+                place NULLS LAST,
+                metadata_value_id
+        ) AS title_rank
+    FROM collection_title_value
+    WHERE collection_title IS NOT NULL
+),
+
+collection_node AS (
+    SELECT
+        collection.collection_id,
+        title.collection_title
+    FROM {{ source('sedicidb', 'collection') }} AS collection
+    LEFT JOIN collection_title_ranked AS title
+        ON title.collection_id = collection.collection_id
+       AND title.title_rank = 1
+),
+
+collection_community AS (
+    SELECT DISTINCT ON (relation.collection_id)
+        relation.collection_id,
+        relation.community_id
+    FROM {{ source('sedicidb', 'community2collection') }} AS relation
+    ORDER BY relation.collection_id, relation.community_id
+),
+
+collection_context AS (
+    SELECT
+        collection.collection_id,
+        collection.collection_title,
+        community.community_id,
+        community.community_title,
+        community.root_community_id,
+        community.root_community_title,
+        community.community_path_titles
+    FROM collection_node AS collection
+    LEFT JOIN collection_community AS relation
+        USING (collection_id)
+    LEFT JOIN {{ ref('dim_unlp_sedicidb_community') }} AS community
+        USING (community_id)
 ),
 
 metadata_value AS (
@@ -262,13 +324,13 @@ prepared AS (
         lists.issn::text AS issn,
         lists.isbn::text AS isbn,
         lists.subject::text AS subject,
-        NULL::text AS owning_root_community_id,
-        NULL::text AS owning_root_community_title,
-        NULL::text AS owning_community_path_titles,
-        NULL::text AS owning_community_id,
-        NULL::text AS owning_community_title,
+        ownership.root_community_id::text AS owning_root_community_id,
+        ownership.root_community_title::text AS owning_root_community_title,
+        ownership.community_path_titles::text AS owning_community_path_titles,
+        ownership.community_id::text AS owning_community_id,
+        ownership.community_title::text AS owning_community_title,
         base.owning_collection::text AS owning_collection,
-        NULL::text AS owning_collection_title,
+        ownership.collection_title::text AS owning_collection_title,
         CASE
             WHEN base.dc_date_issued BETWEEN '1500-01-01'::date AND '2100-12-31'::date
                 THEN EXTRACT(YEAR FROM base.dc_date_issued)::integer
@@ -284,19 +346,9 @@ prepared AS (
         USING (item_id)
     LEFT JOIN type_map
         ON type_map.type_key = LOWER(BTRIM(scalar.type))
-),
-
-final AS (
-    SELECT
-        *,
-        (
-            title IS NOT NULL
-            AND type_dedup IS NOT NULL
-            AND author IS NOT NULL
-            AND publication_year IS NOT NULL
-        ) AS dedup_eligible
-    FROM prepared
+    LEFT JOIN collection_context AS ownership
+        ON ownership.collection_id = base.owning_collection
 )
 
 SELECT *
-FROM final
+FROM prepared
