@@ -1,0 +1,122 @@
+version: 2
+
+models:
+  - name: int_unlp_sedicidb_item_metadatavalue
+    description: >
+      Capa atómica vigente de metadatos de ítems SEDICI, a grano una fila por
+      `metadata_value_id`. Conserva valores crudos y agrega normalizaciones
+      genéricas de texto e idioma sin aplicar reglas propias de un metadatafield.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: sedicidb_metadatavalue_authority_uri_format
+          expression: "authority_uri is null or authority_uri ~* '^https?://'"
+    columns:
+      - name: metadata_value_id
+        description: Identificador de la observación de metadatos en DSpace 5.
+        data_tests: [not_null, unique]
+      - name: item_id
+        description: Ítem al que pertenece la observación.
+        data_tests: [not_null]
+      - name: metadata_field_id
+        description: Identificador del metadatafield observado.
+        data_tests: [not_null]
+      - name: metadatafield_fullname
+        description: Nombre completo formado por schema, element y qualifier.
+        data_tests: [not_null]
+      - name: text_value_raw
+        description: Valor textual original, sin limpieza ni recorte.
+      - name: text_value
+        description: Valor con espacios y caracteres invisibles normalizados; puede ser nulo si el raw está vacío.
+      - name: text_lang_raw
+        description: Idioma original informado en `text_lang`.
+      - name: text_lang
+        description: Idioma normalizado mediante `LOWER(BTRIM(text_lang_raw))`.
+      - name: authority_raw
+        description: Identificador de autoridad original, sin limpieza ni recorte.
+      - name: authority_uri
+        description: Authority sin espacios exteriores; conserva mayúsculas y contenido por ser un identificador.
+      - name: authority_host
+        description: Host derivado de `authority_uri` y normalizado a minúsculas.
+      - name: authority_path
+        description: Camino completo de `authority_uri` posterior al host.
+      - name: confidence
+        description: Código de confianza original de DSpace; se conserva sin interpretar.
+      - name: place
+        description: Posición declarada por DSpace para el valor dentro del metadatafield.
+
+  - name: int_unlp_sedicidb_item_dc_title
+    description: >
+      Observaciones de `dc.title` a grano una fila por `metadata_value_id`.
+      Conserva el título crudo y expone una versión textual normalizada y apta
+      para agregarse con `|` en modelos a grano ítem.
+    columns:
+      - name: metadata_value_id
+        description: Identificador de la observación original de `dc.title`.
+        data_tests: [not_null, unique]
+      - name: item_id
+        description: Ítem al que pertenece el título.
+        data_tests: [not_null]
+      - name: dc_title_raw
+        description: Título exactamente como aparece en `metadatavalue.text_value`.
+      - name: dc_title
+        description: Título normalizado; los caracteres `|` internos se reemplazan por espacios.
+
+  - name: int_unlp_sedicidb_item_sedici_creator_person
+    description: >
+      Observaciones de `sedici.creator.person` a grano una fila por
+      `metadata_value_id`, con nombre personal crudo y normalizado.
+    columns:
+      - name: metadata_value_id
+        description: Identificador de la observación original.
+        data_tests: [not_null, unique]
+      - name: item_id
+        description: Ítem al que pertenece la autoría personal.
+        data_tests: [not_null]
+      - name: sedici_creator_person_raw
+        description: Nombre personal exactamente como aparece en el dump.
+      - name: sedici_creator_person
+        description: Nombre personal con caracteres invisibles y espacios normalizados.
+      - name: authority_uri
+        description: URI de autoridad asociada exactamente a esta observación de autoría.
+      - name: confidence
+        description: Código de confianza original asociado a la observación.
+
+  - name: int_unlp_sedicidb_item_sedici_creator_corporate
+    description: >
+      Observaciones de `sedici.creator.corporate` a grano una fila por
+      `metadata_value_id`, con autor institucional crudo y normalizado.
+    columns:
+      - name: metadata_value_id
+        description: Identificador de la observación original.
+        data_tests: [not_null, unique]
+      - name: item_id
+        description: Ítem al que pertenece la autoría institucional.
+        data_tests: [not_null]
+      - name: sedici_creator_corporate_raw
+        description: Autor institucional exactamente como aparece en el dump.
+      - name: sedici_creator_corporate
+        description: Autor institucional con caracteres invisibles y espacios normalizados.
+      - name: authority_uri
+        description: URI de autoridad asociada exactamente a esta observación institucional.
+      - name: confidence
+        description: Código de confianza original asociado a la observación.
+
+  - name: int_unlp_sedicidb_item_sedici_contributor_compiler
+    description: >
+      Observaciones de `sedici.contributor.compiler` a grano una fila por
+      `metadata_value_id`, con compilador crudo y normalizado.
+    columns:
+      - name: metadata_value_id
+        description: Identificador de la observación original.
+        data_tests: [not_null, unique]
+      - name: item_id
+        description: Ítem al que pertenece el compilador.
+        data_tests: [not_null]
+      - name: sedici_contributor_compiler_raw
+        description: Nombre del compilador exactamente como aparece en el dump.
+      - name: sedici_contributor_compiler
+        description: Nombre del compilador con caracteres invisibles y espacios normalizados.
+      - name: authority_uri
+        description: URI de autoridad asociada exactamente a esta observación de compilador.
+      - name: confidence
+        description: Código de confianza original asociado a la observación.

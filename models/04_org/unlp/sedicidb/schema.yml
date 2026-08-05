@@ -114,6 +114,114 @@ models:
             or community_path_titles = root_community_title
             or community_path_titles like root_community_title || ' > %'
 
+  - name: brg_unlp_sedicidb_item_author
+    description: >
+      Relación atómica entre ítems y observaciones de autoría SEDICI. Conserva
+      nombre, rol, posición, authority y confidence sin concatenar
+      identificadores, a grano una fila por `metadata_value_id`.
+    columns:
+      - name: metadata_value_id
+        description: Identificador de la observación original de metadatos.
+        data_tests: [not_null, unique]
+      - name: item_id
+        description: Ítem relacionado con la observación de autoría.
+        data_tests: [not_null]
+      - name: author_bk
+        description: >
+          Identidad controlada basada en `authority_uri` o identidad nominal de
+          respaldo basada en tipo y nombre normalizado.
+        data_tests:
+          - not_null
+      - name: author_id
+        description: MD5 determinístico de `author_bk`, usado como clave técnica compacta para relaciones e índices.
+        data_tests:
+          - not_null
+          - relationships:
+              name: sedicidb_item_author_id_in_author_dim
+              to: ref('dim_unlp_sedicidb_author')
+              field: author_id
+      - name: author_role
+        description: Rol específico derivado del metadatafield de origen.
+        data_tests:
+          - accepted_values:
+              values: ['creator_person', 'creator_corporate', 'contributor_compiler']
+      - name: author_type
+        description: Tipo general de entidad autora.
+        data_tests:
+          - accepted_values:
+              values: ['person', 'corporate']
+      - name: author_name_raw
+        description: Nombre exactamente como aparece en el dump.
+      - name: author_name
+        description: Nombre normalizado por el modelo específico del metadatafield.
+        data_tests: [not_null]
+      - name: authority_uri
+        description: URI de autoridad asociada a la misma observación del nombre.
+      - name: has_authority_control
+        description: Indica que la observación posee una `authority_uri` no vacía.
+        data_tests: [not_null]
+      - name: confidence
+        description: Código de confianza original, conservado sin interpretación.
+      - name: author_place
+        description: Posición original de la observación dentro del metadatafield.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: sedicidb_item_author_control_matches_uri
+          expression: "has_authority_control = (authority_uri is not null)"
+
+  - name: dim_unlp_sedicidb_author
+    description: >
+      Dimensión vigente de autores observados en SEDICI. Prioriza la URI de
+      autoridad como identidad; cuando no existe, mantiene una identidad nominal
+      explícitamente no controlada.
+    columns:
+      - name: author_id
+        description: MD5 determinístico de `author_bk`, usado como clave técnica compacta.
+        data_tests: [not_null, unique]
+      - name: author_bk
+        description: Clave de negocio controlada o nominal de respaldo.
+        data_tests: [not_null, unique]
+      - name: author_name_preferred
+        description: Variante cruda más observada para la identidad.
+        data_tests: [not_null]
+      - name: author_name_normalized
+        description: Nombre normalizado correspondiente a la variante preferida.
+        data_tests: [not_null]
+      - name: author_type
+        description: Tipo observado; puede valer `mixed` ante usos inconsistentes de una misma authority.
+        data_tests:
+          - accepted_values:
+              values: ['person', 'corporate', 'mixed']
+      - name: author_roles
+        description: Roles distintos observados, unidos con `|`.
+        data_tests: [not_null]
+      - name: authority_uri
+        description: URI canónica conservada para identidades controladas.
+      - name: authority_host
+        description: Host de la URI de autoridad.
+      - name: authority_path
+        description: Camino completo de la URI posterior al host.
+      - name: has_authority_control
+        description: Distingue identidades controladas de identidades nominales de respaldo.
+        data_tests: [not_null]
+      - name: min_confidence
+        description: Menor código de confianza observado para la identidad.
+      - name: max_confidence
+        description: Mayor código de confianza observado para la identidad.
+      - name: observation_count
+        description: Cantidad de observaciones asociadas a la identidad.
+        data_tests: [not_null]
+      - name: item_count
+        description: Cantidad de ítems distintos relacionados con la identidad.
+        data_tests: [not_null]
+      - name: observed_name_variant_count
+        description: Cantidad de variantes crudas de nombre observadas.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: sedicidb_author_control_matches_uri
+          expression: "has_authority_control = (authority_uri is not null)"
+
   - name: fct_unlp_sedicidb_item_publication
     description: >
       Inventario vigente de ítems del dump SEDICI, a grano una fila por
@@ -131,6 +239,26 @@ models:
       - name: discoverable
         description: Estado `discoverable` vigente en el dump.
         data_tests: [not_null]
+      - name: dc_title_raw
+        description: >
+          Valores originales de `dc.title`, ordenados por `place` y unidos con
+          `|`. Conserva espacios y caracteres tal como aparecen en el dump.
+      - name: dc_title
+        description: >
+          Valores distintos de `dc.title` normalizados por la capa `int`,
+          ordenados por `place` y unidos con `|`.
+      - name: sedici_creator_person_raw
+        description: Valores originales de `sedici.creator.person`, ordenados por `place` y unidos con `|`.
+      - name: sedici_creator_person
+        description: Autores personales distintos y normalizados, ordenados por `place` y unidos con `|`.
+      - name: sedici_creator_corporate_raw
+        description: Valores originales de `sedici.creator.corporate`, ordenados por `place` y unidos con `|`.
+      - name: sedici_creator_corporate
+        description: Autores institucionales distintos y normalizados, ordenados por `place` y unidos con `|`.
+      - name: sedici_contributor_compiler_raw
+        description: Valores originales de `sedici.contributor.compiler`, ordenados por `place` y unidos con `|`.
+      - name: sedici_contributor_compiler
+        description: Compiladores distintos y normalizados, ordenados por `place` y unidos con `|`.
       - name: dc_date_issued_raw
         description: >
           Valor válido priorizado de `dc.date.issued`, conservando la precisión

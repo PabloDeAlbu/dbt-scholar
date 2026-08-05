@@ -26,14 +26,15 @@ models:
       - name: dc_date_available
         description: Fecha de disponibilidad en el repositorio.
       - name: title
-        description: Primer valor por `place` de `dc.title`, con espacios normalizados.
+        description: Valores normalizados de `dc.title` provenientes de la fact institucional; excluye la variante raw.
       - name: subtitle
         description: Valores de `sedici.title.subtitle` y `dc.title.alternative` unidos con `|`.
       - name: author
         description: >
-          Valores distintos de `sedici.creator.person`,
-          `sedici.creator.corporate` y `sedici.contributor.compiler`, unidos
-          con `|` en ese orden.
+          Valores normalizados por la fact institucional de
+          `sedici.creator.person`, `sedici.creator.corporate` y
+          `sedici.contributor.compiler`, unidos con `|` en ese orden; excluye
+          las variantes raw.
       - name: doi
         description: DOI extraídos y normalizados desde los campos de identificadores.
       - name: issn

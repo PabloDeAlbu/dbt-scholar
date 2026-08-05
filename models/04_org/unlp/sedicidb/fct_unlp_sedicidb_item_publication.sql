@@ -59,6 +59,141 @@ metadata_stats AS (
     GROUP BY value.resource_id
 ),
 
+dc_title_raw_agg AS (
+    SELECT
+        item_id,
+        STRING_AGG(
+            dc_title_raw,
+            '|'
+            ORDER BY place NULLS LAST, metadata_value_id
+        ) FILTER (WHERE dc_title_raw IS NOT NULL) AS dc_title_raw
+    FROM {{ ref('int_unlp_sedicidb_item_dc_title') }}
+    GROUP BY item_id
+),
+
+dc_title_distinct AS (
+    SELECT
+        item_id,
+        LOWER(dc_title) AS dc_title_key,
+        MIN(dc_title) AS dc_title,
+        MIN(place) AS first_place,
+        MIN(metadata_value_id) AS first_metadata_value_id
+    FROM {{ ref('int_unlp_sedicidb_item_dc_title') }}
+    WHERE dc_title IS NOT NULL
+    GROUP BY item_id, LOWER(dc_title)
+),
+
+dc_title_agg AS (
+    SELECT
+        item_id,
+        STRING_AGG(
+            dc_title,
+            '|'
+            ORDER BY first_place NULLS LAST, first_metadata_value_id, dc_title
+        ) AS dc_title
+    FROM dc_title_distinct
+    GROUP BY item_id
+),
+
+author_value AS (
+    SELECT
+        item_id,
+        metadata_value_id,
+        'sedici_creator_person'::text AS author_field,
+        sedici_creator_person_raw AS author_raw,
+        sedici_creator_person AS author,
+        place
+    FROM {{ ref('int_unlp_sedicidb_item_sedici_creator_person') }}
+
+    UNION ALL
+
+    SELECT
+        item_id,
+        metadata_value_id,
+        'sedici_creator_corporate'::text AS author_field,
+        sedici_creator_corporate_raw AS author_raw,
+        sedici_creator_corporate AS author,
+        place
+    FROM {{ ref('int_unlp_sedicidb_item_sedici_creator_corporate') }}
+
+    UNION ALL
+
+    SELECT
+        item_id,
+        metadata_value_id,
+        'sedici_contributor_compiler'::text AS author_field,
+        sedici_contributor_compiler_raw AS author_raw,
+        sedici_contributor_compiler AS author,
+        place
+    FROM {{ ref('int_unlp_sedicidb_item_sedici_contributor_compiler') }}
+),
+
+author_raw_agg AS (
+    SELECT
+        item_id,
+        author_field,
+        STRING_AGG(
+            author_raw,
+            '|'
+            ORDER BY place NULLS LAST, metadata_value_id
+        ) FILTER (WHERE author_raw IS NOT NULL) AS author_raw
+    FROM author_value
+    GROUP BY item_id, author_field
+),
+
+author_distinct AS (
+    SELECT
+        item_id,
+        author_field,
+        LOWER(author) AS author_key,
+        MIN(author) AS author,
+        MIN(place) AS first_place,
+        MIN(metadata_value_id) AS first_metadata_value_id
+    FROM author_value
+    WHERE author IS NOT NULL
+    GROUP BY item_id, author_field, LOWER(author)
+),
+
+author_agg AS (
+    SELECT
+        item_id,
+        author_field,
+        STRING_AGG(
+            author,
+            '|'
+            ORDER BY first_place NULLS LAST, first_metadata_value_id, author
+        ) AS author
+    FROM author_distinct
+    GROUP BY item_id, author_field
+),
+
+author_metadata AS (
+    SELECT
+        item_id,
+        MAX(raw.author_raw) FILTER (
+            WHERE raw.author_field = 'sedici_creator_person'
+        ) AS sedici_creator_person_raw,
+        MAX(author.author) FILTER (
+            WHERE author.author_field = 'sedici_creator_person'
+        ) AS sedici_creator_person,
+        MAX(raw.author_raw) FILTER (
+            WHERE raw.author_field = 'sedici_creator_corporate'
+        ) AS sedici_creator_corporate_raw,
+        MAX(author.author) FILTER (
+            WHERE author.author_field = 'sedici_creator_corporate'
+        ) AS sedici_creator_corporate,
+        MAX(raw.author_raw) FILTER (
+            WHERE raw.author_field = 'sedici_contributor_compiler'
+        ) AS sedici_contributor_compiler_raw,
+        MAX(author.author) FILTER (
+            WHERE author.author_field = 'sedici_contributor_compiler'
+        ) AS sedici_contributor_compiler
+    FROM author_raw_agg AS raw
+    FULL OUTER JOIN author_agg AS author
+        USING (item_id, author_field)
+    GROUP BY item_id
+),
+
 date_metadatafield AS (
     SELECT
         field.metadata_field_id,
@@ -162,6 +297,14 @@ final AS (
         item.discoverable,
         item.owning_collection,
         item.last_modified,
+        title_raw.dc_title_raw,
+        title.dc_title,
+        author.sedici_creator_person_raw,
+        author.sedici_creator_person,
+        author.sedici_creator_corporate_raw,
+        author.sedici_creator_corporate,
+        author.sedici_contributor_compiler_raw,
+        author.sedici_contributor_compiler,
         date.dc_date_issued_raw,
         date.dc_date_issued,
         date.dc_date_issued_precision,
@@ -183,6 +326,12 @@ final AS (
     LEFT JOIN collection_stats AS collection
         USING (item_id)
     LEFT JOIN metadata_stats AS metadata
+        USING (item_id)
+    LEFT JOIN dc_title_raw_agg AS title_raw
+        USING (item_id)
+    LEFT JOIN dc_title_agg AS title
+        USING (item_id)
+    LEFT JOIN author_metadata AS author
         USING (item_id)
     LEFT JOIN date_prepared AS date
         USING (item_id)

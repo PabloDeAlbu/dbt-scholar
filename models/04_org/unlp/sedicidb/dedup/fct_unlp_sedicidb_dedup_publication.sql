@@ -108,14 +108,10 @@ metadata_value AS (
     INNER JOIN metadatafield AS field
         USING (metadata_field_id)
     WHERE field.metadatafield_fullname IN (
-        'dc.title',
         'dc.title.alternative',
         'sedici.title.subtitle',
         'dc.type',
         'sedici.subtype',
-        'sedici.creator.person',
-        'sedici.creator.corporate',
-        'sedici.contributor.compiler',
         'dc.subject',
         'sedici.subject.materias',
         'dc.description',
@@ -148,9 +144,6 @@ scalar_metadata AS (
     SELECT
         item_id,
         MAX(text_value_clean) FILTER (
-            WHERE metadatafield_fullname = 'dc.title' AND value_rank = 1
-        ) AS title,
-        MAX(text_value_clean) FILTER (
             WHERE metadatafield_fullname = 'dc.type' AND value_rank = 1
         ) AS type,
         MAX(text_value_clean) FILTER (
@@ -165,11 +158,6 @@ list_value AS (
         item_id,
         CASE
             WHEN metadatafield_fullname IN ('sedici.title.subtitle', 'dc.title.alternative') THEN 'subtitle'
-            WHEN metadatafield_fullname IN (
-                'sedici.creator.person',
-                'sedici.creator.corporate',
-                'sedici.contributor.compiler'
-            ) THEN 'author'
             WHEN metadatafield_fullname IN ('sedici.subject.materias', 'dc.subject') THEN 'subject'
             WHEN metadatafield_fullname IN ('dc.description.abstract', 'dc.description') THEN 'description'
             WHEN metadatafield_fullname IN ('sedici.identifier.isbn', 'dc.identifier.isbn') THEN 'isbn'
@@ -178,9 +166,6 @@ list_value AS (
         CASE metadatafield_fullname
             WHEN 'sedici.title.subtitle' THEN 1
             WHEN 'dc.title.alternative' THEN 2
-            WHEN 'sedici.creator.person' THEN 1
-            WHEN 'sedici.creator.corporate' THEN 2
-            WHEN 'sedici.contributor.compiler' THEN 3
             WHEN 'sedici.subject.materias' THEN 1
             WHEN 'dc.subject' THEN 2
             WHEN 'dc.description.abstract' THEN 1
@@ -196,9 +181,6 @@ list_value AS (
     WHERE metadatafield_fullname IN (
         'sedici.title.subtitle',
         'dc.title.alternative',
-        'sedici.creator.person',
-        'sedici.creator.corporate',
-        'sedici.contributor.compiler',
         'sedici.subject.materias',
         'dc.subject',
         'dc.description.abstract',
@@ -239,7 +221,6 @@ list_metadata AS (
     SELECT
         item_id,
         MAX(text_values) FILTER (WHERE list_name = 'subtitle') AS subtitle,
-        MAX(text_values) FILTER (WHERE list_name = 'author') AS author,
         MAX(text_values) FILTER (WHERE list_name = 'subject') AS subject,
         MAX(text_values) FILTER (WHERE list_name = 'description') AS description,
         MAX(text_values) FILTER (WHERE list_name = 'isbn') AS isbn,
@@ -317,9 +298,17 @@ prepared AS (
                 THEN base.dc_date_issued
         END AS date,
         base.dc_date_available,
-        scalar.title::text AS title,
+        base.dc_title::text AS title,
         lists.subtitle::text AS subtitle,
-        lists.author::text AS author,
+        NULLIF(
+            CONCAT_WS(
+                '|',
+                base.sedici_creator_person,
+                base.sedici_creator_corporate,
+                base.sedici_contributor_compiler
+            ),
+            ''
+        )::text AS author,
         doi.doi::text AS doi,
         lists.issn::text AS issn,
         lists.isbn::text AS isbn,
