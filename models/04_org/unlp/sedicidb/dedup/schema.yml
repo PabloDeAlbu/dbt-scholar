@@ -1,12 +1,43 @@
 version: 2
 
 models:
+  - name: dim_unlp_sedicidb_dedup_publication_type
+    description: >
+      Dimensión de combinaciones de tipología observadas en publicaciones
+      SEDICI. Centraliza el mapeo desde `dc.type` y `sedici.subtype` hacia el
+      vocabulario aceptado por el deduplicador y hacia COAR.
+    columns:
+      - name: publication_type_id
+        description: Identificador determinístico de la combinación de tipo y subtipo.
+        data_tests: [not_null, unique]
+      - name: type_raw
+        description: Valor observado de `dc.type`.
+        data_tests: [not_null]
+      - name: subtype
+        description: Valor observado de `sedici.subtype`.
+      - name: type
+        description: Tipo canónico consumible directamente por el deduplicador.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['article', 'tesis', 'book', 'bookpart', 'objeto de conferencia', 'unknown']
+      - name: coar_uri
+        description: URI del tipo de recurso COAR asociado al `dc.type` observado.
+      - name: type_dedup
+        description: Etiqueta reducida derivada del tipo de recurso COAR.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          name: sedicidb_dedup_publication_type_raw_subtype_unique
+          combination_of_columns: [type_raw, subtype]
+
   - name: fct_unlp_sedicidb_dedup_publication
     description: >
-      Dataset SEDICI preparado para el deduplicador a grano una fila por
-      publicación. Parte del inventario vigente de `sedicidb`, restringe el
-      universo a ítems archivados, descubribles, no retirados y con handle, y
-      agrega únicamente los metadatafields requeridos por este consumo.
+      Una fila por publicación de SEDICI preparada para utilizarse como entrada
+      del deduplicador. Se construye a partir de
+      `fct_unlp_sedicidb_item_publication` y conserva solamente los ítems que
+      están archivados, no fueron retirados, son visibles en las búsquedas y
+      tienen handle. Normaliza y agrupa los metadatos que necesita el
+      deduplicador.
     columns:
       - name: source
         description: Origen fijo del registro; vale `sedici`.
@@ -18,7 +49,16 @@ models:
         description: Handle institucional en formato `10915/...`.
         data_tests: [not_null, unique]
       - name: type
-        description: Primer valor por `place` de `dc.type`.
+        description: >
+          Tipo canónico consumible directamente por el deduplicador. Distingue
+          `article`, `tesis`, `book`, `bookpart`, `objeto de conferencia` y
+          `unknown` utilizando `dc.type` y `sedici.subtype`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['article', 'tesis', 'book', 'bookpart', 'objeto de conferencia', 'unknown']
+      - name: type_raw
+        description: Primer valor por `place` de `dc.type`, conservado sin reducir al vocabulario del deduplicador.
       - name: subtype
         description: Primer valor por `place` de `sedici.subtype`.
       - name: date
@@ -26,15 +66,18 @@ models:
       - name: dc_date_available
         description: Fecha de disponibilidad en el repositorio.
       - name: title
-        description: Valores normalizados de `dc.title` provenientes de la fact institucional; excluye la variante raw.
+        description: >
+          Valores normalizados de `dc.title` y `dc.title.alternative`, unidos
+          con `|` para que el deduplicador compare todas las variantes; excluye
+          los valores raw.
+        data_tests: [not_null]
       - name: subtitle
-        description: Valores de `sedici.title.subtitle` y `dc.title.alternative` unidos con `|`.
+        description: Valores de `sedici.title.subtitle` unidos con `|`.
       - name: author
         description: >
-          Valores normalizados por la fact institucional de
-          `sedici.creator.person`, `sedici.creator.corporate` y
-          `sedici.contributor.compiler`, unidos con `|` en ese orden; excluye
-          las variantes raw.
+          Autores normalizados provenientes del bridge institucional, unidos
+          con `|`. Una misma identidad se incluye una sola vez aunque aparezca
+          en más de un rol; excluye las variantes raw.
       - name: doi
         description: DOI extraídos y normalizados desde los campos de identificadores.
       - name: issn

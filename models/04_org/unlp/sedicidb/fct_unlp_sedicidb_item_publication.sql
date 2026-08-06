@@ -296,6 +296,13 @@ final AS (
         item.withdrawn,
         item.discoverable,
         item.owning_collection,
+        ownership.collection_title AS owning_collection_title,
+        ownership.community_id AS owning_community_id,
+        ownership.community_title AS owning_community_title,
+        ownership.root_community_id AS owning_root_community_id,
+        ownership.root_community_title AS owning_root_community_title,
+        ownership.community_path_ids AS owning_community_path_ids,
+        ownership.community_path_titles AS owning_community_path_titles,
         item.last_modified,
         title_raw.dc_title_raw,
         title.dc_title,
@@ -321,6 +328,8 @@ final AS (
         COALESCE(metadata.metadatafield_count, 0) AS metadatafield_count,
         COALESCE(metadata.metadata_value_count, 0) AS metadata_value_count
     FROM item
+    LEFT JOIN {{ ref('dim_unlp_sedicidb_collection') }} AS ownership
+        ON ownership.collection_id = item.owning_collection
     LEFT JOIN handle_stats AS handle
         USING (item_id)
     LEFT JOIN collection_stats AS collection

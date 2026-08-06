@@ -18,6 +18,48 @@ WITH base AS (
       AND handle IS NOT NULL
 ),
 
+author_ranked AS (
+    SELECT
+        item_id,
+        author_name,
+        CASE author_role
+            WHEN 'creator_person' THEN 1
+            WHEN 'creator_corporate' THEN 2
+            WHEN 'contributor_compiler' THEN 3
+        END AS author_role_order,
+        author_place,
+        metadata_value_id,
+        ROW_NUMBER() OVER (
+            PARTITION BY item_id, LOWER(author_name)
+            ORDER BY
+                CASE author_role
+                    WHEN 'creator_person' THEN 1
+                    WHEN 'creator_corporate' THEN 2
+                    WHEN 'contributor_compiler' THEN 3
+                END,
+                author_place NULLS LAST,
+                metadata_value_id
+        ) AS author_rank
+    FROM {{ ref('brg_unlp_sedicidb_item_author') }}
+),
+
+author_agg AS (
+    SELECT
+        item_id,
+        STRING_AGG(
+            author_name,
+            '|'
+            ORDER BY
+                author_role_order,
+                author_place NULLS LAST,
+                metadata_value_id,
+                author_name
+        ) AS author
+    FROM author_ranked
+    WHERE author_rank = 1
+    GROUP BY item_id
+),
+
 metadatafield AS (
     SELECT
         field.metadata_field_id,
@@ -29,69 +71,6 @@ metadatafield AS (
     FROM {{ source('sedicidb', 'metadatafieldregistry') }} AS field
     INNER JOIN {{ source('sedicidb', 'metadataschemaregistry') }} AS schema_registry
         USING (metadata_schema_id)
-),
-
-collection_title_value AS (
-    SELECT
-        value.resource_id AS collection_id,
-        value.metadata_value_id,
-        NULLIF({{ clean_text('value.text_value') }}, '') AS collection_title,
-        NULLIF(LOWER(BTRIM(value.text_lang)), '') AS text_lang,
-        value.place
-    FROM {{ source('sedicidb', 'metadatavalue') }} AS value
-    INNER JOIN metadatafield AS field
-        USING (metadata_field_id)
-    WHERE field.metadatafield_fullname = 'dc.title'
-      AND value.resource_type_id = 3
-),
-
-collection_title_ranked AS (
-    SELECT
-        *,
-        ROW_NUMBER() OVER (
-            PARTITION BY collection_id
-            ORDER BY
-                (text_lang IS NULL) DESC,
-                text_lang,
-                place NULLS LAST,
-                metadata_value_id
-        ) AS title_rank
-    FROM collection_title_value
-    WHERE collection_title IS NOT NULL
-),
-
-collection_node AS (
-    SELECT
-        collection.collection_id,
-        title.collection_title
-    FROM {{ source('sedicidb', 'collection') }} AS collection
-    LEFT JOIN collection_title_ranked AS title
-        ON title.collection_id = collection.collection_id
-       AND title.title_rank = 1
-),
-
-collection_community AS (
-    SELECT DISTINCT ON (relation.collection_id)
-        relation.collection_id,
-        relation.community_id
-    FROM {{ source('sedicidb', 'community2collection') }} AS relation
-    ORDER BY relation.collection_id, relation.community_id
-),
-
-collection_context AS (
-    SELECT
-        collection.collection_id,
-        collection.collection_title,
-        community.community_id,
-        community.community_title,
-        community.root_community_id,
-        community.root_community_title,
-        community.community_path_titles
-    FROM collection_node AS collection
-    LEFT JOIN collection_community AS relation
-        USING (collection_id)
-    LEFT JOIN {{ ref('dim_unlp_sedicidb_community') }} AS community
-        USING (community_id)
 ),
 
 metadata_value AS (
@@ -108,6 +87,7 @@ metadata_value AS (
     INNER JOIN metadatafield AS field
         USING (metadata_field_id)
     WHERE field.metadatafield_fullname IN (
+        'dc.title',
         'dc.title.alternative',
         'sedici.title.subtitle',
         'dc.type',
@@ -140,15 +120,15 @@ ranked_value AS (
     WHERE text_value_clean IS NOT NULL
 ),
 
-scalar_metadata AS (
+item_publication_type AS (
     SELECT
         item_id,
         MAX(text_value_clean) FILTER (
             WHERE metadatafield_fullname = 'dc.type' AND value_rank = 1
-        ) AS type,
+        ) AS type_raw,
         MAX(text_value_clean) FILTER (
             WHERE metadatafield_fullname = 'sedici.subtype' AND value_rank = 1
-        ) AS subtype
+        ) AS subtype_raw
     FROM ranked_value
     GROUP BY item_id
 ),
@@ -157,15 +137,17 @@ list_value AS (
     SELECT
         item_id,
         CASE
-            WHEN metadatafield_fullname IN ('sedici.title.subtitle', 'dc.title.alternative') THEN 'subtitle'
+            WHEN metadatafield_fullname IN ('dc.title', 'dc.title.alternative') THEN 'title'
+            WHEN metadatafield_fullname = 'sedici.title.subtitle' THEN 'subtitle'
             WHEN metadatafield_fullname IN ('sedici.subject.materias', 'dc.subject') THEN 'subject'
             WHEN metadatafield_fullname IN ('dc.description.abstract', 'dc.description') THEN 'description'
             WHEN metadatafield_fullname IN ('sedici.identifier.isbn', 'dc.identifier.isbn') THEN 'isbn'
             WHEN metadatafield_fullname IN ('sedici.identifier.issn', 'dc.identifier.issn') THEN 'issn'
         END AS list_name,
         CASE metadatafield_fullname
-            WHEN 'sedici.title.subtitle' THEN 1
+            WHEN 'dc.title' THEN 1
             WHEN 'dc.title.alternative' THEN 2
+            WHEN 'sedici.title.subtitle' THEN 1
             WHEN 'sedici.subject.materias' THEN 1
             WHEN 'dc.subject' THEN 2
             WHEN 'dc.description.abstract' THEN 1
@@ -179,6 +161,7 @@ list_value AS (
         place
     FROM ranked_value
     WHERE metadatafield_fullname IN (
+        'dc.title',
         'sedici.title.subtitle',
         'dc.title.alternative',
         'sedici.subject.materias',
@@ -220,6 +203,7 @@ list_agg AS (
 list_metadata AS (
     SELECT
         item_id,
+        MAX(text_values) FILTER (WHERE list_name = 'title') AS title,
         MAX(text_values) FILTER (WHERE list_name = 'subtitle') AS subtitle,
         MAX(text_values) FILTER (WHERE list_name = 'subject') AS subject,
         MAX(text_values) FILTER (WHERE list_name = 'description') AS description,
@@ -263,80 +247,50 @@ doi_agg AS (
     GROUP BY item_id
 ),
 
-type_seed AS (
-    SELECT DISTINCT ON (LOWER(BTRIM(type)))
-        LOWER(BTRIM(type)) AS type_key,
-        coar_uri
-    FROM {{ ref('seed_sedici-types2coar-types') }}
-    WHERE NULLIF(BTRIM(type), '') IS NOT NULL
-    ORDER BY LOWER(BTRIM(type)), coar_uri
-),
-
-type_map AS (
-    SELECT
-        seed.type_key,
-        CASE
-            WHEN seed.coar_uri IS NULL THEN NULL
-            WHEN coar.label IN ('JOURNAL ARTICLE', 'RESEARCH ARTICLE') THEN 'ARTÍCULO'
-            WHEN coar.label = 'DOCTORAL THESIS' THEN 'TESIS'
-            WHEN coar.label = 'THESIS' OR coar.parent_label_1 = 'THESIS' THEN 'TESIS'
-            ELSE coar.label_es
-        END AS type_dedup
-    FROM type_seed AS seed
-    LEFT JOIN {{ ref('dim_coar_resource_type') }} AS coar
-        ON coar.coar_uri = seed.coar_uri
-),
-
 prepared AS (
     SELECT
         'sedici'::text AS source,
         base.handle::text AS id,
-        scalar.type::text AS type,
-        scalar.subtype::text AS subtype,
+        publication_type.type::text AS type,
+        observed_type.type_raw::text AS type_raw,
+        observed_type.subtype_raw::text AS subtype,
         CASE
             WHEN base.dc_date_issued BETWEEN '1500-01-01'::date AND '2100-12-31'::date
                 THEN base.dc_date_issued
         END AS date,
         base.dc_date_available,
-        base.dc_title::text AS title,
+        lists.title::text AS title,
         lists.subtitle::text AS subtitle,
-        NULLIF(
-            CONCAT_WS(
-                '|',
-                base.sedici_creator_person,
-                base.sedici_creator_corporate,
-                base.sedici_contributor_compiler
-            ),
-            ''
-        )::text AS author,
+        authors.author::text AS author,
         doi.doi::text AS doi,
         lists.issn::text AS issn,
         lists.isbn::text AS isbn,
         lists.subject::text AS subject,
-        ownership.root_community_id::text AS owning_root_community_id,
-        ownership.root_community_title::text AS owning_root_community_title,
-        ownership.community_path_titles::text AS owning_community_path_titles,
-        ownership.community_id::text AS owning_community_id,
-        ownership.community_title::text AS owning_community_title,
+        base.owning_root_community_id::text AS owning_root_community_id,
+        base.owning_root_community_title::text AS owning_root_community_title,
+        base.owning_community_path_titles::text AS owning_community_path_titles,
+        base.owning_community_id::text AS owning_community_id,
+        base.owning_community_title::text AS owning_community_title,
         base.owning_collection::text AS owning_collection,
-        ownership.collection_title::text AS owning_collection_title,
+        base.owning_collection_title::text AS owning_collection_title,
         CASE
             WHEN base.dc_date_issued BETWEEN '1500-01-01'::date AND '2100-12-31'::date
                 THEN EXTRACT(YEAR FROM base.dc_date_issued)::integer
         END AS publication_year,
-        type_map.type_dedup::text AS type_dedup,
+        publication_type.type_dedup::text AS type_dedup,
         lists.description::text AS description
     FROM base
-    LEFT JOIN scalar_metadata AS scalar
+    LEFT JOIN item_publication_type AS observed_type
+        USING (item_id)
+    LEFT JOIN author_agg AS authors
         USING (item_id)
     LEFT JOIN list_metadata AS lists
         USING (item_id)
     LEFT JOIN doi_agg AS doi
         USING (item_id)
-    LEFT JOIN type_map
-        ON type_map.type_key = LOWER(BTRIM(scalar.type))
-    LEFT JOIN collection_context AS ownership
-        ON ownership.collection_id = base.owning_collection
+    LEFT JOIN {{ ref('dim_unlp_sedicidb_dedup_publication_type') }} AS publication_type
+        ON publication_type.type_raw = observed_type.type_raw
+       AND publication_type.subtype IS NOT DISTINCT FROM observed_type.subtype_raw
 )
 
 SELECT *

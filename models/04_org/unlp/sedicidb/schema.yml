@@ -114,6 +114,45 @@ models:
             or community_path_titles = root_community_title
             or community_path_titles like root_community_title || ' > %'
 
+  - name: dim_unlp_sedicidb_collection
+    description: >
+      Dimensión vigente de colecciones SEDICI, a grano una fila por
+      `collection_id`. Resuelve el título preferido y todo el contexto de la
+      comunidad contenedora para que los modelos de publicaciones no tengan que
+      reconstruir la jerarquía.
+    columns:
+      - name: collection_id
+        description: Identificador de la colección en DSpace 5.
+        data_tests: [not_null, unique]
+      - name: collection_title
+        description: Título `dc.title` preferido de la colección.
+      - name: community_id
+        description: Comunidad que contiene directamente la colección.
+        data_tests:
+          - relationships:
+              name: sedicidb_collection_community_in_community_dim
+              to: ref('dim_unlp_sedicidb_community')
+              field: community_id
+      - name: community_title
+        description: Título preferido de la comunidad inmediata.
+      - name: root_community_id
+        description: Comunidad raíz del camino de la colección.
+      - name: root_community_title
+        description: Título preferido de la comunidad raíz.
+      - name: community_depth
+        description: Distancia entre la comunidad inmediata y su raíz.
+      - name: community_path_ids
+        description: IDs desde la comunidad raíz hasta la inmediata, separados con ` > `.
+      - name: community_path_titles
+        description: Títulos desde la comunidad raíz hasta la inmediata, separados con ` > `.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: sedicidb_collection_path_starts_at_root
+          expression: >
+            root_community_title is null
+            or community_path_titles = root_community_title
+            or community_path_titles like root_community_title || ' > %'
+
   - name: brg_unlp_sedicidb_item_author
     description: >
       Relación atómica entre ítems y observaciones de autoría SEDICI. Conserva
@@ -239,6 +278,27 @@ models:
       - name: discoverable
         description: Estado `discoverable` vigente en el dump.
         data_tests: [not_null]
+      - name: owning_collection
+        description: Identificador de la colección dueña declarada por el ítem.
+        data_tests:
+          - relationships:
+              name: sedicidb_item_owning_collection_in_collection_dim
+              to: ref('dim_unlp_sedicidb_collection')
+              field: collection_id
+      - name: owning_collection_title
+        description: Título preferido de la colección dueña.
+      - name: owning_community_id
+        description: Identificador de la comunidad que contiene la colección dueña.
+      - name: owning_community_title
+        description: Título preferido de la comunidad inmediata.
+      - name: owning_root_community_id
+        description: Identificador de la comunidad raíz del camino estructural.
+      - name: owning_root_community_title
+        description: Título preferido de la comunidad raíz.
+      - name: owning_community_path_ids
+        description: Camino de IDs de comunidades desde la raíz hasta la inmediata.
+      - name: owning_community_path_titles
+        description: Camino de títulos de comunidades desde la raíz hasta la inmediata.
       - name: dc_title_raw
         description: >
           Valores originales de `dc.title`, ordenados por `place` y unidos con
@@ -292,3 +352,10 @@ models:
       - name: metadata_value_count
         description: Cantidad de observaciones de metadatos asociadas al ítem.
         data_tests: [not_null]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: sedicidb_item_publication_path_starts_at_root
+          expression: >
+            owning_root_community_title is null
+            or owning_community_path_titles = owning_root_community_title
+            or owning_community_path_titles like owning_root_community_title || ' > %'
