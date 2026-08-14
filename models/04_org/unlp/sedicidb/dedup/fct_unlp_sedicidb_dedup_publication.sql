@@ -18,6 +18,15 @@ WITH base AS (
       AND handle IS NOT NULL
 ),
 
+type_seed AS (
+    SELECT DISTINCT ON (LOWER(BTRIM(type)))
+        LOWER(BTRIM(type)) AS type_key,
+        coar_uri
+    FROM {{ ref('seed_sedici-types2coar-types') }}
+    WHERE NULLIF(BTRIM(type), '') IS NOT NULL
+    ORDER BY LOWER(BTRIM(type)), coar_uri
+),
+
 author_ranked AS (
     SELECT
         item_id,
@@ -90,8 +99,6 @@ metadata_value AS (
         'dc.title',
         'dc.title.alternative',
         'sedici.title.subtitle',
-        'dc.type',
-        'sedici.subtype',
         'dc.subject',
         'sedici.subject.materias',
         'dc.description',
@@ -118,19 +125,6 @@ ranked_value AS (
         ) AS value_rank
     FROM metadata_value
     WHERE text_value_clean IS NOT NULL
-),
-
-item_publication_type AS (
-    SELECT
-        item_id,
-        MAX(text_value_clean) FILTER (
-            WHERE metadatafield_fullname = 'dc.type' AND value_rank = 1
-        ) AS type_raw,
-        MAX(text_value_clean) FILTER (
-            WHERE metadatafield_fullname = 'sedici.subtype' AND value_rank = 1
-        ) AS subtype_raw
-    FROM ranked_value
-    GROUP BY item_id
 ),
 
 list_value AS (
@@ -251,12 +245,21 @@ prepared AS (
     SELECT
         'sedici'::text AS source,
         base.handle::text AS id,
-        publication_type.type::text AS type,
-        observed_type.type_raw::text AS type_raw,
-        observed_type.subtype_raw::text AS subtype,
+        CASE
+            WHEN LOWER(BTRIM(base.sedici_subtype)) = 'capitulo de libro' THEN 'bookpart'
+            WHEN LOWER(BTRIM(base.dc_type)) IN ('articulo', 'artículo') THEN 'article'
+            WHEN LOWER(BTRIM(base.dc_type)) = 'tesis' THEN 'tesis'
+            WHEN LOWER(BTRIM(base.dc_type)) = 'libro' THEN 'book'
+            WHEN LOWER(BTRIM(base.dc_type)) = 'objeto de conferencia' THEN 'objeto de conferencia'
+            ELSE 'unknown'
+        END::text AS type,
+        base.dc_type::text AS type_raw,
+        base.sedici_subtype::text AS subtype,
         CASE
             WHEN base.dc_date_issued BETWEEN '1500-01-01'::date AND '2100-12-31'::date
                 THEN base.dc_date_issued
+            WHEN base.sedici_date_exposure BETWEEN '1500-01-01'::date AND '2100-12-31'::date
+                THEN base.sedici_date_exposure
         END AS date,
         base.dc_date_available,
         lists.title::text AS title,
@@ -277,20 +280,25 @@ prepared AS (
             WHEN base.dc_date_issued BETWEEN '1500-01-01'::date AND '2100-12-31'::date
                 THEN EXTRACT(YEAR FROM base.dc_date_issued)::integer
         END AS publication_year,
-        publication_type.type_dedup::text AS type_dedup,
+        CASE
+            WHEN type_seed.coar_uri IS NULL THEN NULL
+            WHEN coar.label IN ('JOURNAL ARTICLE', 'RESEARCH ARTICLE') THEN 'ARTÍCULO'
+            WHEN coar.label = 'DOCTORAL THESIS' THEN 'TESIS'
+            WHEN coar.label = 'THESIS' OR coar.parent_label_1 = 'THESIS' THEN 'TESIS'
+            ELSE coar.label_es
+        END::text AS type_dedup,
         lists.description::text AS description
     FROM base
-    LEFT JOIN item_publication_type AS observed_type
-        USING (item_id)
     LEFT JOIN author_agg AS authors
         USING (item_id)
     LEFT JOIN list_metadata AS lists
         USING (item_id)
     LEFT JOIN doi_agg AS doi
         USING (item_id)
-    LEFT JOIN {{ ref('dim_unlp_sedicidb_dedup_publication_type') }} AS publication_type
-        ON publication_type.type_raw = observed_type.type_raw
-       AND publication_type.subtype IS NOT DISTINCT FROM observed_type.subtype_raw
+    LEFT JOIN type_seed
+        ON type_seed.type_key = LOWER(BTRIM(base.dc_type))
+    LEFT JOIN {{ ref('dim_coar_resource_type') }} AS coar
+        ON coar.coar_uri = type_seed.coar_uri
 )
 
 SELECT *

@@ -1,35 +1,6 @@
 version: 2
 
 models:
-  - name: dim_unlp_sedicidb_dedup_publication_type
-    description: >
-      Dimensión de combinaciones de tipología observadas en publicaciones
-      SEDICI. Centraliza el mapeo desde `dc.type` y `sedici.subtype` hacia el
-      vocabulario aceptado por el deduplicador y hacia COAR.
-    columns:
-      - name: publication_type_id
-        description: Identificador determinístico de la combinación de tipo y subtipo.
-        data_tests: [not_null, unique]
-      - name: type_raw
-        description: Valor observado de `dc.type`.
-        data_tests: [not_null]
-      - name: subtype
-        description: Valor observado de `sedici.subtype`.
-      - name: type
-        description: Tipo canónico consumible directamente por el deduplicador.
-        data_tests:
-          - not_null
-          - accepted_values:
-              values: ['article', 'tesis', 'book', 'bookpart', 'objeto de conferencia', 'unknown']
-      - name: coar_uri
-        description: URI del tipo de recurso COAR asociado al `dc.type` observado.
-      - name: type_dedup
-        description: Etiqueta reducida derivada del tipo de recurso COAR.
-    data_tests:
-      - dbt_utils.unique_combination_of_columns:
-          name: sedicidb_dedup_publication_type_raw_subtype_unique
-          combination_of_columns: [type_raw, subtype]
-
   - name: fct_unlp_sedicidb_dedup_publication
     description: >
       Una fila por publicación de SEDICI preparada para utilizarse como entrada
@@ -58,9 +29,9 @@ models:
           - accepted_values:
               values: ['article', 'tesis', 'book', 'bookpart', 'objeto de conferencia', 'unknown']
       - name: type_raw
-        description: Primer valor por `place` de `dc.type`, conservado sin reducir al vocabulario del deduplicador.
+        description: Último valor no vacío de `dc.type`, según el mayor `metadata_value_id`, conservado sin reducir al vocabulario del deduplicador.
       - name: subtype
-        description: Primer valor por `place` de `sedici.subtype`.
+        description: Último valor no vacío de `sedici.subtype`, según el mayor `metadata_value_id`.
       - name: date
         description: Fecha derivada de `dc.date.issued`, limitada al rango 1500–2100.
       - name: dc_date_available

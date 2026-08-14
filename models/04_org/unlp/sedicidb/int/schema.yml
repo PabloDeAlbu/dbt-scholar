@@ -46,20 +46,128 @@ models:
 
   - name: int_unlp_sedicidb_item_dc_title
     description: >
-      Observaciones de `dc.title` a grano una fila por `metadata_value_id`.
-      Conserva el título crudo y expone una versión textual normalizada y apta
-      para agregarse con `|` en modelos a grano ítem.
+      Valor vigente de `dc.title` a grano una fila por `item_id`. Selecciona la
+      observación no vacía con mayor `metadata_value_id` y conserva tanto el
+      valor original como su versión normalizada.
     columns:
       - name: metadata_value_id
-        description: Identificador de la observación original de `dc.title`.
+        description: Identificador de la observación seleccionada como vigente.
         data_tests: [not_null, unique]
       - name: item_id
-        description: Ítem al que pertenece el título.
-        data_tests: [not_null]
-      - name: dc_title_raw
+        description: Ítem al que pertenece el título vigente.
+        data_tests: [not_null, unique]
+      - name: value_raw
         description: Título exactamente como aparece en `metadatavalue.text_value`.
-      - name: dc_title
+      - name: value
         description: Título normalizado; los caracteres `|` internos se reemplazan por espacios.
+        data_tests: [not_null]
+
+  - name: int_unlp_sedicidb_item_dc_type
+    description: >
+      Valor vigente de `dc.type` a grano una fila por `item_id`. Cuando existen
+      varias observaciones no vacías, selecciona la de mayor
+      `metadata_value_id` para permitir que una carga posterior corrija el tipo
+      anterior.
+    columns:
+      - name: item_id
+        description: Ítem al que pertenece el tipo.
+        data_tests: [not_null, unique]
+      - name: metadata_value_id
+        description: Identificador de la observación seleccionada como vigente.
+        data_tests: [not_null, unique]
+      - name: value_raw
+        description: Valor original de `dc.type`.
+      - name: value
+        description: Valor normalizado de la observación vigente de `dc.type`.
+        data_tests: [not_null]
+
+  - name: int_unlp_sedicidb_item_sedici_subtype
+    description: >
+      Valor vigente de `sedici.subtype` a grano una fila por `item_id`. Cuando
+      existen varias observaciones no vacías, selecciona la de mayor
+      `metadata_value_id` para permitir que una carga posterior corrija el
+      subtipo anterior.
+    columns:
+      - name: item_id
+        description: Ítem al que pertenece el subtipo.
+        data_tests: [not_null, unique]
+      - name: metadata_value_id
+        description: Identificador de la observación seleccionada como vigente.
+        data_tests: [not_null, unique]
+      - name: value_raw
+        description: Valor original de `sedici.subtype`.
+      - name: value
+        description: Valor normalizado de la observación vigente de `sedici.subtype`.
+        data_tests: [not_null]
+
+  - name: int_unlp_sedicidb_item_dc_date_issued
+    description: >
+      Valor vigente de `dc.date.issued` a grano una fila por `item_id`.
+      Selecciona la observación válida con mayor `metadata_value_id` y conserva
+      su valor original, la fecha derivada y la precisión declarada.
+    columns:
+      - name: metadata_value_id
+        description: Identificador de la observación seleccionada.
+        data_tests: [not_null, unique]
+      - name: item_id
+        description: Ítem al que pertenece la fecha canónica.
+        data_tests: [not_null, unique]
+      - name: value_raw
+        description: Valor original de `dc.date.issued`.
+      - name: value
+        description: Fecha canónica; completa con día 1 cuando la fuente informa año o año-mes.
+        data_tests: [not_null]
+      - name: value_precision
+        description: Precisión reconocida en la observación.
+        data_tests:
+          - accepted_values:
+              values: ['day', 'month', 'year']
+
+  - name: int_unlp_sedicidb_item_dc_date_available
+    description: >
+      Valor vigente de `dc.date.available` a grano una fila por `item_id`.
+      Selecciona la observación válida con mayor `metadata_value_id` y conserva
+      su valor original, la fecha derivada y la precisión declarada.
+    columns:
+      - name: metadata_value_id
+        description: Identificador de la observación seleccionada.
+        data_tests: [not_null, unique]
+      - name: item_id
+        description: Ítem al que pertenece la fecha canónica.
+        data_tests: [not_null, unique]
+      - name: value_raw
+        description: Valor original de `dc.date.available`.
+      - name: value
+        description: Fecha canónica; completa con día 1 cuando la fuente informa año o año-mes.
+        data_tests: [not_null]
+      - name: value_precision
+        description: Precisión reconocida en la observación.
+        data_tests:
+          - accepted_values:
+              values: ['day', 'month', 'year']
+
+  - name: int_unlp_sedicidb_item_sedici_date_exposure
+    description: >
+      Valor vigente de `sedici.date.exposure` a grano una fila por `item_id`.
+      Selecciona la observación válida con mayor `metadata_value_id`, conserva
+      el valor original y deriva la fecha sin perder la precisión declarada.
+    columns:
+      - name: metadata_value_id
+        description: Identificador de la observación seleccionada como vigente.
+        data_tests: [not_null, unique]
+      - name: item_id
+        description: Ítem al que pertenece la fecha de exposición vigente.
+        data_tests: [not_null, unique]
+      - name: value_raw
+        description: Valor original de `sedici.date.exposure`.
+      - name: value
+        description: Fecha válida derivada; completa con día 1 cuando la precisión es año o mes.
+        data_tests: [not_null]
+      - name: value_precision
+        description: Precisión del valor reconocido.
+        data_tests:
+          - accepted_values:
+              values: ['day', 'month', 'year']
 
   - name: int_unlp_sedicidb_item_sedici_creator_person
     description: >

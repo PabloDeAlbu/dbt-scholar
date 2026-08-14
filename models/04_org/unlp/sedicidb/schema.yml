@@ -264,9 +264,10 @@ models:
   - name: fct_unlp_sedicidb_item_publication
     description: >
       Inventario vigente de ítems del dump SEDICI, a grano una fila por
-      `item_id`. Conserva los estados DSpace sin filtrarlos y agrega solamente
-      métricas estructurales de handles, colecciones y metadatos. Los campos
-      descriptivos se incorporarán gradualmente en modelos posteriores.
+      `item_id`. Conserva los estados DSpace sin filtrarlos y resuelve los
+      atributos singulares reutilizables de identificación, ubicación, tipo,
+      título y fechas. Las relaciones multivaluadas y las métricas de calidad
+      se modelan fuera de esta fact.
     columns:
       - name: item_id
         description: Identificador del ítem en DSpace 5.
@@ -299,26 +300,17 @@ models:
         description: Camino de IDs de comunidades desde la raíz hasta la inmediata.
       - name: owning_community_path_titles
         description: Camino de títulos de comunidades desde la raíz hasta la inmediata.
+      - name: dc_type
+        description: Último valor no vacío de `dc.type`, según el mayor `metadata_value_id`.
+      - name: sedici_subtype
+        description: Último valor no vacío de `sedici.subtype`, según el mayor `metadata_value_id`.
       - name: dc_title_raw
         description: >
-          Valores originales de `dc.title`, ordenados por `place` y unidos con
-          `|`. Conserva espacios y caracteres tal como aparecen en el dump.
+          Valor original de la observación vigente de `dc.title`, seleccionada
+          por el mayor `metadata_value_id`.
       - name: dc_title
         description: >
-          Valores distintos de `dc.title` normalizados por la capa `int`,
-          ordenados por `place` y unidos con `|`.
-      - name: sedici_creator_person_raw
-        description: Valores originales de `sedici.creator.person`, ordenados por `place` y unidos con `|`.
-      - name: sedici_creator_person
-        description: Autores personales distintos y normalizados, ordenados por `place` y unidos con `|`.
-      - name: sedici_creator_corporate_raw
-        description: Valores originales de `sedici.creator.corporate`, ordenados por `place` y unidos con `|`.
-      - name: sedici_creator_corporate
-        description: Autores institucionales distintos y normalizados, ordenados por `place` y unidos con `|`.
-      - name: sedici_contributor_compiler_raw
-        description: Valores originales de `sedici.contributor.compiler`, ordenados por `place` y unidos con `|`.
-      - name: sedici_contributor_compiler
-        description: Compiladores distintos y normalizados, ordenados por `place` y unidos con `|`.
+          Título vigente normalizado por la capa `int`.
       - name: dc_date_issued_raw
         description: >
           Valor válido priorizado de `dc.date.issued`, conservando la precisión
@@ -340,18 +332,15 @@ models:
         description: >
           Fecha en que el recurso quedó disponible en el repositorio según
           `dc.date.available`; no representa necesariamente su publicación.
-      - name: handle_count
-        description: Cantidad de handles distintos asociados al ítem.
-        data_tests: [not_null]
-      - name: collections_count
-        description: Cantidad de colecciones distintas asociadas al ítem.
-        data_tests: [not_null]
-      - name: metadatafield_count
-        description: Cantidad de metadatafields distintos observados en el ítem.
-        data_tests: [not_null]
-      - name: metadata_value_count
-        description: Cantidad de observaciones de metadatos asociadas al ítem.
-        data_tests: [not_null]
+      - name: sedici_date_exposure_raw
+        description: Valor priorizado de `sedici.date.exposure` conservado como fue informado.
+      - name: sedici_date_exposure
+        description: Fecha de exposición derivada de `sedici.date.exposure`.
+      - name: sedici_date_exposure_precision
+        description: Precisión de la fecha de exposición seleccionada.
+        data_tests:
+          - accepted_values:
+              values: ['day', 'month', 'year']
     data_tests:
       - dbt_utils.expression_is_true:
           name: sedicidb_item_publication_path_starts_at_root
@@ -359,3 +348,13 @@ models:
             owning_root_community_title is null
             or owning_community_path_titles = owning_root_community_title
             or owning_community_path_titles like owning_root_community_title || ' > %'
+      - dbt_utils.expression_is_true:
+          name: sedicidb_published_item_has_subtype
+          expression: >
+            not (
+              in_archive is true
+              and withdrawn is false
+              and discoverable is true
+              and handle is not null
+            )
+            or sedici_subtype is not null

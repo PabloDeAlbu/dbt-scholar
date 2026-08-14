@@ -1,24 +1,18 @@
 {{ config(materialized='view') }}
 
-WITH title_value AS (
+WITH ranked AS (
     SELECT
         item_id,
         metadata_value_id,
         text_value_raw AS value_raw,
-        NULLIF({{ clean_text("REPLACE(text_value_raw, '|', ' ')") }}, '') AS value
-    FROM {{ ref('int_unlp_sedicidb_item_metadatavalue') }}
-    WHERE metadatafield_fullname = 'dc.title'
-),
-
-ranked AS (
-    SELECT
-        *,
+        NULLIF(REPLACE(text_value, '|', ' '), '') AS value,
         ROW_NUMBER() OVER (
             PARTITION BY item_id
             ORDER BY metadata_value_id DESC
         ) AS value_rank
-    FROM title_value
-    WHERE value IS NOT NULL
+    FROM {{ ref('int_unlp_sedicidb_item_metadatavalue') }}
+    WHERE metadatafield_fullname = 'sedici.subtype'
+      AND NULLIF(REPLACE(text_value, '|', ' '), '') IS NOT NULL
 )
 
 SELECT
