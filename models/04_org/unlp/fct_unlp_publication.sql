@@ -16,8 +16,20 @@ WITH sedici_base AS (
         description,
         subject,
         subtype,
-        author,
-        author_count,
+        NULLIF(
+            CONCAT_WS(
+                '|',
+                sedici_creator_person,
+                sedici_creator_corporate,
+                sedici_contributor_compiler
+            ),
+            ''
+        ) AS author,
+        (
+            sedici_creator_person_count
+            + sedici_creator_corporate_count
+            + sedici_contributor_compiler_count
+        )::int AS author_count,
         issn,
         isbn,
         has_doi,

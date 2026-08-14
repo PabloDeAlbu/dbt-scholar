@@ -173,8 +173,21 @@ models:
         description: Descripciones o abstracts concatenados.
       - name: subject
         description: Subjects declarados para la publicación, concatenados con `|`.
-      - name: author
-        description: Autores declarados para la publicación, concatenados con `|`.
+      - name: sedici_creator_person
+        description: Valores de `sedici.creator.person`, concatenados con `|` cuando son multivaluados.
+      - name: sedici_creator_person_count
+        description: Cantidad de valores distintos no vacíos de `sedici.creator.person`.
+        data_tests: [not_null]
+      - name: sedici_creator_corporate
+        description: Valores de `sedici.creator.corporate`, concatenados con `|` cuando son multivaluados.
+      - name: sedici_creator_corporate_count
+        description: Cantidad de valores distintos no vacíos de `sedici.creator.corporate`.
+        data_tests: [not_null]
+      - name: sedici_contributor_compiler
+        description: Valores de `sedici.contributor.compiler`, concatenados con `|` cuando son multivaluados.
+      - name: sedici_contributor_compiler_count
+        description: Cantidad de valores distintos no vacíos de `sedici.contributor.compiler`.
+        data_tests: [not_null]
       - name: doi
         description: DOI normalizados declarados para el ítem, concatenados con `|`.
       - name: issn

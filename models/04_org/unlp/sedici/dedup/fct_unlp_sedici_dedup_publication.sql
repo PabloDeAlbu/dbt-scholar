@@ -9,9 +9,12 @@ WITH base AS (
         subtitle AS subtitle_raw,
         type AS type_raw,
         subtype AS subtype_raw,
-        doi AS doi_raw,
-        isbn AS isbn_raw,
-        issn AS issn_raw,
+        sedici_creator_person,
+        sedici_creator_corporate,
+        sedici_contributor_compiler,
+        doi,
+        isbn,
+        issn,
         description AS description_raw,
         subject AS subject_raw,
         owning_root_community_id,
@@ -22,106 +25,6 @@ WITH base AS (
         owning_collection,
         owning_collection_title
     FROM {{ ref('fct_unlp_sedici_item_publication') }}
-),
-
-author_observed AS (
-    SELECT
-        brg.item_hk,
-        brg.sedici_author_hk,
-        COALESCE(brg.author_place, 2147483647) AS author_place,
-        NULLIF(
-            REPLACE({{ clean_text('dim.author_name_preferred') }}, '|', ' '),
-            ''
-        ) AS author_name
-    FROM {{ ref('brg_unlp_sedici_item_author') }} AS brg
-    INNER JOIN {{ ref('dim_unlp_sedici_author') }} AS dim
-        ON dim.sedici_author_hk = brg.sedici_author_hk
-),
-
-author_dedup AS (
-    SELECT
-        item_hk,
-        author_place,
-        author_name
-    FROM (
-        SELECT
-            item_hk,
-            author_place,
-            author_name,
-            ROW_NUMBER() OVER (
-                PARTITION BY item_hk, LOWER(author_name)
-                ORDER BY author_place, author_name
-            ) AS rn
-        FROM author_observed
-        WHERE author_name IS NOT NULL
-    ) AS ranked
-    WHERE rn = 1
-),
-
-author_agg AS (
-    SELECT
-        item_hk,
-        STRING_AGG(author_name, '|' ORDER BY author_place, author_name) AS author
-    FROM author_dedup
-    GROUP BY item_hk
-),
-
-doi_value AS (
-    SELECT DISTINCT
-        base.item_hk,
-        NULLIF(
-            REGEXP_REPLACE(
-                LOWER(TRIM(split_value)),
-                '^(https?://(dx\\.)?doi\\.org/|doi:)',
-                ''
-            ),
-            ''
-        ) AS doi
-    FROM base
-    CROSS JOIN LATERAL UNNEST(STRING_TO_ARRAY(COALESCE(base.doi_raw, ''), '|')) AS split_value
-),
-
-doi_agg AS (
-    SELECT
-        item_hk,
-        STRING_AGG(doi, '|' ORDER BY doi) AS doi
-    FROM doi_value
-    WHERE doi IS NOT NULL
-    GROUP BY item_hk
-),
-
-isbn_value AS (
-    SELECT DISTINCT
-        base.item_hk,
-        NULLIF(TRIM(split_value), '') AS isbn
-    FROM base
-    CROSS JOIN LATERAL UNNEST(STRING_TO_ARRAY(COALESCE(base.isbn_raw, ''), '|')) AS split_value
-),
-
-isbn_agg AS (
-    SELECT
-        item_hk,
-        STRING_AGG(isbn, '|' ORDER BY isbn) AS isbn
-    FROM isbn_value
-    WHERE isbn IS NOT NULL
-    GROUP BY item_hk
-),
-
-issn_value AS (
-    SELECT DISTINCT
-        base.item_hk,
-        NULLIF(TRIM(split_value), '') AS issn
-    FROM base
-    CROSS JOIN LATERAL UNNEST(STRING_TO_ARRAY(COALESCE(base.issn_raw, ''), '|')) AS split_value
-),
-
-issn_agg AS (
-    SELECT
-        item_hk,
-        STRING_AGG(issn, '|' ORDER BY issn) AS issn
-    FROM issn_value
-    WHERE issn IS NOT NULL
-    GROUP BY item_hk
 ),
 
 prepared AS (
@@ -145,10 +48,18 @@ prepared AS (
         NULLIF({{ clean_text('base.title_raw') }}, '')::text AS title,
         NULLIF({{ clean_text('base.subtitle_raw') }}, '')::text AS subtitle,
         type_map.type_dedup::text AS type_dedup,
-        author_agg.author::text AS author,
-        doi_agg.doi::text AS doi,
-        issn_agg.issn::text AS issn,
-        isbn_agg.isbn::text AS isbn,
+        NULLIF(
+            CONCAT_WS(
+                '|',
+                NULLIF({{ clean_text('base.sedici_creator_person') }}, ''),
+                NULLIF({{ clean_text('base.sedici_creator_corporate') }}, ''),
+                NULLIF({{ clean_text('base.sedici_contributor_compiler') }}, '')
+            ),
+            ''
+        )::text AS author,
+        base.doi::text AS doi,
+        base.issn::text AS issn,
+        base.isbn::text AS isbn,
         NULLIF({{ clean_text('base.subject_raw') }}, '')::text AS subject,
         base.owning_root_community_id::text AS owning_root_community_id,
         NULLIF({{ clean_text('base.owning_root_community_title') }}, '')::text AS owning_root_community_title,
@@ -159,14 +70,6 @@ prepared AS (
         NULLIF({{ clean_text('base.owning_collection_title') }}, '')::text AS owning_collection_title,
         NULLIF({{ clean_text('base.description_raw') }}, '')::text AS description
     FROM base
-    LEFT JOIN author_agg
-        USING (item_hk)
-    LEFT JOIN doi_agg
-        USING (item_hk)
-    LEFT JOIN isbn_agg
-        USING (item_hk)
-    LEFT JOIN issn_agg
-        USING (item_hk)
     LEFT JOIN {{ ref('dim_unlp_sedici_item_type') }} AS type_map
         ON type_map.source = 'sedici'
        AND LOWER(BTRIM(type_map.type)) = LOWER(BTRIM(base.type_raw))

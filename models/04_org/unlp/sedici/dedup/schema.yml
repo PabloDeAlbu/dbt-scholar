@@ -35,7 +35,10 @@ models:
       - name: subtitle
         description: Subtítulo o títulos alternativos concatenados cuando existen.
       - name: author
-        description: Lista de autores separada por `|`, sin duplicados y preservando `author_place` cuando está disponible.
+        description: >
+          Lista requerida por el deduplicador, construida concatenando con `|`
+          `sedici.creator.person`, `sedici.creator.corporate` y
+          `sedici.contributor.compiler` desde el modelo institucional base.
       - name: doi
         description: DOI normalizados en lowercase y sin prefijos URL o `doi:`.
       - name: issn

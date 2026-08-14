@@ -34,6 +34,7 @@ metadata_usage AS NOT MATERIALIZED (
         'sedici.subtype',
         'sedici.creator.person',
         'sedici.creator.corporate',
+        'sedici.contributor.compiler',
         'sedici.identifier.issn',
         'sedici.identifier.isbn',
         'sedici.identifier.other',
@@ -161,14 +162,31 @@ subtype AS (
     WHERE metadatafield_fullname = 'sedici.subtype'
 ),
 
-author AS (
+sedici_creator_person AS (
     SELECT
         item_hk,
-        STRING_AGG(ordered_text_values::text, '|' ORDER BY metadatafield_fullname) AS author,
-        SUM(distinct_nonempty_text_value_count)::int AS author_count
+        ordered_text_values::text AS sedici_creator_person,
+        distinct_nonempty_text_value_count::int AS sedici_creator_person_count
     FROM metadata_usage
-    WHERE metadatafield_fullname IN ('sedici.creator.person', 'sedici.creator.corporate')
-    GROUP BY item_hk
+    WHERE metadatafield_fullname = 'sedici.creator.person'
+),
+
+sedici_creator_corporate AS (
+    SELECT
+        item_hk,
+        ordered_text_values::text AS sedici_creator_corporate,
+        distinct_nonempty_text_value_count::int AS sedici_creator_corporate_count
+    FROM metadata_usage
+    WHERE metadatafield_fullname = 'sedici.creator.corporate'
+),
+
+sedici_contributor_compiler AS (
+    SELECT
+        item_hk,
+        ordered_text_values::text AS sedici_contributor_compiler,
+        distinct_nonempty_text_value_count::int AS sedici_contributor_compiler_count
+    FROM metadata_usage
+    WHERE metadatafield_fullname = 'sedici.contributor.compiler'
 ),
 
 issn AS (
@@ -283,8 +301,12 @@ final_raw AS (
         description.description,
         subject.subject,
         subtype.subtype,
-        author.author,
-        COALESCE(author.author_count, 0) AS author_count,
+        sedici_creator_person.sedici_creator_person,
+        COALESCE(sedici_creator_person.sedici_creator_person_count, 0) AS sedici_creator_person_count,
+        sedici_creator_corporate.sedici_creator_corporate,
+        COALESCE(sedici_creator_corporate.sedici_creator_corporate_count, 0) AS sedici_creator_corporate_count,
+        sedici_contributor_compiler.sedici_contributor_compiler,
+        COALESCE(sedici_contributor_compiler.sedici_contributor_compiler_count, 0) AS sedici_contributor_compiler_count,
         issn.issn,
         isbn.isbn,
 
@@ -315,7 +337,9 @@ final_raw AS (
     LEFT JOIN description USING (item_hk)
     LEFT JOIN subject USING (item_hk)
     LEFT JOIN subtype USING (item_hk)
-    LEFT JOIN author USING (item_hk)
+    LEFT JOIN sedici_creator_person USING (item_hk)
+    LEFT JOIN sedici_creator_corporate USING (item_hk)
+    LEFT JOIN sedici_contributor_compiler USING (item_hk)
     LEFT JOIN issn USING (item_hk)
     LEFT JOIN isbn USING (item_hk)
     LEFT JOIN ir_pid_agg USING (item_hk)
@@ -372,8 +396,12 @@ SELECT
     description,
     subject,
     subtype,
-    author,
-    author_count,
+    sedici_creator_person,
+    sedici_creator_person_count,
+    sedici_creator_corporate,
+    sedici_creator_corporate_count,
+    sedici_contributor_compiler,
+    sedici_contributor_compiler_count,
     issn,
     isbn,
     doi_count,
