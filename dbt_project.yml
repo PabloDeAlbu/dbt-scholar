@@ -199,6 +199,17 @@ models:
           +schema: unlp
           +tags: [unlp, analytics]
           +materialized: table
+      unlp:
+        +schema: unlp
+        +tags: [unlp, analytics]
+        +materialized: table
+        sedici:
+          issue_14365:
+            +schema: unlp_sedici_issue_14365
+            +tags: [sedici, issue_14365]
+        libros:
+          +schema: unlp_libros
+          +tags: [libros, revistas, afiliacion]
 seeds:
   dbt_scholar:
     coar:

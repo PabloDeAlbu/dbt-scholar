@@ -1,6 +1,172 @@
 version: 2
 
 seeds:
+  - name: seed_issue_14365_04_review_thesis_digitization_manual
+    description: >
+      Conciliación manual de las relaciones múltiples encontradas entre las
+      tesis de Koha FDA y el listado de digitalización. También identifica un
+      duplicado interno de Koha y conserva el registro canónico elegido.
+    columns:
+      - name: koha_id
+        description: Identificador Koha evaluado.
+        data_tests: [not_null, unique]
+      - name: inventory_id
+        description: Número de inventario correspondiente en el listado de digitalización.
+        data_tests: [not_null]
+      - name: canonical_koha_id
+        description: Registro Koha que debe considerarse canónico para la tesis.
+        data_tests: [not_null]
+      - name: manual_decision
+        description: Decisión adoptada durante la conciliación.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['DUPLICATE', 'KOHA_DUPLICATE']
+      - name: observations
+        description: Evidencia utilizada para resolver la relación múltiple.
+        data_tests: [not_null]
+
+  - name: seed_issue_14365_04_dedup_thesis_digitization_result
+    description: >
+      Resultado completo de la dedup entre las tesis de Koha FDA sin
+      correspondencia confirmada en SEDICI y el listado operativo de tesis
+      enviadas o próximas a digitalizar.
+    columns:
+      - name: id_document1
+        description: Identificador Koha de la tesis evaluada.
+        data_tests: [not_null, unique]
+      - name: id_document2
+        description: Número de inventario propuesto o literal `None` cuando no hubo candidato.
+      - name: rules
+        description: Reglas y puntajes informados por el deduplicador.
+      - name: similarity
+        description: Decisión final informada por el deduplicador.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['DUPLICATE', 'NEAR_DUPLICATE', 'DONT_KNOW', 'NO_DUPLICATE']
+
+  - name: seed_issue_14365_04_thesis_fda_digitization
+    description: >
+      Listado operativo de tesis de FDA enviadas, devueltas o preparadas para
+      digitalización. Conserva las columnas originales de la planilla y puede
+      contener varias filas para un mismo inventario cuando el trabajo está
+      compuesto por más de una pieza documental.
+    config:
+      quote_columns: true
+    columns:
+      - name: INVENTARIO
+        quote: true
+        description: Número de inventario utilizado como identificador del trabajo.
+        data_tests: [not_null]
+      - name: TITULO
+        quote: true
+        description: Título o título de la pieza documental.
+        data_tests: [not_null]
+      - name: AUTOR
+        quote: true
+        description: Autor informado en la planilla de digitalización.
+        data_tests: [not_null]
+      - name: AÑO
+        quote: true
+        description: Año informado, habitualmente representado con un guion inicial.
+      - name: Enviado al SEDICI
+        quote: true
+        description: Fecha en que el material fue enviado a SEDICI.
+      - name: Devuelto por SEDICI
+        quote: true
+        description: Fecha en que el material fue devuelto por SEDICI.
+
+  - name: seed_issue_14365_03_export_thesis_koha_url_reviewed
+    description: >
+      Snapshot del segundo CSV de actualización de SEDICI, generado a partir
+      de los duplicados confirmados durante la revisión manual.
+    columns:
+      - name: id
+        description: Identificador interno del ítem de SEDICI.
+        data_tests: [not_null, unique]
+      - name: mods.recordInfo.recordContentSource[es]
+        quote: true
+        description: URL pública del registro correspondiente en Koha FDA.
+        data_tests: [not_null, unique]
+
+  - name: seed_issue_14365_03_review_thesis_koha_sedici_manual
+    description: >
+      Conciliación manual de los casos `NEAR_DUPLICATE` y `DONT_KNOW` de la
+      dedup de tesis Koha FDA → SEDICI. Distingue duplicados confirmados de
+      falsos positivos y conserva una justificación revisable.
+    columns:
+      - name: koha_id
+        description: Identificador del registro bibliográfico en Koha.
+        data_tests: [not_null, unique]
+      - name: sedici_id
+        description: Handle candidato de SEDICI revisado manualmente.
+        data_tests: [not_null]
+      - name: manual_decision
+        description: Decisión final de la revisión manual.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['DUPLICATE', 'NO_DUPLICATE']
+      - name: observations
+        description: Evidencia o diferencia considerada para tomar la decisión.
+        data_tests: [not_null]
+
+  - name: seed_issue_14365_03_export_thesis_koha_url
+    description: >
+      Snapshot del CSV preparado para actualizar en SEDICI las tesis con una
+      correspondencia unívoca en Koha FDA. La columna `id` contiene el
+      identificador interno del ítem requerido por el importador de DSpace.
+    columns:
+      - name: id
+        description: Identificador interno del ítem de SEDICI.
+        data_tests: [not_null, unique]
+      - name: mods.recordInfo.recordContentSource[es]
+        quote: true
+        description: URL pública del registro correspondiente en Koha FDA.
+        data_tests: [not_null, unique]
+
+  - name: seed_issue_14365_03_dedup_thesis_koha_sedici_result
+    description: >
+      Resultado de control de la dedup Koha FDA → SEDICI para tesis. Contiene
+      una decisión por cada tesis del catálogo Koha evaluada contra todas las
+      tesis de SEDICI y reproduce el resultado conservado en la planilla de la
+      tarea 14365.
+    columns:
+      - name: id_document1
+        description: Identificador Koha de la tesis evaluada.
+        data_tests: [not_null, unique]
+      - name: id_document2
+        description: Handles SEDICI propuestos o literal `None` cuando no hubo candidato.
+      - name: rules
+        description: Reglas y puntajes informados por el deduplicador.
+      - name: similarity
+        description: Decisión final informada por el deduplicador.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['DUPLICATE', 'NEAR_DUPLICATE', 'DONT_KNOW', 'NO_DUPLICATE']
+
+  - name: seed_issue_14365_02_dedup_book_sedici_koha_result
+    description: >
+      Resultado sin modificar de la tercera ejecución del deduplicador para la
+      dedup SEDICI FDA → Koha. Se conserva como evidencia reproducible
+      para separar correspondencias y candidatos sin match.
+    columns:
+      - name: id_document1
+        description: Handle del libro de SEDICI evaluado.
+        data_tests: [not_null, unique]
+      - name: id_document2
+        description: Identificador Koha propuesto o literal `None` cuando no hubo candidato.
+      - name: rules
+        description: Reglas y puntajes informados por el deduplicador.
+      - name: similarity
+        description: Decisión final informada por el deduplicador.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['DUPLICATE', 'NEAR_DUPLICATE', 'NO_DUPLICATE']
+
   - name: libros_catedra_fda_koha_sedici_cruce_2026
     description: >
       Listado adjunto de libros de cátedra FDA/Artes usado para cruzar contra

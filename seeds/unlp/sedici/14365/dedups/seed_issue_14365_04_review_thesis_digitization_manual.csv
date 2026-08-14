@@ -1,0 +1,5 @@
+koha_id,inventory_id,canonical_koha_id,manual_decision,observations
+43123,20956,43123,DUPLICATE,"Coinciden título, autor y año; se descarta el inventario 21144."
+43145,21144,43145,DUPLICATE,"Coinciden título, autor y año; se descarta el inventario 20956."
+44693,5496,44693,DUPLICATE,"Registro Koha canónico; figura disponible en sala."
+44692,5496,44693,KOHA_DUPLICATE,"Duplicado interno de Koha; se conserva 44693 como registro canónico y disponible en sala."

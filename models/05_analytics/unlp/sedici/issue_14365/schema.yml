@@ -1,0 +1,712 @@
+version: 2
+
+models:
+  - name: unlp_sedici_02_dedup_book_sedici_koha_input_1
+    description: >
+      Libros de SEDICI candidatos a estar vinculados con la Facultad de Artes,
+      preparados como input 1 de la dedup inversa SEDICI FDA → Koha.
+      Selecciona únicamente libros completos y combina evidencia del path de
+      comunidades, `mods.originInfo.place` y `dc.publisher`. Conserva las
+      señales utilizadas para que cada inclusión pueda revisarse.
+    columns:
+      - name: source
+        description: Origen fijo del registro; vale `sedici`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['sedici']
+      - name: id
+        description: Handle institucional de la publicación en SEDICI.
+        data_tests: [not_null, unique]
+      - name: title
+        description: Títulos normalizados utilizados por el deduplicador.
+        data_tests: [not_null]
+      - name: subtitle
+        description: Subtítulos normalizados utilizados por el deduplicador.
+      - name: type
+        description: Tipo canónico; vale `book`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['book']
+      - name: author
+        description: >
+          Autores normalizados o un marcador único cuando SEDICI no informa
+          autor, para evitar errores silenciosos durante la dedup.
+        data_tests: [not_null]
+      - name: date
+        description: Fecha de publicación disponible en SEDICI.
+      - name: doi
+        description: DOI normalizados.
+      - name: isbn
+        description: ISBN normalizados.
+      - name: issn
+        description: ISSN normalizados.
+      - name: subject
+        description: Materias y términos temáticos normalizados.
+      - name: description
+        description: Resúmenes y descripciones normalizados.
+      - name: owning_community_path_titles
+        description: Path de comunidades que contiene el recurso.
+      - name: owning_collection_title
+        description: Colección de SEDICI que contiene el recurso.
+      - name: mods_origin_info_place
+        description: Valores observados de `mods.originInfo.place`.
+      - name: dc_publisher
+        description: Valores observados de `dc.publisher`.
+      - name: matches_fda_path
+        description: Indica que el path menciona Facultad de Artes o Facultad de Bellas Artes.
+        data_tests: [not_null]
+      - name: matches_fda_origin
+        description: Indica que `mods.originInfo.place` menciona FDA o FBA.
+        data_tests: [not_null]
+      - name: matches_fda_publisher
+        description: Indica que `dc.publisher` menciona FDA o FBA.
+        data_tests: [not_null]
+      - name: fda_evidence
+        description: Señales que justifican la inclusión del libro en el universo candidato.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: unlp_sedici_02_dedup_book_sedici_koha_input_1_has_evidence
+          expression: >
+            matches_fda_path
+            or matches_fda_origin
+            or matches_fda_publisher
+
+  - name: unlp_sedici_02_dedup_book_sedici_koha_input_2
+    description: >
+      Catálogo de libros recibido desde Koha FDA, reutilizado como input 2 de
+      la dedup inversa SEDICI FDA → Koha. Para la tarea 14365 se asume
+      que este listado representa el universo completo informado por Koha.
+    columns:
+      - name: source
+        description: Origen fijo del registro; vale `koha_fda`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['koha_fda']
+      - name: id
+        description: Identificador del registro bibliográfico en Koha.
+        data_tests: [not_null, unique]
+      - name: title
+        description: Título completo informado por Koha.
+        data_tests: [not_null]
+      - name: type
+        description: Tipo canónico; vale `book`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['book']
+      - name: author
+        description: Autor de Koha o marcador único cuando no está informado.
+        data_tests: [not_null]
+
+  - name: unlp_sedici_02_filter_book_sedici_fda_unmatched
+    description: >
+      Libros de SEDICI vinculados con Facultad de Artes o Facultad de Bellas
+      Artes que no obtuvieron correspondencia contra el listado limitado de
+      36 libros de Koha recibido. Son candidatos para una nueva dedup contra
+      un export más completo de Koha, no registros confirmados para incorporar.
+      Excluye el falso negativo `10915/52442`,
+      resuelto manualmente contra Koha `42205`. Conserva tanto los metadatos
+      útiles para evaluación bibliotecológica como las señales utilizadas para
+      incorporar cada recurso al universo FDA.
+    columns:
+      - name: sedici_id
+        description: Handle institucional del libro en SEDICI.
+        data_tests: [not_null, unique]
+      - name: sedici_url
+        description: URL pública del registro en SEDICI.
+        data_tests: [not_null]
+      - name: title
+        description: Títulos normalizados del recurso.
+        data_tests: [not_null]
+      - name: subtitle
+        description: Subtítulos normalizados del recurso.
+      - name: author
+        description: Autores normalizados o marcador único cuando no están informados.
+        data_tests: [not_null]
+      - name: date
+        description: Fecha de publicación disponible en SEDICI.
+      - name: isbn
+        description: ISBN normalizados.
+      - name: doi
+        description: DOI normalizados.
+      - name: issn
+        description: ISSN normalizados.
+      - name: subject
+        description: Materias y términos temáticos normalizados.
+      - name: description
+        description: Resúmenes y descripciones normalizados.
+      - name: owning_community_path_titles
+        description: Path de comunidades que contiene el recurso.
+      - name: owning_collection_title
+        description: Colección de SEDICI que contiene el recurso.
+      - name: mods_origin_info_place
+        description: Valores observados de `mods.originInfo.place`.
+      - name: dc_publisher
+        description: Valores observados de `dc.publisher`.
+      - name: matches_fda_path
+        description: Indica selección por path de Facultad de Artes o Bellas Artes.
+        data_tests: [not_null]
+      - name: matches_fda_origin
+        description: Indica selección por origen de Facultad de Artes o Bellas Artes.
+        data_tests: [not_null]
+      - name: matches_fda_publisher
+        description: Indica selección por publisher de Facultad de Artes o Bellas Artes.
+        data_tests: [not_null]
+      - name: fda_evidence
+        description: Señales que justifican la inclusión del libro como candidato.
+        data_tests: [not_null]
+      - name: dedup_similarity
+        description: Decisión producida por la tercera ejecución del deduplicador.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['NO_DUPLICATE']
+      - name: dedup_rules
+        description: Reglas informadas por el deduplicador; normalmente nulo para estos casos.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: d14365_02_book_review_excludes_manual_match
+          expression: "sedici_id <> '10915/52442'"
+
+  - name: unlp_sedici_01_dedup_book_koha_sedici_input_1
+    description: >
+      Libros de cátedra exportados desde Koha de la Facultad de Artes y
+      preparados como input 1 del deduplicador para la tarea 14365. Cuando el
+      autor principal no está informado utiliza un marcador diferente por
+      registro, de modo que las reglas puedan evaluar título y fecha sin crear
+      coincidencias artificiales entre autores faltantes.
+    columns:
+      - name: source
+        description: Origen fijo del registro; vale `koha_fda`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['koha_fda']
+      - name: id
+        description: Identificador del registro bibliográfico en Koha.
+        data_tests: [not_null, unique]
+      - name: title
+        description: Título completo informado por Koha.
+        data_tests: [not_null]
+      - name: subtitle
+        description: Columna opcional del deduplicador, sin datos en este export.
+      - name: type
+        description: Tipo canónico `book`, reconocido por el deduplicador.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['book']
+      - name: author
+        description: >
+          Autor principal de Koha o marcador `AUTOR_NO_INFORMADO_<id>` cuando
+          el campo MARC 100a está vacío.
+        data_tests: [not_null]
+      - name: date
+        description: Año de publicación normalizado a cuatro dígitos.
+        data_tests: [not_null]
+      - name: doi
+        description: Columna opcional del deduplicador, sin datos en este export.
+      - name: isbn
+        description: Columna opcional del deduplicador, sin datos en este export.
+      - name: issn
+        description: Columna opcional del deduplicador, sin datos en este export.
+      - name: description
+        description: Columna opcional del deduplicador, sin datos en este export.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: unlp_sedici_01_dedup_book_koha_sedici_input_1_date_is_year
+          expression: "date ~ '^[0-9]{4}$'"
+
+  - name: unlp_sedici_03_dedup_thesis_koha_sedici_input_1
+    description: >
+      Tesis exportadas desde Koha de la Facultad de Artes y preparadas como
+      input 1 del deduplicador para la tarea 14365. Cuando el autor no está
+      informado utiliza un marcador diferente por registro. La fecha toma
+      primero `anio_publicacion` y, cuando no está disponible, `anio_titulo`;
+      conserva solamente años reconocibles de cuatro dígitos.
+    columns:
+      - name: source
+        description: Origen fijo del registro; vale `koha_fda`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['koha_fda']
+      - name: id
+        description: Identificador del registro bibliográfico en Koha.
+        data_tests: [not_null, unique]
+      - name: title
+        description: Título completo informado por Koha.
+        data_tests: [not_null]
+      - name: subtitle
+        description: Columna opcional del deduplicador, sin datos en este export.
+      - name: type
+        description: Tipo canónico `tesis`, reconocido por el deduplicador.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['tesis']
+      - name: author
+        description: >
+          Autor de Koha o marcador `AUTOR_NO_INFORMADO_<id>` cuando el campo
+          está vacío.
+        data_tests: [not_null]
+      - name: date
+        description: >
+          Año extraído de `anio_publicacion` o, como respaldo, de
+          `anio_titulo`. Es nulo cuando el seed no ofrece un año reconocible.
+      - name: doi
+        description: Columna opcional del deduplicador, sin datos en este export.
+      - name: isbn
+        description: Columna opcional del deduplicador, sin datos en este export.
+      - name: issn
+        description: Columna opcional del deduplicador, sin datos en este export.
+      - name: description
+        description: Columna opcional del deduplicador, sin datos en este export.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: d14365_02_thesis_input_1_date_year_or_null
+          expression: "date is null or date ~ '^[0-9]{4}$'"
+
+  - name: unlp_sedici_01_dedup_book_koha_sedici_input_2
+    description: >
+      Publicaciones de SEDICI utilizadas como input 2 para deduplicar los
+      libros exportados desde Koha de la Facultad de Artes en la tarea 14365.
+      Incluye tanto libros completos (`book`) como partes de libro
+      (`bookpart`) para priorizar cobertura en la primera dedup. Conserva
+      los registros sin autor o fecha porque todavía pueden aportar una
+      coincidencia por título, DOI o ISBN.
+    columns:
+      - name: source
+        description: Origen fijo del registro; vale `sedici`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['sedici']
+      - name: id
+        description: Handle institucional de la publicación.
+        data_tests: [not_null, unique]
+      - name: title
+        description: Títulos normalizados utilizados por el deduplicador.
+        data_tests: [not_null]
+      - name: subtitle
+        description: Subtítulos normalizados utilizados por el deduplicador.
+      - name: type
+        description: Tipo canónico; puede ser un libro o una parte de libro.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['book', 'bookpart']
+      - name: author
+        description: Autores normalizados; puede ser nulo en el registro fuente.
+      - name: date
+        description: Fecha de publicación; puede ser nula en el registro fuente.
+      - name: doi
+        description: DOI normalizados.
+      - name: isbn
+        description: ISBN normalizados.
+      - name: issn
+        description: ISSN normalizados.
+      - name: description
+        description: Resúmenes y descripciones normalizados.
+      - name: owning_community_path_titles
+        description: >
+          Camino de comunidades desde la raíz hasta la comunidad inmediata que
+          contiene la colección del recurso.
+      - name: owning_collection_title
+        description: Título de la colección de SEDICI que contiene el recurso.
+
+  - name: unlp_sedici_03_dedup_thesis_koha_sedici_input_2
+    description: >
+      Tesis de SEDICI utilizadas como input 2 para deduplicar las tesis
+      exportadas desde Koha de la Facultad de Artes en la tarea 14365. No se
+      restringe todavía por unidad académica, para no perder tesis que se
+      encuentren fuera de la comunidad esperada. Conserva los registros sin
+      autor o fecha porque todavía pueden aportar una coincidencia por título,
+      DOI o ISBN.
+    columns:
+      - name: source
+        description: Origen fijo del registro; vale `sedici`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['sedici']
+      - name: id
+        description: Handle institucional de la publicación.
+        data_tests: [not_null, unique]
+      - name: title
+        description: Títulos normalizados utilizados por el deduplicador.
+        data_tests: [not_null]
+      - name: subtitle
+        description: Subtítulos normalizados utilizados por el deduplicador.
+      - name: type
+        description: Tipo canónico; vale `tesis`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['tesis']
+      - name: author
+        description: Autores normalizados; puede ser nulo en el registro fuente.
+      - name: date
+        description: Fecha de publicación; puede ser nula en el registro fuente.
+      - name: doi
+        description: DOI normalizados.
+      - name: isbn
+        description: ISBN normalizados.
+      - name: issn
+        description: ISSN normalizados.
+      - name: description
+        description: Resúmenes y descripciones normalizados.
+      - name: owning_community_path_titles
+        description: >
+          Camino de comunidades desde la raíz hasta la comunidad inmediata que
+          contiene la colección del recurso.
+      - name: owning_collection_title
+        description: Título de la colección de SEDICI que contiene el recurso.
+
+  - name: unlp_sedici_03_review_thesis_koha_sedici
+    description: >
+      Casos de la dedup de tesis Koha FDA → SEDICI que requieren revisión
+      manual porque fueron clasificados como `NEAR_DUPLICATE` o `DONT_KNOW`.
+      Conserva la descripción del registro Koha, los candidatos de SEDICI y
+      las reglas informadas por el deduplicador.
+    columns:
+      - name: koha_id
+        description: Identificador del registro bibliográfico en Koha.
+        data_tests: [not_null, unique]
+      - name: koha_url
+        description: URL pública del registro bibliográfico en Koha FDA.
+        data_tests: [not_null, unique]
+      - name: title
+        description: Título de la tesis en Koha.
+        data_tests: [not_null]
+      - name: author
+        description: Autor de la tesis en Koha o marcador de autor faltante.
+        data_tests: [not_null]
+      - name: date
+        description: Año normalizado cuando está disponible.
+      - name: sedici_candidates
+        description: Handles de SEDICI propuestos por el deduplicador.
+        data_tests: [not_null]
+      - name: sedici_urls
+        description: URLs públicas de los candidatos de SEDICI, separadas por `|`.
+        data_tests: [not_null]
+      - name: dedup_rules
+        description: Reglas y puntajes que justifican la decisión.
+        data_tests: [not_null]
+      - name: dedup_similarity
+        description: Decisión pendiente de revisión manual.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['NEAR_DUPLICATE', 'DONT_KNOW']
+
+  - name: unlp_sedici_04_dedup_thesis_digitization_input_1
+    description: >
+      Tesis de Koha FDA clasificadas como `NO_DUPLICATE` en la dedup contra
+      SEDICI, junto con los falsos positivos recuperados durante la revisión
+      manual. Se preparan como input 1 para contrastarlas posteriormente con
+      la planilla de tesis enviadas o próximas a digitalizar.
+    columns:
+      - name: source
+        description: Origen fijo del registro; vale `koha_fda`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['koha_fda']
+      - name: id
+        description: Identificador del registro bibliográfico en Koha.
+        data_tests: [not_null, unique]
+      - name: title
+        description: Título normalizado utilizado por el deduplicador.
+        data_tests: [not_null]
+      - name: subtitle
+        description: Columna opcional del deduplicador.
+      - name: type
+        description: Tipo canónico `tesis`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['tesis']
+      - name: author
+        description: Autor de Koha o marcador único cuando no está informado.
+        data_tests: [not_null]
+      - name: date
+        description: Año normalizado cuando está disponible.
+      - name: doi
+        description: Columna opcional del deduplicador.
+      - name: isbn
+        description: Columna opcional del deduplicador.
+      - name: issn
+        description: Columna opcional del deduplicador.
+      - name: description
+        description: Columna opcional del deduplicador.
+
+  - name: unlp_sedici_04_dedup_thesis_digitization_input_2
+    description: >
+      Tesis del listado operativo de digitalización de FDA preparadas como
+      input 2 del deduplicador. Agrupa las piezas documentales a una fila por
+      número de inventario y concatena con `|` los títulos o autores distintos
+      del mismo trabajo.
+    columns:
+      - name: source
+        description: Origen fijo del registro; vale `fda_digitization`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['fda_digitization']
+      - name: id
+        description: Número de inventario utilizado como identificador del trabajo.
+        data_tests: [not_null, unique]
+      - name: title
+        description: Título o títulos de las piezas, concatenados con `|`.
+        data_tests: [not_null]
+      - name: subtitle
+        description: Columna opcional del deduplicador.
+      - name: type
+        description: Tipo canónico `tesis`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['tesis']
+      - name: author
+        description: Autor o autores informados en el listado de digitalización.
+        data_tests: [not_null]
+      - name: date
+        description: Año de la tesis extraído del valor informado en la planilla.
+      - name: doi
+        description: Columna opcional del deduplicador.
+      - name: isbn
+        description: Columna opcional del deduplicador.
+      - name: issn
+        description: Columna opcional del deduplicador.
+      - name: description
+        description: Columna opcional del deduplicador.
+
+  - name: unlp_sedici_04_int_thesis_digitization_match
+    description: >
+      Correspondencias conciliadas entre tesis de Koha FDA y el listado de
+      digitalización. Combina relaciones automáticas unívocas con decisiones
+      manuales y conserva el registro Koha canónico cuando existen duplicados
+      internos en el catálogo.
+    columns:
+      - name: koha_id
+        description: Identificador Koha evaluado.
+        data_tests: [not_null, unique]
+      - name: inventory_id
+        description: Número de inventario correspondiente en digitalización.
+        data_tests: [not_null]
+      - name: canonical_koha_id
+        description: Identificador Koha canónico de la tesis.
+        data_tests: [not_null]
+      - name: match_status
+        description: Correspondencia documental o duplicado interno de Koha.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['DUPLICATE', 'KOHA_DUPLICATE']
+      - name: match_source
+        description: Indica si la correspondencia fue automática o manual.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['automatic', 'manual']
+
+  - name: unlp_sedici_04_export_thesis_in_digitization
+    description: >
+      Tesis de Koha FDA sin publicación confirmada en SEDICI que aparecen en
+      el listado operativo de digitalización. Incluye las correspondencias
+      automáticas y manuales, el registro Koha canónico y los estados de envío
+      o devolución disponibles en la planilla.
+    columns:
+      - name: koha_id
+        description: Identificador Koha evaluado.
+        data_tests: [not_null, unique]
+      - name: koha_url
+        description: URL pública del registro en Koha FDA.
+        data_tests: [not_null, unique]
+      - name: canonical_koha_id
+        description: Identificador Koha canónico de la tesis.
+        data_tests: [not_null]
+      - name: is_canonical_koha_record
+        description: Indica si la fila representa el registro Koha canónico.
+        data_tests: [not_null]
+      - name: koha_title
+        description: Título de la tesis en Koha.
+        data_tests: [not_null]
+      - name: koha_author
+        description: Autor de la tesis en Koha.
+        data_tests: [not_null]
+      - name: inventory_id
+        description: Número de inventario asociado en digitalización.
+        data_tests: [not_null]
+      - name: digitization_title
+        description: Título observado en el listado de digitalización.
+        data_tests: [not_null]
+      - name: digitization_author
+        description: Autor observado en el listado de digitalización.
+        data_tests: [not_null]
+      - name: match_status
+        description: Correspondencia documental o duplicado interno de Koha.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['DUPLICATE', 'KOHA_DUPLICATE']
+      - name: match_source
+        description: Origen automático o manual de la correspondencia.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['automatic', 'manual']
+      - name: valid_as_of
+        description: Fecha de vigencia informada por la planilla.
+        data_tests: [not_null]
+      - name: sent_to_sedici
+        description: Fecha o fechas de envío a SEDICI, cuando existen.
+      - name: returned_by_sedici
+        description: Fecha o fechas de devolución por SEDICI, cuando existen.
+      - name: prepared_for_delivery
+        description: Estado informado para material preparado para envío.
+      - name: digitization_observations
+        description: Observaciones operativas de la planilla.
+      - name: digitization_comments
+        description: Comentarios operativos de la planilla.
+
+  - name: unlp_sedici_04_export_thesis_without_coverage
+    description: >
+      Tesis de Koha FDA sin correspondencia confirmada en SEDICI y sin
+      correspondencia en el listado operativo de digitalización. Constituye
+      el universo a evaluar para recuperar o incorporar material faltante.
+    columns:
+      - name: koha_id
+        description: Identificador del registro bibliográfico en Koha.
+        data_tests: [not_null, unique]
+      - name: koha_url
+        description: URL pública del registro en Koha FDA.
+        data_tests: [not_null, unique]
+      - name: title
+        description: Título de la tesis en Koha.
+        data_tests: [not_null]
+      - name: author
+        description: Autor de la tesis en Koha o marcador de autor faltante.
+        data_tests: [not_null]
+      - name: type
+        description: Tipo canónico `tesis`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['tesis']
+
+  - name: unlp_sedici_03_base_thesis_koha_sedici_confirmed
+    description: >
+      Correspondencias confirmadas entre tesis de Koha FDA y publicaciones de
+      SEDICI. Integra las 99 relaciones automáticas unívocas y las 16
+      confirmadas manualmente, conservando los metadatos observados en ambos
+      sistemas para facilitar su revisión e integración recíproca.
+    columns:
+      - name: koha_id
+        description: Identificador del registro bibliográfico en Koha FDA.
+        data_tests: [not_null, unique]
+      - name: koha_url
+        description: URL pública del registro en Koha FDA.
+        data_tests: [not_null, unique]
+      - name: sedici_item_id
+        description: Identificador interno del ítem en SEDICI.
+        data_tests: [not_null, unique]
+      - name: sedici_handle
+        description: Handle público del ítem en SEDICI.
+        data_tests: [not_null, unique]
+      - name: sedici_url
+        description: URL pública del ítem en SEDICI.
+        data_tests: [not_null, unique]
+      - name: match_source
+        description: Indica si la correspondencia fue automática o manual.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['automatic', 'manual']
+      - name: dedup_similarity
+        description: Clasificación original producida por el deduplicador.
+        data_tests: [not_null]
+      - name: requires_metadata_review
+        description: Verdadero para las relaciones confirmadas manualmente que conviene revisar bibliográficamente.
+        data_tests: [not_null]
+
+  - name: unlp_sedici_03_filter_thesis_automatic_for_sedici
+    description: >
+      CSV operativo para agregar en SEDICI la URL del registro correspondiente
+      de Koha FDA para las 99 correspondencias automáticas unívocas. Contiene
+      únicamente el identificador interno de DSpace y el metadatafield que
+      debe importarse.
+    columns:
+      - name: id
+        description: Identificador interno del ítem de SEDICI que debe actualizarse.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              name: d14365_03_thesis_update_id_exists_in_sedici
+              to: ref('fct_unlp_sedicidb_item_publication')
+              field: item_id
+      - name: mods.recordInfo.recordContentSource[es]
+        quote: true
+        description: URL pública del registro bibliográfico correspondiente en Koha FDA.
+        data_tests: [not_null, unique]
+
+  - name: unlp_sedici_03_filter_thesis_manual_for_fda
+    description: >
+      Las 16 correspondencias confirmadas manualmente y preparadas para
+      compartir con FDA. Incluye las URLs y los metadatos observados en ambos
+      sistemas para validar diferencias antes de actualizar los registros.
+    columns:
+      - name: koha_id
+        description: Identificador del registro bibliográfico en Koha FDA.
+        data_tests: [not_null, unique]
+      - name: koha_url
+        description: URL pública del registro en Koha FDA.
+        data_tests: [not_null, unique]
+      - name: sedici_handle
+        description: Handle de la publicación correspondiente en SEDICI.
+        data_tests: [not_null, unique]
+      - name: sedici_url
+        description: URL pública de la publicación correspondiente en SEDICI.
+        data_tests: [not_null, unique]
+      - name: match_source
+        description: Origen manual de la correspondencia.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['manual']
+      - name: requires_metadata_review
+        description: Indica si se recomienda una revisión bibliográfica de los metadatos.
+        data_tests: [not_null]
+
+  - name: unlp_sedici_03_filter_thesis_ambiguous_for_review
+    description: >
+      Decisiones `DUPLICATE` donde un registro Koha quedó asociado con más de
+      un handle de SEDICI o un handle quedó asociado con más de un registro
+      Koha. Estos casos se excluyen del CSV automático hasta determinar
+      manualmente qué enlaces deben agregarse.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          name: d14365_02_thesis_ambiguous_unique_pair
+          combination_of_columns: [koha_id, sedici_id]
+    columns:
+      - name: koha_id
+        description: Identificador del registro bibliográfico en Koha.
+        data_tests: [not_null]
+      - name: sedici_id
+        description: Handle candidato de SEDICI.
+        data_tests: [not_null]
+      - name: sedici_candidate_count
+        description: Cantidad de handles candidatos para el registro Koha.
+        data_tests: [not_null]
+      - name: koha_candidate_count
+        description: Cantidad de registros Koha asociados con el handle SEDICI.
+        data_tests: [not_null]
+      - name: dedup_rules
+        description: Reglas y puntajes informados por el deduplicador.
+        data_tests: [not_null]
