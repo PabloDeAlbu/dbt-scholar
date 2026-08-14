@@ -156,6 +156,56 @@ models:
       - name: institution_ror
         data_tests: [not_null]
 
+  - name: brg_dspacedb_community_hierarchy
+    description: >
+      Jerarquía vigente de comunidades para repositorios DSpace 7+, resuelta a
+      grano comunidad. Expone el padre inmediato, la comunidad raíz y los caminos
+      completos por identificador legado, UUID y título. Se construye sobre la
+      dimensión de comunidades y el link histórico comunidad-comunidad de DV.
+    config:
+      tags: [dspacedb, dm]
+    columns:
+      - name: community_hk
+        description: Hash key de la comunidad representada por la fila.
+        data_tests: [not_null, unique]
+      - name: community_uuid
+        description: UUID canónico de la comunidad en DSpace 7+.
+        data_tests: [not_null, unique]
+      - name: community_title
+        description: Título visible de la comunidad.
+      - name: parent_community_hk
+        description: Hash key de la comunidad padre inmediata; nulo para comunidades raíz.
+      - name: parent_community_uuid
+        description: UUID de la comunidad padre inmediata.
+      - name: parent_community_title
+        description: Título de la comunidad padre inmediata.
+      - name: root_community_hk
+        description: Hash key de la comunidad raíz del camino.
+        data_tests: [not_null]
+      - name: root_community_uuid
+        description: UUID de la comunidad raíz del camino.
+        data_tests: [not_null]
+      - name: root_community_title
+        description: Título de la comunidad raíz del camino.
+      - name: community_depth
+        description: Cantidad de relaciones entre la comunidad y su raíz; cero para una raíz.
+        data_tests: [not_null]
+      - name: community_path_ids
+        description: Camino de IDs legados desde la raíz hasta la comunidad, separado por ` > `.
+        data_tests: [not_null]
+      - name: community_path_uuids
+        description: Camino de UUID desde la raíz hasta la comunidad, separado por ` > `.
+        data_tests: [not_null]
+      - name: community_path_titles
+        description: Camino de títulos desde la raíz hasta la comunidad, separado por ` > `.
+        data_tests: [not_null]
+      - name: base_url
+        data_tests: [not_null]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+
   - name: fct_dspacedb_item_extraction
     description: >
       Hecho base de eventos de extracción para items de la rama `dspacedb`.
