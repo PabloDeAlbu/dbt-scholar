@@ -1,0 +1,7 @@
+selectors:
+  - name: unlp_sedicidb
+    description: Construye y prueba la capa organizacional SEDICI sin seleccionar tests de consumidores externos.
+    definition:
+      method: path
+      value: models/04_org/unlp/sedicidb
+      indirect_selection: cautious

@@ -44,7 +44,8 @@ item_metadata_value AS (
         value.metadata_field_id,
         value.metadata_value_id,
         NULLIF(BTRIM(value.text_value), '') AS text_value_clean,
-        NULLIF(LOWER(BTRIM(value.text_lang)), '') AS text_lang_clean
+        NULLIF(LOWER(BTRIM(value.text_lang)), '') AS text_lang_clean,
+        NULLIF(BTRIM(value.authority), '') AS authority_clean
     FROM {{ source('sedicidb', 'metadatavalue') }} AS value
     INNER JOIN item_universe AS item
         ON item.item_id = value.resource_id
@@ -80,6 +81,15 @@ field_text_lang_stats AS (
         metadata_field_id,
         COUNT(*) FILTER (WHERE text_lang_clean IS NOT NULL)::bigint AS text_lang_value_count,
         COUNT(DISTINCT text_lang_clean)::bigint AS distinct_text_lang_count
+    FROM item_metadata_value
+    GROUP BY metadata_field_id
+),
+
+field_authority_stats AS (
+    SELECT
+        metadata_field_id,
+        COUNT(*) FILTER (WHERE authority_clean IS NOT NULL)::bigint AS authority_value_count,
+        COUNT(DISTINCT authority_clean)::bigint AS distinct_authority_count
     FROM item_metadata_value
     GROUP BY metadata_field_id
 ),
@@ -154,7 +164,21 @@ final AS (
         END AS text_lang_coverage_pct,
         COALESCE(text_lang_stats.distinct_text_lang_count, 0) AS distinct_text_lang_count,
         text_lang_summary.text_langs,
-        text_lang_summary.text_lang_value_counts
+        text_lang_summary.text_lang_value_counts,
+        COALESCE(authority_stats.authority_value_count, 0) AS authority_value_count,
+        COALESCE(
+            stats.metadata_value_count - authority_stats.authority_value_count,
+            0
+        ) AS missing_authority_value_count,
+        CASE
+            WHEN COALESCE(stats.metadata_value_count, 0) = 0 THEN 0::numeric
+            ELSE ROUND(
+                100.0 * COALESCE(authority_stats.authority_value_count, 0)
+                / stats.metadata_value_count,
+                4
+            )
+        END AS authority_coverage_pct,
+        COALESCE(authority_stats.distinct_authority_count, 0) AS distinct_authority_count
     FROM metadatafield AS field
     CROSS JOIN repository_stats AS repository
     LEFT JOIN field_stats AS stats
@@ -164,6 +188,8 @@ final AS (
     LEFT JOIN field_text_lang_stats AS text_lang_stats
         USING (metadata_field_id)
     LEFT JOIN field_text_lang_summary AS text_lang_summary
+        USING (metadata_field_id)
+    LEFT JOIN field_authority_stats AS authority_stats
         USING (metadata_field_id)
 )
 

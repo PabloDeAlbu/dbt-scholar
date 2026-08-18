@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: sedicidb
     description: Dump completo vigente de la base de datos DSpace 5 de SEDICI.
-    schema: ldg_sedici
+    schema: ldg_sedicidb
     tables:
       - name: item
       - name: handle
@@ -29,6 +29,12 @@ models:
       - dbt_utils.expression_is_true:
           name: sedicidb_metadata_usage_lang_coverage_range
           expression: "text_lang_coverage_pct between 0 and 100"
+      - dbt_utils.expression_is_true:
+          name: sedicidb_metadata_usage_authority_counts_reconcile
+          expression: "authority_value_count + missing_authority_value_count = metadata_value_count"
+      - dbt_utils.expression_is_true:
+          name: sedicidb_metadata_usage_authority_coverage_range
+          expression: "authority_coverage_pct between 0 and 100"
     columns:
       - name: metadata_field_id
         description: Identificador del metadatafield en DSpace 5.
@@ -70,6 +76,18 @@ models:
         description: Idiomas observados, ordenados y unidos con `|`; por ejemplo `en|es|pt`.
       - name: text_lang_value_counts
         description: Conteo de observaciones por idioma en formato `idioma=cantidad`, unido con `|`.
+      - name: authority_value_count
+        description: Cantidad de observaciones con `authority` no nula ni vacía.
+        data_tests: [not_null]
+      - name: missing_authority_value_count
+        description: Cantidad de observaciones sin `authority` informada.
+        data_tests: [not_null]
+      - name: authority_coverage_pct
+        description: Porcentaje de observaciones del metadatafield con `authority` informada.
+        data_tests: [not_null]
+      - name: distinct_authority_count
+        description: Cantidad de valores de `authority` distintos observados en el metadatafield.
+        data_tests: [not_null]
 
   - name: dim_unlp_sedicidb_community
     description: >
