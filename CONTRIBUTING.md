@@ -27,14 +27,24 @@ dbt debug --target dw
 dbt run --target dw -s dim_dspacedb5_community
 ```
 
-Si necesitás refrescar datos locales de DSpace 5 desde Docker:
+Para exportar un modelo dbt materializado en el PostgreSQL local a CSV:
 
 ```bash
-make dump-dspace-public
-make restore-dspace-public-to-dw
+make export MODEL=fct_unlp_sedicidb_metadatafield_usage
 ```
 
-Los dumps locales se guardan en `var/dumps/` y están ignorados por git.
+El target resuelve la relación física mediante dbt y genera el archivo en
+`var/exports/<modelo>_<fecha>.csv`. Se puede fijar la fecha del snapshot:
+
+```bash
+make export \
+  MODEL=fct_unlp_sedicidb_metadatafield_usage \
+  DATE=2026-08-02
+```
+
+El selector debe resolver un único modelo. Los archivos exportados quedan
+fuera de Git y pueden utilizarse como insumo para planillas o herramientas de
+visualización.
 
 ## Estructura del proyecto
 

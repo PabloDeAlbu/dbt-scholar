@@ -1,24 +1,36 @@
-DB_CONTAINER ?= dspacedb-1
-PGUSER ?= dspace
-SOURCE_DB ?= dspace
-TARGET_DB ?= dw
-DUMPS_DIR ?= var/dumps
+EXPORTS_DIR ?= var/exports
 DATE ?= $(shell date +%F)
-DSPACE_DUMP ?= $(DUMPS_DIR)/dspace_$(DATE).sql
+TARGET ?= dev_docker
+DW_CONTAINER ?= dw-scholar_postgres
+DW_USER ?= dw_user
+DW_DB ?= dw
+EXPORT_FILE = $(EXPORTS_DIR)/$(MODEL)_$(DATE).csv
 
-.PHONY: parse_results dump-dspace-public restore-dspace-public-to-dw print-dspace-dump-path
+.PHONY: export
 
-parse_results:
-	python3 scripts/parse_run_results.py target/run_results.json
-
-print-dspace-dump-path:
-	@echo $(DSPACE_DUMP)
-
-dump-dspace-public:
-	@mkdir -p $(DUMPS_DIR)
-	docker exec -t $(DB_CONTAINER) sh -lc 'pg_dump -U $(PGUSER) -d $(SOURCE_DB) --schema=public --no-owner --no-privileges' > $(DSPACE_DUMP)
-	@echo "Dump generado en $(DSPACE_DUMP)"
-
-restore-dspace-public-to-dw:
-	psql -h localhost -p 5432 -U $(PGUSER) -d $(TARGET_DB) < $(DSPACE_DUMP)
-	@echo "Restore completado en $(TARGET_DB) desde $(DSPACE_DUMP)"
+export:
+	@if [ -z "$(MODEL)" ]; then \
+		echo "Uso: make export MODEL=<nombre_modelo> [TARGET=dev_docker] [DATE=YYYY-MM-DD]" >&2; \
+		exit 2; \
+	fi
+	@mkdir -p $(EXPORTS_DIR)
+	@relation="$$(dbt --quiet ls \
+		--target $(TARGET) \
+		--select $(MODEL) \
+		--resource-type model \
+		--output json \
+		--output-keys name relation_name \
+		| jq -r 'select(.relation_name != null) | .relation_name')"; \
+	if [ -z "$$relation" ]; then \
+		echo "No se encontró el modelo dbt: $(MODEL)" >&2; \
+		exit 2; \
+	fi; \
+	if [ "$$(printf '%s\n' "$$relation" | wc -l)" -ne 1 ]; then \
+		echo "El selector debe resolver un único modelo: $(MODEL)" >&2; \
+		exit 2; \
+	fi; \
+	docker exec -i $(DW_CONTAINER) \
+		psql -U $(DW_USER) -d $(DW_DB) \
+		-c "COPY (SELECT * FROM $$relation) TO STDOUT WITH (FORMAT CSV, HEADER TRUE)" \
+		> $(EXPORT_FILE)
+	@echo "Export generado en $(EXPORT_FILE)"
