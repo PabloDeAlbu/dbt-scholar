@@ -34,7 +34,8 @@ make export MODEL=fct_unlp_sedicidb_metadatafield_usage
 ```
 
 El target resuelve la relación física mediante dbt y genera el archivo en
-`var/exports/<modelo>_<fecha>.csv`. Se puede fijar la fecha del snapshot:
+`var/exports/<modelo>_<fecha>.csv`. Por defecto usa la fecha actual; se puede
+fijar otra fecha para identificar el snapshot:
 
 ```bash
 make export \

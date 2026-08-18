@@ -1,38 +1,83 @@
 # dbt-scholar
 
-## Project layout
+Proyecto dbt para organizar fuentes de información académica y construir
+modelos reutilizables y salidas analíticas.
 
-Models are organized by layer:
+## Capas
 
-- `models/01_ldg`: landing
-- `models/02_dv`: data vault
-- `models/03_dm`: data marts
-- `models/04_viz`: analytics views
+- `models/01_ldg`: normalización mínima de datos de entrada.
+- `models/02_dv`: historización mediante Data Vault cuando la fuente lo requiere.
+- `models/03_dm`: modelos dimensionales compartidos.
+- `models/04_org`: hechos, dimensiones y bridges propios de una organización o fuente institucional.
+- `models/04_viz`: vistas orientadas a visualización.
+- `models/05_analytics`: modelos y resultados de un análisis o proyecto específico.
 
-## Schema naming
+Los esquemas físicos son generados según la capa. Por ejemplo:
 
-Final physical schemas are defined by both `dbt_project.yml` and `macros/generate_schema_name.sql`.
-The macro adds a layer prefix:
+- `models/04_org/unlp/sedicidb` se materializa en `dm_unlp_sedicidb`.
+- `models/05_analytics/unlp/libros` se materializa en `analytics_unlp_libros`.
 
-- `models/01_ldg/*` -> `ldg_<schema>`
-- `models/02_dv/*` -> `dv_<schema>`
-- `models/03_dm/*` -> `dm_<schema>`
-- `models/04_viz/*` -> `dm_<schema>`
-- `seeds/*` -> `ldg_<schema>`
+## Desarrollo local con SEDICI
 
-Examples:
+El dump vigente de la base DSpace 5 se restaura directamente en el esquema
+`ldg_sedicidb` de PostgreSQL. Esta fuente representa un estado completo del
+repositorio y actualmente no pasa por Data Vault:
 
-- `models/03_dm/core/openalex/*` with `+schema: openalex` builds in `dm_openalex`
-- `models/03_dm/core/openaire/*` with `+schema: openaire` builds in `dm_openaire`
-- models in `models/03_dm/core/` root use `+schema: core` and build in `dm_core`
+```text
+ldg_sedicidb
+    -> models/04_org/unlp/sedicidb
+    -> dm_unlp_sedicidb
+    -> models/05_analytics/unlp/*
+```
 
-Notes:
+La capa `04_org/unlp/sedicidb` busca mantener una base sencilla y trazable:
 
-- Subdirectories can override `+schema` from the parent directory.
-- A model placed directly under `models/03_dm/core/` only builds in `dm_core` if `03_dm.core` sets `+schema: core` in `dbt_project.yml`.
+- los modelos `int_` preparan metadatafields concretos;
+- las `dim_` representan entidades como comunidades, colecciones o personas;
+- las `brg_` conservan relaciones multivaluadas entre entidades;
+- las `fct_` declaran un hecho y un grano explícitos;
+- `dedup/` adapta publicaciones al contrato requerido por procesos de deduplicación.
 
-## Common commands
+Para validar la conexión local:
 
-- `dbt parse`
-- `dbt run`
-- `dbt test`
+```bash
+dbt debug --target dev_docker
+```
+
+Para construir y probar solamente la base SEDICI, sin ejecutar tests de
+consumidores analytics no seleccionados:
+
+```bash
+dbt build --target dev_docker --threads 1 \
+  --selector unlp_sedicidb
+```
+
+## Exportar un modelo a CSV
+
+Un modelo materializado en el PostgreSQL local puede exportarse mediante:
+
+```bash
+make export MODEL=fct_unlp_sedicidb_metadatafield_usage
+```
+
+El archivo se genera en `var/exports/` con la fecha actual:
+
+```text
+var/exports/fct_unlp_sedicidb_metadatafield_usage_YYYY-MM-DD.csv
+```
+
+La fecha puede sobrescribirse cuando se necesita identificar el snapshot de
+la fuente:
+
+```bash
+make export \
+  MODEL=fct_unlp_sedicidb_metadatafield_usage \
+  DATE=2026-08-02
+```
+
+Los archivos de `var/` no se versionan.
+
+## Más información
+
+Las convenciones de modelado, ejecución y contribución están documentadas en
+[CONTRIBUTING.md](CONTRIBUTING.md).
