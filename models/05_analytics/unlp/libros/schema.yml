@@ -1,6 +1,40 @@
 version: 2
 
 models:
+  - name: dim_libros_unlp_journal
+    description: >
+      Universo de revistas de SEDICI a grano una fila por revista. Considera
+      revista a cada comunidad hija directa de la comunidad raíz `Revistas`;
+      las comunidades descendientes quedan interpretadas como secciones.
+    columns:
+      - name: journal_id
+        description: Identificador de la comunidad SEDICI que representa la revista.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              name: libros_journal_in_sedici_community_dim
+              to: ref('dim_unlp_sedicidb_community')
+              field: community_id
+      - name: journal_title
+        description: Título vigente de la comunidad que representa la revista.
+        data_tests: [not_null]
+      - name: root_community_id
+        description: Identificador de la comunidad raíz `Revistas`.
+        data_tests: [not_null]
+      - name: root_community_title
+        description: Título de la comunidad raíz; siempre `Revistas`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Revistas']
+      - name: journal_path_ids
+        description: Camino de IDs desde la raíz `Revistas` hasta la revista.
+        data_tests: [not_null]
+      - name: journal_path_titles
+        description: Camino de títulos desde la raíz `Revistas` hasta la revista.
+        data_tests: [not_null]
+
   - name: unlp_libros_01_cobertura_general
     description: >
       Perfil general de autorías agrupado por estado y evidencia de afiliación.
@@ -70,7 +104,7 @@ models:
       - dbt_utils.expression_is_true:
           name: libros_journal_article_author_journal_matches_path
           expression: >
-            journal_id = split_part(owning_community_path_ids, ' > ', 2)
+            journal_id = split_part(owning_community_path_ids, ' > ', 2)::bigint
             and journal_title = split_part(owning_community_path_titles, ' > ', 2)
       - dbt_utils.expression_is_true:
           name: libros_journal_article_author_year_matches_date
@@ -145,7 +179,12 @@ models:
         description: >
           ID de la comunidad que representa la revista, derivado como segundo
           nodo del camino bajo la comunidad raíz `Revistas`.
-        data_tests: [not_null]
+        data_tests:
+          - not_null
+          - relationships:
+              name: libros_journal_article_author_journal_in_universe
+              to: ref('dim_libros_unlp_journal')
+              field: journal_id
       - name: journal_title
         description: >
           Nombre de la revista derivado como segundo nodo del camino de

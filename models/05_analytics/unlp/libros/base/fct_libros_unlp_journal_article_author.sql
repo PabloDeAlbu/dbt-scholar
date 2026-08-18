@@ -21,12 +21,17 @@ WITH article AS (
         base.sedici_subtype,
         base.dc_date_issued AS publication_date,
         base.publication_year,
-        SPLIT_PART(base.owning_community_path_ids, ' > ', 2) AS journal_id,
-        SPLIT_PART(base.owning_community_path_titles, ' > ', 2) AS journal_title,
+        journal.journal_id,
+        journal.journal_title,
         base.owning_root_community_title,
         base.owning_community_path_ids,
         base.owning_community_path_titles
     FROM {{ ref('fct_unlp_sedicidb_item_publication') }} AS base
+    INNER JOIN {{ ref('dim_libros_unlp_journal') }} AS journal
+        ON journal.journal_id = NULLIF(
+            SPLIT_PART(base.owning_community_path_ids, ' > ', 2),
+            ''
+        )::bigint
     WHERE base.in_archive IS TRUE
       AND base.withdrawn IS FALSE
       AND base.discoverable IS TRUE
@@ -35,8 +40,6 @@ WITH article AS (
       AND base.dc_type IN ('Articulo', 'Artículo')
       AND base.dc_date_issued IS NOT NULL
       AND base.publication_year IS NOT NULL
-      AND SPLIT_PART(base.owning_community_path_ids, ' > ', 2) <> ''
-      AND SPLIT_PART(base.owning_community_path_titles, ' > ', 2) <> ''
 ),
 
 author_observation AS (

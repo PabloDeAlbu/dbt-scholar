@@ -7,8 +7,8 @@ Los modelos se materializan en el esquema `analytics_unlp_libros`.
 
 ## Fuentes
 
-- Publicaciones: `fct_unlp_sedicidb_item_publication` y
-  `fct_unlp_sedicidb_dedup_publication`.
+- Publicaciones y jerarquía: `fct_unlp_sedicidb_item_publication` y
+  `dim_unlp_sedicidb_community`.
 - Autorías: `brg_unlp_sedicidb_item_author` y
   `dim_unlp_sedicidb_author`.
 - Personas y afiliaciones: `dim_vocsedici_persona`,
@@ -16,6 +16,8 @@ Los modelos se materializan en el esquema `analytics_unlp_libros`.
 
 ## Modelos
 
+- `base/dim_libros_unlp_journal`: una fila por comunidad que representa una
+  revista, definida como hija directa de la comunidad raíz `Revistas`.
 - `base/fct_libros_unlp_journal_article_author`: una fila por artículo y autor, con
   la afiliación vigente a la fecha de publicación y la evidencia utilizada
   para clasificarla.
