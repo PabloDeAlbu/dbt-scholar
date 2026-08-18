@@ -1,73 +1,44 @@
 # dbt-scholar
 
-Proyecto dbt para organizar fuentes de información académica y construir
-modelos reutilizables y salidas analíticas.
+English | [Español](LEEME.md)
 
-## Capas
+A dbt project for organizing scholarly information sources and building
+reusable models and analytical outputs.
 
-- `models/01_ldg`: normalización mínima de datos de entrada.
-- `models/02_dv`: historización mediante Data Vault cuando la fuente lo requiere.
-- `models/03_dm`: modelos dimensionales compartidos.
-- `models/04_org`: hechos, dimensiones y bridges propios de una organización o fuente institucional.
-- `models/04_viz`: vistas orientadas a visualización.
-- `models/05_analytics`: modelos y resultados de un análisis o proyecto específico.
+## Layers
 
-Los esquemas físicos son generados según la capa. Por ejemplo:
+- `models/01_ldg`: minimal normalization of input data.
+- `models/02_dv`: history tracking through Data Vault when required by the source.
+- `models/03_dm`: shared dimensional models.
+- `models/04_org`: facts, dimensions, and bridges specific to an organization or institutional source.
+- `models/04_viz`: views intended for visualization.
+- `models/05_analytics`: models and results for a specific analysis or project.
 
-- `models/04_org/unlp/sedicidb` se materializa en `dm_unlp_sedicidb`.
-- `models/05_analytics/unlp/libros` se materializa en `analytics_unlp_libros`.
+Physical schemas are generated according to the layer. For example:
 
-## Desarrollo local con SEDICI
+- `models/04_org/unlp/sedicidb` is materialized in `dm_unlp_sedicidb`.
+- `models/05_analytics/unlp/libros` is materialized in `analytics_unlp_libros`.
 
-El dump vigente de la base DSpace 5 se restaura directamente en el esquema
-`ldg_sedicidb` de PostgreSQL. Esta fuente representa un estado completo del
-repositorio y actualmente no pasa por Data Vault:
+## Institutional sources
 
-```text
-ldg_sedicidb
-    -> models/04_org/unlp/sedicidb
-    -> dm_unlp_sedicidb
-    -> models/05_analytics/unlp/*
-```
+Local loading, modeling, and building of the SEDICI base are described in the
+[SEDICI model guide](models/04_org/unlp/sedicidb/LEEME.md), currently in Spanish.
 
-La capa `04_org/unlp/sedicidb` busca mantener una base sencilla y trazable:
+## Export a model to CSV
 
-- los modelos `int_` preparan metadatafields concretos;
-- las `dim_` representan entidades como comunidades, colecciones o personas;
-- las `brg_` conservan relaciones multivaluadas entre entidades;
-- las `fct_` declaran un hecho y un grano explícitos;
-- `dedup/` adapta publicaciones al contrato requerido por procesos de deduplicación.
-
-Para validar la conexión local:
-
-```bash
-dbt debug --target dev_docker
-```
-
-Para construir y probar solamente la base SEDICI, sin ejecutar tests de
-consumidores analytics no seleccionados:
-
-```bash
-dbt build --target dev_docker --threads 1 \
-  --selector unlp_sedicidb
-```
-
-## Exportar un modelo a CSV
-
-Un modelo materializado en el PostgreSQL local puede exportarse mediante:
+A model materialized in the local PostgreSQL database can be exported with:
 
 ```bash
 make export MODEL=fct_unlp_sedicidb_metadatafield_usage
 ```
 
-El archivo se genera en `var/exports/` con la fecha actual:
+The file is generated in `var/exports/` with the current date:
 
 ```text
 var/exports/fct_unlp_sedicidb_metadatafield_usage_YYYY-MM-DD.csv
 ```
 
-La fecha puede sobrescribirse cuando se necesita identificar el snapshot de
-la fuente:
+The date can be overridden when the source snapshot needs to be identified:
 
 ```bash
 make export \
@@ -75,9 +46,9 @@ make export \
   DATE=2026-08-02
 ```
 
-Los archivos de `var/` no se versionan.
+Files under `var/` are not versioned.
 
-## Más información
+## More information
 
-Las convenciones de modelado, ejecución y contribución están documentadas en
+Modeling, execution, and contribution conventions are documented in
 [CONTRIBUTING.md](CONTRIBUTING.md).
