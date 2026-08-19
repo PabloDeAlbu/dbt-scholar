@@ -3,12 +3,16 @@ version: 2
 models:
   - name: fct_unlp_sedicidb_dedup_publication
     description: >
-      Una fila por publicación de SEDICI preparada para utilizarse como entrada
-      del deduplicador. Se construye a partir de
-      `fct_unlp_sedicidb_item_publication` y conserva solamente los ítems que
-      están archivados, no fueron retirados, son visibles en las búsquedas y
-      tienen handle. Normaliza y agrupa los metadatos que necesita el
-      deduplicador.
+      Una fila por publicación elegible del snapshot `sedicidb`, adaptada al
+      contrato del deduplicador.
+    config:
+      meta:
+        organization: unlp
+        source_system: sedicidb
+        input_layer: org
+        model_role: dedup_contract
+        grain: id
+        temporal_scope: current_snapshot
     columns:
       - name: source
         description: Origen fijo del registro; vale `sedici`.

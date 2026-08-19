@@ -3,13 +3,16 @@ version: 2
 models:
   - name: fct_unlp_sedici_dedup_publication
     description: >
-      Conjunto estable y normalizado de publicaciones SEDICI/UNLP a grano una
-      fila por publicación, preparado para consumo posterior desde Kedro en
-      procesos de deduplicación. Actualmente parte de
-      `fct_unlp_sedici_item_publication`. Expone en primer plano el mismo bloque
-      de columnas usado en consultas operativas para exportar CSVs de
-      deduplicación y conserva algunas columnas de soporte para consumidores
-      downstream.
+      Una fila por publicación elegible de SEDICI observada mediante
+      `dspacedb5`, adaptada al contrato del deduplicador.
+    config:
+      meta:
+        organization: unlp
+        source_system: dspacedb5
+        input_layer: org
+        model_role: dedup_contract
+        grain: id
+        temporal_scope: latest_historical_observation
     columns:
       - name: source
         description: Origen fijo del registro; en este modelo vale `sedici`.

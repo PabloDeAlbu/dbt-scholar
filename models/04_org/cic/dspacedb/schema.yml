@@ -3,9 +3,17 @@ version: 2
 models:
   - name: fct_cic_dspacedb_item_publication
     description: >
-      Hecho de items publicados en CIC DIGITAL, construido sobre `fct_dspacedb_item_publication`
+      Una fila por ítem publicado de CIC Digital observado mediante `dspacedb`.
     config:
       tags: [cic, dm]
+      meta:
+        organization: cic
+        source_system: dspacedb
+        input_layer: dm
+        model_role: fact
+        business_process: item_publication
+        grain: item_uuid
+        temporal_scope: latest_historical_observation
     data_tests:
       - dbt_utils.expression_is_true:
           expression: "coalesce(owning_collection_title, '') not in ('', '!UNKNOWN', 'N/A', 'NA')"
@@ -56,6 +64,13 @@ models:
       submitter a partir de `fct_cic_dspacedb_item_publication`.
     config:
       tags: [cic, dm]
+      meta:
+        organization: cic
+        source_system: dspacedb
+        input_layer: dm
+        model_role: fact
+        grain: eperson_hk
+        temporal_scope: latest_historical_observation
     columns:
       - name: eperson_hk
         description: Hash key estable del usuario dentro del scope institucional del repositorio.

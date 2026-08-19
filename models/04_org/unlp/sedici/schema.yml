@@ -142,11 +142,17 @@ models:
 
   - name: fct_unlp_sedici_item_publication
     description: >
-      Hecho institucional fuente-específico de publicaciones SEDICI/UNLP a
-      nivel de ítem, construido sobre `fct_dspacedb5_item_publication` con
-      filtro institucional y enriquecido con metadatos descriptivos, PIDs
-      normalizados y contexto técnico del ítem. Es la base institucional
-      canónica de SEDICI para el modelado organizacional de UNLP.
+      Una fila por ítem de SEDICI observado mediante la rama historizada
+      `dspacedb5` y delimitado para UNLP.
+    config:
+      meta:
+        organization: unlp
+        source_system: dspacedb5
+        input_layer: dm
+        model_role: fact
+        business_process: item_publication
+        grain: item_hk
+        temporal_scope: latest_historical_observation
     columns:
       - name: item_hk
         description: Clave hash del ítem institucional.
