@@ -1,0 +1,204 @@
+version: 2
+
+sources:
+  - name: cicdigital
+    description: Dump completo vigente de la base de datos DSpace 7 de CIC Digital.
+    schema: ldg_cicdigital
+    meta:
+      organization: cic
+      source_system: cicdigital
+      input_layer: ldg
+      temporal_scope: current_snapshot
+    tables:
+      - name: item
+      - name: handle
+      - name: collection2item
+      - name: collection
+      - name: community
+      - name: community2collection
+      - name: community2community
+      - name: dspaceobject
+      - name: metadatavalue
+      - name: metadatafieldregistry
+      - name: metadataschemaregistry
+
+models:
+  - name: dim_cic_cicdigital_collection
+    description: >
+      Colecciones vigentes de CIC Digital, a grano una fila por UUID de
+      colección, con su título y comunidad contenedora inmediata.
+    config:
+      meta:
+        organization: cic
+        source_system: cicdigital
+        input_layer: ldg
+        model_role: dimension
+        grain: collection_id
+    columns:
+      - name: collection_id
+        data_tests: [not_null, unique]
+      - name: collection_title
+        data_tests: [not_null]
+      - name: community_id
+        data_tests: [not_null]
+      - name: community_title
+        data_tests: [not_null]
+
+  - name: brg_cic_cicdigital_item_author
+    description: >
+      Relación multivaluada entre ítems y autorías declaradas en CIC Digital.
+      Conserva el rol y la observación original sin generar un identificador
+      hash de persona.
+    config:
+      meta:
+        organization: cic
+        source_system: cicdigital
+        input_layer: int
+        model_role: bridge
+        grain: metadata_value_id
+    columns:
+      - name: item_id
+        data_tests: [not_null]
+      - name: metadata_value_id
+        data_tests: [not_null, unique]
+      - name: author_role
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['author', 'corporate', 'editor', 'compilator']
+      - name: author_name
+        data_tests: [not_null]
+      - name: authority
+        description: Authority declarada para la observación, cuando existe.
+
+  - name: fct_cic_cicdigital_item_publication
+    description: >
+      Una fila por ítem publicado y no retirado de CIC Digital. Conserva los
+      flags operativos, la colección propietaria y los metadatos escalares
+      preparados por los modelos `int_`.
+    config:
+      meta:
+        organization: cic
+        source_system: cicdigital
+        input_layer: ldg
+        model_role: fact
+        business_process: item_publication
+        grain: item_id
+        temporal_scope: current_snapshot
+    columns:
+      - name: item_id
+        description: UUID canónico del ítem en DSpace 7.
+        data_tests: [not_null, unique]
+      - name: legacy_item_id
+        description: Identificador numérico legado, cuando está disponible.
+      - name: in_archive
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [true]
+      - name: withdrawn
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [false]
+      - name: discoverable
+        data_tests: [not_null]
+      - name: owning_collection_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_cic_cicdigital_collection')
+              field: collection_id
+      - name: handle
+        description: Handle persistente del ítem.
+      - name: item_url
+        description: URL pública de la página del ítem en CIC Digital.
+      - name: dc_title
+        description: Último valor no vacío de `dc.title`.
+      - name: dc_type
+        description: Último valor no vacío de `dc.type`.
+      - name: cic_parent_type
+        description: Último valor no vacío de `cic.parentType`.
+      - name: dcterms_issued
+        description: Fecha normalizada desde `dcterms.issued`.
+      - name: dcterms_issued_precision
+        description: Precisión reconocida para la fecha.
+      - name: dcterms_description
+        description: Último valor no vacío de `dcterms.description`.
+
+  - name: fct_cic_cicdigital_metadatafield_usage
+    description: >
+      Inventario vigente de metadatafields registrados en el dump de CIC
+      Digital, a grano una fila por `metadata_field_id`. Incluye campos sin uso
+      y métricas de cobertura, volumen, multivaluación, idioma y authority
+      sobre recursos que existen en `item`.
+    config:
+      meta:
+        organization: cic
+        source_system: cicdigital
+        input_layer: ldg
+        model_role: profiling
+        grain: metadata_field_id
+        temporal_scope: current_snapshot
+    columns:
+      - name: metadata_field_id
+        description: Identificador del metadatafield en DSpace 7.
+        data_tests: [not_null, unique]
+      - name: metadatafield_fullname
+        description: Nombre completo formado por schema, element y qualifier.
+        data_tests: [not_null, unique]
+      - name: total_item_count
+        description: Cantidad total de ítems del dump utilizada como denominador.
+        data_tests: [not_null]
+      - name: item_count
+        description: Cantidad de ítems con al menos una observación del campo.
+        data_tests: [not_null]
+      - name: metadata_value_count
+        description: Cantidad total de observaciones del campo en ítems.
+        data_tests: [not_null]
+      - name: empty_metadata_value_count
+        description: Cantidad de observaciones con valor textual nulo o vacío.
+        data_tests: [not_null]
+      - name: distinct_nonempty_value_count
+        description: Cantidad de valores textuales no vacíos distintos.
+        data_tests: [not_null]
+      - name: multivalued_item_count
+        description: Cantidad de ítems con más de un valor distinto para el campo.
+        data_tests: [not_null]
+      - name: item_coverage_pct
+        description: Porcentaje de ítems del dump que observan el metadatafield.
+        data_tests: [not_null]
+      - name: text_lang_value_count
+        description: Cantidad de observaciones con idioma informado.
+        data_tests: [not_null]
+      - name: missing_text_lang_value_count
+        description: Cantidad de observaciones sin idioma informado.
+        data_tests: [not_null]
+      - name: text_lang_coverage_pct
+        description: Porcentaje de observaciones con idioma informado.
+        data_tests: [not_null]
+      - name: authority_value_count
+        description: Cantidad de observaciones con authority informada.
+        data_tests: [not_null]
+      - name: missing_authority_value_count
+        description: Cantidad de observaciones sin authority informada.
+        data_tests: [not_null]
+      - name: authority_coverage_pct
+        description: Porcentaje de observaciones con authority informada.
+        data_tests: [not_null]
+      - name: distinct_authority_count
+        description: Cantidad de authorities distintas observadas.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: cicdigital_metadata_usage_lang_counts_reconcile
+          expression: "text_lang_value_count + missing_text_lang_value_count = metadata_value_count"
+      - dbt_utils.expression_is_true:
+          name: cicdigital_metadata_usage_lang_coverage_range
+          expression: "text_lang_coverage_pct between 0 and 100"
+      - dbt_utils.expression_is_true:
+          name: cicdigital_metadata_usage_authority_counts_reconcile
+          expression: "authority_value_count + missing_authority_value_count = metadata_value_count"
+      - dbt_utils.expression_is_true:
+          name: cicdigital_metadata_usage_authority_coverage_range
+          expression: "authority_coverage_pct between 0 and 100"
