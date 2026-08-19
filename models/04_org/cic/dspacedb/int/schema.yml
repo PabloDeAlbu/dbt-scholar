@@ -1,0 +1,121 @@
+version: 2
+
+models:
+  - name: int_cic_dspacedb_item
+    description: Última observación institucional de cada ítem CIC disponible en `dspacedb`.
+    config:
+      meta:
+        organization: cic
+        source_system: dspacedb
+        input_layer: dm
+        model_role: intermediate
+        grain: item_uuid
+        temporal_scope: latest_historical_observation
+    columns:
+      - name: item_hk
+        data_tests: [not_null, unique]
+      - name: item_uuid
+        data_tests: [not_null, unique]
+      - name: source_label
+        data_tests: [not_null]
+      - name: institution_ror
+        data_tests: [not_null]
+
+  - name: int_cic_dspacedb_item_metadatavalue
+    description: >
+      Metadatos de los ítems CIC seleccionados por `int_cic_dspacedb_item`, sin
+      combinar observaciones procedentes de etiquetas distintas del repositorio.
+    config:
+      meta:
+        organization: cic
+        source_system: dspacedb
+        input_layer: dm
+        model_role: intermediate
+        grain: metadatavalue_hk
+        temporal_scope: latest_historical_observation
+    columns:
+      - name: metadatavalue_hk
+        data_tests: [not_null, unique]
+      - name: item_uuid
+        data_tests: [not_null]
+      - name: metadata_value_id
+        data_tests: [not_null]
+      - name: metadatafield_fullname
+        data_tests: [not_null]
+      - name: value_raw
+        description: Valor observado en `fct_dspacedb_item_metadata`.
+      - name: value
+        description: Valor textual limpio; `!UNKNOWN` se representa como nulo.
+      - name: authority
+        description: Identificador de autoridad sin espacios exteriores.
+      - name: place
+        description: Posición del valor dentro del metadatafield.
+
+  - name: int_cic_dspacedb_item_dc_title
+    description: Último valor no vacío de `dc.title` por ítem.
+    config:
+      meta: &scalar_meta
+        organization: cic
+        source_system: dspacedb
+        input_layer: int
+        model_role: intermediate
+        grain: item_uuid
+        temporal_scope: latest_historical_observation
+    columns: &scalar_columns
+      - name: item_uuid
+        data_tests: [not_null, unique]
+      - name: metadata_value_id
+        data_tests: [not_null]
+      - name: value_raw
+      - name: value
+        data_tests: [not_null]
+
+  - name: int_cic_dspacedb_item_dcterms_title_subtitle
+    description: Último valor no vacío de `dcterms.title.subtitle` por ítem.
+    config:
+      meta: *scalar_meta
+    columns: *scalar_columns
+
+  - name: int_cic_dspacedb_item_dc_type
+    description: Último valor no vacío de `dc.type` por ítem.
+    config:
+      meta: *scalar_meta
+    columns: *scalar_columns
+
+  - name: int_cic_dspacedb_item_cic_parent_type
+    description: Último valor no vacío de `cic.parentType` por ítem.
+    config:
+      meta: *scalar_meta
+    columns: *scalar_columns
+
+  - name: int_cic_dspacedb_item_dcterms_description
+    description: Último valor no vacío de `dcterms.description` por ítem.
+    config:
+      meta: *scalar_meta
+    columns: *scalar_columns
+
+  - name: int_cic_dspacedb_item_dc_date_available
+    description: >
+      Último valor válido de `dc.date.available` por ítem; acepta fechas y
+      timestamps ISO informados por DSpace.
+    config:
+      meta: *scalar_meta
+    columns: &date_columns
+      - name: item_uuid
+        data_tests: [not_null, unique]
+      - name: metadata_value_id
+        data_tests: [not_null]
+      - name: value_raw
+      - name: value
+        data_tests: [not_null]
+      - name: value_precision
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['day', 'month', 'year']
+
+  - name: int_cic_dspacedb_item_dcterms_issued
+    description: Último valor válido de `dcterms.issued` por ítem.
+    config:
+      meta: *scalar_meta
+    columns: *date_columns

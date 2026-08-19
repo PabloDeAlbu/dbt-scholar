@@ -41,21 +41,46 @@ models:
       - name: owning_community_url
         description: URL canónica de la comunidad owning construida como `base_url/communities/{community_uuid}/`.
       - name: dc_date_available
-        description: Valores crudos observados para `dc.date.available`, concatenados para auditoría.
+        description: Fecha normalizada desde el último valor válido de `dc.date.available`.
         data_tests: [not_null]
+      - name: dc_date_available_raw
+        description: Valor original elegido para `dc.date.available`.
+      - name: dc_date_available_precision
+        description: Precisión declarada por el valor elegido para `dc.date.available`.
       - name: dcterms_issued
-        description: Valores crudos observados para `dcterms.issued`, concatenados para auditoría.
+        description: Fecha normalizada desde el último valor válido de `dcterms.issued`.
         data_tests:
           - not_null:
               config:
                 severity: warn
+      - name: dcterms_issued_raw
+        description: Valor original elegido para `dcterms.issued`.
+      - name: dcterms_issued_precision
+        description: Precisión declarada por el valor elegido para `dcterms.issued`.
       - name: dc_title
-        description: Valores crudos observados para `dc.title`, concatenados para auditoría.
+        description: Último valor no vacío de `dc.title`.
+      - name: dc_title_raw
+        description: Valor original elegido para `dc.title`.
+      - name: dcterms_title_subtitle
+        description: Último valor no vacío de `dcterms.title.subtitle`.
+      - name: dcterms_title_subtitle_raw
+        description: Valor original elegido para `dcterms.title.subtitle`.
       - name: cic_parent_type
-        description: Valores crudos observados para `cic.parentType`, concatenados para auditoría.
+        description: Último valor no vacío de `cic.parentType`.
+      - name: cic_parent_type_raw
+        description: Valor original elegido para `cic.parentType`.
       - name: dc_type
-        description: Valores crudos observados para `dc.type`, concatenados para auditoría.
-        data_tests: [not_null]
+        description: Último valor no vacío de `dc.type`.
+        data_tests:
+          - not_null:
+              config:
+                severity: warn
+      - name: dc_type_raw
+        description: Valor original elegido para `dc.type`.
+      - name: dcterms_description
+        description: Último valor no vacío de `dcterms.description`.
+      - name: dcterms_description_raw
+        description: Valor original elegido para `dcterms.description`.
 
   - name: fct_cic_dspacedb_eperson
     description: >

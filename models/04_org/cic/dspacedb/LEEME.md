@@ -6,9 +6,21 @@ conserva contexto de repositorio, extracción y carga.
 
 ```text
 modelos compartidos dspacedb
-    -> filtro y reglas institucionales CIC
+    -> int_cic_dspacedb_item
+    -> int_cic_dspacedb_item_metadatavalue
+    -> un int por metadato utilizado
     -> fct_cic_dspacedb_item_publication
 ```
+
+`int_cic_dspacedb_item` elige una sola observación institucional por
+`item_uuid`. La unión posterior de metadatos conserva `item_hk`,
+`source_label` e `institution_ror` para no mezclar las distintas etiquetas con
+las que el mismo repositorio fue cargado en el warehouse.
+
+La fact conserva todos los ítems publicados del alcance institucional. La
+ausencia de un metadato, incluido `dc.type`, se expone como nulo y se controla
+como calidad de datos; no se utiliza para excluir silenciosamente una
+publicación.
 
 A diferencia de `cicdigital`, esta rama se apoya en el recorrido historizado
 del Data Warehouse. Debe utilizarse cuando el análisis necesita comparar
