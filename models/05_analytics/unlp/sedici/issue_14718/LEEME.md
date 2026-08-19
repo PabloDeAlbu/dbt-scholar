@@ -39,6 +39,13 @@ otras fuentes. Cada escenario debe usar nombres de modelo distintos y declarar
 en su `schema.yml` las fuentes de ambos inputs. Los resultados no deben cambiar
 de procedencia implícitamente según el target.
 
+La primera variante histórica disponible utiliza
+`fct_cic_dspacedb_dedup_publication` como input 1. Conserva los mismos UUID de
+colección, pero representa 353 publicaciones observadas en abril de 2026 antes
+de aplicar las condiciones de elegibilidad del deduplicador. De ellas, 349 son
+elegibles; las cuatro restantes corresponden a `Resumen` sin
+`cic.parentType`, cuyo tipo documental no se infiere por ser ambiguo.
+
 ## Validaciones realizadas
 
 Se verificaron los metadatafields utilizados para título, autor, fecha, tipo e

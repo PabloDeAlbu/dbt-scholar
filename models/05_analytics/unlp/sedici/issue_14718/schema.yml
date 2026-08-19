@@ -23,6 +23,12 @@ models:
           - not_null
           - accepted_values:
               values: ['cic_digital']
+      - name: source_system
+        description: Recorrido técnico utilizado; vale `cicdigital`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['cicdigital']
       - name: id
         description: Handle persistente del ítem en CIC Digital.
         data_tests: [not_null, unique]
@@ -71,6 +77,12 @@ models:
           - not_null
           - accepted_values:
               values: ['sedici']
+      - name: source_system
+        description: Recorrido técnico utilizado; vale `sedicidb`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['sedicidb']
       - name: id
         description: Handle institucional de la publicación en SEDICI.
         data_tests: [not_null, unique]
@@ -86,3 +98,55 @@ models:
       - name: date
         description: Fecha de publicación reconocida en SEDICI.
         data_tests: [not_null]
+
+  - name: unlp_sedici_01_dedup_cic_lifia_sedici_input_1_dspacedb
+    description: >
+      Variante histórica del input 1, construida con la última observación de
+      las colecciones LIFIA disponible en `dspacedb`.
+    config:
+      meta:
+        issue: 14718
+        input_number: 1
+        organization: cic
+        source_system: dspacedb
+        input_layer: org
+        model_role: dedup_input
+        business_process: publication_deduplication
+        grain: id
+        temporal_scope: latest_historical_observation
+    columns:
+      - name: source
+        description: Repositorio institucional; vale `cic_digital`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['cic_digital']
+      - name: source_system
+        description: Recorrido técnico utilizado; vale `dspacedb`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['dspacedb']
+      - name: id
+        description: Handle público de la publicación en CIC Digital.
+        data_tests: [not_null, unique]
+      - name: title
+        description: Título utilizado por el deduplicador.
+        data_tests: [not_null]
+      - name: type
+        description: Tipo reconocido por el deduplicador.
+        data_tests: [not_null]
+      - name: author
+        description: Autores utilizados por el deduplicador.
+        data_tests: [not_null]
+      - name: date
+        description: Fecha de publicación reconocida en CIC Digital.
+        data_tests: [not_null]
+      - name: owning_collection_id
+        description: UUID de una de las dos colecciones LIFIA definidas por el issue.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - '3da12564-7da1-4d08-9037-f706cc294a09'
+                - 'ff4e8e87-449a-4df0-b424-07ef1b533e1e'

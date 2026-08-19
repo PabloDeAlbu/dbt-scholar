@@ -1,5 +1,6 @@
 SELECT
     source,
+    'sedicidb'::text AS source_system,
     id,
     title,
     subtitle,
