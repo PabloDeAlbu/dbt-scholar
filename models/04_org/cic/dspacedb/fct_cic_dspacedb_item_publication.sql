@@ -5,8 +5,11 @@ SELECT
     REGEXP_REPLACE(item.base_url, '/+$', '') || '/items/' || item.item_uuid || '/' AS item_url,
     collection.collection_url AS owning_collection_url,
     collection.collection_title AS owning_collection_title,
+    collection.community_uuid AS owning_community_id,
     collection.community_title AS owning_community_title,
     collection.community_url AS owning_community_url,
+    identifier_uri.value_raw AS dc_identifier_uri_raw,
+    identifier_uri.value AS dc_identifier_uri,
     available.value_raw AS dc_date_available_raw,
     available.value AS dc_date_available,
     available.value_precision AS dc_date_available_precision,
@@ -30,6 +33,8 @@ LEFT JOIN {{ ref('dim_dspacedb_collection') }} AS collection
    AND collection.source_label = item.source_label
    AND collection.institution_ror = item.institution_ror
 LEFT JOIN {{ ref('int_cic_dspacedb_item_dc_date_available') }} AS available
+    USING (item_uuid)
+LEFT JOIN {{ ref('int_cic_dspacedb_item_dc_identifier_uri') }} AS identifier_uri
     USING (item_uuid)
 LEFT JOIN {{ ref('int_cic_dspacedb_item_dcterms_issued') }} AS issued
     USING (item_uuid)

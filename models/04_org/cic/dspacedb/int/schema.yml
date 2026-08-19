@@ -119,3 +119,68 @@ models:
     config:
       meta: *scalar_meta
     columns: *date_columns
+
+  - name: int_cic_dspacedb_item_dc_identifier_uri
+    description: Último valor no vacío de `dc.identifier.uri` por ítem.
+    config:
+      meta: *scalar_meta
+    columns: *scalar_columns
+
+  - name: int_cic_dspacedb_item_dcterms_creator_author
+    description: Observaciones no vacías de `dcterms.creator.author`.
+    config:
+      meta: &multivalue_meta
+        organization: cic
+        source_system: dspacedb
+        input_layer: int
+        model_role: intermediate
+        grain: metadata_value_id
+        temporal_scope: latest_historical_observation
+    columns: &multivalue_columns
+      - name: item_uuid
+        data_tests: [not_null]
+      - name: metadata_value_id
+        data_tests: [not_null, unique]
+      - name: value_raw
+      - name: value
+        data_tests: [not_null]
+      - name: authority
+      - name: confidence
+      - name: place
+
+  - name: int_cic_dspacedb_item_dcterms_creator_corporate
+    description: Observaciones no vacías de `dcterms.creator.corporate`.
+    config:
+      meta: *multivalue_meta
+    columns: *multivalue_columns
+
+  - name: int_cic_dspacedb_item_dcterms_creator_editor
+    description: Observaciones no vacías de `dcterms.creator.editor`.
+    config:
+      meta: *multivalue_meta
+    columns: *multivalue_columns
+
+  - name: int_cic_dspacedb_item_dcterms_creator_compilator
+    description: Observaciones no vacías de `dcterms.creator.compilator`.
+    config:
+      meta: *multivalue_meta
+    columns: *multivalue_columns
+
+  - name: int_cic_dspacedb_item_dcterms_identifier_doi
+    description: DOI reconocidos dentro de `dcterms.identifier.other`.
+    config:
+      meta: *multivalue_meta
+    columns: &identifier_columns
+      - name: item_uuid
+        data_tests: [not_null]
+      - name: metadata_value_id
+        data_tests: [not_null, unique]
+      - name: value_raw
+      - name: value
+        data_tests: [not_null]
+
+  - name: int_cic_dspacedb_item_dcterms_identifier_isbn
+    description: ISBN válidos reconocidos en `dcterms.identifier.isbn`.
+    config:
+      meta: *multivalue_meta
+    columns: *identifier_columns

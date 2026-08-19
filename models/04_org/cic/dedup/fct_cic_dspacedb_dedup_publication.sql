@@ -2,14 +2,14 @@
 
 WITH base AS (
     SELECT *
-    FROM {{ ref('fct_cic_cicdigital_item_publication') }}
+    FROM {{ ref('fct_cic_dspacedb_item_publication') }}
     WHERE discoverable IS TRUE
-      AND handle IS NOT NULL
+      AND dc_identifier_uri IS NOT NULL
 ),
 
 author_ranked AS (
     SELECT
-        author.item_id,
+        author.item_uuid,
         author.author_name,
         author.metadata_value_id,
         author.place,
@@ -20,7 +20,7 @@ author_ranked AS (
             WHEN 'compilator' THEN 4
         END AS role_order,
         ROW_NUMBER() OVER (
-            PARTITION BY author.item_id, LOWER(author.author_name)
+            PARTITION BY author.item_uuid, LOWER(author.author_name)
             ORDER BY
                 CASE author.author_role
                     WHEN 'author' THEN 1
@@ -31,14 +31,14 @@ author_ranked AS (
                 author.place NULLS LAST,
                 author.metadata_value_id DESC
         ) AS author_rank
-    FROM {{ ref('brg_cic_cicdigital_item_author') }} AS author
+    FROM {{ ref('brg_cic_dspacedb_item_author') }} AS author
     INNER JOIN base
-        USING (item_id)
+        USING (item_uuid)
 ),
 
 author_agg AS (
     SELECT
-        item_id,
+        item_uuid,
         STRING_AGG(
             author_name,
             '|'
@@ -46,35 +46,42 @@ author_agg AS (
         ) AS author
     FROM author_ranked
     WHERE author_rank = 1
-    GROUP BY item_id
+    GROUP BY item_uuid
 ),
 
 doi_agg AS (
     SELECT
-        doi.item_id,
+        doi.item_uuid,
         STRING_AGG(DISTINCT doi.value, '|' ORDER BY doi.value) AS doi
-    FROM {{ ref('int_cic_cicdigital_item_dcterms_identifier_doi') }} AS doi
+    FROM {{ ref('int_cic_dspacedb_item_dcterms_identifier_doi') }} AS doi
     INNER JOIN base
-        USING (item_id)
-    GROUP BY doi.item_id
+        USING (item_uuid)
+    GROUP BY doi.item_uuid
 ),
 
 isbn_agg AS (
     SELECT
-        isbn.item_id,
+        isbn.item_uuid,
         STRING_AGG(DISTINCT isbn.value, '|' ORDER BY isbn.value) AS isbn
-    FROM {{ ref('int_cic_cicdigital_item_dcterms_identifier_isbn') }} AS isbn
+    FROM {{ ref('int_cic_dspacedb_item_dcterms_identifier_isbn') }} AS isbn
     INNER JOIN base
-        USING (item_id)
-    GROUP BY isbn.item_id
+        USING (item_uuid)
+    GROUP BY isbn.item_uuid
 ),
 
 prepared AS (
     SELECT
         'cic_digital'::text AS source,
-        'cicdigital'::text AS source_system,
-        base.handle::text AS id,
-        base.item_id,
+        'dspacedb'::text AS source_system,
+        NULLIF(
+            REGEXP_REPLACE(
+                TRIM(base.dc_identifier_uri),
+                '^https?://[^/]+/handle/',
+                ''
+            ),
+            ''
+        )::text AS id,
+        base.item_uuid AS item_id,
         base.item_url,
         base.dc_title::text AS title,
         base.dcterms_title_subtitle::text AS subtitle,
@@ -100,17 +107,17 @@ prepared AS (
         NULL::text AS issn,
         NULL::text AS subject,
         base.dcterms_description::text AS description,
-        base.owning_collection_id::text AS owning_collection_id,
+        base.owning_collection::text AS owning_collection_id,
         base.owning_collection_title::text AS owning_collection_title,
         base.owning_community_id::text AS owning_community_id,
         base.owning_community_title::text AS owning_community_title
     FROM base
     LEFT JOIN author_agg AS authors
-        USING (item_id)
+        USING (item_uuid)
     LEFT JOIN doi_agg AS doi
-        USING (item_id)
+        USING (item_uuid)
     LEFT JOIN isbn_agg AS isbn
-        USING (item_id)
+        USING (item_uuid)
 ),
 
 final AS (

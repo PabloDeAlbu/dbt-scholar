@@ -28,3 +28,12 @@ extracciones, conservar procedencia temporal o trabajar con varias instancias
 DSpace bajo el mismo contrato técnico.
 
 La rama no debe depender de que exista un dump directo en `ldg_cicdigital`.
+
+`fct_cic_dspacedb_dedup_publication` adapta esta representación al contrato de
+deduplicación. En ese contrato, `source` identifica al repositorio CIC Digital
+y `source_system` identifica el recorrido histórico `dspacedb`.
+
+Para el tipo de deduplicación se prioriza `cic.parentType`. Cuando una
+observación histórica no tiene ese metadato, se aplican equivalencias
+documentales inequívocas de `dc.type`; los valores ambiguos permanecen como
+`unknown`.

@@ -28,6 +28,9 @@ fct_cic_cicdigital_dedup_publication
 fct_cic_dspacedb_dedup_publication
 ```
 
+Ambos contratos identifican al repositorio mediante `source` y conservan el
+recorrido técnico mediante `source_system`.
+
 Un contrato institucional sin fuente sólo se justifica si representa una unión
 explícita, conserva una columna de procedencia y define cómo trata registros
 repetidos entre fuentes.
