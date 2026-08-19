@@ -10,7 +10,7 @@ El primer escenario compara snapshots directos de ambos repositorios:
 ```text
 ldg_cicdigital
     -> fct_cic_cicdigital_item_publication
-    -> adaptación dedup CIC Digital
+    -> fct_cic_cicdigital_dedup_publication
     -> input 1
 
 ldg_sedicidb

@@ -1,11 +1,11 @@
 version: 2
 
 models:
-  - name: fct_cic_dedup_publication
+  - name: fct_cic_cicdigital_dedup_publication
     description: >
       Una fila por publicación vigente de CIC Digital preparada para procesos
-      de deduplicación. El contrato es institucional y reutilizable; obtiene
-      ítems y metadatos directamente de la base organizacional `cicdigital`.
+      de deduplicación. Es la variante del contrato institucional construida
+      directamente desde la base organizacional `cicdigital`.
     config:
       meta:
         organization: cic
@@ -72,8 +72,8 @@ models:
         data_tests: [not_null]
     data_tests:
       - dbt_utils.expression_is_true:
-          name: cic_dedup_publication_year_range
+          name: cic_cicdigital_dedup_publication_year_range
           expression: "publication_year is null or publication_year between 1500 and 2100"
       - dbt_utils.expression_is_true:
-          name: cic_dedup_publication_date_matches_year
+          name: cic_cicdigital_dedup_publication_date_matches_year
           expression: "publication_year is null or publication_year = extract(year from date)::integer"
