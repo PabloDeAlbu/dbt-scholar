@@ -1,0 +1,79 @@
+version: 2
+
+models:
+  - name: fct_cic_dedup_publication
+    description: >
+      Una fila por publicación vigente de CIC Digital preparada para procesos
+      de deduplicación. El contrato es institucional y reutilizable; obtiene
+      ítems y metadatos directamente de la base organizacional `cicdigital`.
+    config:
+      meta:
+        organization: cic
+        source_system: cicdigital
+        input_layer: org
+        model_role: dedup_contract
+        grain: id
+        temporal_scope: current_snapshot
+    columns:
+      - name: source
+        description: Origen fijo del registro; vale `cic_digital`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['cic_digital']
+      - name: id
+        description: Handle persistente del ítem en CIC Digital.
+        data_tests: [not_null, unique]
+      - name: item_id
+        description: UUID canónico del ítem en DSpace 7, conservado para trazabilidad.
+        data_tests: [not_null, unique]
+      - name: item_url
+        description: URL pública del ítem en CIC Digital.
+        data_tests: [not_null]
+      - name: title
+        description: Último título normalizado observado en `dc.title`.
+        data_tests: [not_null]
+      - name: subtitle
+        description: Último subtítulo normalizado observado en `dcterms.title.subtitle`.
+      - name: type
+        description: Tipo reducido al vocabulario consumido por el deduplicador.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['article', 'tesis', 'book', 'bookpart', 'objeto de conferencia', 'unknown']
+      - name: type_raw
+        description: Último valor no vacío observado para `dc.type`.
+      - name: subtype
+        description: Último valor no vacío observado para `cic.parentType`.
+      - name: author
+        description: Autores declarados en los metadatafields reconocidos, unidos con `|`.
+      - name: date
+        description: Fecha normalizada desde `dcterms.issued`.
+      - name: publication_year
+        description: Año derivado de `date`.
+      - name: doi
+        description: DOI extraídos de `dcterms.identifier.other`, distintos y unidos con `|`.
+      - name: isbn
+        description: ISBN normalizados desde `dcterms.identifier.isbn`, distintos y unidos con `|`.
+      - name: issn
+        description: Columna opcional del deduplicador; CIC Digital no presenta valores en el metadatafield ISSN.
+      - name: subject
+        description: Columna opcional del deduplicador; no se prepara en esta primera iteración.
+      - name: description
+        description: Última descripción normalizada observada en `dcterms.description`.
+      - name: owning_collection_id
+        description: UUID de la colección propietaria del ítem.
+      - name: owning_collection_title
+        description: Título de la colección propietaria.
+      - name: owning_community_title
+        description: Título de la comunidad que contiene la colección.
+      - name: dedup_eligible
+        description: Indica que título, tipo reconocido, autor y fecha están disponibles.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: cic_dedup_publication_year_range
+          expression: "publication_year is null or publication_year between 1500 and 2100"
+      - dbt_utils.expression_is_true:
+          name: cic_dedup_publication_date_matches_year
+          expression: "publication_year is null or publication_year = extract(year from date)::integer"
