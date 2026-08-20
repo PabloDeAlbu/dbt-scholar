@@ -1,6 +1,69 @@
 version: 2
 
 models:
+  - name: unlp_sedici_00_dedup_cic_lifia_sedici_smoke_candidate
+    description: >
+      Pares CIC–SEDICI con DOI o título normalizado exacto, utilizados sólo
+      para construir una prueba local acotada del deduplicador.
+    config:
+      meta:
+        issue: 14718
+        model_role: dedup_smoke_candidate
+        grain: cic_id_sedici_id
+    columns:
+      - name: cic_id
+        data_tests: [not_null]
+      - name: sedici_id
+        data_tests: [not_null]
+      - name: candidate_signal
+        data_tests: [not_null]
+      - name: signal_priority
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [cic_id, sedici_id]
+
+  - name: unlp_sedici_00_dedup_cic_lifia_sedici_smoke_input_1
+    description: Muestra determinista de 100 publicaciones CIC con candidatos exactos en SEDICI.
+    config:
+      meta:
+        issue: 14718
+        input_number: 1
+        model_role: dedup_smoke_input
+        grain: id
+    columns:
+      - name: id
+        data_tests: [not_null, unique]
+      - name: source_system
+        data_tests:
+          - accepted_values:
+              values: ['cicdigital']
+    data_tests:
+      - dbt_utils.equal_rowcount:
+          compare_model: "(select generate_series(1, 100))"
+
+  - name: unlp_sedici_00_dedup_cic_lifia_sedici_smoke_input_2
+    description: Muestra determinista de 100 publicaciones SEDICI relacionadas con el input 1.
+    config:
+      meta:
+        issue: 14718
+        input_number: 2
+        model_role: dedup_smoke_input
+        grain: id
+    columns:
+      - name: id
+        data_tests: [not_null, unique]
+      - name: source_system
+        data_tests:
+          - accepted_values:
+              values: ['sedicidb']
+    data_tests:
+      - dbt_utils.equal_rowcount:
+          compare_model: "(select generate_series(1, 100))"
+
   - name: unlp_sedici_01_dedup_cic_lifia_sedici_input_1
     description: >
       Publicaciones elegibles de las dos colecciones LIFIA indicadas en el

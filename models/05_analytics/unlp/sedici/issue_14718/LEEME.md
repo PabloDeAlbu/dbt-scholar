@@ -51,3 +51,14 @@ elegibles; las cuatro restantes corresponden a `Resumen` sin
 Se verificaron los metadatafields utilizados para título, autor, fecha, tipo e
 identificadores; la cobertura dentro de las dos colecciones; el mapeo de tipos;
 y los motivos de exclusión del input 1.
+
+## Prueba local 100 × 100
+
+La prueba local del deduplicador utiliza 100 publicaciones CIC y 100 registros
+SEDICI relacionados. Los candidatos se obtienen por DOI exacto o título
+normalizado exacto. Estas condiciones son señales bibliográficas para acotar la
+prueba y no una definición de pertenencia a LIFIA.
+
+La muestra es determinista: prioriza DOI, continúa con título y desempata por
+el hash del identificador. Los modelos `smoke_input_1` y `smoke_input_2`
+conservan el mismo contrato CSV que los inputs completos.
