@@ -15,30 +15,20 @@ WITH article AS (
         base.withdrawn,
         base.discoverable,
         base.handle,
-        base.dc_identifier_uri AS article_url,
-        base.dc_title AS article_title,
+        base.item_url AS article_url,
+        base.item_title AS article_title,
         base.dc_type,
         base.sedici_subtype,
-        base.dc_date_issued AS publication_date,
+        base.publication_date,
         base.publication_year,
-        journal.journal_id,
-        journal.journal_title,
+        base.journal_id,
+        base.journal_title,
         base.owning_root_community_title,
         base.owning_community_path_ids,
         base.owning_community_path_titles
-    FROM {{ ref('fct_unlp_sedicidb_item_publication') }} AS base
-    INNER JOIN {{ ref('dim_libros_unlp_journal') }} AS journal
-        ON journal.journal_id = NULLIF(
-            SPLIT_PART(base.owning_community_path_ids, ' > ', 2),
-            ''
-        )::bigint
-    WHERE base.in_archive IS TRUE
-      AND base.withdrawn IS FALSE
-      AND base.discoverable IS TRUE
-      AND base.handle IS NOT NULL
-      AND base.owning_root_community_title = 'Revistas'
-      AND base.dc_type IN ('Articulo', 'Artículo')
-      AND base.dc_date_issued IS NOT NULL
+    FROM {{ ref('fct_libros_unlp_journal_item') }} AS base
+    WHERE base.is_article IS TRUE
+      AND base.publication_date IS NOT NULL
       AND base.publication_year IS NOT NULL
 ),
 

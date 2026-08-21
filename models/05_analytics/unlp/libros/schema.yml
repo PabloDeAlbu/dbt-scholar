@@ -1,6 +1,87 @@
 version: 2
 
 models:
+  - name: unlp_libros_00_universo_autores
+    description: >
+      Identidades de autor utilizadas por el análisis de artículos de revistas.
+      Una fila por `author_id`, sin asignar una afiliación general a la persona.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: libros_author_universe_identity_basis_is_consistent
+          expression: >
+            (identity_basis = 'authority' and has_authority_control)
+            or
+            (identity_basis = 'normalized_name' and not has_authority_control)
+      - dbt_utils.expression_is_true:
+          name: libros_author_universe_voc_match_has_authority
+          expression: "not has_voc_match or has_authority_control"
+      - dbt_utils.expression_is_true:
+          name: libros_author_universe_publication_period_is_valid
+          expression: >
+            (first_publication_year is null and last_publication_year is null)
+            or
+            (
+              first_publication_year is not null
+              and last_publication_year is not null
+              and first_publication_year <= last_publication_year
+            )
+    columns:
+      - name: author_id
+        description: Identificador técnico de la identidad de autor en SEDICI.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              name: libros_author_universe_in_sedici_author_dim
+              to: ref('dim_unlp_sedicidb_author')
+              field: author_id
+      - name: author_name
+        description: Forma preferida del nombre observada en SEDICI.
+        data_tests: [not_null]
+      - name: author_name_normalized
+        description: Nombre normalizado utilizado para comparar variantes.
+        data_tests: [not_null]
+      - name: identity_basis
+        description: Base de identidad; `authority` o `normalized_name`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['authority', 'normalized_name']
+      - name: authority_uri
+        description: URI de authority cuando está informada.
+      - name: authority_host
+        description: Host de la URI de authority.
+      - name: has_authority_control
+        description: Indica si la identidad se construyó con una authority.
+        data_tests: [not_null]
+      - name: voc_person_node_id
+        description: Identificador de persona VOC enlazado mediante la authority.
+      - name: has_voc_match
+        description: Indica si la authority corresponde a una persona en VOC.
+        data_tests: [not_null]
+      - name: observed_name_variant_count
+        description: Variantes textuales del nombre observadas para la identidad.
+        data_tests: [not_null]
+      - name: sedici_item_count
+        description: Ítems SEDICI vinculados con la identidad en la dimensión general.
+        data_tests: [not_null]
+      - name: journal_article_count
+        description: Artículos de revistas incluidos en este análisis.
+        data_tests: [not_null]
+      - name: journal_count
+        description: Revistas distintas en las que aparece la identidad.
+        data_tests: [not_null]
+      - name: first_publication_year
+        description: Primer año de publicación observado en el análisis.
+      - name: last_publication_year
+        description: Último año de publicación observado en el análisis.
+      - name: normalized_name_identity_count
+        description: Identidades del universo que comparten el mismo nombre normalizado.
+        data_tests: [not_null]
+      - name: has_shared_normalized_name
+        description: Indica si el nombre normalizado representa más de una identidad.
+        data_tests: [not_null]
+
   - name: dim_libros_unlp_journal
     description: >
       Universo de revistas de SEDICI a grano una fila por revista. Considera
@@ -34,6 +115,446 @@ models:
       - name: journal_path_titles
         description: Camino de títulos desde la raíz `Revistas` hasta la revista.
         data_tests: [not_null]
+
+  - name: fct_libros_unlp_journal_item
+    description: >
+      Ítems publicados y visibles bajo las comunidades interpretadas como
+      revistas. Una fila por `item_id`, sin exigir tipo, fecha ni autor.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: libros_journal_item_is_valid_sedici_item
+          expression: >
+            in_archive is true
+            and withdrawn is false
+            and discoverable is true
+            and handle is not null
+      - dbt_utils.expression_is_true:
+          name: libros_journal_item_journal_matches_path
+          expression: >
+            journal_id = split_part(owning_community_path_ids, ' > ', 2)::bigint
+            and journal_title = split_part(owning_community_path_titles, ' > ', 2)
+      - dbt_utils.expression_is_true:
+          name: libros_journal_item_article_flag_is_consistent
+          expression: >
+            is_article = (
+              sedici_subtype in (
+                'Articulo',
+                'Comunicacion',
+                'Contribucion a revista',
+                'Revision'
+              )
+            )
+    columns:
+      - name: item_id
+        description: Identificador del ítem en SEDICI.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              name: libros_journal_item_in_sedici_fact
+              to: ref('fct_unlp_sedicidb_item_publication')
+              field: item_id
+      - name: handle
+        description: Handle institucional del ítem.
+        data_tests: [not_null]
+      - name: item_url
+        description: URL pública informada en `dc.identifier.uri`.
+      - name: item_title
+        description: Título vigente del ítem.
+        data_tests: [not_null]
+      - name: dc_type
+        description: Categoría general vigente informada por `dc.type`.
+        data_tests: [not_null]
+      - name: sedici_subtype
+        description: Subtipo específico vigente informado por `sedici.subtype`.
+        data_tests: [not_null]
+      - name: publication_date
+        description: Fecha de publicación; puede faltar o ser imprecisa.
+      - name: publication_year
+        description: Año derivado de la fecha de publicación.
+      - name: journal_id
+        description: Identificador de la comunidad que representa la revista.
+        data_tests:
+          - not_null
+          - relationships:
+              name: libros_journal_item_journal_in_universe
+              to: ref('dim_libros_unlp_journal')
+              field: journal_id
+      - name: journal_title
+        description: Nombre de la revista.
+        data_tests: [not_null]
+      - name: owning_root_community_title
+        description: Comunidad raíz; siempre `Revistas`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Revistas']
+      - name: owning_community_path_ids
+        description: Jerarquía de identificadores de comunidades del ítem.
+        data_tests: [not_null]
+      - name: owning_community_path_titles
+        description: Jerarquía de nombres de comunidades del ítem.
+        data_tests: [not_null]
+      - name: in_archive
+        description: Indica que el ítem fue incorporado al repositorio.
+        data_tests: [not_null]
+      - name: withdrawn
+        description: Indica si el ítem fue retirado.
+        data_tests: [not_null]
+      - name: discoverable
+        description: Indica si el ítem es visible mediante búsqueda.
+        data_tests: [not_null]
+      - name: is_article
+        description: >
+          Indica si `sedici.subtype` corresponde a una de las categorías de
+          artículo definidas para este análisis.
+        data_tests: [not_null]
+
+  - name: brg_libros_unlp_journal_item_author
+    description: >
+      Relación descriptiva entre ítems de revistas e identidades de autores
+      personales. Una fila por `item_id` y `author_id`, sin afiliaciones.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          name: libros_journal_item_author_unique_grain
+          combination_of_columns: [item_id, author_id]
+      - dbt_utils.expression_is_true:
+          name: libros_journal_item_author_authority_is_consistent
+          expression: "has_authority_control = (authority_uri is not null)"
+      - dbt_utils.expression_is_true:
+          name: libros_journal_item_author_voc_match_has_person
+          expression: "not has_voc_match or voc_person_node_id is not null"
+    columns:
+      - name: item_id
+        description: Identificador del ítem de revista.
+        data_tests:
+          - not_null
+          - relationships:
+              name: libros_journal_item_author_item_in_fact
+              to: ref('fct_libros_unlp_journal_item')
+              field: item_id
+      - name: author_id
+        description: Identificador técnico de la identidad de autor.
+        data_tests:
+          - not_null
+          - relationships:
+              name: libros_journal_item_author_in_sedici_author_dim
+              to: ref('dim_unlp_sedicidb_author')
+              field: author_id
+      - name: author_name
+        description: Forma preferida del nombre del autor.
+        data_tests: [not_null]
+      - name: author_name_normalized
+        description: Nombre normalizado de la identidad.
+        data_tests: [not_null]
+      - name: author_place
+        description: Posición informada en la lista de autores.
+      - name: metadata_value_id
+        description: Observación de metadato elegida para la relación.
+        data_tests: [not_null]
+      - name: authority_uri
+        description: URI de authority de la identidad, cuando existe.
+      - name: has_authority_control
+        description: Indica si la identidad tiene una authority.
+        data_tests: [not_null]
+      - name: voc_person_node_id
+        description: Identificador de persona enlazado en VOC.
+      - name: has_voc_match
+        description: Indica si la authority corresponde a una persona en VOC.
+        data_tests: [not_null]
+      - name: journal_id
+        description: Identificador de la revista del ítem.
+        data_tests: [not_null]
+      - name: journal_title
+        description: Nombre de la revista del ítem.
+        data_tests: [not_null]
+      - name: publication_date
+        description: Fecha de publicación del ítem.
+      - name: publication_year
+        description: Año de publicación del ítem.
+      - name: is_article
+        description: Indica si el ítem fue clasificado como artículo.
+        data_tests: [not_null]
+
+  - name: unlp_libros_00_items_dashboard
+    description: >
+      Fuente principal del dashboard a grano ítem. Reúne revista, publicación,
+      tipo, unidad UNLP atribuida y cobertura de autores para que los controles
+      compartan una fuente.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: libros_items_dashboard_author_counts_are_ordered
+          expression: >
+            recognized_author_count >= authority_author_count
+            and authority_author_count >= voc_author_count
+      - dbt_utils.expression_is_true:
+          name: libros_items_dashboard_author_flags_are_consistent
+          expression: >
+            has_recognized_author = (recognized_author_count > 0)
+            and has_authority_author = (authority_author_count > 0)
+            and has_voc_author = (voc_author_count > 0)
+      - dbt_utils.expression_is_true:
+          name: libros_items_dashboard_year_flag_is_consistent
+          expression: "has_publication_year = (publication_year is not null)"
+    columns:
+      - name: item_id
+        description: Identificador del ítem; define el grano de la fuente.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              name: libros_items_dashboard_item_in_fact
+              to: ref('fct_libros_unlp_journal_item')
+              field: item_id
+      - name: handle
+        description: Handle institucional del ítem.
+        data_tests: [not_null]
+      - name: item_url
+        description: URL pública informada para el ítem.
+      - name: item_title
+        description: Título del ítem.
+        data_tests: [not_null]
+      - name: dc_type
+        description: Categoría general informada por `dc.type`.
+        data_tests: [not_null]
+      - name: sedici_subtype
+        description: Subtipo específico informado por `sedici.subtype`.
+        data_tests: [not_null]
+      - name: publication_date
+        description: Fecha de publicación informada.
+      - name: publication_year
+        description: Año derivado de la fecha de publicación.
+      - name: journal_id
+        description: Identificador de la revista.
+        data_tests: [not_null]
+      - name: journal_title
+        description: Nombre de la revista.
+        data_tests: [not_null]
+      - name: unlp_unit_id
+        description: Identificador de la unidad principal UNLP atribuida a la revista.
+      - name: unlp_unit_name
+        description: Nombre de la unidad principal UNLP atribuida a la revista.
+      - name: unlp_unit_item_count
+        description: Ítems de la revista que aportan evidencia para la unidad atribuida.
+        data_tests: [not_null]
+      - name: unlp_unit_coverage_pct
+        description: Porcentaje de ítems de la revista asociados con la unidad atribuida.
+        data_tests: [not_null]
+      - name: unlp_unit_attribution_status
+        description: Estado de la atribución según su cobertura; permite identificar casos para revisión.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['high_confidence', 'review', 'ambiguous', 'not_identified']
+      - name: owning_community_path_titles
+        description: Jerarquía de comunidades del ítem.
+        data_tests: [not_null]
+      - name: is_article
+        description: Indica si el subtipo corresponde a un artículo.
+        data_tests: [not_null]
+      - name: has_publication_year
+        description: Indica si el ítem tiene un año utilizable.
+        data_tests: [not_null]
+      - name: recognized_author_count
+        description: Identidades de autor personal reconocidas en el ítem.
+        data_tests: [not_null]
+      - name: authority_author_count
+        description: Identidades del ítem que tienen una authority.
+        data_tests: [not_null]
+      - name: voc_author_count
+        description: Identidades del ítem enlazadas con una persona en VOC.
+        data_tests: [not_null]
+      - name: has_recognized_author
+        description: Indica si el ítem tiene al menos un autor personal reconocido.
+        data_tests: [not_null]
+      - name: has_authority_author
+        description: Indica si al menos un autor del ítem tiene authority.
+        data_tests: [not_null]
+      - name: has_voc_author
+        description: Indica si al menos un autor del ítem tiene correspondencia VOC.
+        data_tests: [not_null]
+
+  - name: unlp_libros_00_revistas_unidad
+    description: >
+      Unidad principal UNLP atribuida a cada revista a partir de la institución
+      de origen de sus ítems. Selecciona la unidad con más ítems y conserva la
+      cobertura para distinguir una atribución dominante de un caso ambiguo.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: libros_journal_unit_coverage_is_valid
+          expression: "unlp_unit_coverage_pct between 0 and 100"
+      - dbt_utils.expression_is_true:
+          name: libros_journal_unit_status_is_consistent
+          expression: >
+            (unlp_unit_attribution_status = 'not_identified' and unlp_unit_id is null)
+            or
+            (unlp_unit_attribution_status = 'high_confidence' and unlp_unit_id is not null and unlp_unit_coverage_pct >= 75)
+            or
+            (unlp_unit_attribution_status = 'review' and unlp_unit_id is not null and unlp_unit_coverage_pct >= 50 and unlp_unit_coverage_pct < 75)
+            or
+            (unlp_unit_attribution_status = 'ambiguous' and unlp_unit_id is not null and unlp_unit_coverage_pct < 50)
+    columns:
+      - name: journal_id
+        description: Identificador de la revista; define el grano del modelo.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              name: libros_journal_unit_in_journal_dimension
+              to: ref('dim_libros_unlp_journal')
+              field: journal_id
+      - name: journal_title
+        description: Nombre de la revista.
+        data_tests: [not_null]
+      - name: unlp_unit_id
+        description: Identificador de la unidad principal UNLP dominante.
+      - name: unlp_unit_name
+        description: Nombre de la unidad principal UNLP dominante.
+      - name: unlp_unit_item_count
+        description: Ítems vinculados con la unidad principal seleccionada.
+        data_tests: [not_null]
+      - name: published_item_count
+        description: Total de ítems publicados y visibles de la revista.
+        data_tests: [not_null]
+      - name: unlp_unit_coverage_pct
+        description: Porcentaje de ítems vinculados con la unidad seleccionada.
+        data_tests: [not_null]
+      - name: unlp_unit_attribution_status
+        description: Calidad operativa de la atribución según el porcentaje de cobertura.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['high_confidence', 'review', 'ambiguous', 'not_identified']
+
+  - name: unlp_libros_00_panorama_revistas
+    description: >
+      Panorama por revista desde ítems publicados hasta artículos con autor
+      identificado, sin clasificar todavía su afiliación.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: libros_journal_overview_items_reconcile
+          expression: "published_item_count = article_item_count + other_item_count"
+      - dbt_utils.expression_is_true:
+          name: libros_journal_overview_articles_reconcile
+          expression: "article_item_count = dated_article_count + undated_article_count"
+      - dbt_utils.expression_is_true:
+          name: libros_journal_overview_author_coverage_reconciles
+          expression: >
+            dated_article_count
+            = article_with_author_count + article_without_author_count
+      - dbt_utils.expression_is_true:
+          name: libros_journal_overview_period_is_valid
+          expression: "first_publication_year <= last_publication_year"
+      - dbt_utils.expression_is_true:
+          name: libros_journal_overview_coverage_is_valid
+          expression: >
+            (dated_article_count = 0 and article_author_coverage_pct is null)
+            or
+            (dated_article_count > 0 and article_author_coverage_pct between 0 and 100)
+    columns:
+      - name: journal_id
+        description: Identificador de la revista en SEDICI.
+        data_tests: [not_null, unique]
+      - name: journal_title
+        description: Nombre de la revista.
+        data_tests: [not_null]
+      - name: published_item_count
+        description: Ítems publicados y visibles de la revista.
+        data_tests: [not_null]
+      - name: article_item_count
+        description: Ítems clasificados como artículos mediante `sedici.subtype`.
+        data_tests: [not_null]
+      - name: dated_article_count
+        description: Artículos con fecha y año utilizables.
+        data_tests: [not_null]
+      - name: undated_article_count
+        description: Artículos sin fecha o año utilizables.
+        data_tests: [not_null]
+      - name: other_item_count
+        description: Ítems cuyo subtipo no se clasificó como artículo.
+        data_tests: [not_null]
+      - name: article_with_author_count
+        description: Artículos con al menos un autor personal reconocido.
+        data_tests: [not_null]
+      - name: article_without_author_count
+        description: Artículos fechados sin autor personal reconocido.
+        data_tests: [not_null]
+      - name: authorship_count
+        description: Relaciones entre artículos y autores.
+        data_tests: [not_null]
+      - name: author_identity_count
+        description: Identidades de autor distintas observadas en la revista.
+        data_tests: [not_null]
+      - name: authority_identity_count
+        description: Identidades construidas mediante una authority.
+        data_tests: [not_null]
+      - name: voc_identity_count
+        description: Identidades enlazadas con una persona en VOC.
+        data_tests: [not_null]
+      - name: article_author_coverage_pct
+        description: Porcentaje de artículos fechados con autor reconocido.
+      - name: first_publication_year
+        description: Primer año de publicación observado en la revista.
+        data_tests: [not_null]
+      - name: last_publication_year
+        description: Último año de publicación observado en la revista.
+        data_tests: [not_null]
+
+  - name: unlp_libros_00_revistas_por_anio
+    description: >
+      Evolución descriptiva por revista y año a partir de los ítems con año de
+      publicación, sin clasificar afiliaciones de autores.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          name: libros_journal_year_overview_unique_grain
+          combination_of_columns: [journal_id, publication_year]
+      - dbt_utils.expression_is_true:
+          name: libros_journal_year_overview_items_reconcile
+          expression: "published_item_count = article_item_count + other_item_count"
+      - dbt_utils.expression_is_true:
+          name: libros_journal_year_overview_authors_reconcile
+          expression: >
+            article_item_count
+            = article_with_author_count + article_without_author_count
+      - dbt_utils.expression_is_true:
+          name: libros_journal_year_overview_coverage_is_valid
+          expression: >
+            (article_item_count = 0 and article_author_coverage_pct is null)
+            or
+            (article_item_count > 0 and article_author_coverage_pct between 0 and 100)
+    columns:
+      - name: journal_id
+        description: Identificador de la revista en SEDICI.
+        data_tests: [not_null]
+      - name: journal_title
+        description: Nombre de la revista.
+        data_tests: [not_null]
+      - name: publication_year
+        description: Año de publicación del grupo.
+        data_tests: [not_null]
+      - name: published_item_count
+        description: Ítems con año de publicación en la revista.
+        data_tests: [not_null]
+      - name: article_item_count
+        description: Ítems del año clasificados como artículos.
+        data_tests: [not_null]
+      - name: other_item_count
+        description: Ítems del año no clasificados como artículos.
+        data_tests: [not_null]
+      - name: article_with_author_count
+        description: Artículos del año con autor personal reconocido.
+        data_tests: [not_null]
+      - name: article_without_author_count
+        description: Artículos del año sin autor personal reconocido.
+        data_tests: [not_null]
+      - name: authorship_count
+        description: Relaciones entre artículos y autores en el año.
+        data_tests: [not_null]
+      - name: author_identity_count
+        description: Identidades de autor distintas observadas en el año.
+        data_tests: [not_null]
+      - name: article_author_coverage_pct
+        description: Porcentaje de artículos del año con autor reconocido.
 
   - name: unlp_libros_01_cobertura_general
     description: >
@@ -100,7 +621,12 @@ models:
           name: libros_journal_article_author_is_journal_article
           expression: >
             owning_root_community_title = 'Revistas'
-            and dc_type in ('Articulo', 'Artículo')
+            and sedici_subtype in (
+              'Articulo',
+              'Comunicacion',
+              'Contribucion a revista',
+              'Revision'
+            )
       - dbt_utils.expression_is_true:
           name: libros_journal_article_author_journal_matches_path
           expression: >
@@ -161,14 +687,18 @@ models:
         description: Título del artículo.
         data_tests: [not_null]
       - name: dc_type
-        description: Categoría general vigente informada por `dc.type`; corresponde a un artículo.
+        description: Categoría general vigente informada por `dc.type`.
+        data_tests: [not_null]
+      - name: sedici_subtype
+        description: Subtipo específico usado para identificar artículos.
         data_tests:
           - not_null
           - accepted_values:
-              values: ['Articulo', 'Artículo']
-      - name: sedici_subtype
-        description: Subtipo específico vigente informado por `sedici.subtype`.
-        data_tests: [not_null]
+              values:
+                - Articulo
+                - Comunicacion
+                - Contribucion a revista
+                - Revision
       - name: publication_date
         description: Fecha de publicación.
         data_tests: [not_null]

@@ -62,6 +62,32 @@ models:
         description: Título normalizado; los caracteres `|` internos se reemplazan por espacios.
         data_tests: [not_null]
 
+  - name: int_unlp_sedicidb_item_mods_origin_info_place
+    description: >
+      Instituciones de origen informadas mediante `mods.originInfo.place`, a
+      grano una fila por observación de metadato. Conserva texto y authority y
+      deriva el identificador institucional cuando corresponde a VOC Sedici.
+    columns:
+      - name: metadata_value_id
+        description: Identificador de la observación de institución de origen.
+        data_tests: [not_null, unique]
+      - name: item_id
+        description: Ítem al que pertenece la institución de origen.
+        data_tests: [not_null]
+      - name: value_raw
+        description: Institución de origen tal como aparece en la base SEDICI.
+      - name: value
+        description: Institución de origen con espacios y caracteres invisibles normalizados.
+        data_tests: [not_null]
+      - name: authority_uri
+        description: URI de authority asociada con la institución, cuando existe.
+      - name: voc_institution_node_id
+        description: Identificador de nodo institucional derivado de una URI de VOC Sedici válida.
+      - name: confidence
+        description: Código de confianza original asociado con la observación.
+      - name: place
+        description: Posición declarada para el valor dentro del metadatafield.
+
   - name: int_unlp_sedicidb_item_dc_type
     description: >
       Valor vigente de `dc.type` a grano una fila por `item_id`. Cuando existen
