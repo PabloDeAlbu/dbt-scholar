@@ -3,8 +3,8 @@
 WITH raw_source AS (
     SELECT
         record_id::text AS record_id,
-        NULLIF(SPLIT_PART(record_id::text, ':', 2), '') AS repository_identifier,
-        '{{ var("oai_institution_ror") }}'::text AS institution_ror,
+        NULLIF(_repository_identifier::text, '') AS repository_identifier,
+        NULLIF(_institution_ror::text, '') AS institution_ror,
         COALESCE(extract_datetime::timestamp, _load_datetime::timestamp) AS extract_datetime,
         _load_datetime::timestamp AS load_datetime
     FROM {{ ref('stg_oai_records') }}

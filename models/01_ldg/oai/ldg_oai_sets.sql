@@ -1,16 +1,18 @@
 {{ config(materialized = 'table') }}
 
 WITH source AS (
-    SELECT * 
-    FROM {{ source('oai', 'sets') }}
+    SELECT *
+    FROM {{ source('oai', 'map_identifier_set') }}
 ),
 
 renamed AS (
-    SELECT 
-        "setSpec"::text as set_id,
-        "setName"::text as set_name,
-        "load_datetime"::timestamp as _load_datetime
+    SELECT
+        "set_id"::text as set_id,
+        "set_id"::text as set_name,
+        max("_load_datetime"::timestamp) as _load_datetime
     FROM source
+    WHERE "set_id" IS NOT NULL
+    GROUP BY "set_id"
 ),
 ghost_record AS (
     SELECT

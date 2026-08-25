@@ -2,21 +2,34 @@ version: 2
 
 sources:
   - name: oai
-    description: 'oai'
+    description: >
+      Último batch OAI-PMH entregado por Kedro. El esquema fuente es temporal;
+      la historia se conserva en los modelos de Data Vault.
     schema: ldg_oai
     tables:
-      - name: sets
       - name: records
+        description: Una fila por registro OAI activo recuperado, más su procedencia.
         columns:
           - name: record_id
           - name: col_id
           - name: title
           - name: date_issued
           - name: extract_datetime
-          - name: _context 
-          - name: _load_datetime
+          - name: _context
+          - name: _source_key
+          - name: _repository_identifier
+          - name: _institution_ror
+          - name: _base_url
+          - name: _metadata_prefix
+          - name: load_datetime
+      - name: identifiers
+        description: Manifiesto del batch, incluidos los encabezados eliminados.
+      - name: map_identifier_set
+        description: Relación multivaluada entre encabezados OAI y sets.
       - name: map_record_creator
       - name: map_record_description
+      - name: map_record_format
+        description: Valores Dublin Core `format` asociados a cada registro.
       - name: map_record_identifier
       - name: map_record_language
       - name: map_record_publisher

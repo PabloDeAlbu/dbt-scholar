@@ -11,3 +11,11 @@ models:
         description: >
           Hash key del evento de extracción por registro, fecha de extracción y
           contexto de repositorio.
+      - name: repository_identifier
+        description: Identificador del repositorio propagado desde landing.
+      - name: institution_ror
+        description: ROR institucional propagado desde landing.
+  - name: stg_oai_record_formats
+    description: >
+      Normaliza `dc:format` y calcula las claves hash del formato y de su
+      relación con el registro OAI.
