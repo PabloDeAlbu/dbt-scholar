@@ -17,7 +17,8 @@ modelos reutilizables y salidas analíticas.
 Los esquemas físicos son generados según la capa. Por ejemplo:
 
 - `models/04_org/unlp/sedicidb` se materializa en `dm_unlp_sedicidb`.
-- `models/05_analytics/unlp/libros` se materializa en `analytics_unlp_libros`.
+- `models/05_analytics/unlp/portalderevistas` se materializa en
+  `analytics_unlp_portalderevistas`.
 
 ## Fuentes institucionales
 

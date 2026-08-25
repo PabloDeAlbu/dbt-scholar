@@ -1,22 +1,28 @@
 version: 2
 
 models:
-  - name: unlp_libros_00_universo_autores
+  - name: unlp_portalderevistas_00_universo_autores
     description: >
       Identidades de autor utilizadas por el análisis de artículos de revistas.
       Una fila por `author_id`, sin asignar una afiliación general a la persona.
     data_tests:
       - dbt_utils.expression_is_true:
-          name: libros_author_universe_identity_basis_is_consistent
+          name: portalderevistas_author_universe_identity_basis_is_consistent
           expression: >
             (identity_basis = 'authority' and has_authority_control)
             or
             (identity_basis = 'normalized_name' and not has_authority_control)
       - dbt_utils.expression_is_true:
-          name: libros_author_universe_voc_match_has_authority
+          name: portalderevistas_author_universe_voc_match_has_authority
           expression: "not has_voc_match or has_authority_control"
       - dbt_utils.expression_is_true:
-          name: libros_author_universe_publication_period_is_valid
+          name: portalderevistas_author_universe_publication_counts_are_ordered
+          expression: >
+            sedici_publication_count >= journal_publication_count
+            and journal_publication_count >= journal_article_count
+            and journal_article_count > 0
+      - dbt_utils.expression_is_true:
+          name: portalderevistas_author_universe_publication_period_is_valid
           expression: >
             (first_publication_year is null and last_publication_year is null)
             or
@@ -32,7 +38,7 @@ models:
           - not_null
           - unique
           - relationships:
-              name: libros_author_universe_in_sedici_author_dim
+              name: portalderevistas_author_universe_in_sedici_author_dim
               to: ref('dim_unlp_sedicidb_author')
               field: author_id
       - name: author_name
@@ -62,11 +68,14 @@ models:
       - name: observed_name_variant_count
         description: Variantes textuales del nombre observadas para la identidad.
         data_tests: [not_null]
-      - name: sedici_item_count
-        description: Ítems SEDICI vinculados con la identidad en la dimensión general.
+      - name: sedici_publication_count
+        description: Publicaciones visibles de todo SEDICI donde la identidad figura como autor personal.
+        data_tests: [not_null]
+      - name: journal_publication_count
+        description: Publicaciones visibles bajo la comunidad raíz `Revistas` asociadas con la identidad.
         data_tests: [not_null]
       - name: journal_article_count
-        description: Artículos de revistas incluidos en este análisis.
+        description: Publicaciones de revistas clasificadas como artículos asociadas con la identidad.
         data_tests: [not_null]
       - name: journal_count
         description: Revistas distintas en las que aparece la identidad.
@@ -82,11 +91,15 @@ models:
         description: Indica si el nombre normalizado representa más de una identidad.
         data_tests: [not_null]
 
-  - name: dim_libros_unlp_journal
+  - name: dim_unlp_portalderevistas_journal
     description: >
       Universo de revistas de SEDICI a grano una fila por revista. Considera
       revista a cada comunidad hija directa de la comunidad raíz `Revistas`;
       las comunidades descendientes quedan interpretadas como secciones.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: portalderevistas_journal_closed_flag_is_consistent
+          expression: "is_closed = (journal_title like '%[Publicación cerrada]%')"
     columns:
       - name: journal_id
         description: Identificador de la comunidad SEDICI que representa la revista.
@@ -94,11 +107,14 @@ models:
           - not_null
           - unique
           - relationships:
-              name: libros_journal_in_sedici_community_dim
+              name: portalderevistas_journal_in_sedici_community_dim
               to: ref('dim_unlp_sedicidb_community')
               field: community_id
       - name: journal_title
         description: Título vigente de la comunidad que representa la revista.
+        data_tests: [not_null]
+      - name: is_closed
+        description: Indica si el título de la comunidad contiene el marcador `[Publicación cerrada]`.
         data_tests: [not_null]
       - name: root_community_id
         description: Identificador de la comunidad raíz `Revistas`.
@@ -116,25 +132,25 @@ models:
         description: Camino de títulos desde la raíz `Revistas` hasta la revista.
         data_tests: [not_null]
 
-  - name: fct_libros_unlp_journal_item
+  - name: fct_unlp_portalderevistas_journal_item
     description: >
       Ítems publicados y visibles bajo las comunidades interpretadas como
       revistas. Una fila por `item_id`, sin exigir tipo, fecha ni autor.
     data_tests:
       - dbt_utils.expression_is_true:
-          name: libros_journal_item_is_valid_sedici_item
+          name: portalderevistas_journal_item_is_valid_sedici_item
           expression: >
             in_archive is true
             and withdrawn is false
             and discoverable is true
             and handle is not null
       - dbt_utils.expression_is_true:
-          name: libros_journal_item_journal_matches_path
+          name: portalderevistas_journal_item_journal_matches_path
           expression: >
             journal_id = split_part(owning_community_path_ids, ' > ', 2)::bigint
             and journal_title = split_part(owning_community_path_titles, ' > ', 2)
       - dbt_utils.expression_is_true:
-          name: libros_journal_item_article_flag_is_consistent
+          name: portalderevistas_journal_item_article_flag_is_consistent
           expression: >
             is_article = (
               sedici_subtype in (
@@ -151,7 +167,7 @@ models:
           - not_null
           - unique
           - relationships:
-              name: libros_journal_item_in_sedici_fact
+              name: portalderevistas_journal_item_in_sedici_fact
               to: ref('fct_unlp_sedicidb_item_publication')
               field: item_id
       - name: handle
@@ -177,11 +193,14 @@ models:
         data_tests:
           - not_null
           - relationships:
-              name: libros_journal_item_journal_in_universe
-              to: ref('dim_libros_unlp_journal')
+              name: portalderevistas_journal_item_journal_in_universe
+              to: ref('dim_unlp_portalderevistas_journal')
               field: journal_id
       - name: journal_title
         description: Nombre de la revista.
+        data_tests: [not_null]
+      - name: is_closed
+        description: Indica si la revista está marcada como publicación cerrada en SEDICI.
         data_tests: [not_null]
       - name: owning_root_community_title
         description: Comunidad raíz; siempre `Revistas`.
@@ -210,19 +229,19 @@ models:
           artículo definidas para este análisis.
         data_tests: [not_null]
 
-  - name: brg_libros_unlp_journal_item_author
+  - name: brg_unlp_portalderevistas_journal_item_author
     description: >
       Relación descriptiva entre ítems de revistas e identidades de autores
       personales. Una fila por `item_id` y `author_id`, sin afiliaciones.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          name: libros_journal_item_author_unique_grain
+          name: portalderevistas_journal_item_author_unique_grain
           combination_of_columns: [item_id, author_id]
       - dbt_utils.expression_is_true:
-          name: libros_journal_item_author_authority_is_consistent
+          name: portalderevistas_journal_item_author_authority_is_consistent
           expression: "has_authority_control = (authority_uri is not null)"
       - dbt_utils.expression_is_true:
-          name: libros_journal_item_author_voc_match_has_person
+          name: portalderevistas_journal_item_author_voc_match_has_person
           expression: "not has_voc_match or voc_person_node_id is not null"
     columns:
       - name: item_id
@@ -230,15 +249,15 @@ models:
         data_tests:
           - not_null
           - relationships:
-              name: libros_journal_item_author_item_in_fact
-              to: ref('fct_libros_unlp_journal_item')
+              name: portalderevistas_journal_item_author_item_in_fact
+              to: ref('fct_unlp_portalderevistas_journal_item')
               field: item_id
       - name: author_id
         description: Identificador técnico de la identidad de autor.
         data_tests:
           - not_null
           - relationships:
-              name: libros_journal_item_author_in_sedici_author_dim
+              name: portalderevistas_journal_item_author_in_sedici_author_dim
               to: ref('dim_unlp_sedicidb_author')
               field: author_id
       - name: author_name
@@ -276,35 +295,66 @@ models:
         description: Indica si el ítem fue clasificado como artículo.
         data_tests: [not_null]
 
-  - name: unlp_libros_00_items_dashboard
+  - name: unlp_portalderevistas_00_base
     description: >
-      Fuente principal del dashboard a grano ítem. Reúne revista, publicación,
-      tipo, unidad UNLP atribuida y cobertura de autores para que los controles
-      compartan una fuente.
+      Fuente principal del dashboard a grano ítem y autor personal. Conserva
+      una fila con autor nulo para los ítems sin autor reconocido y permite que
+      los filtros de revista y período alcancen publicaciones y autores.
     data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          name: portalderevistas_base_unique_grain
+          combination_of_columns: [item_id, author_id]
       - dbt_utils.expression_is_true:
-          name: libros_items_dashboard_author_counts_are_ordered
+          name: portalderevistas_base_author_fields_are_consistent
           expression: >
-            recognized_author_count >= authority_author_count
-            and authority_author_count >= voc_author_count
+            (
+              author_id is null
+              and authorship_id is null
+              and author_name is null
+              and author_identity_basis is null
+              and not has_recognized_author
+              and not has_authority_control
+              and not has_voc_match
+            )
+            or
+            (
+              author_id is not null
+              and authorship_id is not null
+              and author_name is not null
+              and author_identity_basis is not null
+              and has_recognized_author
+              and (not has_voc_match or has_authority_control)
+            )
       - dbt_utils.expression_is_true:
-          name: libros_items_dashboard_author_flags_are_consistent
+          name: portalderevistas_base_publication_counts_are_ordered
           expression: >
-            has_recognized_author = (recognized_author_count > 0)
-            and has_authority_author = (authority_author_count > 0)
-            and has_voc_author = (voc_author_count > 0)
+            (
+              author_id is null
+              and sedici_publication_count is null
+              and journal_publication_count is null
+              and journal_article_count is null
+            )
+            or
+            (
+              author_id is not null
+              and sedici_publication_count >= journal_publication_count
+              and journal_publication_count >= journal_article_count
+              and journal_article_count >= 0
+            )
       - dbt_utils.expression_is_true:
-          name: libros_items_dashboard_year_flag_is_consistent
+          name: portalderevistas_base_year_flag_is_consistent
           expression: "has_publication_year = (publication_year is not null)"
+      - dbt_utils.expression_is_true:
+          name: portalderevistas_base_closed_flag_is_consistent
+          expression: "is_closed = (journal_title like '%[Publicación cerrada]%')"
     columns:
       - name: item_id
-        description: Identificador del ítem; define el grano de la fuente.
+        description: Identificador del ítem de revista.
         data_tests:
           - not_null
-          - unique
           - relationships:
-              name: libros_items_dashboard_item_in_fact
-              to: ref('fct_libros_unlp_journal_item')
+              name: portalderevistas_base_item_in_fact
+              to: ref('fct_unlp_portalderevistas_journal_item')
               field: item_id
       - name: handle
         description: Handle institucional del ítem.
@@ -330,22 +380,9 @@ models:
       - name: journal_title
         description: Nombre de la revista.
         data_tests: [not_null]
-      - name: unlp_unit_id
-        description: Identificador de la unidad principal UNLP atribuida a la revista.
-      - name: unlp_unit_name
-        description: Nombre de la unidad principal UNLP atribuida a la revista.
-      - name: unlp_unit_item_count
-        description: Ítems de la revista que aportan evidencia para la unidad atribuida.
+      - name: is_closed
+        description: Indica si la revista está marcada como publicación cerrada en SEDICI.
         data_tests: [not_null]
-      - name: unlp_unit_coverage_pct
-        description: Porcentaje de ítems de la revista asociados con la unidad atribuida.
-        data_tests: [not_null]
-      - name: unlp_unit_attribution_status
-        description: Estado de la atribución según su cobertura; permite identificar casos para revisión.
-        data_tests:
-          - not_null
-          - accepted_values:
-              values: ['high_confidence', 'review', 'ambiguous', 'not_identified']
       - name: owning_community_path_titles
         description: Jerarquía de comunidades del ítem.
         data_tests: [not_null]
@@ -355,98 +392,74 @@ models:
       - name: has_publication_year
         description: Indica si el ítem tiene un año utilizable.
         data_tests: [not_null]
-      - name: recognized_author_count
-        description: Identidades de autor personal reconocidas en el ítem.
-        data_tests: [not_null]
-      - name: authority_author_count
-        description: Identidades del ítem que tienen una authority.
-        data_tests: [not_null]
-      - name: voc_author_count
-        description: Identidades del ítem enlazadas con una persona en VOC.
-        data_tests: [not_null]
-      - name: has_recognized_author
-        description: Indica si el ítem tiene al menos un autor personal reconocido.
-        data_tests: [not_null]
-      - name: has_authority_author
-        description: Indica si al menos un autor del ítem tiene authority.
-        data_tests: [not_null]
-      - name: has_voc_author
-        description: Indica si al menos un autor del ítem tiene correspondencia VOC.
-        data_tests: [not_null]
-
-  - name: unlp_libros_00_revistas_unidad
-    description: >
-      Unidad principal UNLP atribuida a cada revista a partir de la institución
-      de origen de sus ítems. Selecciona la unidad con más ítems y conserva la
-      cobertura para distinguir una atribución dominante de un caso ambiguo.
-    data_tests:
-      - dbt_utils.expression_is_true:
-          name: libros_journal_unit_coverage_is_valid
-          expression: "unlp_unit_coverage_pct between 0 and 100"
-      - dbt_utils.expression_is_true:
-          name: libros_journal_unit_status_is_consistent
-          expression: >
-            (unlp_unit_attribution_status = 'not_identified' and unlp_unit_id is null)
-            or
-            (unlp_unit_attribution_status = 'high_confidence' and unlp_unit_id is not null and unlp_unit_coverage_pct >= 75)
-            or
-            (unlp_unit_attribution_status = 'review' and unlp_unit_id is not null and unlp_unit_coverage_pct >= 50 and unlp_unit_coverage_pct < 75)
-            or
-            (unlp_unit_attribution_status = 'ambiguous' and unlp_unit_id is not null and unlp_unit_coverage_pct < 50)
-    columns:
-      - name: journal_id
-        description: Identificador de la revista; define el grano del modelo.
+      - name: author_id
+        description: Identificador técnico del autor; es nulo cuando el ítem no tiene autor reconocido.
         data_tests:
-          - not_null
-          - unique
           - relationships:
-              name: libros_journal_unit_in_journal_dimension
-              to: ref('dim_libros_unlp_journal')
-              field: journal_id
-      - name: journal_title
-        description: Nombre de la revista.
-        data_tests: [not_null]
-      - name: unlp_unit_id
-        description: Identificador de la unidad principal UNLP dominante.
-      - name: unlp_unit_name
-        description: Nombre de la unidad principal UNLP dominante.
-      - name: unlp_unit_item_count
-        description: Ítems vinculados con la unidad principal seleccionada.
-        data_tests: [not_null]
-      - name: published_item_count
-        description: Total de ítems publicados y visibles de la revista.
-        data_tests: [not_null]
-      - name: unlp_unit_coverage_pct
-        description: Porcentaje de ítems vinculados con la unidad seleccionada.
-        data_tests: [not_null]
-      - name: unlp_unit_attribution_status
-        description: Calidad operativa de la atribución según el porcentaje de cobertura.
+              name: portalderevistas_base_author_in_dimension
+              to: ref('dim_unlp_sedicidb_author')
+              field: author_id
+      - name: authorship_id
+        description: Identificador legible de la relación ítem-autor, formado por ambos identificadores.
+        data_tests: [unique]
+      - name: author_name
+        description: Nombre preferido del autor.
+      - name: author_name_normalized
+        description: Nombre normalizado utilizado para construir identidades nominales.
+      - name: author_place
+        description: Posición informada para el autor dentro del ítem.
+      - name: author_identity_basis
+        description: Indica si la identidad se basa en una authority o en el nombre normalizado.
         data_tests:
-          - not_null
           - accepted_values:
-              values: ['high_confidence', 'review', 'ambiguous', 'not_identified']
+              values: ['authority', 'normalized_name']
+      - name: authority_uri
+        description: URI de authority del autor, cuando existe.
+      - name: has_recognized_author
+        description: Indica si la fila representa una relación ítem-autor reconocida.
+        data_tests: [not_null]
+      - name: has_authority_control
+        description: Indica si la identidad del autor se construyó con una authority.
+        data_tests: [not_null]
+      - name: voc_person_node_id
+        description: Identificador de persona VOC enlazado mediante la authority.
+      - name: has_voc_match
+        description: Indica si la authority corresponde a una persona en VOC.
+        data_tests: [not_null]
+      - name: sedici_publication_count
+        description: >
+          Publicaciones visibles de todo SEDICI donde la identidad figura como
+          autor personal. Es un atributo del autor y debe agregarse con `MAX`.
+      - name: journal_publication_count
+        description: >
+          Publicaciones visibles bajo la comunidad raíz `Revistas` donde la
+          identidad figura como autor. Debe agregarse con `MAX`.
+      - name: journal_article_count
+        description: >
+          Publicaciones de revistas clasificadas como artículos donde aparece
+          la identidad. Debe agregarse con `MAX`.
 
-  - name: unlp_libros_00_panorama_revistas
+  - name: unlp_portalderevistas_00_panorama_revistas
     description: >
       Panorama por revista desde ítems publicados hasta artículos con autor
       identificado, sin clasificar todavía su afiliación.
     data_tests:
       - dbt_utils.expression_is_true:
-          name: libros_journal_overview_items_reconcile
+          name: portalderevistas_journal_overview_items_reconcile
           expression: "published_item_count = article_item_count + other_item_count"
       - dbt_utils.expression_is_true:
-          name: libros_journal_overview_articles_reconcile
+          name: portalderevistas_journal_overview_articles_reconcile
           expression: "article_item_count = dated_article_count + undated_article_count"
       - dbt_utils.expression_is_true:
-          name: libros_journal_overview_author_coverage_reconciles
+          name: portalderevistas_journal_overview_author_coverage_reconciles
           expression: >
             dated_article_count
             = article_with_author_count + article_without_author_count
       - dbt_utils.expression_is_true:
-          name: libros_journal_overview_period_is_valid
+          name: portalderevistas_journal_overview_period_is_valid
           expression: "first_publication_year <= last_publication_year"
       - dbt_utils.expression_is_true:
-          name: libros_journal_overview_coverage_is_valid
+          name: portalderevistas_journal_overview_coverage_is_valid
           expression: >
             (dated_article_count = 0 and article_author_coverage_pct is null)
             or
@@ -500,24 +513,24 @@ models:
         description: Último año de publicación observado en la revista.
         data_tests: [not_null]
 
-  - name: unlp_libros_00_revistas_por_anio
+  - name: unlp_portalderevistas_00_revistas_por_anio
     description: >
       Evolución descriptiva por revista y año a partir de los ítems con año de
       publicación, sin clasificar afiliaciones de autores.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          name: libros_journal_year_overview_unique_grain
+          name: portalderevistas_journal_year_overview_unique_grain
           combination_of_columns: [journal_id, publication_year]
       - dbt_utils.expression_is_true:
-          name: libros_journal_year_overview_items_reconcile
+          name: portalderevistas_journal_year_overview_items_reconcile
           expression: "published_item_count = article_item_count + other_item_count"
       - dbt_utils.expression_is_true:
-          name: libros_journal_year_overview_authors_reconcile
+          name: portalderevistas_journal_year_overview_authors_reconcile
           expression: >
             article_item_count
             = article_with_author_count + article_without_author_count
       - dbt_utils.expression_is_true:
-          name: libros_journal_year_overview_coverage_is_valid
+          name: portalderevistas_journal_year_overview_coverage_is_valid
           expression: >
             (article_item_count = 0 and article_author_coverage_pct is null)
             or
@@ -556,16 +569,16 @@ models:
       - name: article_author_coverage_pct
         description: Porcentaje de artículos del año con autor reconocido.
 
-  - name: unlp_libros_01_cobertura_general
+  - name: unlp_portalderevistas_01_cobertura_general
     description: >
       Perfil general de autorías agrupado por estado y evidencia de afiliación.
       Expone volumen, participación y cobertura de authorities y matches VOC.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          name: libros_journal_article_author_coverage_unique_grain
+          name: portalderevistas_journal_article_author_coverage_unique_grain
           combination_of_columns: [affiliation_status, affiliation_evidence]
       - dbt_utils.expression_is_true:
-          name: libros_journal_article_author_coverage_percentages_in_range
+          name: portalderevistas_article_author_coverage_pct_in_range
           expression: >
             authorship_share_pct between 0 and 100
             and authority_coverage_pct between 0 and 100
@@ -602,23 +615,23 @@ models:
         description: Porcentaje del grupo enlazado con una persona en VOC.
         data_tests: [not_null]
 
-  - name: fct_libros_unlp_journal_article_author
+  - name: fct_unlp_portalderevistas_journal_article_author
     description: >
       Autorías de artículos de revistas UNLP. Una fila por `item_id` y
       `author_id`, con afiliación a la fecha de publicación.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          name: libros_journal_article_author_unique_grain
+          name: portalderevistas_journal_article_author_unique_grain
           combination_of_columns: [item_id, author_id]
       - dbt_utils.expression_is_true:
-          name: libros_journal_article_author_is_valid_sedici_item
+          name: portalderevistas_journal_article_author_is_valid_sedici_item
           expression: >
             in_archive is true
             and withdrawn is false
             and discoverable is true
             and handle is not null
       - dbt_utils.expression_is_true:
-          name: libros_journal_article_author_is_journal_article
+          name: portalderevistas_journal_article_author_is_journal_article
           expression: >
             owning_root_community_title = 'Revistas'
             and sedici_subtype in (
@@ -628,30 +641,30 @@ models:
               'Revision'
             )
       - dbt_utils.expression_is_true:
-          name: libros_journal_article_author_journal_matches_path
+          name: portalderevistas_journal_article_author_journal_matches_path
           expression: >
             journal_id = split_part(owning_community_path_ids, ' > ', 2)::bigint
             and journal_title = split_part(owning_community_path_titles, ' > ', 2)
       - dbt_utils.expression_is_true:
-          name: libros_journal_article_author_year_matches_date
+          name: portalderevistas_journal_article_author_year_matches_date
           expression: "publication_year = extract(year from publication_date)::integer"
       - dbt_utils.expression_is_true:
-          name: libros_journal_article_author_voc_match_has_person
+          name: portalderevistas_journal_article_author_voc_match_has_person
           expression: "not has_voc_match or voc_person_node_id is not null"
       - dbt_utils.expression_is_true:
-          name: libros_journal_article_author_unlp_has_voc_evidence
+          name: portalderevistas_journal_article_author_unlp_has_voc_evidence
           expression: "affiliation_status <> 'unlp' or has_voc_match"
       - dbt_utils.expression_is_true:
-          name: libros_journal_article_author_external_has_voc_evidence
+          name: portalderevistas_article_author_external_has_voc_evidence
           expression: "affiliation_status <> 'external' or has_voc_match"
       - dbt_utils.expression_is_true:
-          name: libros_journal_article_author_nonnegative_affiliation_counts
+          name: portalderevistas_article_author_nonnegative_affiliation_counts
           expression: "unlp_institution_count >= 0 and external_institution_count >= 0"
       - dbt_utils.expression_is_true:
-          name: libros_journal_article_author_unlp_count_consistent
+          name: portalderevistas_journal_article_author_unlp_count_consistent
           expression: "affiliation_status <> 'unlp' or unlp_institution_count > 0"
       - dbt_utils.expression_is_true:
-          name: libros_journal_article_author_external_count_consistent
+          name: portalderevistas_article_author_external_count_consistent
           expression: >
             affiliation_status <> 'external'
             or (external_institution_count > 0 and unlp_institution_count = 0)
@@ -661,7 +674,7 @@ models:
         data_tests:
           - not_null
           - relationships:
-              name: libros_journal_article_author_item_in_sedici_fact
+              name: portalderevistas_journal_article_author_item_in_sedici_fact
               to: ref('fct_unlp_sedicidb_item_publication')
               field: item_id
       - name: author_id
@@ -669,7 +682,7 @@ models:
         data_tests:
           - not_null
           - relationships:
-              name: libros_journal_article_author_in_sedici_author_dim
+              name: portalderevistas_journal_article_author_in_sedici_author_dim
               to: ref('dim_unlp_sedicidb_author')
               field: author_id
       - name: author_name
@@ -712,8 +725,8 @@ models:
         data_tests:
           - not_null
           - relationships:
-              name: libros_journal_article_author_journal_in_universe
-              to: ref('dim_libros_unlp_journal')
+              name: portalderevistas_journal_article_author_journal_in_universe
+              to: ref('dim_unlp_portalderevistas_journal')
               field: journal_id
       - name: journal_title
         description: >
@@ -758,31 +771,31 @@ models:
       - name: external_institution_count
         description: Afiliaciones externas vigentes al publicar.
         data_tests: [not_null]
-  - name: unlp_libros_02_revistas_ultimos_5_anios
+  - name: unlp_portalderevistas_02_revistas_ultimos_5_anios
     description: >
       Resumen de artículos, autorías y autores por revista y período.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          name: libros_journal_author_affiliation_unique_grain
+          name: portalderevistas_journal_author_affiliation_unique_grain
           combination_of_columns: [journal_id, period_start_year, period_end_year]
       - dbt_utils.expression_is_true:
-          name: libros_journal_author_affiliation_period_is_valid
+          name: portalderevistas_journal_author_affiliation_period_is_valid
           expression: "period_start_year <= period_end_year"
       - dbt_utils.expression_is_true:
-          name: libros_journal_author_affiliation_authorships_reconcile
+          name: portalderevistas_author_affiliation_authorships_reconcile
           expression: >
             authorship_count
             = unlp_authorship_count + external_authorship_count + unknown_authorship_count
       - dbt_utils.expression_is_true:
-          name: libros_journal_author_affiliation_classified_reconciles
+          name: portalderevistas_author_affiliation_classified_reconciles
           expression: "classified_authorship_count = unlp_authorship_count + external_authorship_count"
       - dbt_utils.expression_is_true:
-          name: libros_journal_author_affiliation_percentages_in_range
+          name: portalderevistas_author_affiliation_pct_in_range
           expression: >
             unlp_authorship_share_pct between 0 and 100
             and known_affiliation_coverage_pct between 0 and 100
       - dbt_utils.expression_is_true:
-          name: libros_journal_author_affiliation_counts_nonnegative
+          name: portalderevistas_journal_author_affiliation_counts_nonnegative
           expression: >
             article_count >= 0
             and authorship_count >= 0
@@ -791,7 +804,7 @@ models:
             and unique_external_author_count >= 0
             and unique_unknown_author_count >= 0
       - dbt_utils.expression_is_true:
-          name: libros_journal_author_affiliation_unlp_share_denominator
+          name: portalderevistas_author_affiliation_unlp_share_denominator
           expression: >
             (classified_authorship_count = 0 and unlp_authorship_share_pct is null)
             or
@@ -844,28 +857,28 @@ models:
       - name: unique_unknown_author_count
         description: Autores distintos sin afiliación determinada.
         data_tests: [not_null]
-  - name: unlp_libros_03_revistas_por_anio
+  - name: unlp_portalderevistas_03_revistas_por_anio
     description: >
       Resumen anual de artículos, autorías y autores por revista.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          name: libros_journal_author_affiliation_by_year_unique_grain
+          name: portalderevistas_author_affiliation_year_unique_grain
           combination_of_columns: [journal_id, publication_year]
       - dbt_utils.expression_is_true:
-          name: libros_journal_author_affiliation_by_year_authorships_reconcile
+          name: portalderevistas_author_affiliation_year_authorships_reconcile
           expression: >
             authorship_count
             = unlp_authorship_count + external_authorship_count + unknown_authorship_count
       - dbt_utils.expression_is_true:
-          name: libros_journal_author_affiliation_by_year_classified_reconciles
+          name: portalderevistas_author_affiliation_year_classified_reconciles
           expression: "classified_authorship_count = unlp_authorship_count + external_authorship_count"
       - dbt_utils.expression_is_true:
-          name: libros_journal_author_affiliation_by_year_percentages_in_range
+          name: portalderevistas_author_affiliation_year_pct_in_range
           expression: >
             unlp_authorship_share_pct between 0 and 100
             and known_affiliation_coverage_pct between 0 and 100
       - dbt_utils.expression_is_true:
-          name: libros_journal_affiliation_year_share_denominator
+          name: portalderevistas_journal_affiliation_year_share_denominator
           expression: >
             (classified_authorship_count = 0 and unlp_authorship_share_pct is null)
             or

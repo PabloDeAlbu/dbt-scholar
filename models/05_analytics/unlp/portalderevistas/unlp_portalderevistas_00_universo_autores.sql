@@ -3,33 +3,39 @@
 WITH author_in_scope AS (
     SELECT
         author_id,
+        MIN(author_name) AS author_name,
+        MIN(author_name_normalized) AS author_name_normalized,
+        MIN(author_identity_basis) AS identity_basis,
+        MIN(authority_uri) AS authority_uri,
+        BOOL_OR(has_authority_control) AS has_authority_control,
         MIN(voc_person_node_id) AS voc_person_node_id,
         BOOL_OR(has_voc_match) AS has_voc_match,
-        COUNT(DISTINCT item_id)::bigint AS journal_article_count,
+        MAX(sedici_publication_count) AS sedici_publication_count,
+        MAX(journal_publication_count) AS journal_publication_count,
+        MAX(journal_article_count) AS journal_article_count,
         COUNT(DISTINCT journal_id)::bigint AS journal_count,
         MIN(publication_year) AS first_publication_year,
         MAX(publication_year) AS last_publication_year
-    FROM {{ ref('brg_libros_unlp_journal_item_author') }}
+    FROM {{ ref('unlp_portalderevistas_00_base') }}
     WHERE is_article IS TRUE
+      AND author_id IS NOT NULL
     GROUP BY author_id
 ),
 
 author_prepared AS (
     SELECT
         author.author_id,
-        author.author_name_preferred AS author_name,
-        author.author_name_normalized,
-        CASE
-            WHEN author.has_authority_control THEN 'authority'
-            ELSE 'normalized_name'
-        END::text AS identity_basis,
-        author.authority_uri,
+        scope.author_name,
+        scope.author_name_normalized,
+        scope.identity_basis,
+        scope.authority_uri,
         author.authority_host,
-        author.has_authority_control,
+        scope.has_authority_control,
         scope.voc_person_node_id,
         scope.has_voc_match,
         author.observed_name_variant_count,
-        author.item_count AS sedici_item_count,
+        scope.sedici_publication_count,
+        scope.journal_publication_count,
         scope.journal_article_count,
         scope.journal_count,
         scope.first_publication_year,

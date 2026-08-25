@@ -9,6 +9,7 @@
 SELECT
     community_id AS journal_id,
     community_title AS journal_title,
+    community_title LIKE '%[Publicación cerrada]%' AS is_closed,
     root_community_id,
     root_community_title,
     community_path_ids AS journal_path_ids,

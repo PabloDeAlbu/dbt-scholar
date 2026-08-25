@@ -26,7 +26,7 @@ WITH article AS (
         base.owning_root_community_title,
         base.owning_community_path_ids,
         base.owning_community_path_titles
-    FROM {{ ref('fct_libros_unlp_journal_item') }} AS base
+    FROM {{ ref('fct_unlp_portalderevistas_journal_item') }} AS base
     WHERE base.is_article IS TRUE
       AND base.publication_date IS NOT NULL
       AND base.publication_year IS NOT NULL

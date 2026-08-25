@@ -8,7 +8,7 @@ WITH item_stats AS (
         COUNT(*)::bigint AS published_item_count,
         COUNT(*) FILTER (WHERE is_article)::bigint AS article_item_count,
         COUNT(*) FILTER (WHERE NOT is_article)::bigint AS other_item_count
-    FROM {{ ref('fct_libros_unlp_journal_item') }}
+    FROM {{ ref('fct_unlp_portalderevistas_journal_item') }}
     WHERE publication_year IS NOT NULL
     GROUP BY journal_id, publication_year
 ),
@@ -20,7 +20,7 @@ author_stats AS (
         COUNT(DISTINCT item_id)::bigint AS article_with_author_count,
         COUNT(*)::bigint AS authorship_count,
         COUNT(DISTINCT author_id)::bigint AS author_identity_count
-    FROM {{ ref('fct_libros_unlp_journal_article_author') }}
+    FROM {{ ref('fct_unlp_portalderevistas_journal_article_author') }}
     GROUP BY journal_id, publication_year
 ),
 

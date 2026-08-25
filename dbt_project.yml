@@ -213,9 +213,9 @@ models:
           issue_14718:
             +schema: unlp_sedici_issue_14718
             +tags: [sedici, cic, issue_14718]
-        libros:
-          +schema: unlp_libros
-          +tags: [libros, revistas, afiliacion]
+        portalderevistas:
+          +schema: unlp_portalderevistas
+          +tags: [portalderevistas, revistas, sedici]
 seeds:
   dbt_scholar:
     coar:

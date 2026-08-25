@@ -17,7 +17,8 @@ reusable models and analytical outputs.
 Physical schemas are generated according to the layer. For example:
 
 - `models/04_org/unlp/sedicidb` is materialized in `dm_unlp_sedicidb`.
-- `models/05_analytics/unlp/libros` is materialized in `analytics_unlp_libros`.
+- `models/05_analytics/unlp/portalderevistas` is materialized in
+  `analytics_unlp_portalderevistas`.
 
 ## Institutional sources
 
