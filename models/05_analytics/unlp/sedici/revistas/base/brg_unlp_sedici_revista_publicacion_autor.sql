@@ -30,7 +30,7 @@ WITH author_observation AS (
                 bridge.author_place NULLS LAST,
                 bridge.metadata_value_id DESC
         ) AS observation_rank
-    FROM {{ ref('fct_unlp_portalderevistas_journal_item') }} AS item
+    FROM {{ ref('fct_unlp_sedici_revista_publicacion') }} AS item
     INNER JOIN {{ ref('brg_unlp_sedicidb_item_author') }} AS bridge
         USING (item_id)
     WHERE bridge.author_role = 'creator_person'

@@ -18,7 +18,7 @@ WITH item_stats AS (
         COUNT(*) FILTER (WHERE NOT is_article)::bigint AS other_item_count,
         MIN(publication_year) AS first_publication_year,
         MAX(publication_year) AS last_publication_year
-    FROM {{ ref('fct_unlp_portalderevistas_journal_item') }}
+    FROM {{ ref('fct_unlp_sedici_revista_publicacion') }}
     GROUP BY journal_id
 ),
 
@@ -34,7 +34,7 @@ author_stats AS (
         COUNT(DISTINCT author_id) FILTER (
             WHERE has_voc_match
         )::bigint AS voc_identity_count
-    FROM {{ ref('fct_unlp_portalderevistas_journal_article_author') }}
+    FROM {{ ref('fct_unlp_sedici_revista_articulo_autor') }}
     GROUP BY journal_id
 ),
 

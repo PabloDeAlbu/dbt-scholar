@@ -1,10 +1,14 @@
-# Portal de Revistas de la UNLP — Guía conceptual para el dashboard
+# Revistas en SEDICI — Guía conceptual para el dashboard
 
 ## Propósito
 
 Construir para el Portal de Revistas de la UNLP un panorama comprensible y
 verificable de las revistas alojadas en SEDICI, sus publicaciones y los autores
 registrados en sus metadatos.
+
+El universo se delimita mediante la organización interna de SEDICI. La rama
+`Revistas` representa un agrupamiento institucional y no una clasificación
+tipológica exhaustiva de las publicaciones.
 
 El dashboard debe permitir avanzar desde una visión general hasta el detalle
 de una revista o un autor. La selección de una revista o de un período debe
@@ -32,12 +36,12 @@ filtrar tanto las publicaciones como los autores observados.
 
 Fuente de datos para todos los gráficos:
 
-`analytics_unlp_portalderevistas.unlp_portalderevistas_00_base`
+`analytics_unlp_sedici_revistas.unlp_sedici_revistas_dashboard`
 
 La fuente tiene grano ítem–autor:
 
 - una publicación aparece una vez por cada identidad de autor reconocida;
-- una publicación sin autor reconocido conserva una fila con `author_id` nulo;
+- una publicación sin autor reconocido conserva una fila con `id_autor` nulo;
 - los filtros de revista, fecha, subtipo y cierre afectan publicaciones y
   autores desde la misma fuente.
 
@@ -66,7 +70,7 @@ en datos de SEDICI`. En los gráficos conviene hablar de `Revistas en SEDICI` o
 ### Revista cerrada
 
 Una revista se considera cerrada cuando el título de su comunidad contiene el
-marcador `[Publicación cerrada]`. El campo `is_closed` reproduce esa marca de
+marcador `[Publicación cerrada]`. El campo `es_cerrada` reproduce esa marca de
 SEDICI; no infiere el cierre a partir de la falta de publicaciones recientes.
 
 ### Publicación
@@ -79,7 +83,7 @@ SEDICI; no infiere el cierre a partir de la falta de publicaciones recientes.
 - tiene handle;
 - está alojado bajo una revista del universo.
 
-Las publicaciones deben contarse mediante `COUNT_DISTINCT(item_id)`. No debe
+Las publicaciones deben contarse mediante `COUNT_DISTINCT(handle_publicacion)`. No debe
 usarse `Record Count`, porque una publicación puede ocupar varias filas al
 tener varios autores.
 
@@ -92,7 +96,7 @@ Publicación cuyo `sedici.subtype` tiene alguno de estos valores:
 - `Contribucion a revista`;
 - `Revision`.
 
-El campo `is_article` materializa esta definición. El análisis conserva
+El campo `es_articulo` materializa esta definición. El análisis conserva
 también las publicaciones de otros subtipos.
 
 ### Autoría
@@ -100,7 +104,7 @@ también las publicaciones de otros subtipos.
 Relación entre una publicación y una identidad de autor personal registrada
 mediante `sedici.creator.person`.
 
-Las autorías deben contarse mediante `COUNT_DISTINCT(authorship_id)`. Una misma
+Las autorías deben contarse mediante `COUNT_DISTINCT(id_autoria)`. Una misma
 identidad puede aportar varias autorías si aparece en varias publicaciones.
 
 ### Identidad de autor
@@ -114,33 +118,33 @@ Una identidad de autor no equivale necesariamente a una persona identificada
 con certeza. Dos personas pueden compartir un nombre y una misma persona puede
 aparecer bajo distintas variantes.
 
-Los autores deben contarse mediante `COUNT_DISTINCT(author_id)`.
+Los autores deben contarse mediante `COUNT_DISTINCT(id_autor)`.
 
 ### Correspondencia con VOC
 
-`has_voc_match` indica que la authority pudo enlazarse con una persona de VOC
+`tiene_correspondencia_voc` indica que la authority pudo enlazarse con una persona de VOC
 SEDICI. No significa por sí solo que la persona pertenezca a la UNLP ni que su
 afiliación esté vigente para una publicación determinada.
 
 ### Fecha y período
 
-`publication_date` y `publication_year` derivan de la fecha de publicación
+`fecha_publicacion` y `anio_publicacion` derivan de la fecha de publicación
 informada en los metadatos. No representan la fecha de depósito en SEDICI.
 
 ### Conteos globales del autor
 
 La base expone tres atributos por identidad:
 
-- `sedici_publication_count`: publicaciones visibles de todo SEDICI donde
+- `publicaciones_autor_en_sedici`: publicaciones visibles de todo SEDICI donde
   figura como autor personal;
-- `journal_publication_count`: publicaciones visibles bajo la comunidad
+- `publicaciones_autor_en_revistas`: publicaciones visibles bajo la comunidad
   `Revistas`;
-- `journal_article_count`: subconjunto anterior clasificado como artículo.
+- `articulos_autor_en_revistas`: subconjunto anterior clasificado como artículo.
 
 Estos valores describen el total global del autor y deben agregarse con `MAX`.
 No cambian cuando se selecciona una revista o un período. Para conocer la
 cantidad correspondiente a la selección actual debe utilizarse
-`COUNT_DISTINCT(item_id)`.
+`COUNT_DISTINCT(handle_publicacion)`.
 
 ## Recorrido narrativo
 
@@ -161,10 +165,10 @@ Visualización: tarjetas.
 
 Indicadores:
 
-- Revistas: `COUNT_DISTINCT(journal_id)`.
-- Publicaciones: `COUNT_DISTINCT(item_id)`.
-- Autorías identificadas: `COUNT_DISTINCT(authorship_id)`.
-- Autores identificados: `COUNT_DISTINCT(author_id)`.
+- Revistas: `COUNT_DISTINCT(handle_revista)`.
+- Publicaciones: `COUNT_DISTINCT(handle_publicacion)`.
+- Autorías identificadas: `COUNT_DISTINCT(id_autoria)`.
+- Autores identificados: `COUNT_DISTINCT(id_autor)`.
 
 Texto sugerido:
 
@@ -177,18 +181,18 @@ Visualización: tabla o barras horizontales con interacción de filtro.
 
 Dimensión:
 
-- `journal_title`.
+- `revista`.
 
 Métricas:
 
-- Publicaciones: `COUNT_DISTINCT(item_id)`.
-- Autorías: `COUNT_DISTINCT(authorship_id)`.
-- Autores: `COUNT_DISTINCT(author_id)`.
+- Publicaciones: `COUNT_DISTINCT(handle_publicacion)`.
+- Autorías: `COUNT_DISTINCT(id_autoria)`.
+- Autores: `COUNT_DISTINCT(id_autor)`.
 
 Campos opcionales:
 
-- `is_closed`, presentado como `Cerrada`;
-- cantidad de artículos mediante un filtro `is_article = TRUE`.
+- `es_cerrada`, presentado como `Cerrada`;
+- cantidad de artículos mediante un filtro `es_articulo = TRUE`.
 
 Pregunta auxiliar:
 
@@ -201,11 +205,11 @@ Visualización: tarjetas o barra apilada.
 
 Dimensión:
 
-- `is_closed`, presentado como `Abierta` y `Cerrada`.
+- `es_cerrada`, presentado como `Abierta` y `Cerrada`.
 
 Métrica:
 
-- `COUNT_DISTINCT(journal_id)`.
+- `COUNT_DISTINCT(handle_revista)`.
 
 Texto sugerido:
 
@@ -218,11 +222,11 @@ Visualización: barras ordenadas.
 
 Dimensión:
 
-- `sedici_subtype`.
+- `tipo_publicacion`.
 
 Métrica:
 
-- `COUNT_DISTINCT(item_id)`.
+- `COUNT_DISTINCT(handle_publicacion)`.
 
 Preguntas auxiliares:
 
@@ -238,12 +242,12 @@ Visualización: serie temporal.
 
 Dimensión:
 
-- `publication_year`.
+- `anio_publicacion`.
 
 Métricas:
 
-- Publicaciones: `COUNT_DISTINCT(item_id)`.
-- Artículos: `COUNT_DISTINCT(item_id)` con `is_article = TRUE`.
+- Publicaciones: `COUNT_DISTINCT(handle_publicacion)`.
+- Artículos: `COUNT_DISTINCT(handle_publicacion)` con `es_articulo = TRUE`.
 
 Texto sugerido:
 
@@ -256,12 +260,12 @@ Visualización: tabla, barras o mapa de calor revista–año.
 
 Dimensiones:
 
-- `journal_title`;
-- `publication_year`.
+- `revista`;
+- `anio_publicacion`.
 
 Métrica:
 
-- `COUNT_DISTINCT(item_id)`.
+- `COUNT_DISTINCT(handle_publicacion)`.
 
 ### ¿Qué cobertura de autorías tienen las publicaciones?
 
@@ -271,10 +275,10 @@ Campo calculado sugerido:
 
 ```text
 COUNT_DISTINCT(
-  CASE WHEN has_recognized_author THEN item_id ELSE NULL END
+  CASE WHEN tiene_autor_reconocido THEN handle_publicacion ELSE NULL END
 )
 /
-COUNT_DISTINCT(item_id)
+COUNT_DISTINCT(handle_publicacion)
 ```
 
 Texto sugerido:
@@ -290,19 +294,19 @@ Visualización: tabla ordenada por publicaciones en la selección.
 
 Dimensión:
 
-- `author_name`.
+- `nombre_autor`.
 
 Filtro del gráfico:
 
-- `author_id` no es nulo;
-- opcionalmente `is_article = TRUE` si la página se limita a artículos.
+- `id_autor` no es nulo;
+- opcionalmente `es_articulo = TRUE` si la página se limita a artículos.
 
 Métricas:
 
-- Todo SEDICI: `MAX(sedici_publication_count)`.
-- Comunidad Revistas: `MAX(journal_publication_count)`.
-- Artículos de revistas: `MAX(journal_article_count)`.
-- Selección actual: `COUNT_DISTINCT(item_id)`.
+- Todo SEDICI: `MAX(publicaciones_autor_en_sedici)`.
+- Comunidad Revistas: `MAX(publicaciones_autor_en_revistas)`.
+- Artículos de revistas: `MAX(articulos_autor_en_revistas)`.
+- Selección actual: `COUNT_DISTINCT(handle_publicacion)`.
 
 Texto sugerido:
 
@@ -315,11 +319,11 @@ Visualización: barras horizontales.
 
 Dimensión:
 
-- `author_name`.
+- `nombre_autor`.
 
 Métrica:
 
-- `COUNT_DISTINCT(item_id)`.
+- `COUNT_DISTINCT(handle_publicacion)`.
 
 Pregunta auxiliar:
 
@@ -332,7 +336,7 @@ Visualización: barras o tarjetas.
 
 Dimensión:
 
-- `author_identity_basis`.
+- `id_autorentity_basis`.
 
 Valores:
 
@@ -341,7 +345,7 @@ Valores:
 
 Métrica:
 
-- `COUNT_DISTINCT(author_id)`.
+- `COUNT_DISTINCT(id_autor)`.
 
 ### ¿Qué proporción tiene correspondencia con VOC?
 
@@ -349,11 +353,11 @@ Visualización: barra porcentual o tarjetas.
 
 Dimensión:
 
-- `has_voc_match`.
+- `tiene_correspondencia_voc`.
 
 Métrica:
 
-- `COUNT_DISTINCT(author_id)`.
+- `COUNT_DISTINCT(id_autor)`.
 
 Texto sugerido:
 
@@ -362,26 +366,26 @@ Texto sugerido:
 
 ## Controles recomendados
 
-- Período, basado en `publication_date`.
-- Revista, mediante `journal_title`.
-- Estado de cierre, mediante `is_closed`.
-- Subtipo, mediante `sedici_subtype`.
-- Es artículo, mediante `is_article`.
-- Base de identidad, mediante `author_identity_basis`.
-- Correspondencia VOC, mediante `has_voc_match`.
+- Período, basado en `fecha_publicacion`.
+- Revista, mediante `revista`.
+- Estado de cierre, mediante `es_cerrada`.
+- Subtipo, mediante `tipo_publicacion`.
+- Es artículo, mediante `es_articulo`.
+- Base de identidad, mediante `id_autorentity_basis`.
+- Correspondencia VOC, mediante `tiene_correspondencia_voc`.
 
-Todos los gráficos principales deben utilizar `unlp_portalderevistas_00_base` para que
+Todos los gráficos principales deben utilizar `unlp_sedici_revistas_dashboard` para que
 los filtros y la interacción por clic se propaguen de forma consistente.
 
 ## Reglas para no distorsionar las métricas
 
 - No utilizar `Record Count` como cantidad de publicaciones.
-- Contar publicaciones con `COUNT_DISTINCT(item_id)`.
-- Contar autorías con `COUNT_DISTINCT(authorship_id)`.
-- Contar autores con `COUNT_DISTINCT(author_id)`.
+- Contar publicaciones con `COUNT_DISTINCT(handle_publicacion)`.
+- Contar autorías con `COUNT_DISTINCT(id_autoria)`.
+- Contar autores con `COUNT_DISTINCT(id_autor)`.
 - Agregar los conteos globales del autor mediante `MAX`, nunca mediante `SUM`.
 - Mostrar cantidades junto con porcentajes de cobertura.
-- Aplicar explícitamente `is_article = TRUE` cuando se hable de artículos.
+- Aplicar explícitamente `es_articulo = TRUE` cuando se hable de artículos.
 - Diferenciar los totales globales del autor de la cantidad bajo los filtros
   actuales.
 
@@ -403,8 +407,8 @@ calidad específicos.
 
 - La definición de revista está visible.
 - La fuente y la fecha de actualización están informadas.
-- Todas las cantidades de publicaciones usan `COUNT_DISTINCT(item_id)`.
-- La tabla de autores excluye filas con `author_id` nulo.
+- Todas las cantidades de publicaciones usan `COUNT_DISTINCT(handle_publicacion)`.
+- La tabla de autores excluye filas con `id_autor` nulo.
 - Los conteos globales del autor usan `MAX`.
 - Los títulos distinguen publicaciones, artículos, autorías y autores.
 - El filtro de revista afecta la tabla de autores.

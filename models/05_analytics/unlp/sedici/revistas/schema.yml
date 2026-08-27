@@ -1,28 +1,28 @@
 version: 2
 
 models:
-  - name: unlp_portalderevistas_00_universo_autores
+  - name: unlp_sedici_revistas_universo_autores
     description: >
       Identidades de autor utilizadas por el análisis de artículos de revistas.
       Una fila por `author_id`, sin asignar una afiliación general a la persona.
     data_tests:
       - dbt_utils.expression_is_true:
-          name: portalderevistas_author_universe_identity_basis_is_consistent
+          name: sedici_revistas_author_universe_identity_basis_is_consistent
           expression: >
             (identity_basis = 'authority' and has_authority_control)
             or
             (identity_basis = 'normalized_name' and not has_authority_control)
       - dbt_utils.expression_is_true:
-          name: portalderevistas_author_universe_voc_match_has_authority
+          name: sedici_revistas_author_universe_voc_match_has_authority
           expression: "not has_voc_match or has_authority_control"
       - dbt_utils.expression_is_true:
-          name: portalderevistas_author_universe_publication_counts_are_ordered
+          name: sedici_revistas_author_universe_publication_counts_are_ordered
           expression: >
             sedici_publication_count >= journal_publication_count
             and journal_publication_count >= journal_article_count
             and journal_article_count > 0
       - dbt_utils.expression_is_true:
-          name: portalderevistas_author_universe_publication_period_is_valid
+          name: sedici_revistas_author_universe_publication_period_is_valid
           expression: >
             (first_publication_year is null and last_publication_year is null)
             or
@@ -38,7 +38,7 @@ models:
           - not_null
           - unique
           - relationships:
-              name: portalderevistas_author_universe_in_sedici_author_dim
+              name: sedici_revistas_author_universe_in_sedici_author_dim
               to: ref('dim_unlp_sedicidb_author')
               field: author_id
       - name: author_name
@@ -91,14 +91,14 @@ models:
         description: Indica si el nombre normalizado representa más de una identidad.
         data_tests: [not_null]
 
-  - name: dim_unlp_portalderevistas_journal
+  - name: dim_unlp_sedici_revista
     description: >
       Universo de revistas de SEDICI a grano una fila por revista. Considera
       revista a cada comunidad hija directa de la comunidad raíz `Revistas`;
       las comunidades descendientes quedan interpretadas como secciones.
     data_tests:
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_closed_flag_is_consistent
+          name: sedici_revistas_journal_closed_flag_is_consistent
           expression: "is_closed = (journal_title like '%[Publicación cerrada]%')"
     columns:
       - name: journal_id
@@ -107,12 +107,15 @@ models:
           - not_null
           - unique
           - relationships:
-              name: portalderevistas_journal_in_sedici_community_dim
+              name: sedici_revistas_journal_in_sedici_community_dim
               to: ref('dim_unlp_sedicidb_community')
               field: community_id
       - name: journal_title
         description: Título vigente de la comunidad que representa la revista.
         data_tests: [not_null]
+      - name: journal_handle
+        description: Handle persistente de la comunidad que representa la revista.
+        data_tests: [not_null, unique]
       - name: is_closed
         description: Indica si el título de la comunidad contiene el marcador `[Publicación cerrada]`.
         data_tests: [not_null]
@@ -132,25 +135,25 @@ models:
         description: Camino de títulos desde la raíz `Revistas` hasta la revista.
         data_tests: [not_null]
 
-  - name: fct_unlp_portalderevistas_journal_item
+  - name: fct_unlp_sedici_revista_publicacion
     description: >
       Ítems publicados y visibles bajo las comunidades interpretadas como
       revistas. Una fila por `item_id`, sin exigir tipo, fecha ni autor.
     data_tests:
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_item_is_valid_sedici_item
+          name: sedici_revistas_journal_item_is_valid_sedici_item
           expression: >
             in_archive is true
             and withdrawn is false
             and discoverable is true
             and handle is not null
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_item_journal_matches_path
+          name: sedici_revistas_journal_item_journal_matches_path
           expression: >
             journal_id = split_part(owning_community_path_ids, ' > ', 2)::bigint
             and journal_title = split_part(owning_community_path_titles, ' > ', 2)
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_item_article_flag_is_consistent
+          name: sedici_revistas_journal_item_article_flag_is_consistent
           expression: >
             is_article = (
               sedici_subtype in (
@@ -167,7 +170,7 @@ models:
           - not_null
           - unique
           - relationships:
-              name: portalderevistas_journal_item_in_sedici_fact
+              name: sedici_revistas_journal_item_in_sedici_fact
               to: ref('fct_unlp_sedicidb_item_publication')
               field: item_id
       - name: handle
@@ -193,11 +196,14 @@ models:
         data_tests:
           - not_null
           - relationships:
-              name: portalderevistas_journal_item_journal_in_universe
-              to: ref('dim_unlp_portalderevistas_journal')
+              name: sedici_revistas_journal_item_journal_in_universe
+              to: ref('dim_unlp_sedici_revista')
               field: journal_id
       - name: journal_title
         description: Nombre de la revista.
+        data_tests: [not_null]
+      - name: journal_handle
+        description: Handle persistente de la comunidad que representa la revista.
         data_tests: [not_null]
       - name: is_closed
         description: Indica si la revista está marcada como publicación cerrada en SEDICI.
@@ -229,19 +235,19 @@ models:
           artículo definidas para este análisis.
         data_tests: [not_null]
 
-  - name: brg_unlp_portalderevistas_journal_item_author
+  - name: brg_unlp_sedici_revista_publicacion_autor
     description: >
       Relación descriptiva entre ítems de revistas e identidades de autores
       personales. Una fila por `item_id` y `author_id`, sin afiliaciones.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          name: portalderevistas_journal_item_author_unique_grain
+          name: sedici_revistas_journal_item_author_unique_grain
           combination_of_columns: [item_id, author_id]
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_item_author_authority_is_consistent
+          name: sedici_revistas_journal_item_author_authority_is_consistent
           expression: "has_authority_control = (authority_uri is not null)"
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_item_author_voc_match_has_person
+          name: sedici_revistas_journal_item_author_voc_match_has_person
           expression: "not has_voc_match or voc_person_node_id is not null"
     columns:
       - name: item_id
@@ -249,15 +255,15 @@ models:
         data_tests:
           - not_null
           - relationships:
-              name: portalderevistas_journal_item_author_item_in_fact
-              to: ref('fct_unlp_portalderevistas_journal_item')
+              name: sedici_revistas_journal_item_author_item_in_fact
+              to: ref('fct_unlp_sedici_revista_publicacion')
               field: item_id
       - name: author_id
         description: Identificador técnico de la identidad de autor.
         data_tests:
           - not_null
           - relationships:
-              name: portalderevistas_journal_item_author_in_sedici_author_dim
+              name: sedici_revistas_journal_item_author_in_sedici_author_dim
               to: ref('dim_unlp_sedicidb_author')
               field: author_id
       - name: author_name
@@ -295,171 +301,162 @@ models:
         description: Indica si el ítem fue clasificado como artículo.
         data_tests: [not_null]
 
-  - name: unlp_portalderevistas_00_base
+  - name: unlp_sedici_revistas_dashboard
     description: >
       Fuente principal del dashboard a grano ítem y autor personal. Conserva
       una fila con autor nulo para los ítems sin autor reconocido y permite que
       los filtros de revista y período alcancen publicaciones y autores.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          name: portalderevistas_base_unique_grain
-          combination_of_columns: [item_id, author_id]
+          name: sedici_revistas_dashboard_unique_grain
+          combination_of_columns: [handle_publicacion, id_autor]
       - dbt_utils.expression_is_true:
-          name: portalderevistas_base_author_fields_are_consistent
+          name: sedici_revistas_dashboard_author_fields_are_consistent
           expression: >
             (
-              author_id is null
-              and authorship_id is null
-              and author_name is null
-              and author_identity_basis is null
-              and not has_recognized_author
-              and not has_authority_control
-              and not has_voc_match
+              id_autor is null
+              and id_autoria is null
+              and nombre_autor is null
+              and base_identidad_autor is null
+              and not tiene_autor_reconocido
+              and not tiene_autoridad
+              and not tiene_correspondencia_voc
             )
             or
             (
-              author_id is not null
-              and authorship_id is not null
-              and author_name is not null
-              and author_identity_basis is not null
-              and has_recognized_author
-              and (not has_voc_match or has_authority_control)
+              id_autor is not null
+              and id_autoria is not null
+              and nombre_autor is not null
+              and base_identidad_autor is not null
+              and tiene_autor_reconocido
+              and (not tiene_correspondencia_voc or tiene_autoridad)
             )
       - dbt_utils.expression_is_true:
-          name: portalderevistas_base_publication_counts_are_ordered
+          name: sedici_revistas_dashboard_publication_counts_are_ordered
           expression: >
             (
-              author_id is null
-              and sedici_publication_count is null
-              and journal_publication_count is null
-              and journal_article_count is null
+              id_autor is null
+              and publicaciones_autor_en_sedici is null
+              and publicaciones_autor_en_revistas is null
+              and articulos_autor_en_revistas is null
             )
             or
             (
-              author_id is not null
-              and sedici_publication_count >= journal_publication_count
-              and journal_publication_count >= journal_article_count
-              and journal_article_count >= 0
+              id_autor is not null
+              and publicaciones_autor_en_sedici >= publicaciones_autor_en_revistas
+              and publicaciones_autor_en_revistas >= articulos_autor_en_revistas
+              and articulos_autor_en_revistas >= 0
             )
       - dbt_utils.expression_is_true:
-          name: portalderevistas_base_year_flag_is_consistent
-          expression: "has_publication_year = (publication_year is not null)"
+          name: sedici_revistas_dashboard_closed_flag_is_consistent
+          expression: "es_cerrada = (revista like '%[Publicación cerrada]%')"
       - dbt_utils.expression_is_true:
-          name: portalderevistas_base_closed_flag_is_consistent
-          expression: "is_closed = (journal_title like '%[Publicación cerrada]%')"
+          name: sedici_revistas_dashboard_publication_handle_url_is_consistent
+          expression: "url_handle_publicacion = 'https://hdl.handle.net/' || handle_publicacion"
+      - dbt_utils.expression_is_true:
+          name: sedici_revistas_dashboard_journal_handle_url_is_consistent
+          expression: "url_handle_revista = 'https://hdl.handle.net/' || handle_revista"
     columns:
-      - name: item_id
-        description: Identificador del ítem de revista.
-        data_tests:
-          - not_null
-          - relationships:
-              name: portalderevistas_base_item_in_fact
-              to: ref('fct_unlp_portalderevistas_journal_item')
-              field: item_id
-      - name: handle
-        description: Handle institucional del ítem.
+      - name: handle_publicacion
+        description: Handle persistente de la publicación.
         data_tests: [not_null]
-      - name: item_url
-        description: URL pública informada para el ítem.
-      - name: item_title
-        description: Título del ítem.
+      - name: url_handle_publicacion
+        description: URL de resolución del handle persistente de la publicación.
         data_tests: [not_null]
-      - name: dc_type
-        description: Categoría general informada por `dc.type`.
+      - name: url_publicacion
+        description: URL pública de la publicación en SEDICI.
+      - name: titulo_publicacion
+        description: Título vigente de la publicación.
         data_tests: [not_null]
-      - name: sedici_subtype
+      - name: tipo_publicacion
         description: Subtipo específico informado por `sedici.subtype`.
         data_tests: [not_null]
-      - name: publication_date
+      - name: fecha_publicacion
         description: Fecha de publicación informada.
-      - name: publication_year
+      - name: anio_publicacion
         description: Año derivado de la fecha de publicación.
-      - name: journal_id
-        description: Identificador de la revista.
+      - name: es_articulo
+        description: Indica si el subtipo se considera un artículo para este análisis.
         data_tests: [not_null]
-      - name: journal_title
-        description: Nombre de la revista.
+      - name: revista
+        description: Nombre vigente de la revista en SEDICI.
         data_tests: [not_null]
-      - name: is_closed
+      - name: handle_revista
+        description: Handle persistente de la comunidad que representa la revista.
+        data_tests: [not_null]
+      - name: url_handle_revista
+        description: URL de resolución del handle persistente de la revista.
+        data_tests: [not_null]
+      - name: es_cerrada
         description: Indica si la revista está marcada como publicación cerrada en SEDICI.
         data_tests: [not_null]
-      - name: owning_community_path_titles
+      - name: ruta_en_sedici
         description: Jerarquía de comunidades del ítem.
         data_tests: [not_null]
-      - name: is_article
-        description: Indica si el subtipo corresponde a un artículo.
-        data_tests: [not_null]
-      - name: has_publication_year
-        description: Indica si el ítem tiene un año utilizable.
-        data_tests: [not_null]
-      - name: author_id
-        description: Identificador técnico del autor; es nulo cuando el ítem no tiene autor reconocido.
-        data_tests:
-          - relationships:
-              name: portalderevistas_base_author_in_dimension
-              to: ref('dim_unlp_sedicidb_author')
-              field: author_id
-      - name: authorship_id
-        description: Identificador legible de la relación ítem-autor, formado por ambos identificadores.
-        data_tests: [unique]
-      - name: author_name
+      - name: nombre_autor
         description: Nombre preferido del autor.
-      - name: author_name_normalized
-        description: Nombre normalizado utilizado para construir identidades nominales.
-      - name: author_place
-        description: Posición informada para el autor dentro del ítem.
-      - name: author_identity_basis
-        description: Indica si la identidad se basa en una authority o en el nombre normalizado.
-        data_tests:
-          - accepted_values:
-              values: ['authority', 'normalized_name']
-      - name: authority_uri
-        description: URI de authority del autor, cuando existe.
-      - name: has_recognized_author
+      - name: tiene_autor_reconocido
         description: Indica si la fila representa una relación ítem-autor reconocida.
         data_tests: [not_null]
-      - name: has_authority_control
+      - name: tiene_autoridad
         description: Indica si la identidad del autor se construyó con una authority.
         data_tests: [not_null]
-      - name: voc_person_node_id
-        description: Identificador de persona VOC enlazado mediante la authority.
-      - name: has_voc_match
+      - name: tiene_correspondencia_voc
         description: Indica si la authority corresponde a una persona en VOC.
         data_tests: [not_null]
-      - name: sedici_publication_count
+      - name: url_autor_voc
+        description: URL pública de la persona en VOC SEDICI, cuando existe correspondencia.
+      - name: publicaciones_autor_en_sedici
         description: >
           Publicaciones visibles de todo SEDICI donde la identidad figura como
           autor personal. Es un atributo del autor y debe agregarse con `MAX`.
-      - name: journal_publication_count
+      - name: publicaciones_autor_en_revistas
         description: >
           Publicaciones visibles bajo la comunidad raíz `Revistas` donde la
           identidad figura como autor. Debe agregarse con `MAX`.
-      - name: journal_article_count
+      - name: articulos_autor_en_revistas
         description: >
           Publicaciones de revistas clasificadas como artículos donde aparece
           la identidad. Debe agregarse con `MAX`.
+      - name: id_autor
+        description: >
+          Clave analítica provisional de la identidad de autor en SEDICI. Se
+          conserva para realizar conteos distintos sin mezclar homónimos.
+        data_tests:
+          - relationships:
+              name: sedici_revistas_dashboard_author_in_dimension
+              to: ref('dim_unlp_sedicidb_author')
+              field: author_id
+      - name: id_autoria
+        description: Clave analítica de la relación entre publicación y autor.
+        data_tests: [unique]
+      - name: base_identidad_autor
+        description: Indica si la identidad se basa en una autoridad o en el nombre normalizado.
+        data_tests:
+          - accepted_values:
+              values: ['autoridad', 'nombre_normalizado']
 
-  - name: unlp_portalderevistas_00_panorama_revistas
+  - name: unlp_sedici_revistas_panorama
     description: >
       Panorama por revista desde ítems publicados hasta artículos con autor
       identificado, sin clasificar todavía su afiliación.
     data_tests:
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_overview_items_reconcile
+          name: sedici_revistas_journal_overview_items_reconcile
           expression: "published_item_count = article_item_count + other_item_count"
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_overview_articles_reconcile
+          name: sedici_revistas_journal_overview_articles_reconcile
           expression: "article_item_count = dated_article_count + undated_article_count"
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_overview_author_coverage_reconciles
+          name: sedici_revistas_journal_overview_author_coverage_reconciles
           expression: >
             dated_article_count
             = article_with_author_count + article_without_author_count
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_overview_period_is_valid
+          name: sedici_revistas_journal_overview_period_is_valid
           expression: "first_publication_year <= last_publication_year"
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_overview_coverage_is_valid
+          name: sedici_revistas_journal_overview_coverage_is_valid
           expression: >
             (dated_article_count = 0 and article_author_coverage_pct is null)
             or
@@ -513,24 +510,24 @@ models:
         description: Último año de publicación observado en la revista.
         data_tests: [not_null]
 
-  - name: unlp_portalderevistas_00_revistas_por_anio
+  - name: unlp_sedici_revistas_por_anio
     description: >
       Evolución descriptiva por revista y año a partir de los ítems con año de
       publicación, sin clasificar afiliaciones de autores.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          name: portalderevistas_journal_year_overview_unique_grain
+          name: sedici_revistas_journal_year_overview_unique_grain
           combination_of_columns: [journal_id, publication_year]
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_year_overview_items_reconcile
+          name: sedici_revistas_journal_year_overview_items_reconcile
           expression: "published_item_count = article_item_count + other_item_count"
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_year_overview_authors_reconcile
+          name: sedici_revistas_journal_year_overview_authors_reconcile
           expression: >
             article_item_count
             = article_with_author_count + article_without_author_count
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_year_overview_coverage_is_valid
+          name: sedici_revistas_journal_year_overview_coverage_is_valid
           expression: >
             (article_item_count = 0 and article_author_coverage_pct is null)
             or
@@ -569,16 +566,16 @@ models:
       - name: article_author_coverage_pct
         description: Porcentaje de artículos del año con autor reconocido.
 
-  - name: unlp_portalderevistas_01_cobertura_general
+  - name: unlp_sedici_revistas_cobertura_general
     description: >
       Perfil general de autorías agrupado por estado y evidencia de afiliación.
       Expone volumen, participación y cobertura de authorities y matches VOC.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          name: portalderevistas_journal_article_author_coverage_unique_grain
+          name: sedici_revistas_journal_article_author_coverage_unique_grain
           combination_of_columns: [affiliation_status, affiliation_evidence]
       - dbt_utils.expression_is_true:
-          name: portalderevistas_article_author_coverage_pct_in_range
+          name: sedici_revistas_article_author_coverage_pct_in_range
           expression: >
             authorship_share_pct between 0 and 100
             and authority_coverage_pct between 0 and 100
@@ -615,23 +612,23 @@ models:
         description: Porcentaje del grupo enlazado con una persona en VOC.
         data_tests: [not_null]
 
-  - name: fct_unlp_portalderevistas_journal_article_author
+  - name: fct_unlp_sedici_revista_articulo_autor
     description: >
       Autorías de artículos de revistas UNLP. Una fila por `item_id` y
       `author_id`, con afiliación a la fecha de publicación.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          name: portalderevistas_journal_article_author_unique_grain
+          name: sedici_revistas_journal_article_author_unique_grain
           combination_of_columns: [item_id, author_id]
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_article_author_is_valid_sedici_item
+          name: sedici_revistas_journal_article_author_is_valid_sedici_item
           expression: >
             in_archive is true
             and withdrawn is false
             and discoverable is true
             and handle is not null
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_article_author_is_journal_article
+          name: sedici_revistas_journal_article_author_is_journal_article
           expression: >
             owning_root_community_title = 'Revistas'
             and sedici_subtype in (
@@ -641,30 +638,30 @@ models:
               'Revision'
             )
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_article_author_journal_matches_path
+          name: sedici_revistas_journal_article_author_journal_matches_path
           expression: >
             journal_id = split_part(owning_community_path_ids, ' > ', 2)::bigint
             and journal_title = split_part(owning_community_path_titles, ' > ', 2)
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_article_author_year_matches_date
+          name: sedici_revistas_journal_article_author_year_matches_date
           expression: "publication_year = extract(year from publication_date)::integer"
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_article_author_voc_match_has_person
+          name: sedici_revistas_journal_article_author_voc_match_has_person
           expression: "not has_voc_match or voc_person_node_id is not null"
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_article_author_unlp_has_voc_evidence
+          name: sedici_revistas_journal_article_author_unlp_has_voc_evidence
           expression: "affiliation_status <> 'unlp' or has_voc_match"
       - dbt_utils.expression_is_true:
-          name: portalderevistas_article_author_external_has_voc_evidence
+          name: sedici_revistas_article_author_external_has_voc_evidence
           expression: "affiliation_status <> 'external' or has_voc_match"
       - dbt_utils.expression_is_true:
-          name: portalderevistas_article_author_nonnegative_affiliation_counts
+          name: sedici_revistas_article_author_nonnegative_affiliation_counts
           expression: "unlp_institution_count >= 0 and external_institution_count >= 0"
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_article_author_unlp_count_consistent
+          name: sedici_revistas_journal_article_author_unlp_count_consistent
           expression: "affiliation_status <> 'unlp' or unlp_institution_count > 0"
       - dbt_utils.expression_is_true:
-          name: portalderevistas_article_author_external_count_consistent
+          name: sedici_revistas_article_author_external_count_consistent
           expression: >
             affiliation_status <> 'external'
             or (external_institution_count > 0 and unlp_institution_count = 0)
@@ -674,7 +671,7 @@ models:
         data_tests:
           - not_null
           - relationships:
-              name: portalderevistas_journal_article_author_item_in_sedici_fact
+              name: sedici_revistas_journal_article_author_item_in_sedici_fact
               to: ref('fct_unlp_sedicidb_item_publication')
               field: item_id
       - name: author_id
@@ -682,7 +679,7 @@ models:
         data_tests:
           - not_null
           - relationships:
-              name: portalderevistas_journal_article_author_in_sedici_author_dim
+              name: sedici_revistas_journal_article_author_in_sedici_author_dim
               to: ref('dim_unlp_sedicidb_author')
               field: author_id
       - name: author_name
@@ -725,8 +722,8 @@ models:
         data_tests:
           - not_null
           - relationships:
-              name: portalderevistas_journal_article_author_journal_in_universe
-              to: ref('dim_unlp_portalderevistas_journal')
+              name: sedici_revistas_journal_article_author_journal_in_universe
+              to: ref('dim_unlp_sedici_revista')
               field: journal_id
       - name: journal_title
         description: >
@@ -771,31 +768,31 @@ models:
       - name: external_institution_count
         description: Afiliaciones externas vigentes al publicar.
         data_tests: [not_null]
-  - name: unlp_portalderevistas_02_revistas_ultimos_5_anios
+  - name: unlp_sedici_revistas_ultimos_5_anios
     description: >
       Resumen de artículos, autorías y autores por revista y período.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          name: portalderevistas_journal_author_affiliation_unique_grain
+          name: sedici_revistas_journal_author_affiliation_unique_grain
           combination_of_columns: [journal_id, period_start_year, period_end_year]
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_author_affiliation_period_is_valid
+          name: sedici_revistas_journal_author_affiliation_period_is_valid
           expression: "period_start_year <= period_end_year"
       - dbt_utils.expression_is_true:
-          name: portalderevistas_author_affiliation_authorships_reconcile
+          name: sedici_revistas_author_affiliation_authorships_reconcile
           expression: >
             authorship_count
             = unlp_authorship_count + external_authorship_count + unknown_authorship_count
       - dbt_utils.expression_is_true:
-          name: portalderevistas_author_affiliation_classified_reconciles
+          name: sedici_revistas_author_affiliation_classified_reconciles
           expression: "classified_authorship_count = unlp_authorship_count + external_authorship_count"
       - dbt_utils.expression_is_true:
-          name: portalderevistas_author_affiliation_pct_in_range
+          name: sedici_revistas_author_affiliation_pct_in_range
           expression: >
             unlp_authorship_share_pct between 0 and 100
             and known_affiliation_coverage_pct between 0 and 100
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_author_affiliation_counts_nonnegative
+          name: sedici_revistas_journal_author_affiliation_counts_nonnegative
           expression: >
             article_count >= 0
             and authorship_count >= 0
@@ -804,7 +801,7 @@ models:
             and unique_external_author_count >= 0
             and unique_unknown_author_count >= 0
       - dbt_utils.expression_is_true:
-          name: portalderevistas_author_affiliation_unlp_share_denominator
+          name: sedici_revistas_author_affiliation_unlp_share_denominator
           expression: >
             (classified_authorship_count = 0 and unlp_authorship_share_pct is null)
             or
@@ -857,28 +854,28 @@ models:
       - name: unique_unknown_author_count
         description: Autores distintos sin afiliación determinada.
         data_tests: [not_null]
-  - name: unlp_portalderevistas_03_revistas_por_anio
+  - name: unlp_sedici_revistas_afiliacion_autores_por_anio
     description: >
       Resumen anual de artículos, autorías y autores por revista.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          name: portalderevistas_author_affiliation_year_unique_grain
+          name: sedici_revistas_author_affiliation_year_unique_grain
           combination_of_columns: [journal_id, publication_year]
       - dbt_utils.expression_is_true:
-          name: portalderevistas_author_affiliation_year_authorships_reconcile
+          name: sedici_revistas_author_affiliation_year_authorships_reconcile
           expression: >
             authorship_count
             = unlp_authorship_count + external_authorship_count + unknown_authorship_count
       - dbt_utils.expression_is_true:
-          name: portalderevistas_author_affiliation_year_classified_reconciles
+          name: sedici_revistas_author_affiliation_year_classified_reconciles
           expression: "classified_authorship_count = unlp_authorship_count + external_authorship_count"
       - dbt_utils.expression_is_true:
-          name: portalderevistas_author_affiliation_year_pct_in_range
+          name: sedici_revistas_author_affiliation_year_pct_in_range
           expression: >
             unlp_authorship_share_pct between 0 and 100
             and known_affiliation_coverage_pct between 0 and 100
       - dbt_utils.expression_is_true:
-          name: portalderevistas_journal_affiliation_year_share_denominator
+          name: sedici_revistas_journal_affiliation_year_share_denominator
           expression: >
             (classified_authorship_count = 0 and unlp_authorship_share_pct is null)
             or

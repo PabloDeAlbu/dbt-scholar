@@ -8,7 +8,7 @@ WITH period AS (
 
 authorship AS (
     SELECT fact.*
-    FROM {{ ref('fct_unlp_portalderevistas_journal_article_author') }} AS fact
+    FROM {{ ref('fct_unlp_sedici_revista_articulo_autor') }} AS fact
     CROSS JOIN period
     WHERE fact.publication_year BETWEEN period.period_start_year AND period.period_end_year
 ),

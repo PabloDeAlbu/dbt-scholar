@@ -2,7 +2,7 @@
 
 WITH authorship AS (
     SELECT *
-    FROM {{ ref('fct_unlp_portalderevistas_journal_article_author') }}
+    FROM {{ ref('fct_unlp_sedici_revista_articulo_autor') }}
 ),
 
 grouped AS (

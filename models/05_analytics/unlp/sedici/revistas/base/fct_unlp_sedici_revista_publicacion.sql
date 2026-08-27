@@ -20,6 +20,7 @@ SELECT
     item.publication_year,
     journal.journal_id,
     journal.journal_title,
+    journal.journal_handle,
     journal.is_closed,
     item.owning_root_community_title,
     item.owning_community_path_ids,
@@ -34,7 +35,7 @@ SELECT
         'Revision'
     ) AS is_article
 FROM {{ ref('fct_unlp_sedicidb_item_publication') }} AS item
-INNER JOIN {{ ref('dim_unlp_portalderevistas_journal') }} AS journal
+INNER JOIN {{ ref('dim_unlp_sedici_revista') }} AS journal
     ON journal.journal_id = NULLIF(
         SPLIT_PART(item.owning_community_path_ids, ' > ', 2),
         ''

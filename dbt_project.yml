@@ -216,9 +216,9 @@ models:
           malvinas:
             +schema: unlp_sedici_malvinas
             +tags: [sedici, malvinas]
-        portalderevistas:
-          +schema: unlp_portalderevistas
-          +tags: [portalderevistas, revistas, sedici]
+          revistas:
+            +schema: unlp_sedici_revistas
+            +tags: [sedici, revistas]
 seeds:
   dbt_scholar:
     coar:
