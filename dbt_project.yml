@@ -213,6 +213,9 @@ models:
           issue_14718:
             +schema: unlp_sedici_issue_14718
             +tags: [sedici, cic, issue_14718]
+          malvinas:
+            +schema: unlp_sedici_malvinas
+            +tags: [sedici, malvinas]
         portalderevistas:
           +schema: unlp_portalderevistas
           +tags: [portalderevistas, revistas, sedici]

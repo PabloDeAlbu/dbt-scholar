@@ -1,0 +1,130 @@
+version: 2
+
+models:
+  - name: unlp_sedici_malvinas_publication_candidate
+    description: >
+      Publicaciones candidatas sobre Malvinas seleccionadas mediante Solr y
+      enriquecidas con la fact de deduplicación de SEDICI.
+    config:
+      meta:
+        project: malvinas
+        source_system: sedicidb
+        selection_system: solr_sedici
+        model_role: publication_candidate
+        grain: url_sedici
+        temporal_scope: solr_snapshot_2026_08_26
+    columns:
+      - name: url_sedici
+        description: Enlace público permanente a la publicación en SEDICI.
+        data_tests: [not_null, unique]
+      - name: titulo
+        description: Título o títulos disponibles para la publicación.
+        data_tests: [not_null]
+      - name: subtitulo
+        description: Subtítulo disponible para la publicación.
+      - name: autorias
+        description: Autorías disponibles, separadas por punto y coma.
+      - name: tipo_documento
+        description: >
+          Tipo presentado a partir de `sedici.subtype`, con respaldo en
+          `dc.type` y en las clasificaciones técnicas disponibles.
+        data_tests: [not_null]
+      - name: fecha_publicacion
+        description: Fecha de publicación reconocida en los metadatos.
+      - name: anio_publicacion
+        description: Año derivado de la fecha de publicación.
+      - name: fecha_disponible_en_sedici
+        description: Fecha desde la que el documento está disponible en SEDICI.
+      - name: temas
+        description: Materias y términos temáticos separados por punto y coma.
+      - name: resumen
+        description: Resumen o descripciones disponibles.
+      - name: doi
+        description: DOI disponibles, separados por punto y coma.
+      - name: isbn
+        description: ISBN disponibles, separados por punto y coma.
+      - name: issn
+        description: ISSN disponibles, separados por punto y coma.
+      - name: comunidad
+        description: Comunidad inmediata que contiene la colección del ítem.
+      - name: ruta_comunidades
+        description: Recorrido de comunidades desde la raíz hasta la colección.
+      - name: coleccion
+        description: Colección propietaria del ítem en SEDICI.
+
+  - name: unlp_sedici_malvinas_publication_identifier
+    description: >
+      Identificadores de las publicaciones candidatas, con una columna por
+      metadatafield y nombres formados reemplazando puntos por guiones bajos.
+    config:
+      meta:
+        project: malvinas
+        source_system: sedicidb
+        model_role: publication_identifier
+        grain: url_sedici
+    columns:
+      - name: url_sedici
+        description: Enlace público utilizado para relacionar este modelo con la base de publicaciones.
+        data_tests: [not_null, unique]
+      - name: doi
+        description: DOI consolidados y normalizados por la fact de deduplicación.
+      - name: isbn
+        description: ISBN consolidados por la fact de deduplicación.
+      - name: issn
+        description: ISSN consolidados por la fact de deduplicación.
+      - name: dc_identifier
+        description: Valores originales de `dc.identifier`.
+      - name: dc_identifier_isbn
+        description: Valores originales de `dc.identifier.isbn`.
+      - name: dc_identifier_issn
+        description: Valores originales de `dc.identifier.issn`.
+      - name: dc_identifier_other
+        description: Valores originales de `dc.identifier.other`.
+      - name: dc_identifier_uri
+        description: Valores originales de `dc.identifier.uri`.
+      - name: sedici_identifier_doi
+        description: Valores originales de `sedici.identifier.doi`.
+      - name: sedici_identifier_isbn
+        description: Valores originales de `sedici.identifier.isbn`.
+      - name: sedici_identifier_issn
+        description: Valores originales de `sedici.identifier.issn`.
+      - name: sedici_identifier_other
+        description: Valores originales de `sedici.identifier.other`.
+      - name: sedici_identifier_uri
+        description: Valores originales de `sedici.identifier.uri`.
+
+  - name: unlp_sedici_malvinas_item_candidate_excluded
+    description: >
+      Ítems recuperados por Solr que no ingresan en la fact de deduplicación,
+      clasificados según su presencia y estado en el dump de SEDICI.
+    config:
+      meta:
+        project: malvinas
+        source_system: sedicidb
+        selection_system: solr_sedici
+        model_role: candidate_exclusion_review
+        grain: handle
+    columns:
+      - name: search_resource_id
+        description: >
+          Identificador interno informado por Solr, utilizado para buscar el
+          ítem aun cuando todavía no tenía handle en el dump.
+        data_tests: [not_null, unique]
+      - name: handle
+        description: Handle candidato que no ingresó en la fact de deduplicación.
+        data_tests: [not_null, unique]
+      - name: exclusion_reason
+        description: Motivo por el que el candidato no está en la fact de deduplicación.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - absent_from_dump
+                - withdrawn
+                - not_in_archive
+                - not_discoverable
+                - excluded_from_dedup_fact
+      - name: item_id
+        description: Identificador del ítem cuando ya estaba presente en el dump.
+      - name: dc_title
+        description: Título disponible en el dump para facilitar la revisión manual.

@@ -1,0 +1,24 @@
+version: 2
+
+seeds:
+  - name: seed_unlp_sedici_malvinas_solr_item_candidate
+    description: >
+      Snapshot de ítems candidatos recuperados por la búsqueda `malvinas`
+      en Solr SEDICI el 26 de agosto de 2026.
+    config:
+      meta:
+        source_system: solr_sedici
+        model_role: candidate_selection
+        resource_type: item
+        query_q: malvinas
+        query_fq: 'search.resourcetype:2'
+        query_rows: 8000
+        extraction_date: '2026-08-26'
+        grain: handle
+    columns:
+      - name: handle
+        description: Handle del ítem candidato devuelto por Solr.
+        data_tests: [not_null, unique]
+      - name: search_resource_id
+        description: Identificador interno del ítem en el índice de Solr.
+        data_tests: [not_null, unique]
