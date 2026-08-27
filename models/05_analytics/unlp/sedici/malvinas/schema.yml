@@ -18,11 +18,15 @@ models:
         description: Enlace público permanente a la publicación en SEDICI.
         data_tests: [not_null, unique]
       - name: titulo
-        description: Título o títulos disponibles para la publicación.
+        description: >
+          Último `dc.title` declarado para el ítem, unido al subtítulo con dos
+          puntos cuando ambos están disponibles.
         data_tests: [not_null]
-      - name: subtitulo
-        description: Subtítulo disponible para la publicación.
-      - name: autorias
+      - name: titulos_alternativos
+        description: >
+          Valores de `dc.title.alternative` disponibles para la publicación,
+          concatenados y separados por punto y coma.
+      - name: autoria
         description: Autorías disponibles, separadas por punto y coma.
       - name: tipo_documento
         description: >
