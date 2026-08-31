@@ -1,0 +1,104 @@
+version: 2
+
+models:
+  - name: unlp_sedici_tesis_reporte
+    description: >
+      Tesis publicadas y visibles en SEDICI, presentadas para su consulta y
+      exportación. Una fila por tesis cuyo tipo padre vigente es `Tesis`.
+    config:
+      meta:
+        project: tesis_unlp
+        source_system: sedicidb
+        model_role: end_user_report
+        grain: url_sedici
+        temporal_scope: current_snapshot
+    columns:
+      - name: url_sedici
+        description: Enlace público persistente a la tesis en SEDICI.
+        data_tests: [not_null, unique]
+      - name: titulo
+        description: Título vigente unido al subtítulo con dos puntos cuando existe.
+        data_tests: [not_null]
+      - name: titulo_truncado
+        description: >
+          Versión del título limitada a 50 caracteres, incluidos los tres
+          puntos finales cuando el título original supera ese límite.
+        data_tests: [not_null]
+      - name: autoria
+        description: >
+          Autorías declaradas, separadas por punto y coma. Puede quedar vacía
+          cuando el ítem no contiene un metadato de autor utilizable.
+      - name: tipo_tesis
+        description: Subtipo específico declarado en `sedici.subtype`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - Tesis de doctorado
+                - Tesis de grado
+                - Tesis de maestría
+                - Trabajo de especialización
+                - Trabajo final de grado
+      - name: grado
+        description: Grado o título académico informado en `thesis.degree.name`.
+        data_tests: [not_null]
+      - name: institucion_otorgante
+        description: Institución que otorga el grado, según `thesis.degree.grantor`.
+        data_tests: [not_null]
+      - name: direccion
+        description: Personas declaradas en la dirección de la tesis.
+      - name: codireccion
+        description: Personas declaradas en la codirección de la tesis.
+      - name: jurado
+        description: Integrantes del jurado cuando están informados.
+      - name: fecha_publicacion
+        description: Fecha de publicación reconocida en los metadatos.
+      - name: anio_publicacion
+        description: Año derivado de la fecha de publicación.
+      - name: fecha_exposicion
+        description: Fecha de exposición pública declarada en SEDICI.
+        data_tests: [not_null]
+      - name: fecha_disponible_en_sedici
+        description: Fecha desde la que la tesis está disponible en SEDICI.
+      - name: idioma
+        description: Idiomas declarados, separados por punto y coma.
+      - name: temas
+        description: Materias y términos temáticos sin duplicados, separados por punto y coma.
+      - name: licencia
+        description: Licencias declaradas para la tesis.
+      - name: url_licencia
+        description: Enlaces asociados con las licencias declaradas.
+      - name: unidad_academica
+        description: >
+          Comunidad hija de `Unidades académicas` que organiza la tesis en
+          SEDICI; generalmente corresponde a una unidad académica de la UNLP.
+        data_tests: [not_null]
+      - name: comunidad
+        description: Comunidad inmediata que contiene la colección de la tesis.
+      - name: ruta_comunidades
+        description: Recorrido de comunidades desde la raíz hasta la colección.
+      - name: coleccion
+        description: Colección propietaria de la tesis en SEDICI.
+
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: unlp_sedici_tesis_publication_year_range
+          expression: >
+            anio_publicacion is null
+            or anio_publicacion between 1800 and extract(year from current_date)::integer
+      - dbt_utils.expression_is_true:
+          name: unlp_sedici_tesis_academic_unit_matches_path
+          expression: >
+            ruta_comunidades like
+            'Unidades académicas > ' || unidad_academica || '%'
+      - dbt_utils.expression_is_true:
+          name: unlp_sedici_tesis_truncated_title_is_consistent
+          expression: >
+            char_length(titulo_truncado) <= 50
+            and (
+              (char_length(titulo) <= 50 and titulo_truncado = titulo)
+              or (
+                char_length(titulo) > 50
+                and right(titulo_truncado, 3) = '...'
+              )
+            )

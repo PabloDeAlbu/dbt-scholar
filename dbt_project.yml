@@ -219,6 +219,9 @@ models:
           revistas:
             +schema: unlp_sedici_revistas
             +tags: [sedici, revistas]
+          tesis:
+            +schema: unlp_sedici_tesis
+            +tags: [sedici, tesis]
 seeds:
   dbt_scholar:
     coar:
