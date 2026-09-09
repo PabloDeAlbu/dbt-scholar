@@ -1,0 +1,140 @@
+version: 2
+
+models:
+  - name: fct_unlp_sedici_revista_autoria_afiliacion_vocsedici
+    description: >
+      Autorías de publicaciones de revistas UNLP. Una fila por `item_id` y
+      `sedicidb_author_id`, con afiliación a la fecha de publicación.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          name: sedici_revistas_revista_publication_author_unique_grain
+          combination_of_columns: [item_id, sedicidb_author_id]
+      - dbt_utils.expression_is_true:
+          name: sedici_revistas_revista_publication_author_is_valid_sedici_item
+          expression: >
+            in_archive is true
+            and withdrawn is false
+            and discoverable is true
+            and handle is not null
+      - dbt_utils.expression_is_true:
+          name: sedici_revistas_revista_publication_author_voc_match_has_person
+          expression: "not has_voc_match or voc_person_node_id is not null"
+      - dbt_utils.expression_is_true:
+          name: revistas_authorship_unlp_has_voc_evidence
+          expression: "affiliation_status <> 'unlp' or has_voc_match"
+      - dbt_utils.expression_is_true:
+          name: sedici_revistas_publication_author_external_has_voc_evidence
+          expression: "affiliation_status <> 'external' or has_voc_match"
+      - dbt_utils.expression_is_true:
+          name: revistas_authorship_affiliation_counts_nonnegative
+          expression: "unlp_institution_count >= 0 and external_institution_count >= 0"
+      - dbt_utils.expression_is_true:
+          name: revistas_authorship_unlp_count_consistent
+          expression: "affiliation_status <> 'unlp' or unlp_institution_count > 0"
+      - dbt_utils.expression_is_true:
+          name: sedici_revistas_publication_author_external_count_consistent
+          expression: >
+            affiliation_status <> 'external'
+            or (external_institution_count > 0 and unlp_institution_count = 0)
+    columns:
+      - name: item_id
+        description: Identificador de la publicación en SEDICI.
+        data_tests:
+          - not_null
+          - relationships:
+              name: sedici_revistas_revista_publication_author_item_in_sedici_fact
+              to: ref('fct_unlp_sedicidb_item_publication')
+              field: item_id
+      - name: sedicidb_author_id
+        description: Identificador de autor en SEDICI.
+        data_tests:
+          - not_null
+          - relationships:
+              name: sedici_revistas_revista_publication_author_in_sedici_author_dim
+              to: ref('dim_unlp_sedicidb_author')
+              field: author_id
+      - name: author_name
+        description: Nombre preferido del autor.
+        data_tests: [not_null]
+      - name: author_place
+        description: Posición en la lista de autores.
+      - name: handle
+        description: Handle institucional de la publicación.
+        data_tests: [not_null]
+      - name: publication_url
+        description: URL pública de la publicación.
+        data_tests: [not_null]
+      - name: publication_title
+        description: Título de la publicación.
+        data_tests: [not_null]
+      - name: dc_type
+        description: Categoría general vigente informada por `dc.type`.
+        data_tests: [not_null]
+      - name: sedici_subtype
+        description: Subtipo específico vigente informado por `sedici.subtype`.
+        data_tests: [not_null]
+      - name: publication_date
+        description: Fecha de publicación.
+      - name: publication_year
+        description: Año derivado de `publication_date`.
+      - name: sedici_community_id
+        description: >
+          ID de la comunidad que representa la revista, derivado como segundo
+          nodo del camino bajo la comunidad raíz `Revistas`.
+        data_tests:
+          - not_null
+          - relationships:
+              name: sedici_revistas_revista_publication_author_revista_in_universe
+              to: ref('dim_unlp_sedici_revista')
+              field: sedici_community_id
+      - name: sedici_community_title
+        description: >
+          Nombre de la revista derivado como segundo nodo del camino de
+          comunidades; no se confunde con posibles subcomunidades de sección.
+        data_tests: [not_null]
+      - name: owning_root_community_title
+        description: Comunidad raíz; siempre `Revistas`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Revistas']
+      - name: owning_community_path_titles
+        description: Jerarquía de comunidades de la publicación.
+        data_tests: [not_null]
+      - name: owning_community_path_ids
+        description: Jerarquía de IDs de comunidades de la publicación.
+        data_tests: [not_null]
+      - name: authority
+        description: Clave de autoridad del autor.
+      - name: has_authority_control
+        description: Indica si el autor tiene URI de autoridad.
+        data_tests: [not_null]
+      - name: author_identity_basis
+        description: Base institucional usada para construir la identidad del autor.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [autoridad, nombre_normalizado]
+      - name: voc_person_node_id
+        description: Identificador de persona en VOC.
+      - name: has_voc_match
+        description: Indica si el autor fue identificado en VOC.
+        data_tests: [not_null]
+      - name: voc_person_url
+        description: URL pública de la persona enlazada en VOC.
+      - name: affiliation_status
+        description: >
+          Afiliación al publicar: `unlp`, `external` o `unknown`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['unlp', 'external', 'unknown']
+      - name: affiliation_evidence
+        description: Evidencia usada para clasificar la afiliación.
+        data_tests: [not_null]
+      - name: unlp_institution_count
+        description: Afiliaciones UNLP vigentes al publicar.
+        data_tests: [not_null]
+      - name: external_institution_count
+        description: Afiliaciones externas vigentes al publicar.
+        data_tests: [not_null]

@@ -1,0 +1,185 @@
+version: 2
+
+models:
+  - name: dim_unlp_sedici_revista
+    description: >
+      Universo de revistas de SEDICI a grano una fila por revista.
+      Considera revista a cada comunidad hija directa de la comunidad raíz
+      [Revistas](https://sedici.unlp.edu.ar/handle/10915/51).
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: sedici_revistas_revista_closed_flag_is_consistent
+          expression: "is_closed = (sedici_community_title like '%[Publicación cerrada]%')"
+    columns:
+      - name: sedici_community_id
+        description: Identificador de la comunidad SEDICI.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              name: sedici_revistas_revista_in_sedici_community_dim
+              to: ref('dim_unlp_sedicidb_community')
+              field: community_id
+      - name: sedici_community_title
+        description: Título vigente de la comunidad.
+        data_tests: [not_null]
+      - name: sedici_community_handle
+        description: Handle persistente de la comunidad.
+        data_tests: [not_null, unique]
+      - name: is_closed
+        description: Indica si el título de la comunidad contiene el marcador `[Publicación cerrada]`.
+        data_tests: [not_null]
+      - name: root_community_id
+        description: Identificador de la comunidad raíz `Revistas`.
+        data_tests: [not_null]
+      - name: root_community_title
+        description: Título de la comunidad raíz; siempre `Revistas`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Revistas']
+      - name: sedici_community_path_ids
+        description: Camino de IDs desde la raíz `Revistas` hasta la revista.
+        data_tests: [not_null]
+      - name: sedici_community_path_titles
+        description: Camino de títulos desde la raíz `Revistas` hasta la revista.
+        data_tests: [not_null]
+
+  - name: fct_unlp_sedici_revista_publicacion
+    description: >
+      Ítems publicados y visibles bajo las comunidades interpretadas como
+      revistas. Una fila por `item_id`, sin exigir tipo, fecha ni autor.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: sedici_revistas_revista_item_is_valid_sedici_item
+          expression: >
+            in_archive is true
+            and withdrawn is false
+            and discoverable is true
+            and handle is not null
+      - dbt_utils.expression_is_true:
+          name: sedici_revistas_revista_item_matches_root_child_community
+          expression: >
+            sedici_community_id = owning_root_child_community_id
+            and sedici_community_title = owning_root_child_community_title
+    columns:
+      - name: item_id
+        description: Identificador del ítem en SEDICI.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              name: sedici_revistas_revista_item_in_sedici_fact
+              to: ref('fct_unlp_sedicidb_item_publication')
+              field: item_id
+      - name: handle
+        description: Handle institucional del ítem.
+        data_tests: [not_null]
+      - name: item_url
+        description: URL pública informada en `dc.identifier.uri`.
+      - name: item_title
+        description: Título vigente del ítem.
+        data_tests: [not_null]
+      - name: dc_type
+        description: Categoría general vigente informada por `dc.type`.
+        data_tests: [not_null]
+      - name: sedici_subtype
+        description: Subtipo específico vigente informado por `sedici.subtype`.
+        data_tests: [not_null]
+      - name: publication_date
+        description: Fecha de publicación; puede faltar o ser imprecisa.
+      - name: publication_year
+        description: Año derivado de la fecha de publicación.
+      - name: sedici_community_id
+        description: Identificador de la comunidad.
+        data_tests:
+          - not_null
+          - relationships:
+              name: sedici_revistas_revista_item_revista_in_universe
+              to: ref('dim_unlp_sedici_revista')
+              field: sedici_community_id
+      - name: sedici_community_title
+        description: Nombre de la revista.
+        data_tests: [not_null]
+      - name: sedici_community_handle
+        description: Handle persistente de la comunidad.
+        data_tests: [not_null]
+      - name: is_closed
+        description: Indica si la revista está marcada como publicación cerrada en SEDICI.
+        data_tests: [not_null]
+      - name: owning_root_community_title
+        description: Comunidad raíz; siempre `Revistas`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Revistas']
+      - name: owning_community_path_ids
+        description: Jerarquía de identificadores de comunidades del ítem.
+        data_tests: [not_null]
+      - name: owning_community_path_titles
+        description: Jerarquía de nombres de comunidades del ítem.
+        data_tests: [not_null]
+      - name: in_archive
+        description: Indica que el ítem fue incorporado al repositorio.
+        data_tests: [not_null]
+      - name: withdrawn
+        description: Indica si el ítem fue retirado.
+        data_tests: [not_null]
+      - name: discoverable
+        description: Indica si el ítem es visible mediante búsqueda.
+        data_tests: [not_null]
+
+  - name: brg_unlp_sedici_revista_publicacion_autor
+    description: >
+      Relación descriptiva entre ítems de revistas e identidades de autores
+      personales. Una fila por `item_id` y `sedicidb_author_id`, sin afiliaciones.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          name: sedici_revistas_revista_item_author_unique_grain
+          combination_of_columns: [item_id, sedicidb_author_id]
+      - dbt_utils.expression_is_true:
+          name: sedici_revistas_revista_item_author_authority_is_consistent
+          expression: "has_authority_control = (authority is not null)"
+    columns:
+      - name: item_id
+        description: Identificador del ítem de revista.
+        data_tests:
+          - not_null
+          - relationships:
+              name: sedici_revistas_revista_item_author_item_in_fact
+              to: ref('fct_unlp_sedici_revista_publicacion')
+              field: item_id
+      - name: sedicidb_author_id
+        description: Identificador técnico de la identidad de autor.
+        data_tests:
+          - not_null
+          - relationships:
+              name: sedici_revistas_revista_item_author_in_sedici_author_dim
+              to: ref('dim_unlp_sedicidb_author')
+              field: author_id
+      - name: author_name
+        description: Forma preferida del nombre del autor.
+        data_tests: [not_null]
+      - name: author_name_normalized
+        description: Nombre normalizado de la identidad.
+        data_tests: [not_null]
+      - name: author_place
+        description: Posición informada en la lista de autores.
+      - name: metadata_value_id
+        description: Observación de metadato elegida para la relación.
+        data_tests: [not_null]
+      - name: authority
+        description: Clave de autoridad de la identidad, cuando existe.
+      - name: has_authority_control
+        description: Indica si la identidad tiene una authority.
+        data_tests: [not_null]
+      - name: sedici_community_id
+        description: Identificador de la revista del ítem.
+        data_tests: [not_null]
+      - name: sedici_community_title
+        description: Nombre de la revista del ítem.
+        data_tests: [not_null]
+      - name: publication_date
+        description: Fecha de publicación del ítem.
+      - name: publication_year
+        description: Año de publicación del ítem.

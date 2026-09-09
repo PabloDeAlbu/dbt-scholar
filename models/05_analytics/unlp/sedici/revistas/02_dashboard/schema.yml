@@ -1,0 +1,171 @@
+version: 2
+
+models:
+  - name: unlp_sedici_revistas_dashboard
+    description: |
+      Los datos provienen del repositorio institucional SEDICI de la
+      Universidad Nacional de La Plata.
+
+      Los datos reúnen publicaciones alojadas bajo la comunidad raíz
+      `Revistas` de SEDICI y las organizan según la revista a la que
+      pertenecen. Este universo responde a la organización del repositorio y
+      no a una clasificación tipológica de sus contenidos.
+
+      Los datos permiten explorar revistas, publicaciones y autores.
+
+      VOC SEDICI es el sistema de gestión de autoridades y vocabularios
+      controlados utilizado para asistir la carga y normalización de metadatos
+      en SEDICI.
+
+      La correspondencia de un autor con una persona de VOC SEDICI permite
+      reconocer una autoridad, pero no garantiza su afiliación con la UNLP.
+
+      VOC SEDICI no es un padrón de personal ni monitorea sistemáticamente los
+      cambios de afiliación de las personas a lo largo del tiempo. La ausencia
+      de una afiliación UNLP registrada no demuestra que la persona sea externa
+      a la Universidad.
+    config:
+      meta:
+        organization: unlp
+        model_role: dashboard_dataset
+        grain: handle_publicacion, id_autor
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          name: sedici_revistas_dashboard_unique_grain
+          combination_of_columns: [handle_publicacion, id_autor]
+      - dbt_utils.expression_is_true:
+          name: sedici_revistas_dashboard_author_fields_are_consistent
+          expression: >
+            (
+              id_autor is null
+              and id_autoria is null
+              and nombre_autor is null
+              and not tiene_autor_reconocido
+              and tiene_autoridad is null
+            )
+            or
+            (
+              id_autor is not null
+              and id_autoria is not null
+              and nombre_autor is not null
+              and tiene_autor_reconocido
+              and tiene_autoridad is not null
+            )
+      - dbt_utils.expression_is_true:
+          name: sedici_revistas_dashboard_voc_evidence_is_consistent
+          expression: >
+            (
+              id_autor is null
+              and tiene_correspondencia_voc is null
+              and situacion_afiliacion is null
+              and afiliaciones_unlp is null
+              and otras_afiliaciones is null
+            )
+            or
+            (
+              id_autor is not null
+              and tiene_correspondencia_voc is not null
+              and situacion_afiliacion is not null
+              and afiliaciones_unlp >= 0
+              and otras_afiliaciones >= 0
+            )
+      - dbt_utils.expression_is_true:
+          name: sedici_revistas_dashboard_closed_flag_is_consistent
+          expression: "es_cerrada = (revista like '%[Publicación cerrada]%')"
+      - dbt_utils.expression_is_true:
+          name: sedici_revistas_dashboard_publication_handle_url_is_consistent
+          expression: "url_handle_publicacion = 'https://hdl.handle.net/' || handle_publicacion"
+      - dbt_utils.expression_is_true:
+          name: sedici_revistas_dashboard_community_handle_url_is_consistent
+          expression: "url_handle_revista = 'https://hdl.handle.net/' || handle_revista"
+    columns:
+      - name: handle_publicacion
+        description: Handle persistente de la publicación.
+        data_tests: [not_null]
+      - name: url_handle_publicacion
+        description: URL de resolución del handle persistente de la publicación.
+        data_tests: [not_null]
+      - name: url_publicacion
+        description: URL pública de la publicación en SEDICI.
+      - name: titulo_publicacion
+        description: Título vigente de la publicación.
+        data_tests: [not_null]
+      - name: tipo_publicacion
+        description: Subtipo específico informado por `sedici.subtype`.
+        data_tests: [not_null]
+      - name: fecha_publicacion
+        description: Fecha de publicación informada.
+      - name: anio_publicacion
+        description: Año derivado de la fecha de publicación.
+      - name: revista
+        description: Nombre vigente de la revista en SEDICI.
+        data_tests: [not_null]
+      - name: handle_revista
+        description: Handle persistente de la comunidad que representa la revista.
+        data_tests: [not_null]
+      - name: url_handle_revista
+        description: URL de resolución del handle persistente de la revista.
+        data_tests: [not_null]
+      - name: es_cerrada
+        description: Indica si la revista está marcada como publicación cerrada en SEDICI.
+        data_tests: [not_null]
+      - name: estado_revista
+        description: Estado de la revista presentado como `Abierta` o `Cerrada`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [Abierta, Cerrada]
+      - name: ruta_en_sedici
+        description: Jerarquía de comunidades del ítem.
+        data_tests: [not_null]
+      - name: correspondencia_voc_publicacion
+        description: >
+          Indica si la publicación tiene al menos un autor con correspondencia
+          en VOC SEDICI. No implica por sí sola una afiliación con la UNLP.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - Con autor en VOC SEDICI
+                - Sin autor en VOC SEDICI
+      - name: nombre_autor
+        description: Nombre preferido del autor.
+      - name: tiene_autor_reconocido
+        description: Indica si la fila representa una relación ítem-autor reconocida.
+        data_tests: [not_null]
+      - name: tiene_autoridad
+        description: Indica si la identidad del autor se construyó con una authority.
+      - name: tiene_correspondencia_voc
+        description: Indica si la autoridad del autor corresponde con una persona registrada en VOC SEDICI.
+      - name: url_autor_voc
+        description: Enlace al registro de autoridad de la persona cuando existe correspondencia con VOC SEDICI.
+      - name: situacion_afiliacion
+        description: >
+          Síntesis de la afiliación registrada en VOC aplicable a la fecha de
+          publicación. La ausencia de información no demuestra una afiliación externa.
+        data_tests:
+          - accepted_values:
+              values:
+                - Afiliación UNLP registrada
+                - Otra afiliación registrada
+                - Sin afiliación aplicable registrada
+      - name: tiene_afiliacion_unlp
+        description: >
+          Indica `true` cuando existe una afiliación UNLP aplicable y `false`
+          cuando solo existe otra afiliación. Es nulo cuando no hay evidencia suficiente.
+      - name: afiliaciones_unlp
+        description: Cantidad de instituciones del árbol UNLP aplicables a la fecha de publicación.
+      - name: otras_afiliaciones
+        description: Cantidad de instituciones externas aplicables a la fecha de publicación.
+      - name: id_autor
+        description: >
+          Clave analítica provisional de la identidad de autor en SEDICI. Se
+          conserva para realizar conteos distintos sin mezclar homónimos.
+        data_tests:
+          - relationships:
+              name: sedici_revistas_dashboard_author_in_dimension
+              to: ref('dim_unlp_sedicidb_author')
+              field: author_id
+      - name: id_autoria
+        description: Clave analítica de la relación entre publicación y autor.
+        data_tests: [unique]

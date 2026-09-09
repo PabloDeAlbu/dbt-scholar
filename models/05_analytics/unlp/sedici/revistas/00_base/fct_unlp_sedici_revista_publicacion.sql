@@ -2,9 +2,8 @@
     materialized='table',
     indexes=[
         {'columns': ['item_id'], 'unique': true},
-        {'columns': ['journal_id', 'publication_year']},
-        {'columns': ['sedici_subtype']},
-        {'columns': ['is_article']}
+        {'columns': ['sedici_community_id', 'publication_year']},
+        {'columns': ['sedici_subtype']}
     ],
     post_hook=["analyze {{ this }}"]
 ) }}
@@ -18,28 +17,21 @@ SELECT
     item.sedici_subtype,
     item.dc_date_issued AS publication_date,
     item.publication_year,
-    journal.journal_id,
-    journal.journal_title,
-    journal.journal_handle,
-    journal.is_closed,
+    revista.sedici_community_id,
+    revista.sedici_community_title,
+    revista.sedici_community_handle,
+    revista.is_closed,
     item.owning_root_community_title,
+    item.owning_root_child_community_id,
+    item.owning_root_child_community_title,
     item.owning_community_path_ids,
     item.owning_community_path_titles,
     item.in_archive,
     item.withdrawn,
-    item.discoverable,
-    item.sedici_subtype IN (
-        'Articulo',
-        'Comunicacion',
-        'Contribucion a revista',
-        'Revision'
-    ) AS is_article
+    item.discoverable
 FROM {{ ref('fct_unlp_sedicidb_item_publication') }} AS item
-INNER JOIN {{ ref('dim_unlp_sedici_revista') }} AS journal
-    ON journal.journal_id = NULLIF(
-        SPLIT_PART(item.owning_community_path_ids, ' > ', 2),
-        ''
-    )::bigint
+INNER JOIN {{ ref('dim_unlp_sedici_revista') }} AS revista
+    ON revista.sedici_community_id = item.owning_root_child_community_id
 WHERE item.in_archive IS TRUE
   AND item.withdrawn IS FALSE
   AND item.discoverable IS TRUE

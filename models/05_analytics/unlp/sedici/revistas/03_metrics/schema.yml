@@ -1,0 +1,140 @@
+version: 2
+
+models:
+  - name: unlp_sedici_revistas_resumen_historico
+    description: >
+      Listado histórico completo de revistas con publicaciones en SEDICI.
+      Presenta una fila por revista y está preparado para su exportación.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: revistas_resumen_historico_author_counts_are_consistent
+          expression: >
+            autores_relacionados_voc <= autores_identificados
+            and autores_con_afiliacion_unlp_registrada <= autores_relacionados_voc
+      - dbt_utils.expression_is_true:
+          name: revistas_resumen_historico_unlp_proportion_is_valid
+          expression: proporcion_autores_con_afiliacion_unlp between 0 and 100
+    columns:
+      - name: handle_revista
+        description: Handle persistente de la comunidad que representa la revista.
+        data_tests: [not_null, unique]
+      - name: url_handle_revista
+        description: URL persistente de la revista.
+      - name: revista
+        description: Nombre de la revista en SEDICI.
+        data_tests: [not_null]
+      - name: estado_revista
+        description: Estado abierto o cerrado de la revista.
+        data_tests: [not_null]
+      - name: publicaciones
+        description: Publicaciones distintas de la revista.
+        data_tests: [not_null]
+      - name: autores_identificados
+        description: Identidades de autor distintas observadas en la revista.
+        data_tests: [not_null]
+      - name: autores_relacionados_voc
+        description: Autores distintos relacionados con una persona de VOC SEDICI.
+        data_tests: [not_null]
+      - name: autores_con_afiliacion_unlp_registrada
+        description: Autores con una afiliación UNLP registrada y aplicable.
+        data_tests: [not_null]
+      - name: proporcion_autores_con_afiliacion_unlp
+        description: >
+          Porcentaje de autores con afiliación UNLP registrada sobre los autores
+          identificados en la revista.
+
+  - name: unlp_sedici_revistas_resumen_ultimos_5_anios
+    description: >
+      Listado de revistas con publicaciones durante el año corriente y los
+      cuatro anteriores. Presenta una fila por revista y acompaña el reporte.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: revistas_resumen_5_anios_author_counts_are_consistent
+          expression: >
+            autores_relacionados_voc <= autores_identificados
+            and autores_con_afiliacion_unlp_registrada <= autores_relacionados_voc
+      - dbt_utils.expression_is_true:
+          name: revistas_resumen_5_anios_unlp_proportion_is_valid
+          expression: proporcion_autores_con_afiliacion_unlp between 0 and 100
+    columns:
+      - name: handle_revista
+        description: Handle persistente de la comunidad que representa la revista.
+        data_tests: [not_null, unique]
+      - name: url_handle_revista
+        description: URL persistente de la revista.
+      - name: revista
+        description: Nombre de la revista en SEDICI.
+        data_tests: [not_null]
+      - name: estado_revista
+        description: Estado abierto o cerrado de la revista.
+        data_tests: [not_null]
+      - name: anio_desde
+        description: Primer año incluido en el período.
+        data_tests: [not_null]
+      - name: anio_hasta
+        description: Último año incluido en el período.
+        data_tests: [not_null]
+      - name: publicaciones
+        description: Publicaciones distintas de la revista durante el período.
+        data_tests: [not_null]
+      - name: autores_identificados
+        description: Identidades de autor distintas observadas en la revista.
+        data_tests: [not_null]
+      - name: autores_relacionados_voc
+        description: Autores distintos relacionados con una persona de VOC SEDICI.
+        data_tests: [not_null]
+      - name: autores_con_afiliacion_unlp_registrada
+        description: Autores con una afiliación UNLP registrada y aplicable.
+        data_tests: [not_null]
+      - name: proporcion_autores_con_afiliacion_unlp
+        description: >
+          Porcentaje de autores con afiliación UNLP registrada sobre los autores
+          identificados en la revista.
+
+  - name: unlp_sedici_revistas_resumen_por_anio
+    description: >
+      Evolución de publicaciones y autores por revista y año de publicación.
+      Permite aplicar cortes temporales sin utilizar el detalle del dashboard.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          name: revistas_resumen_por_anio_unique_grain
+          combination_of_columns: [handle_revista, anio_publicacion]
+      - dbt_utils.expression_is_true:
+          name: revistas_resumen_por_anio_author_counts_are_consistent
+          expression: >
+            autores_relacionados_voc <= autores_identificados
+            and autores_con_afiliacion_unlp_registrada <= autores_relacionados_voc
+      - dbt_utils.expression_is_true:
+          name: revistas_resumen_por_anio_unlp_proportion_is_valid
+          expression: proporcion_autores_con_afiliacion_unlp between 0 and 100
+    columns:
+      - name: handle_revista
+        description: Handle persistente de la comunidad que representa la revista.
+        data_tests: [not_null]
+      - name: url_handle_revista
+        description: URL persistente de la revista.
+      - name: revista
+        description: Nombre de la revista en SEDICI.
+        data_tests: [not_null]
+      - name: estado_revista
+        description: Estado abierto o cerrado de la revista.
+        data_tests: [not_null]
+      - name: anio_publicacion
+        description: Año de publicación.
+        data_tests: [not_null]
+      - name: publicaciones
+        description: Publicaciones distintas de la revista durante el año.
+        data_tests: [not_null]
+      - name: autores_identificados
+        description: Identidades de autor distintas observadas durante el año.
+        data_tests: [not_null]
+      - name: autores_relacionados_voc
+        description: Autores distintos relacionados con una persona de VOC SEDICI.
+        data_tests: [not_null]
+      - name: autores_con_afiliacion_unlp_registrada
+        description: Autores con una afiliación UNLP registrada y aplicable.
+        data_tests: [not_null]
+      - name: proporcion_autores_con_afiliacion_unlp
+        description: >
+          Porcentaje de autores con afiliación UNLP registrada sobre los autores
+          identificados en la revista durante el año.
