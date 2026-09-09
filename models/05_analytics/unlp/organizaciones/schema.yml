@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: unlp_organizaciones_dashboard
+    description: >
+      Vista de auditoría de las organizaciones del árbol UNLP registrado en VOC
+      SEDICI. Presenta una fila por organización y antecesora para revisar la
+      estructura antes de utilizarla transversalmente en análisis institucionales.
+    columns:
+      - name: id_organizacion
+        data_tests: [not_null]
+      - name: organizacion
+        data_tests: [not_null]
+      - name: id_organizacion_antecesora
+        data_tests: [not_null]
+      - name: organizacion_antecesora
+        data_tests: [not_null]
+      - name: distancia
+        data_tests: [not_null]
+      - name: esta_publicada_en_voc
+        data_tests: [not_null]
+      - name: fuente
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [vocsedici]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [id_organizacion, id_organizacion_antecesora]

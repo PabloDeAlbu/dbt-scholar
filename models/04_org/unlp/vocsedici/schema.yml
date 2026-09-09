@@ -25,12 +25,18 @@ models:
         description: Apellido de la persona tomado de `field_apellido`.
       - name: nombre_completo
         description: Nombre visible consolidado a partir de nombre y apellido.
+      - name: persona_url
+        description: URL pública canónica del nodo de persona en VOC SEDICI.
       - name: orcid
         description: ORCID informado para la persona cuando existe y no es un placeholder.
       - name: email
         description: Correo electrónico informado para la persona cuando existe y no es un placeholder.
       - name: google_scholar
         description: URL o identificador de Google Scholar informado para la persona cuando existe y no es un placeholder.
+      - name: scholar_user_id
+        description: Identificador de usuario extraído del valor de Google Scholar informado en VOC SEDICI.
+      - name: scholar_profile_url
+        description: URL canónica del perfil de Google Scholar cuando se informó su identificador.
       - name: researchgate
         description: URL o identificador de ResearchGate informado para la persona cuando existe y no es un placeholder.
       - name: fecha_creacion

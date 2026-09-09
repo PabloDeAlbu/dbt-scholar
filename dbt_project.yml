@@ -37,9 +37,9 @@ models:
       coar:
         +schema: coar
         +tags: [coar]
-      google_scholar:
-        +schema: google_scholar
-        +tags: [google_scholar]
+      googlescholar:
+        +schema: googlescholar
+        +tags: [googlescholar]
       unlp:
         +schema: unlp
         +tags: [unlp]
@@ -65,6 +65,9 @@ models:
       coar:
         +schema: coar
         +tags: [coar]
+      googlescholar:
+        +schema: googlescholar
+        +tags: [googlescholar]
       dspacedb:
         +schema: dspacedb
         +tags: [dspacedb]
@@ -89,6 +92,9 @@ models:
       coar:
         +schema: coar
         +tags: [coar]
+      googlescholar:
+        +schema: googlescholar
+        +tags: [googlescholar]
       dspacedb:
         +schema: dspacedb
         +tags: [dspacedb]
@@ -147,9 +153,9 @@ models:
       unlp:
         +schema: unlp
         +tags: [unlp]
-        google_scholar:
-          +schema: unlp_google_scholar
-          +tags: [unlp, google_scholar]
+        googlescholar:
+          +schema: unlp_googlescholar
+          +tags: [unlp, googlescholar]
         openalex:
           +schema: unlp_openalex
           +tags: [unlp, openalex]
@@ -206,6 +212,15 @@ models:
         +schema: unlp
         +tags: [unlp, analytics]
         +materialized: table
+        googlescholar:
+          +schema: unlp_googlescholar
+          +tags: [googlescholar]
+        organizaciones:
+          +schema: unlp_organizaciones
+          +tags: [organizaciones]
+        vocsedici:
+          +schema: unlp_vocsedici
+          +tags: [vocsedici]
         sedici:
           issue_14365:
             +schema: unlp_sedici_issue_14365
@@ -222,6 +237,12 @@ models:
           tesis:
             +schema: unlp_sedici_tesis
             +tags: [sedici, tesis]
+          googlescholar:
+            +schema: unlp_sedici_googlescholar
+            +tags: [sedici, googlescholar]
+            author_coverage:
+              +schema: unlp_sedici_googlescholar_author_coverage
+              +tags: [author_coverage]
 seeds:
   dbt_scholar:
     coar:
@@ -273,6 +294,13 @@ data_tests:
 
 vars:
     "dbt_date:time_zone": "America/Argentina/Buenos_Aires"
+
+    # Perfil público seleccionado por el modelo analítico de Scholar.
+    googlescholar_profile_user_id: "WJp137kAAAAJ"
+
+    # Identidad SEDICI y término nominal usados para construir el universo del autor.
+    sedici_authority: "http://voc.sedici.unlp.edu.ar/node/48738"
+    sedici_author_name_term: "dova"
 
     # Ejemplo cic. Usar sin protocolo y sin `/` final.
     dspacedb_base_url: "digital.cic.gba.gob.ar"

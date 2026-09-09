@@ -11,9 +11,32 @@ final as (
         n.nombre,
         a.apellido,
         trim(concat_ws(' ', n.nombre, a.apellido)) as nombre_completo,
+        'http://voc.sedici.unlp.edu.ar/node/' || s.person_node_id as persona_url,
         o.orcid,
         e.email,
         gs.google_scholar,
+        case
+            when gs.google_scholar like '%user=%'
+                then nullif(
+                    split_part(split_part(gs.google_scholar, 'user=', 2), '&', 1),
+                    ''
+                )
+            when nullif(btrim(gs.google_scholar), '') is not null
+                then btrim(gs.google_scholar)
+        end as scholar_user_id,
+        case
+            when nullif(btrim(gs.google_scholar), '') is not null
+                then 'https://scholar.google.com/citations?hl=es&user=' ||
+                    case
+                        when gs.google_scholar like '%user=%'
+                            then split_part(
+                                split_part(gs.google_scholar, 'user=', 2),
+                                '&',
+                                1
+                            )
+                        else btrim(gs.google_scholar)
+                    end
+        end as scholar_profile_url,
         rg.researchgate,
         created_at as fecha_creacion,
         changed_at as fecha_actualizacion,

@@ -61,6 +61,8 @@ final AS (
         community.community_title,
         community.root_community_id,
         community.root_community_title,
+        community.root_child_community_id,
+        community.root_child_community_title,
         community.community_depth,
         community.community_path_ids,
         community.community_path_titles

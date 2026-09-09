@@ -1,6 +1,280 @@
 version: 2
 
 models:
+  - name: dim_unlp_author
+    description: >
+      Identidades de autor relevantes para los procesos analíticos de la UNLP,
+      observadas inicialmente en SEDICI. Conserva identidades con afiliación
+      UNLP, externa o desconocida y las enriquece con los identificadores
+      disponibles en VOC SEDICI. La pertenencia institucional se modela por
+      separado y no está implícita en esta dimensión.
+    config:
+      meta:
+        organization: unlp
+        model_role: dimension
+        grain: author_id
+        temporal_scope: current_snapshot
+    columns:
+      - name: author_id
+        description: Clave técnica de la identidad de autor.
+        data_tests: [not_null, unique]
+      - name: author_bk
+        description: Clave de negocio controlada o nominal de respaldo.
+        data_tests: [not_null, unique]
+      - name: author_name_preferred
+        description: Nombre preferido observado en SEDICI.
+        data_tests: [not_null]
+      - name: authority
+        description: Clave de autoridad observada en SEDICI cuando existe control de autoridades.
+      - name: has_authority_control
+        description: Indica si la identidad posee una authority.
+        data_tests: [not_null]
+      - name: author_identity_basis
+        description: Base usada para construir la identidad; `autoridad` o `nombre_normalizado`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [autoridad, nombre_normalizado]
+      - name: voc_person_node_id
+        description: Identificador de la persona cuando la authority corresponde con un nodo existente en VOC.
+        data_tests:
+          - relationships:
+              to: ref('dim_vocsedici_persona')
+              field: person_node_id
+              config:
+                where: "voc_person_node_id is not null"
+      - name: has_voc_match
+        description: Indica si la authority corresponde con una persona existente en VOC.
+        data_tests: [not_null]
+      - name: voc_person_url
+        description: URL pública de la persona en VOC cuando existe correspondencia.
+      - name: orcid
+        description: ORCID informado por VOC SEDICI.
+      - name: scholar_user_id
+        description: Identificador del perfil Google Scholar vinculado a la identidad.
+      - name: scholar_profile_url
+        description: URL pública del perfil Google Scholar.
+  - name: fct_unlp_author_affiliation
+    description: >
+      Afiliaciones institucionales publicadas en VOC SEDICI para las
+      identidades de autor relevantes para la UNLP. Una fila por identidad y
+      afiliación; conserva su período de vigencia. La pertenencia a la UNLP se
+      determina mediante `dim_unlp_organization`.
+    config:
+      meta:
+        organization: unlp
+        model_role: fact
+        grain: author_id, affiliation_id
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [author_id, affiliation_id]
+      - dbt_utils.expression_is_true:
+          expression: "valid_from is null or valid_to is null or valid_from <= valid_to"
+      - dbt_utils.expression_is_true:
+          name: unlp_author_affiliation_organization_is_consistent
+          expression: "is_unlp_affiliation = (unlp_organization_id is not null)"
+    columns:
+      - name: author_id
+        description: Identificador de la identidad institucional de autor.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_unlp_author')
+              field: author_id
+      - name: voc_person_node_id
+        description: Persona VOC vinculada con la identidad de autor.
+        data_tests: [not_null]
+      - name: affiliation_id
+        description: Identificador de la observación de afiliación en VOC.
+        data_tests: [not_null]
+      - name: institution_node_id
+        description: Institución declarada en la afiliación.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_vocsedici_institucion')
+              field: institution_node_id
+      - name: institution_name
+        description: Nombre de la institución declarada.
+        data_tests: [not_null]
+      - name: unlp_organization_id
+        description: >
+          Organización canónica UNLP cuando la institución afiliada pertenece
+          al árbol representado por `dim_unlp_organization`.
+        data_tests:
+          - relationships:
+              to: ref('dim_unlp_organization')
+              field: organization_id
+              config:
+                where: "unlp_organization_id is not null"
+      - name: is_unlp_affiliation
+        description: Indica si la afiliación corresponde con una organización de `dim_unlp_organization`.
+        data_tests: [not_null]
+      - name: valid_from
+        description: Inicio declarado de la afiliación, cuando está disponible.
+      - name: valid_to
+        description: Fin declarado de la afiliación, cuando está disponible.
+      - name: affiliation_source
+        description: Fuente de la evidencia de afiliación; actualmente `vocsedici`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [vocsedici]
+
+  - name: dim_unlp_organizational_unit
+    description: >
+      Dimensión transversal de unidades organizativas de la UNLP identificadas
+      mediante dominios institucionales curados. Tiene una fila por dominio
+      normalizado y no pretende representar todavía un padrón oficial completo
+      de la estructura institucional.
+    config:
+      meta:
+        organization: unlp
+        model_role: dimension
+        grain: organizational_unit_domain
+        temporal_scope: current_snapshot
+    columns:
+      - name: organizational_unit_domain
+        description: Dominio institucional normalizado que identifica operativamente la unidad.
+        data_tests: [not_null, unique]
+      - name: organizational_unit_domain_label
+        description: Etiqueta corta y curada del dominio institucional.
+        data_tests: [not_null]
+      - name: organizational_unit_name
+        description: Nombre curado de la unidad organizativa.
+        data_tests: [not_null]
+      - name: parent_organizational_unit_name
+        description: Nombre curado de la unidad organizativa superior.
+        data_tests: [not_null]
+      - name: organization_ror
+        description: ROR de la Universidad Nacional de La Plata, organización que contiene estas unidades.
+        data_tests: [not_null]
+
+  - name: dim_unlp_organization
+    description: >
+      Organizaciones pertenecientes al árbol institucional de la UNLP observado
+      en VOC SEDICI. Tiene una fila por organización, una clave analítica y el
+      identificador original del nodo VOC para conservar su procedencia;
+      `pidu_id` es otro identificador fuente opcional. No infiere tipos
+      organizativos a partir de la profundidad.
+    config:
+      meta:
+        organization: unlp
+        model_role: dimension
+        grain: organization_id
+        temporal_scope: current_snapshot
+    columns:
+      - name: organization_id
+        description: Identificador analítico de la organización.
+        data_tests: [not_null, unique]
+      - name: vocsedici_institution_node_id
+        description: Identificador original del nodo institucional en VOC SEDICI.
+        data_tests: [not_null, unique]
+      - name: organization_name
+        description: Nombre de la organización publicado en VOC SEDICI.
+        data_tests: [not_null]
+      - name: pidu_id
+        description: Identificador histórico PIDU, cuando fue informado en VOC SEDICI.
+      - name: is_active
+        description: Indica si el nodo se encuentra publicado en VOC SEDICI.
+        data_tests: [not_null]
+      - name: source_hierarchy_level
+        description: Profundidad observada en el árbol UNLP de VOC; no representa un tipo organizativo.
+        data_tests: [not_null]
+      - name: source_url
+        description: URL pública del nodo utilizado como fuente.
+        data_tests: [not_null]
+      - name: source
+        description: Fuente de la observación; actualmente `vocsedici`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [vocsedici]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: unlp_organization_vocsedici_identifier_is_consistent
+          expression: "organization_id = vocsedici_institution_node_id"
+
+  - name: brg_unlp_organization_relationship
+    description: >
+      Relaciones directas entre organizaciones UNLP observadas en VOC SEDICI.
+      Modela el vínculo dirigido desde una organización hacia la organización
+      a la que pertenece, sin asumir que la jerarquía futura tendrá un único padre.
+    config:
+      meta:
+        organization: unlp
+        model_role: bridge
+        grain: organization_id, related_organization_id, relationship_type
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [organization_id, related_organization_id, relationship_type]
+    columns:
+      - name: organization_id
+        description: Organización hija en la relación.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_unlp_organization')
+              field: organization_id
+      - name: related_organization_id
+        description: Organización padre directa.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_unlp_organization')
+              field: organization_id
+      - name: relationship_type
+        description: Tipo de relación dirigida; actualmente `pertenece_a`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [pertenece_a]
+      - name: source
+        description: Fuente de la relación; actualmente `vocsedici`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [vocsedici]
+
+  - name: brg_unlp_organization_hierarchy
+    description: >
+      Cierre transitivo de la jerarquía organizativa UNLP. Tiene una fila por
+      organización y antecesora alcanzable, incluye la relación consigo misma
+      con distancia cero y conserva la ruta empleada para auditoría.
+    config:
+      meta:
+        organization: unlp
+        model_role: bridge
+        grain: organization_id, ancestor_organization_id
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [organization_id, ancestor_organization_id]
+    columns:
+      - name: organization_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_unlp_organization')
+              field: organization_id
+      - name: ancestor_organization_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_unlp_organization')
+              field: organization_id
+      - name: distance
+        description: Cantidad de relaciones directas entre la organización y su antecesora.
+        data_tests: [not_null]
+      - name: is_self
+        description: Indica la fila de distancia cero de cada organización.
+        data_tests: [not_null]
+      - name: is_direct
+        description: Indica una relación directa con distancia uno.
+        data_tests: [not_null]
+      - name: organization_path_ids
+        description: Ruta de identificadores desde la organización hasta la antecesora.
+        data_tests: [not_null]
+
   - name: fct_unlp_publication
     description: >
       Hecho institucional principal de publicaciones UNLP, basado en

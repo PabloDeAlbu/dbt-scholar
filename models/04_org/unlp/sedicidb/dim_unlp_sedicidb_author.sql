@@ -2,7 +2,7 @@
     materialized='table',
     indexes=[
         {'columns': ['author_id'], 'unique': true},
-        {'columns': ['authority_uri'], 'unique': true},
+        {'columns': ['authority'], 'unique': true},
         {'columns': ['author_name_normalized']}
     ],
     post_hook=[
@@ -51,9 +51,7 @@ author_stats AS (
             '|'
             ORDER BY metadatafield_fullname
         ) AS metadatafields,
-        MIN(authority_uri) AS authority_uri,
-        MIN(authority_host) AS authority_host,
-        MIN(authority_path) AS authority_path,
+        MIN(authority) AS authority,
         BOOL_OR(has_authority_control) AS has_authority_control,
         MIN(confidence) AS min_confidence,
         MAX(confidence) AS max_confidence,
@@ -73,9 +71,7 @@ final AS (
         stats.author_type,
         stats.author_roles,
         stats.metadatafields,
-        stats.authority_uri,
-        stats.authority_host,
-        stats.authority_path,
+        stats.authority,
         stats.has_authority_control,
         stats.min_confidence,
         stats.max_confidence,

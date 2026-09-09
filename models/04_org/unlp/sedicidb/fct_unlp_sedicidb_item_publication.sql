@@ -52,6 +52,8 @@ final AS (
         ownership.community_title AS owning_community_title,
         ownership.root_community_id AS owning_root_community_id,
         ownership.root_community_title AS owning_root_community_title,
+        ownership.root_child_community_id AS owning_root_child_community_id,
+        ownership.root_child_community_title AS owning_root_child_community_title,
         ownership.community_path_ids AS owning_community_path_ids,
         ownership.community_path_titles AS owning_community_path_titles,
         item.last_modified,

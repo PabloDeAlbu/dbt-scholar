@@ -42,12 +42,7 @@ final AS (
         value.text_lang AS text_lang_raw,
         NULLIF(LOWER(BTRIM(value.text_lang)), '') AS text_lang,
         value.authority AS authority_raw,
-        NULLIF(BTRIM(value.authority), '') AS authority_uri,
-        LOWER(SUBSTRING(BTRIM(value.authority) FROM '^https?://([^/]+)')) AS authority_host,
-        NULLIF(
-            SUBSTRING(BTRIM(value.authority) FROM '^https?://[^/]+/?(.*)$'),
-            ''
-        ) AS authority_path,
+        NULLIF(BTRIM(value.authority), '') AS authority,
         value.confidence,
         value.place
     FROM {{ source('sedicidb', 'metadatavalue') }} AS value

@@ -9,9 +9,7 @@ WITH final AS (
         text_lang_raw,
         text_lang,
         authority_raw,
-        authority_uri,
-        authority_host,
-        authority_path,
+        authority,
         confidence,
         place
     FROM {{ ref('int_unlp_sedicidb_item_metadatavalue') }}

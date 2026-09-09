@@ -4,7 +4,7 @@
         {'columns': ['metadata_value_id'], 'unique': true},
         {'columns': ['item_id']},
         {'columns': ['author_id']},
-        {'columns': ['authority_uri']}
+        {'columns': ['authority']}
     ],
     post_hook=[
         "analyze {{ this }}"
@@ -21,9 +21,7 @@ WITH author_observation AS (
         sedici_creator_person_raw AS author_name_raw,
         sedici_creator_person AS author_name,
         authority_raw,
-        authority_uri,
-        authority_host,
-        authority_path,
+        authority,
         confidence,
         place AS author_place
     FROM {{ ref('int_unlp_sedicidb_item_sedici_creator_person') }}
@@ -39,9 +37,7 @@ WITH author_observation AS (
         sedici_creator_corporate_raw AS author_name_raw,
         sedici_creator_corporate AS author_name,
         authority_raw,
-        authority_uri,
-        authority_host,
-        authority_path,
+        authority,
         confidence,
         place AS author_place
     FROM {{ ref('int_unlp_sedicidb_item_sedici_creator_corporate') }}
@@ -57,9 +53,7 @@ WITH author_observation AS (
         sedici_contributor_compiler_raw AS author_name_raw,
         sedici_contributor_compiler AS author_name,
         authority_raw,
-        authority_uri,
-        authority_host,
-        authority_path,
+        authority,
         confidence,
         place AS author_place
     FROM {{ ref('int_unlp_sedicidb_item_sedici_contributor_compiler') }}
@@ -75,15 +69,13 @@ identified AS (
         author_name_raw,
         author_name,
         authority_raw,
-        authority_uri,
-        authority_host,
-        authority_path,
-        authority_uri IS NOT NULL AS has_authority_control,
+        authority,
+        authority IS NOT NULL AS has_authority_control,
         confidence,
         author_place,
         CASE
-            WHEN authority_uri IS NOT NULL
-                THEN 'authority||' || authority_uri
+            WHEN authority IS NOT NULL
+                THEN 'authority||' || authority
             ELSE 'name||' || author_type || '||' || LOWER(author_name)
         END AS author_bk
     FROM author_observation

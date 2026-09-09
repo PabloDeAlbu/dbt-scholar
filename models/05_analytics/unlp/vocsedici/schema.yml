@@ -1,0 +1,90 @@
+version: 2
+
+models:
+  - name: unlp_vocsedici_personas_dashboard
+    description: |
+      VOC SEDICI es el sistema de gestión de autoridades y vocabularios
+      controlados utilizado por SEDICI.
+
+      Este sistema permite identificar personas e instituciones, asistir la
+      carga y normalización de metadatos y reconocer una misma entidad mediante
+      una clave de autoridad.
+
+      Los datos reúnen las personas y afiliaciones institucionales registradas,
+      junto con identificadores y datos de contacto como ORCID, Google Scholar
+      y correo electrónico.
+    config:
+      meta:
+        organization: unlp
+        model_role: dashboard_dataset
+        grain: id_persona_voc, id_afiliacion_voc
+    columns:
+      - name: id_persona_voc
+        description: Identificador de la persona en VOC SEDICI.
+        data_tests: [not_null]
+      - name: persona
+        description: Nombre completo mostrado en VOC SEDICI.
+      - name: persona_publicada
+        description: Indica si la persona se encuentra publicada en VOC SEDICI.
+        data_tests: [not_null]
+      - name: url_persona_voc
+        description: Enlace al registro público de la persona.
+        data_tests: [not_null]
+      - name: fecha_registro_en_voc
+        description: Fecha de creación del registro de la persona en VOC SEDICI.
+      - name: fecha_actualizacion_en_voc
+        description: Fecha de la última actualización registrada para la persona en VOC SEDICI.
+      - name: orcid
+        description: ORCID informado en VOC SEDICI.
+      - name: tiene_orcid
+        description: Indica si la persona tiene un ORCID registrado en VOC SEDICI.
+        data_tests: [not_null]
+      - name: correo_electronico
+        description: Correo electrónico informado en VOC SEDICI.
+      - name: tiene_correo_electronico
+        description: Indica si la persona tiene un correo electrónico registrado en VOC SEDICI.
+        data_tests: [not_null]
+      - name: id_google_scholar
+        description: Identificador de perfil de Google Scholar informado en VOC SEDICI.
+      - name: url_google_scholar
+        description: Enlace al perfil de Google Scholar cuando se informó su identificador.
+      - name: tiene_google_scholar
+        description: Indica si la persona tiene un perfil de Google Scholar registrado en VOC SEDICI.
+        data_tests: [not_null]
+      - name: researchgate
+        description: Perfil de ResearchGate informado en VOC SEDICI.
+      - name: tiene_researchgate
+        description: Indica si la persona tiene un perfil de ResearchGate registrado en VOC SEDICI.
+        data_tests: [not_null]
+      - name: id_afiliacion_voc
+        description: Identificador de la afiliación; es nulo cuando la persona no posee afiliaciones.
+      - name: tiene_afiliacion
+        description: Indica si la persona posee una afiliación registrada.
+        data_tests: [not_null]
+      - name: afiliacion_publicada
+        description: Indica si la afiliación se encuentra publicada en VOC SEDICI.
+      - name: afiliacion_vigente
+        description: Indica si la afiliación está vigente según sus fechas declaradas.
+      - name: afiliacion_desde
+        description: Fecha de inicio declarada para la afiliación.
+      - name: afiliacion_hasta
+        description: Fecha de finalización declarada para la afiliación.
+      - name: id_institucion_voc
+        description: Identificador de la institución afiliada en VOC SEDICI.
+      - name: institucion
+        description: Nombre de la institución afiliada.
+      - name: abreviatura_institucion
+        description: Abreviatura registrada para la institución.
+      - name: url_institucion_voc
+        description: Enlace al registro público de la institución.
+      - name: institucion_publicada
+        description: Indica si la institución se encuentra publicada en VOC SEDICI.
+      - name: pertenece_a_unlp
+        description: Indica si la institución pertenece al árbol UNLP registrado en VOC SEDICI.
+      - name: unidad_principal_unlp
+        description: Primer nivel institucional debajo de la raíz UNLP en la ruta registrada.
+      - name: jerarquia_unlp
+        description: Ruta desde la Universidad Nacional de La Plata hasta la institución afiliada.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [id_persona_voc, id_afiliacion_voc]

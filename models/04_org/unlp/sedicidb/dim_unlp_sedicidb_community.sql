@@ -127,6 +127,17 @@ root_community AS (
     ORDER BY leaf_community_id, depth_from_leaf DESC, ancestor_community_id
 ),
 
+root_child_community AS (
+    SELECT
+        lineage.leaf_community_id AS community_id,
+        lineage.ancestor_community_id AS root_child_community_id,
+        lineage.ancestor_community_title AS root_child_community_title
+    FROM lineage
+    INNER JOIN root_community AS root
+        ON root.community_id = lineage.leaf_community_id
+       AND root.root_community_id = lineage.parent_community_id
+),
+
 final AS (
     SELECT
         community.community_id,
@@ -135,6 +146,8 @@ final AS (
         parent_node.community_title AS parent_community_title,
         root.root_community_id,
         root.root_community_title,
+        root_child.root_child_community_id,
+        root_child.root_child_community_title,
         path.community_depth,
         path.community_path_ids,
         path.community_path_titles
@@ -145,6 +158,8 @@ final AS (
         ON parent_node.community_id = parent.parent_community_id
     LEFT JOIN root_community AS root
         ON root.community_id = community.community_id
+    LEFT JOIN root_child_community AS root_child
+        ON root_child.community_id = community.community_id
     LEFT JOIN lineage_aggregate AS path
         ON path.community_id = community.community_id
 )

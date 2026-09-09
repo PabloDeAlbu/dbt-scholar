@@ -6,10 +6,6 @@ models:
       Capa atómica vigente de metadatos de ítems SEDICI, a grano una fila por
       `metadata_value_id`. Conserva valores crudos y agrega normalizaciones
       genéricas de texto e idioma sin aplicar reglas propias de un metadatafield.
-    data_tests:
-      - dbt_utils.expression_is_true:
-          name: sedicidb_metadatavalue_authority_uri_format
-          expression: "authority_uri is null or authority_uri ~* '^https?://'"
     columns:
       - name: metadata_value_id
         description: Identificador de la observación de metadatos en DSpace 5.
@@ -33,12 +29,8 @@ models:
         description: Idioma normalizado mediante `LOWER(BTRIM(text_lang_raw))`.
       - name: authority_raw
         description: Identificador de autoridad original, sin limpieza ni recorte.
-      - name: authority_uri
-        description: Authority sin espacios exteriores; conserva mayúsculas y contenido por ser un identificador.
-      - name: authority_host
-        description: Host derivado de `authority_uri` y normalizado a minúsculas.
-      - name: authority_path
-        description: Camino completo de `authority_uri` posterior al host.
+      - name: authority
+        description: Clave de autoridad sin espacios exteriores, conservada como un identificador opaco.
       - name: confidence
         description: Código de confianza original de DSpace; se conserva sin interpretar.
       - name: place
@@ -79,8 +71,8 @@ models:
       - name: value
         description: Institución de origen con espacios y caracteres invisibles normalizados.
         data_tests: [not_null]
-      - name: authority_uri
-        description: URI de authority asociada con la institución, cuando existe.
+      - name: authority
+        description: Clave de autoridad asociada con la institución, cuando existe.
       - name: voc_institution_node_id
         description: Identificador de nodo institucional derivado de una URI de VOC Sedici válida.
       - name: confidence
@@ -210,8 +202,8 @@ models:
         description: Nombre personal exactamente como aparece en el dump.
       - name: sedici_creator_person
         description: Nombre personal con caracteres invisibles y espacios normalizados.
-      - name: authority_uri
-        description: URI de autoridad asociada exactamente a esta observación de autoría.
+      - name: authority
+        description: Clave de autoridad asociada exactamente a esta observación de autoría.
       - name: confidence
         description: Código de confianza original asociado a la observación.
 
@@ -230,8 +222,8 @@ models:
         description: Autor institucional exactamente como aparece en el dump.
       - name: sedici_creator_corporate
         description: Autor institucional con caracteres invisibles y espacios normalizados.
-      - name: authority_uri
-        description: URI de autoridad asociada exactamente a esta observación institucional.
+      - name: authority
+        description: Clave de autoridad asociada exactamente a esta observación institucional.
       - name: confidence
         description: Código de confianza original asociado a la observación.
 
@@ -250,7 +242,7 @@ models:
         description: Nombre del compilador exactamente como aparece en el dump.
       - name: sedici_contributor_compiler
         description: Nombre del compilador con caracteres invisibles y espacios normalizados.
-      - name: authority_uri
-        description: URI de autoridad asociada exactamente a esta observación de compilador.
+      - name: authority
+        description: Clave de autoridad asociada exactamente a esta observación de compilador.
       - name: confidence
         description: Código de confianza original asociado a la observación.

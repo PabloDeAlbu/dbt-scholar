@@ -114,6 +114,12 @@ models:
         data_tests: [not_null]
       - name: root_community_title
         description: Título preferido de la comunidad raíz.
+      - name: root_child_community_id
+        description: >
+          Identificador de la primera comunidad situada debajo de la raíz en
+          el camino; es nulo cuando la fila representa la propia raíz.
+      - name: root_child_community_title
+        description: Título preferido de la primera comunidad situada debajo de la raíz.
       - name: community_depth
         description: Distancia desde la comunidad hasta su raíz; vale cero para una raíz.
         data_tests: [not_null]
@@ -162,6 +168,10 @@ models:
         description: Comunidad raíz del camino de la colección.
       - name: root_community_title
         description: Título preferido de la comunidad raíz.
+      - name: root_child_community_id
+        description: Primera comunidad debajo de la raíz que contiene la colección.
+      - name: root_child_community_title
+        description: Título preferido de la primera comunidad debajo de la raíz.
       - name: community_depth
         description: Distancia entre la comunidad inmediata y su raíz.
       - name: community_path_ids
@@ -190,7 +200,7 @@ models:
         data_tests: [not_null]
       - name: author_bk
         description: >
-          Identidad controlada basada en `authority_uri` o identidad nominal de
+          Identidad controlada basada en `authority` o identidad nominal de
           respaldo basada en tipo y nombre normalizado.
         data_tests:
           - not_null
@@ -217,10 +227,10 @@ models:
       - name: author_name
         description: Nombre normalizado por el modelo específico del metadatafield.
         data_tests: [not_null]
-      - name: authority_uri
-        description: URI de autoridad asociada a la misma observación del nombre.
+      - name: authority
+        description: Clave de autoridad asociada a la misma observación del nombre.
       - name: has_authority_control
-        description: Indica que la observación posee una `authority_uri` no vacía.
+        description: Indica que la observación posee una clave `authority` no vacía.
         data_tests: [not_null]
       - name: confidence
         description: Código de confianza original, conservado sin interpretación.
@@ -228,8 +238,8 @@ models:
         description: Posición original de la observación dentro del metadatafield.
     data_tests:
       - dbt_utils.expression_is_true:
-          name: sedicidb_item_author_control_matches_uri
-          expression: "has_authority_control = (authority_uri is not null)"
+          name: sedicidb_item_author_control_matches_authority
+          expression: "has_authority_control = (authority is not null)"
 
   - name: dim_unlp_sedicidb_author
     description: >
@@ -257,12 +267,8 @@ models:
       - name: author_roles
         description: Roles distintos observados, unidos con `|`.
         data_tests: [not_null]
-      - name: authority_uri
-        description: URI canónica conservada para identidades controladas.
-      - name: authority_host
-        description: Host de la URI de autoridad.
-      - name: authority_path
-        description: Camino completo de la URI posterior al host.
+      - name: authority
+        description: Clave de autoridad conservada para identidades controladas.
       - name: has_authority_control
         description: Distingue identidades controladas de identidades nominales de respaldo.
         data_tests: [not_null]
@@ -281,8 +287,8 @@ models:
         data_tests: [not_null]
     data_tests:
       - dbt_utils.expression_is_true:
-          name: sedicidb_author_control_matches_uri
-          expression: "has_authority_control = (authority_uri is not null)"
+          name: sedicidb_author_control_matches_authority
+          expression: "has_authority_control = (authority is not null)"
 
   - name: fct_unlp_sedicidb_item_publication
     description: >
@@ -325,6 +331,10 @@ models:
         description: Identificador de la comunidad raíz del camino estructural.
       - name: owning_root_community_title
         description: Título preferido de la comunidad raíz.
+      - name: owning_root_child_community_id
+        description: Primera comunidad debajo de la raíz que contiene el ítem.
+      - name: owning_root_child_community_title
+        description: Título preferido de la primera comunidad debajo de la raíz.
       - name: owning_community_path_ids
         description: Camino de IDs de comunidades desde la raíz hasta la inmediata.
       - name: owning_community_path_titles
