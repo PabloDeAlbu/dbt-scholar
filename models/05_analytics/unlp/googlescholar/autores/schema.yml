@@ -1,0 +1,53 @@
+version: 2
+
+models:
+  - name: unlp_googlescholar_autores_dashboard
+    description: >
+      Fuente general para explorar perfiles de autores observados en Google
+      Scholar mediante búsquedas institucionales de UNLP. Tiene una fila por
+      perfil y conserva las señales derivadas del email verificado y de la
+      afiliación declarada. No representa un padrón institucional oficial ni
+      una consulta actualizada en tiempo real a Google Scholar.
+    config:
+      meta:
+        organization: unlp
+        source_system: googlescholar
+        model_role: dashboard_source
+        grain: scholar_user_id
+    columns:
+      - name: scholar_user_id
+        description: Identificador estable del perfil en Google Scholar.
+        data_tests: [not_null, unique]
+      - name: autor
+        description: Nombre visible del perfil al momento de observarlo.
+        data_tests: [not_null]
+      - name: url_perfil_scholar
+        description: URL pública del perfil en Google Scholar.
+        data_tests: [not_null]
+      - name: afiliacion_declarada
+        description: Texto libre de afiliación visible en el perfil.
+      - name: email_verificado
+        description: Texto de email verificado mostrado por Scholar, cuando existe.
+      - name: dominio_email_verificado
+        description: Dominio derivado del email verificado.
+      - name: tiene_email_verificado_unlp
+        description: Indica si el dominio verificado pertenece a `unlp.edu.ar`.
+        data_tests: [not_null]
+      - name: menciona_unlp_en_afiliacion
+        description: Indica si la afiliación declarada menciona UNLP.
+        data_tests: [not_null]
+      - name: tiene_evidencia_unlp
+        description: >
+          Indica si existe email institucional verificado o una mención de
+          UNLP en la afiliación. Es evidencia operativa, no una validación oficial.
+        data_tests: [not_null]
+      - name: cantidad_citas
+        description: Citas visibles en el perfil al momento de la observación.
+      - name: intereses
+        description: Intereses declarados en el perfil, separados por ` | `.
+      - name: cantidad_intereses
+        description: Cantidad de intereses declarados.
+        data_tests: [not_null]
+      - name: fecha_carga
+        description: Fecha y hora de carga de la observación procesada por Kedro.
+        data_tests: [not_null]

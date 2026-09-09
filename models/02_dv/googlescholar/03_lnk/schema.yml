@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: link_googlescholar_profile_publication
+    description: >
+      Vincula cada perfil con las publicaciones observadas dentro de él. Usa
+      `scholar_publication_id` como clave dependiente del perfil porque el valor no
+      identifica globalmente una obra entre perfiles distintos.
+    columns:
+      - name: profile_publication_hk
+        data_tests: [not_null, unique]
+      - name: profile_hk
+        data_tests: [not_null]
+      - name: scholar_publication_id
+        data_tests: [not_null]

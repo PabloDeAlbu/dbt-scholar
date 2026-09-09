@@ -1,0 +1,235 @@
+version: 2
+
+models:
+  - name: unlp_01_publicaciones_scholar_por_perfil
+    description: >
+      Publicaciones observadas en el perfil público de Google Scholar
+      seleccionado mediante `googlescholar_profile_user_id`. No afirma que
+      estas publicaciones tengan una contraparte en SEDICI.
+    config:
+      meta:
+        organization: unlp
+        source_system: googlescholar
+        model_role: end_user_source_universe
+        grain: scholar publication in observed profile
+        profile_selector_var: googlescholar_profile_user_id
+    columns:
+      - name: titulo
+        description: Título mostrado en el perfil de Scholar.
+        data_tests: [not_null]
+      - name: autoria
+        description: Autoría mostrada por Scholar como texto.
+      - name: publication_details
+        description: Segunda línea descriptiva `.gs_gray` de la fila del perfil, conservada con el nombre del dato extraído.
+      - name: anio_publicacion
+        description: Año mostrado por Scholar; puede utilizarse para filtrar el universo.
+      - name: cantidad_citas
+        description: Citas mostradas para la publicación al observar el perfil.
+        data_tests: [not_null]
+      - name: url_publicacion_scholar
+        description: URL del registro dentro del perfil de Scholar.
+      - name: url_cluster_scholar
+        description: URL del cluster de versiones cuando Scholar lo expone.
+      - name: nombre_perfil_scholar
+        description: Nombre mostrado en el perfil seleccionado.
+        data_tests: [not_null]
+      - name: url_perfil_scholar
+        description: URL del perfil público seleccionado.
+        data_tests: [not_null]
+      - name: fecha_observacion
+        description: Fecha asignada a la captura manual del perfil.
+        data_tests: [not_null]
+      - name: id_publicacion_scholar
+        description: Identificador de la publicación dentro del perfil, conservado para controlar duplicados.
+        data_tests: [not_null, unique]
+
+  - name: unlp_02_publicaciones_sedici_por_autor
+    description: >
+      Publicaciones de SEDICI recuperadas mediante dos criterios independientes:
+      coincidencia exacta con `sedici_authority` y presencia de la palabra
+      indicada en `sedici_author_name_term`. Este universo se presenta sin
+      depender de una correspondencia con publicaciones de Scholar y conserva
+      los flags necesarios para revisar por separado ambos criterios.
+    config:
+      meta:
+        organization: unlp
+        source_system: sedicidb
+        model_role: end_user_source_universe
+        grain: handle
+        authority_selector_var: sedici_authority
+        name_selector_var: sedici_author_name_term
+    columns:
+      - name: handle
+        description: Identificador persistente de la publicación en SEDICI.
+        data_tests: [not_null, unique]
+      - name: url_sedici
+        description: URL de la publicación en SEDICI.
+        data_tests: [not_null]
+      - name: titulo
+        description: Título declarado en SEDICI.
+        data_tests: [not_null]
+      - name: autoria
+        description: Personas autoras declaradas en SEDICI, separadas por punto y coma.
+      - name: cantidad_autores
+        description: Cantidad de personas autoras identificadas en SEDICI.
+        data_tests: [not_null]
+      - name: es_autoria_unica
+        description: Indica que SEDICI declara exactamente una persona autora.
+        data_tests: [not_null]
+      - name: coincide_autoridad_voc
+        description: Indica que alguna autoría posee exactamente la autoridad seleccionada de `voc.sedici`.
+        data_tests: [not_null]
+      - name: coincide_texto_autor
+        description: Indica que alguna autoría contiene el término nominal seleccionado como palabra completa.
+        data_tests: [not_null]
+      - name: criterio_identificacion_autor
+        description: Criterio o combinación de criterios por los que la publicación ingresó al universo.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Autoridad y texto', 'Solo autoridad', 'Solo texto']
+      - name: tipo_publicacion
+        description: Tipo padre declarado en `dc.type`.
+      - name: subtipo_publicacion
+        description: Subtipo documental declarado en `sedici.subtype`.
+      - name: fecha_publicacion
+        description: Fecha de publicación declarada en SEDICI.
+      - name: anio_publicacion
+        description: Año derivado de la fecha de publicación declarada en SEDICI.
+      - name: fecha_exposicion
+        description: Fecha de exposición pública declarada en SEDICI.
+      - name: fecha_disponible_en_sedici
+        description: Fecha desde la que la publicación está disponible en SEDICI.
+      - name: estado_sedici
+        description: Resumen legible de los estados archivado, retirado y descubrible.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Publicada y visible', 'Retirada', 'No archivada', 'No visible']
+      - name: url_busqueda_google_scholar
+        description: Búsqueda por frase exacta preparada para la revisión manual.
+
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: sedici_author_publication_count_nonnegative
+          expression: cantidad_autores >= 0
+      - dbt_utils.expression_is_true:
+          name: sedici_author_publication_single_matches_count
+          expression: es_autoria_unica = (cantidad_autores = 1)
+
+  - name: unlp_05_correspondencias_confirmadas
+    description: >
+      Casos del cruce con autoridad exacta del autor en SEDICI, título
+      normalizado y año coincidentes, y cardinalidad uno-a-uno entre ambas
+      fuentes. La confirmación refiere a la correspondencia bibliográfica; no
+      demuestra por sí sola qué URL o Handle indexó Scholar.
+    config:
+      meta:
+        organization: unlp
+        model_role: confirmed_correspondence
+        grain: handle
+    columns:
+      - name: handle
+        data_tests: [not_null, unique]
+      - name: estado_correspondencia
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Confirmada']
+      - name: coincide_autoridad_voc
+        description: Debe ser verdadero en toda correspondencia confirmada.
+        data_tests:
+          - accepted_values:
+              values: [true]
+
+  - name: unlp_04_correspondencias_a_revisar
+    description: >
+      Casos del universo SEDICI que no cumplen la regla conservadora de
+      correspondencia confirmada. Reúne ambigüedades, coincidencias nominales
+      sin autoridad y publicaciones sin coincidencia exacta por título y año.
+      Los registros de 2026 aparecen primero para orientar la revisión inicial.
+    config:
+      meta:
+        organization: unlp
+        model_role: manual_review_queue
+        grain: handle
+    columns:
+      - name: handle
+        data_tests: [not_null, unique]
+      - name: estado_correspondencia
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Requiere revisión', 'Sin coincidencia exacta']
+
+  - name: unlp_03_cruce_sedici_scholar
+    description: >
+      Cruce exploratorio entre los universos de publicaciones del autor en
+      SEDICI y en su perfil de Google Scholar. La regla actual compara título
+      normalizado y año de publicación, y solo confirma relaciones
+      uno-a-uno. El resultado sirve para debatir y revisar la estrategia de
+      correspondencia; no constituye una medición definitiva de indexación.
+    config:
+      meta:
+        organization: unlp
+        source_system: sedicidb + googlescholar
+        model_role: exploratory_coverage
+        grain: handle
+        matching_rule: normalized title + publication year + exact authority
+    columns:
+      - name: handle
+        description: Identificador persistente de la publicación en SEDICI.
+        data_tests: [not_null, unique]
+      - name: url_sedici
+        description: URL de la publicación en SEDICI.
+        data_tests: [not_null]
+      - name: titulo_sedici
+        description: Título declarado en SEDICI.
+        data_tests: [not_null]
+      - name: autoria_sedici
+        description: Personas autoras declaradas en SEDICI.
+      - name: cantidad_autores
+        description: Cantidad de personas autoras identificadas en SEDICI.
+        data_tests: [not_null]
+      - name: es_autoria_unica
+        description: Indica que SEDICI declara exactamente una persona autora.
+        data_tests: [not_null]
+      - name: coincide_autoridad_voc
+        description: Indica coincidencia exacta con la autoridad seleccionada de `voc.sedici`.
+        data_tests: [not_null]
+      - name: coincide_texto_autor
+        description: Indica coincidencia nominal con el término de autor seleccionado.
+        data_tests: [not_null]
+      - name: criterio_identificacion_autor
+        description: Criterio utilizado para incluir la publicación en el universo SEDICI.
+        data_tests: [not_null]
+      - name: tipo_publicacion
+        description: Tipo padre declarado en SEDICI.
+      - name: subtipo_publicacion
+        description: Subtipo documental declarado en SEDICI.
+      - name: fecha_publicacion
+        description: Fecha de publicación declarada en SEDICI.
+      - name: anio_publicacion
+        description: Año utilizado junto con el título para el cruce y disponible para filtros.
+      - name: fecha_exposicion
+        description: Fecha de exposición pública declarada en SEDICI.
+      - name: fecha_disponible_en_sedici
+        description: Fecha de disponibilidad declarada en SEDICI.
+      - name: estado_sedici
+        description: Estado resumido de la publicación en SEDICI.
+      - name: estado_correspondencia
+        description: >
+          Resultado de la regla exploratoria. La ausencia de una coincidencia
+          exacta no demuestra que la publicación no esté indexada.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Confirmada', 'Requiere revisión', 'Sin coincidencia exacta']
+      - name: titulo_scholar
+        description: Título del candidato observado en el perfil de Scholar.
+      - name: url_publicacion_scholar
+        description: URL del candidato dentro del perfil de Scholar.
+      - name: cantidad_citas
+        description: Citas mostradas para el candidato de Scholar.
+      - name: url_busqueda_google_scholar
+        description: Búsqueda por frase exacta preparada para la revisión manual.

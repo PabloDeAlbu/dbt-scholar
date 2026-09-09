@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: sat_googlescholar_profile
+    description: Conserva los atributos y las métricas observadas sucesivamente para cada perfil.
+    columns:
+      - name: profile_hk
+        data_tests: [not_null]
+      - name: hashdiff
+        data_tests: [not_null]
+      - name: observed_on
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+
+  - name: sat_googlescholar_profile_publication
+    description: Conserva los atributos y métricas observados para cada vínculo entre perfil y publicación.
+    columns:
+      - name: profile_publication_hk
+        data_tests: [not_null]
+      - name: hashdiff
+        data_tests: [not_null]
+      - name: title
+        data_tests: [not_null]
+      - name: observed_on
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]

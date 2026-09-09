@@ -1,0 +1,118 @@
+version: 2
+
+models:
+  - name: unlp_googlescholar_perfiles_dashboard
+    description: >
+      Resume los perfiles completos de Google Scholar descargados manualmente
+      para su exploración comparativa. Presenta la observación más reciente de
+      cada perfil; no constituye un padrón institucional ni una extracción en
+      tiempo real.
+    config:
+      meta:
+        organization: unlp
+        source_system: googlescholar
+        model_role: dashboard_source
+        grain: id_perfil_scholar
+    columns:
+      - name: id_perfil_scholar
+        description: Identificador estable del perfil en Google Scholar.
+        data_tests: [not_null, unique]
+      - name: autor
+        description: Nombre visible en el perfil observado.
+        data_tests: [not_null]
+      - name: url_perfil_scholar
+        description: Enlace público al perfil.
+        data_tests: [not_null]
+      - name: orcid
+        description: ORCID declarado en el nombre del perfil, cuando está disponible.
+      - name: afiliacion_declarada
+        description: Afiliación informada por la persona en Google Scholar.
+      - name: organizacion_scholar
+        description: Organización asociada por Google Scholar.
+      - name: url_organizacion_scholar
+        description: Enlace a la organización en Google Scholar.
+      - name: email_verificado
+        description: Texto de verificación institucional mostrado en el perfil.
+      - name: intereses_declarados
+        description: Intereses informados en el perfil, separados por ` | `.
+      - name: cantidad_publicaciones
+        description: Publicaciones visibles en la observación seleccionada.
+        data_tests: [not_null]
+      - name: publicaciones_con_anio
+        description: Publicaciones que muestran año en el perfil.
+        data_tests: [not_null]
+      - name: primer_anio_publicacion
+        description: Menor año visible entre las publicaciones observadas.
+      - name: ultimo_anio_publicacion
+        description: Mayor año visible entre las publicaciones observadas.
+      - name: cantidad_citas
+        description: Citas totales mostradas por Google Scholar.
+      - name: indice_h
+        description: Índice h total mostrado por Google Scholar.
+      - name: indice_i10
+        description: Índice i10 total mostrado por Google Scholar.
+      - name: fecha_observacion
+        description: Fecha asignada al HTML descargado manualmente.
+        data_tests: [not_null]
+      - name: fecha_carga
+        description: Fecha y hora de procesamiento mediante Kedro.
+        data_tests: [not_null]
+
+  - name: unlp_googlescholar_publicaciones_dashboard
+    description: >
+      Reúne las publicaciones visibles en la observación más reciente de cada
+      perfil completo descargado. Permite comparar autores, años y citas según
+      lo mostrado por Google Scholar, sin afirmar que la cobertura sea completa.
+    config:
+      meta:
+        organization: unlp
+        source_system: googlescholar
+        model_role: dashboard_source
+        grain: id_perfil_scholar + id_publicacion_scholar
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [id_perfil_scholar, id_publicacion_scholar]
+    columns:
+      - name: id_perfil_scholar
+        description: Identificador del perfil donde se observó la publicación.
+        data_tests: [not_null]
+      - name: autor
+        description: Nombre visible del perfil observado.
+        data_tests: [not_null]
+      - name: url_perfil_scholar
+        description: Enlace público al perfil.
+        data_tests: [not_null]
+      - name: afiliacion_declarada
+        description: Afiliación informada en el perfil.
+      - name: intereses_declarados
+        description: Intereses informados en el perfil, separados por ` | `.
+      - name: id_publicacion_scholar
+        description: Identificador de la publicación dentro del perfil.
+        data_tests: [not_null]
+      - name: titulo
+        description: Título mostrado por Google Scholar.
+        data_tests: [not_null]
+      - name: autores_declarados
+        description: Texto de autoría mostrado por Google Scholar.
+      - name: detalles_publicacion
+        description: Revista, editorial u otros datos mostrados bajo la autoría.
+      - name: anio_publicacion
+        description: Año mostrado por Google Scholar, cuando está disponible.
+      - name: cantidad_citas
+        description: Citas mostradas para la publicación en la fecha observada.
+        data_tests: [not_null]
+      - name: posicion_en_perfil
+        description: Posición de la publicación en el HTML descargado.
+        data_tests: [not_null]
+      - name: url_publicacion_scholar
+        description: Enlace al detalle de la publicación en Google Scholar.
+      - name: id_cluster_googlescholar
+        description: Identificador del conjunto de versiones, cuando está disponible.
+      - name: url_cluster_googlescholar
+        description: Enlace a las versiones agrupadas por Google Scholar.
+      - name: fecha_observacion
+        description: Fecha asignada al HTML descargado manualmente.
+        data_tests: [not_null]
+      - name: fecha_carga
+        description: Fecha y hora de procesamiento mediante Kedro.
+        data_tests: [not_null]

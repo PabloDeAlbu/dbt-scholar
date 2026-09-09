@@ -1,0 +1,155 @@
+version: 2
+
+models:
+  - name: dim_unlp_googlescholar_author
+    description: >
+      Dimensión de perfiles Google Scholar observados en HTML de resultados de
+      búsqueda descargados manualmente para relevar autores vinculados con
+      UNLP. Materializa una fila por `scholar_user_id` desde
+      `ldg_googlescholar_profile_search_result`, sin modelar histórico. La pertenencia UNLP
+      es una clasificación derivada del email verificado o del texto libre de
+      afiliación y no equivale a un padrón institucional validado.
+    config:
+      tags: [unlp, dm, googlescholar]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [scholar_user_id]
+    columns:
+      - name: scholar_user_id
+        description: Identificador del perfil en Google Scholar.
+        data_tests: [not_null, unique]
+      - name: author_name
+        description: Nombre visible del perfil.
+        data_tests: [not_null]
+      - name: profile_url
+        description: URL canónica del perfil de Scholar.
+        data_tests: [not_null]
+      - name: affiliation
+        description: Texto libre de afiliación visible en la tarjeta del perfil del HTML descargado.
+      - name: verified_email
+        description: Texto de email verificado visible en la tarjeta del perfil, cuando Scholar lo informa.
+      - name: verified_email_domain
+        description: Dominio derivado del texto de email verificado mostrado en la tarjeta del perfil.
+      - name: has_unlp_verified_email
+        description: Flag que indica dominio verificado `*.unlp.edu.ar`.
+        data_tests: [not_null]
+      - name: mentions_unlp_affiliation
+        description: Flag que indica mención de `UNLP` o `Universidad Nacional de La Plata` en la afiliación.
+        data_tests: [not_null]
+      - name: is_unlp_profile
+        description: Flag compuesto para perfilar pertenencia institucional usando email o afiliación.
+        data_tests: [not_null]
+      - name: cited_by_count
+        description: Cantidad de citas visible en la tarjeta del perfil al momento de descargar el HTML.
+      - name: interests_json
+        description: Intereses del perfil en formato JSONB normalizado.
+      - name: interests
+        description: Intereses del perfil concatenados con ` | `.
+      - name: interest_count
+        description: Cantidad de intereses declarados en el perfil.
+        data_tests: [not_null]
+      - name: source_system
+        description: Sistema fuente asignado por el parser Kedro; vale `googlescholar`.
+      - name: entity_type
+        description: Tipo de entidad informado en la observación seleccionada.
+      - name: source_file
+        description: HTML paginado de la búsqueda manual del que se extrajo el perfil.
+      - name: load_datetime
+        description: Fecha-hora en que Kedro transformó y cargó la observación.
+
+  - name: fct_unlp_googlescholar_author_affiliation
+    description: >
+      Vista organizacional de afiliación para perfiles relevados mediante HTML
+      de una búsqueda manual de autores UNLP en Google Scholar. Materializa una
+      fila por perfil y organización objetivo. Los atributos del perfil
+      provienen de `dim_unlp_googlescholar_author`; la dependencia se deriva
+      del dominio de email y se resuelve con `dim_unlp_organizational_unit`; los identificadores
+      institucionales se incorporan desde `dim_organization`. El modelo no
+      representa una afirmación oficial de vínculo laboral ni una extracción
+      mediante API.
+    config:
+      tags: [unlp, dm, googlescholar]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [scholar_user_id, organization_ror]
+    columns:
+      - name: scholar_user_id
+        description: Identificador del perfil en Google Scholar.
+        data_tests: [not_null]
+      - name: author_name
+        description: Nombre visible del perfil Scholar.
+        data_tests: [not_null]
+      - name: scholar_affiliation
+        description: Texto de afiliación libre observado en el perfil.
+      - name: scholar_org_id
+        description: >
+          Identificador constante de UNLP en el directorio de Scholar
+          (`18050997564342690566`), usado para contextualizar el universo; no se
+          extrae individualmente de cada tarjeta de perfil.
+        data_tests: [not_null]
+      - name: scholar_org_profile_url
+        description: URL construida con el identificador constante del directorio institucional de UNLP.
+        data_tests: [not_null]
+      - name: openaire_organization_id
+        description: Identificador OpenAIRE de UNLP incorporado desde `dim_organization`.
+      - name: openalex_institution_id
+        description: Identificador institucional OpenAlex de UNLP incorporado desde `dim_organization`.
+      - name: has_openaire
+        description: Indicador de disponibilidad del identificador OpenAIRE, derivado en `dim_organization`.
+        data_tests: [not_null]
+      - name: has_openalex
+        description: Indicador de disponibilidad del identificador OpenAlex, derivado en `dim_organization`.
+        data_tests: [not_null]
+      - name: verified_email_domain
+        description: Dominio derivado del email verificado observado en la tarjeta del perfil Scholar.
+      - name: dependency_domain
+        description: >
+          Dominio de dependencia normalizado para agrupar perfiles por unidad
+          UNLP usando el email verificado. Conserva el subdominio inmediato
+          anterior a `unlp.edu.ar`, de modo que `ext.ing.unlp.edu.ar` y
+          `cidepint.ing.unlp.edu.ar` se agrupan como `ing.unlp.edu.ar`.
+      - name: dependency_domain_label
+        description: >
+          Etiqueta corta curada en `dim_unlp_organizational_unit` para el
+          dominio normalizado. Es nula cuando el dominio no está mapeado.
+      - name: dependency_name
+        description: >
+          Nombre legible de la dependencia específica asociado a
+          `dependency_domain`, resuelto desde `dim_unlp_organizational_unit`.
+      - name: parent_unit_name
+        description: >
+          Unidad institucional superior asociada a la dependencia, resuelta
+          desde `dim_unlp_organizational_unit`. Puede ser una
+          facultad, la UNLP u otra unidad madre según corresponda.
+      - name: organization_ror
+        description: ROR de UNLP incorporado desde `dim_organization`, no observado en Scholar.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_organization')
+              field: organization_ror
+      - name: organization_name
+        description: Nombre de UNLP resuelto desde `dim_organization`.
+        data_tests: [not_null]
+      - name: is_primary_affiliation
+        description: >
+          Flag operativo constante para la organización objetivo. No demuestra
+          que UNLP sea la afiliación primaria declarada por la persona.
+        data_tests: [not_null]
+      - name: affiliation_source
+        description: >
+          Etiqueta técnica del criterio de construcción. La observación base
+          proviene de HTML descargados manualmente; no debe interpretarse como
+          procedencia de una API.
+        data_tests: [not_null]
+      - name: has_unlp_verified_email
+        description: Flag que indica dominio verificado `*.unlp.edu.ar`.
+        data_tests: [not_null]
+      - name: mentions_unlp_affiliation
+        description: Flag que indica mención de UNLP en el texto de afiliación.
+        data_tests: [not_null]
+      - name: is_unlp_profile
+        description: Flag compuesto de pertenencia institucional derivado del perfil Scholar.
+        data_tests: [not_null]
+      - name: cited_by_count
+        description: Cantidad de citas visible en Scholar al descargar el HTML; representa una observación temporal.

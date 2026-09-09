@@ -19,6 +19,6 @@ WITH final AS (
         entity_type,
         source_file,
         load_datetime
-    FROM {{ ref('ldg_google_scholar_author') }}
+    FROM {{ ref('ldg_googlescholar_profile_search_result') }}
 )
 SELECT * FROM final

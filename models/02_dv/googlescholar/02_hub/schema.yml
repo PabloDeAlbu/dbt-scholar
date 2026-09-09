@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: hub_googlescholar_profile
+    description: Identidades de perfiles observados en Google Scholar, definidas por `scholar_user_id`.
+    columns:
+      - name: profile_hk
+        data_tests: [not_null, unique]
+      - name: scholar_user_id
+        data_tests: [not_null, unique]

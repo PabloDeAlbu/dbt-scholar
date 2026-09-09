@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: stg_googlescholar_profile
+    description: Prepara las claves y cambios observados de cada perfil de Google Scholar para su carga en Data Vault.
+    columns:
+      - name: profile_hk
+        data_tests: [not_null]
+      - name: scholar_user_id
+        data_tests: [not_null]
+      - name: profile_hashdiff
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+
+  - name: stg_googlescholar_profile_publication
+    description: Prepara las publicaciones visibles dentro de cada perfil; su identidad depende del perfil observado.
+    columns:
+      - name: profile_hk
+        data_tests: [not_null]
+      - name: profile_publication_hk
+        data_tests: [not_null]
+      - name: scholar_publication_id
+        data_tests: [not_null]
+      - name: profile_publication_hashdiff
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]

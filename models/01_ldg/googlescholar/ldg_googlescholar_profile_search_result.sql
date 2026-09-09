@@ -2,7 +2,7 @@
 
 WITH source_data AS (
     SELECT *
-    FROM {{ source('google_scholar', 'author') }}
+    FROM {{ source('googlescholar', 'profile_search_result') }}
 ),
 
 renamed AS (

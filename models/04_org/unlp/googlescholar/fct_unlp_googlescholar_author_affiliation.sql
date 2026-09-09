@@ -16,13 +16,13 @@ WITH organization AS (
     WHERE organization_ror = '{{ unlp_ror }}'
 ),
 
-dependency_map AS (
+organizational_unit AS (
     SELECT
-        dependency_domain,
-        dependency_domain_label,
-        dependency_name,
-        parent_unit_name
-    FROM {{ ref('seed_unlp_domain_unit_map') }}
+        organizational_unit_domain,
+        organizational_unit_domain_label,
+        organizational_unit_name,
+        parent_organizational_unit_name
+    FROM {{ ref('dim_unlp_organizational_unit') }}
 ),
 
 author AS (
@@ -36,7 +36,7 @@ author AS (
         mentions_unlp_affiliation,
         is_unlp_profile,
         COALESCE(cited_by_count::int, 0) AS cited_by_count
-    FROM {{ ref('dim_unlp_google_scholar_author') }}
+    FROM {{ ref('dim_unlp_googlescholar_author') }}
 ),
 
 author_with_dependency AS (
@@ -48,18 +48,7 @@ author_with_dependency AS (
             WHEN author.verified_email_domain ~ '[.]unlp[.]edu[.]ar$'
                 THEN SUBSTRING(author.verified_email_domain FROM '([^.]+[.]unlp[.]edu[.]ar)$')
             ELSE author.verified_email_domain
-        END AS dependency_domain,
-        CASE
-            WHEN author.verified_email_domain IS NULL THEN NULL
-            WHEN author.verified_email_domain = 'unlp.edu.ar' THEN 'unlp'
-            WHEN author.verified_email_domain ~ '[.]unlp[.]edu[.]ar$'
-                THEN REGEXP_REPLACE(
-                    SUBSTRING(author.verified_email_domain FROM '([^.]+[.]unlp[.]edu[.]ar)$'),
-                    '[.]unlp[.]edu[.]ar$',
-                    ''
-                )
-            ELSE author.verified_email_domain
-        END AS dependency_domain_label_derived
+        END AS dependency_domain
     FROM author
 ),
 
@@ -79,18 +68,9 @@ final AS (
         organization.has_openalex,
         author.verified_email_domain,
         author.dependency_domain,
-        COALESCE(dependency_map.dependency_domain_label, author.dependency_domain_label_derived) AS dependency_domain_label,
-        COALESCE(
-            dependency_map.dependency_name,
-            CASE
-                WHEN author.dependency_domain IS NULL THEN NULL
-                WHEN author.dependency_domain = 'unlp.edu.ar' THEN 'Universidad Nacional de La Plata'
-                WHEN author.dependency_domain ~ '[.]unlp[.]edu[.]ar$'
-                    THEN INITCAP(REPLACE(REPLACE(author.dependency_domain, '.unlp.edu.ar', ''), '.', ' '))
-                ELSE author.dependency_domain
-            END
-        ) AS dependency_name,
-        dependency_map.parent_unit_name,
+        organizational_unit.organizational_unit_domain_label AS dependency_domain_label,
+        organizational_unit.organizational_unit_name AS dependency_name,
+        organizational_unit.parent_organizational_unit_name AS parent_unit_name,
         author.has_unlp_verified_email,
         author.mentions_unlp_affiliation,
         author.is_unlp_profile,
@@ -99,8 +79,8 @@ final AS (
         author.cited_by_count
     FROM author_with_dependency AS author
     CROSS JOIN organization
-    LEFT JOIN dependency_map
-        ON author.dependency_domain = dependency_map.dependency_domain
+    LEFT JOIN organizational_unit
+        ON author.dependency_domain = organizational_unit.organizational_unit_domain
 )
 
 SELECT * FROM final

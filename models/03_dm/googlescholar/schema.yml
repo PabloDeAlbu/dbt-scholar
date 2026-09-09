@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: latest_sat_googlescholar_profile
+    description: Última observación disponible en el satélite de cada perfil de Google Scholar.
+
+  - name: latest_sat_googlescholar_profile_publication
+    description: Última observación disponible de cada publicación dentro de un perfil.
+
+  - name: dim_googlescholar_profile
+    description: >
+      Dimensión canónica de perfiles de Google Scholar. Presenta una fila por
+      `scholar_user_id` con los atributos y métricas de su última observación.
+    columns:
+      - name: profile_hk
+        data_tests: [not_null, unique]
+      - name: scholar_user_id
+        data_tests: [not_null, unique]
+      - name: profile_name
+        data_tests: [not_null]
+      - name: observed_on
+        data_tests: [not_null]
+
+  - name: fct_googlescholar_profile_publication
+    description: >
+      Publicaciones visibles en la última observación de cada perfil. Su grano es
+      una publicación dentro de un perfil, no una obra global consolidada.
+    columns:
+      - name: profile_publication_hk
+        data_tests: [not_null, unique]
+      - name: profile_hk
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_googlescholar_profile')
+              field: profile_hk
+      - name: scholar_user_id
+        data_tests: [not_null]
+      - name: scholar_publication_id
+        data_tests: [not_null]
+      - name: title
+        data_tests: [not_null]
+      - name: observed_on
+        data_tests: [not_null]
