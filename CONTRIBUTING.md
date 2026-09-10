@@ -70,6 +70,15 @@ Data Vault. La estructura se organiza por dominio y por tipo de modelo:
 
 Si el cambio afecta claves de negocio, relaciones o satélites, va en esta capa.
 
+Responsabilidades internas:
+
+- cada modelo de `01_stg` prepara un modelo de landing para que sea procesable por Data Vault; no debería existir únicamente para consolidar claves de varios staging
+- un hub puede recibir una misma clave de negocio desde varios staging; cuando ocurra, usar la entrada multifuente de `automate_dv.hub` mediante una lista en `source_model`
+- los hubs conservan identidades, los links relaciones y los satélites atributos históricos
+- el grano de un satélite debe ser compatible con su clave y fecha de carga
+- priorizar las macros provistas por AutomateDV antes de implementar manualmente el mismo patrón
+- nunca ejecutar `full-refresh` sobre Data Vault sin analizar expresamente la pérdida de historia que puede producir
+
 ### `models/03_dm/core`
 
 Modelo dimensional reutilizable. Acá viven dimensiones, hechos y bridges compartidos por dominio, pensados como capa semántica base para consumo posterior.
@@ -225,7 +234,7 @@ Scopes sugeridos:
 
 - capa y dominio juntos: `ldg dspacedb5`, `dv dspacedb`, `dm openalex`
 - variante más específica cuando aporta claridad: `dm custom unlp`
-- `dev` para tooling local o helpers de desarrollo
+- `dev` puede utilizarse como checkpoint local mientras un cambio está en elaboración; esos commits deben reescribirse antes de publicar la rama
 
 Ejemplos:
 
@@ -242,3 +251,4 @@ Ejemplos:
 - que el `schema.yml` cercano refleje la intención del cambio
 - que el selector mínimo relevante compile o ejecute
 - que el mensaje de commit describa el cambio con el scope correcto
+- que no se publiquen commits `dev(...)` ni comentarios `TODO` o `FIXME` usados como recordatorios personales
