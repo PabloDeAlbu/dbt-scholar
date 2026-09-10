@@ -221,7 +221,10 @@ models:
         description: Valor de percentil de citas normalizado (si está disponible).
 
   - name: brg_openalex_work_author
-    description: Bridge obra–autor (vínculos N a N entre works y authors).
+    description: >
+      Bridge obra–autor construido desde la relación histórica de OpenAlex.
+      Presenta la identidad canónica del autor cuando está disponible y conserva
+      como respaldo el nombre, ORCID y posición observados en la autoría.
     config:
       tags: [dm]
     columns:
@@ -232,6 +235,14 @@ models:
         data_tests: [not_null]
       - name: author_hk
         data_tests: [not_null]
+      - name: canonical_display_name
+        description: Nombre canónico proveniente de `dim_openalex_author`.
+      - name: fallback_display_name
+        description: Nombre observado en la autoría cuando no existe un nombre canónico.
+      - name: fallback_orcid
+        description: ORCID observado en la autoría.
+      - name: author_position
+        description: Posición del autor observada en la publicación.
 
   - name: brg_openalex_work_authorship
     description: Bridge obra-authorship-autor para conservar la granularidad observada en el payload de OpenAlex.
@@ -246,29 +257,6 @@ models:
         data_tests: [not_null]
       - name: authorship_hk
         data_tests: [not_null]
-
-  - name: brg_openalex_work_author_enriched
-    description: >
-      Bridge obra–autor enriquecido con nombre canónico desde `dim_openalex_author`
-      y fallback descriptivo observado en el vínculo `work_author` cuando el autor
-      no resuelve en la dimensión canónica.
-    config:
-      tags: [dm]
-    columns:
-      - name: work_author_hk
-        data_tests: [not_null, unique]
-      - name: work_hk
-        data_tests: [not_null]
-      - name: author_hk
-        data_tests: [not_null]
-      - name: canonical_display_name
-        description: Nombre canónico desde `dim_openalex_author` cuando existe.
-      - name: fallback_display_name
-        description: Nombre descriptivo observado en el authorship de OpenAlex.
-      - name: fallback_orcid
-        description: ORCID observado en el authorship de OpenAlex.
-      - name: author_position
-        description: Posición del autor observada en el authorship de OpenAlex.
 
   - name: brg_openalex_work_institution
     description: Bridge obra–institución (afiliaciones institucionales asociadas a works).

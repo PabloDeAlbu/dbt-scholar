@@ -28,7 +28,7 @@ author AS (
                 WHEN 'last' THEN 3
                 ELSE 4
             END AS author_position_sort_key
-        FROM {{ ref('brg_openalex_work_author_enriched') }} brg
+        FROM {{ ref('brg_openalex_work_author') }} brg
         WHERE COALESCE(
             brg.canonical_display_name,
             brg.fallback_display_name

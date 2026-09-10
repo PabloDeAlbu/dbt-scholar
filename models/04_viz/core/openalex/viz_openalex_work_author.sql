@@ -15,7 +15,7 @@ WITH base AS (
         dim_a.cited_by_count,
         brg.work_hk,
         brg.author_hk
-    FROM {{ref('brg_openalex_work_author_enriched')}} brg
+    FROM {{ ref('brg_openalex_work_author') }} AS brg
     INNER JOIN {{ref('fct_openalex_work_publication')}} work USING (work_hk)
     LEFT JOIN {{ref('dim_openalex_author')}} dim_a USING (author_hk)
     WHERE COALESCE(brg.canonical_display_name, brg.fallback_display_name) IS NOT NULL

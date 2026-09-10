@@ -27,7 +27,7 @@ author_observed AS (
             ),
             ''
         ) AS author_name
-    FROM {{ ref('brg_openalex_work_author_enriched') }} AS brg
+    FROM {{ ref('brg_openalex_work_author') }} AS brg
     WHERE COALESCE(brg.canonical_display_name, brg.fallback_display_name) IS NOT NULL
 ),
 
