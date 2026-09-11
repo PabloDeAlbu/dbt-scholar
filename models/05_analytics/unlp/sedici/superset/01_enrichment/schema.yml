@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: unlp_sedici_publicacion_digitalizacion
+    description: >
+      Publicaciones visibles de SEDICI enriquecidas con evidencia y posibles
+      omisiones de catalogación de digitalización. La confirmación surge de
+      `sedici.description.note`. Los indicios restantes forman una lista de
+      revisión y no confirman por sí mismos que una publicación haya sido
+      digitalizada.
+    config:
+      meta:
+        organization: unlp
+        source_system: sedicidb
+        model_role: analytical_enrichment
+        grain: item
+    columns:
+      - name: item_id
+        description: Identificador interno del ítem usado para vincular el enriquecimiento.
+        data_tests: [not_null, unique]
+      - name: tiene_nota_digitalizacion
+        description: Indica que `sedici.description.note` contiene la raíz `digitaliz`.
+        data_tests: [not_null]
+      - name: tiene_formato_digitalizacion
+        description: Indica que `dc.format.medium` menciona digitalización o escaneo.
+        data_tests: [not_null]
+      - name: tiene_descripcion_coleccion_digitalizacion
+        description: >
+          Indica que `dc.description` de la colección dueña informa que su
+          contenido fue digitalizado.
+        data_tests: [not_null]
+      - name: tiene_indicio_temporal
+        description: >
+          Indica una publicación anterior a 2000 incorporada a SEDICI al menos
+          diez años después de su fecha de publicación.
+        data_tests: [not_null]
+      - name: fue_digitalizada
+        description: Clasificación `Sí`, `No` o `Posiblemente` basada en la evidencia disponible.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Sí', 'No', 'Posiblemente']
+      - name: evidencia_digitalizacion
+        description: Evidencia principal utilizada para clasificar la publicación.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - 'Nota del ítem'
+                - 'Descripción de la colección'
+                - 'Formato del ítem'
+                - 'Indicio temporal'
+                - 'Sin evidencia'
+      - name: requiere_revision_digitalizacion
+        description: Identifica los casos posibles que no poseen una nota confirmatoria.
+        data_tests: [not_null]
+      - name: motivo_revision_digitalizacion
+        description: Señales que determinaron la inclusión del ítem en la lista de revisión.

@@ -222,6 +222,9 @@ models:
           +schema: unlp_vocsedici
           +tags: [vocsedici]
         sedici:
+          superset:
+            +schema: unlp_sedici_dashboard
+            +tags: [sedici, superset]
           issue_14365:
             +schema: unlp_sedici_issue_14365
             +tags: [sedici, issue_14365]

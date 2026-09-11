@@ -1,0 +1,78 @@
+version: 2
+
+models:
+  - name: unlp_sedici_publicaciones_dashboard
+    description: |
+      Los datos provienen del repositorio institucional SEDICI de la
+      Universidad Nacional de La Plata.
+
+      Reúnen las publicaciones actualmente archivadas, visibles y no retiradas,
+      junto con sus fechas, tipos y ubicación dentro de la estructura del
+      repositorio.
+
+      La fecha de disponibilidad indica cuándo el recurso quedó disponible en
+      SEDICI. No representa necesariamente la fecha de publicación del contenido.
+    config:
+      meta:
+        organization: unlp
+        source_system: sedicidb
+        model_role: dashboard_dataset
+        grain: handle
+        temporal_scope: current_snapshot
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: sedici_publicaciones_dashboard_handle_url_is_consistent
+          expression: "url_handle = 'https://hdl.handle.net/' || handle"
+    columns:
+      - name: handle
+        description: Identificador persistente de la publicación.
+        data_tests: [not_null, unique]
+      - name: url_handle
+        description: URL de resolución del handle persistente.
+        data_tests: [not_null]
+      - name: url_publicacion
+        description: URL pública del recurso en SEDICI.
+        data_tests: [not_null]
+      - name: titulo
+        description: Título vigente de la publicación.
+        data_tests: [not_null]
+      - name: titulo_truncado
+        description: Título limitado a 50 caracteres y terminado en `...` cuando fue recortado.
+        data_tests: [not_null]
+      - name: tipo_publicacion
+        description: Tipo general informado mediante `dc.type`.
+      - name: subtipo_publicacion
+        description: Tipo específico informado mediante `sedici.subtype`.
+        data_tests: [not_null]
+      - name: fue_digitalizada
+        description: >
+          Clasifica la evidencia disponible como `Sí`, `No` o `Posiblemente`.
+          `Sí` requiere una nota de digitalización; `Posiblemente` identifica
+          casos que requieren revisión catalográfica.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Sí', 'No', 'Posiblemente']
+      - name: evidencia_digitalizacion
+        description: Evidencia principal utilizada para clasificar la digitalización.
+        data_tests: [not_null]
+      - name: fecha_publicacion
+        description: Fecha de publicación informada en los metadatos del recurso.
+      - name: anio_publicacion
+        description: Año derivado de la fecha de publicación.
+      - name: fecha_disponibilidad_sedici
+        description: Fecha en que el recurso quedó disponible en SEDICI.
+      - name: mes_disponibilidad_sedici
+        description: Primer día del mes de disponibilidad, preparado para series temporales.
+      - name: anio_disponibilidad_sedici
+        description: Año de disponibilidad en SEDICI.
+      - name: comunidad_raiz
+        description: Comunidad raíz a la que pertenece la publicación.
+      - name: comunidad_principal
+        description: Primera comunidad ubicada debajo de la comunidad raíz.
+      - name: comunidad
+        description: Comunidad inmediata que contiene la colección de la publicación.
+      - name: coleccion
+        description: Colección dueña de la publicación.
+      - name: ruta_en_sedici
+        description: Ruta completa de comunidades de la publicación.
