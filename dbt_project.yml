@@ -61,6 +61,9 @@ models:
       vocsedici:
         +schema: vocsedici
         +tags: [vocsedici]
+      webometrics:
+        +schema: webometrics
+        +tags: [webometrics]
     02_dv:
       coar:
         +schema: coar
@@ -110,6 +113,9 @@ models:
       openalex:
         +schema: openalex
         +tags: [openalex]
+      webometrics:
+        +schema: webometrics
+        +tags: [webometrics]
 
     04_org:
       # Nuevo layout objetivo: vistas institucionales por organización y fuente

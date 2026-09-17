@@ -1,0 +1,119 @@
+version: 2
+
+sources:
+  - name: webometrics
+    description: >
+      Datos extraídos de los rankings públicos de Webometrics by UNIRANKS.
+      Las páginas HTML originales se conservan como evidencia y Kedro carga
+      sus representaciones tabulares en el esquema `ldg_webometrics`.
+    schema: ldg_webometrics
+    tables:
+      - name: university_latinamerica_ranking
+        description: >
+          Instituciones publicadas en `/latin-america`, con las posiciones de
+          la edición observada. La tabla conserva el alcance regional, la
+          procedencia y los controles de completitud de la extracción.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns:
+                - university_url
+                - ranking_path
+                - ranking_year
+                - ranking_edition
+        columns:
+          - name: university_url
+            data_tests: [not_null]
+          - name: regional_rank
+            data_tests: [not_null]
+          - name: ranking_path
+            data_tests: [not_null]
+          - name: ranking_year
+            data_tests: [not_null]
+          - name: ranking_edition
+            data_tests: [not_null]
+          - name: is_complete_extraction
+            data_tests:
+              - accepted_values:
+                  values: [true]
+                  quote: false
+          - name: _load_datetime
+            data_tests: [not_null]
+
+models:
+  - name: ldg_webometrics_ranking
+    description: >
+      Normalización relacional de las instituciones observadas en los rankings
+      regionales de Webometrics. Conserva una fila por institución, ámbito,
+      año y edición, junto con las posiciones y la trazabilidad de extracción.
+      Los valores de rank son posiciones ordinales: un número menor representa
+      una mejor posición y un valor nulo indica que la fuente no publicó ese
+      indicador. La metodología vigente pondera Impact (50 %), Openness
+      (10 %) y Excellence (40 %), pero este modelo no intenta recalcular el
+      puntaje porque la fuente no publica aquí los valores normalizados.
+      Metodología: https://www.webometrics.org/methodology
+    config:
+      tags: [ldg]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - university_url
+            - ranking_path
+            - ranking_year
+            - ranking_edition
+      - dbt_utils.expression_is_true:
+          name: webometrics_regional_rank_is_positive
+          expression: "regional_rank > 0"
+      - dbt_utils.expression_is_true:
+          name: webometrics_extraction_is_complete
+          expression: "is_complete_extraction"
+    columns:
+      - name: university_name
+        description: Nombre de la institución publicado por Webometrics.
+        data_tests: [not_null]
+      - name: university_url
+        description: URL de la ficha institucional dentro de Webometrics.
+        data_tests: [not_null]
+      - name: university_slug
+        description: Segmento identificador de la ficha institucional.
+        data_tests: [not_null]
+      - name: country_code
+        description: Código de país observado en el ranking regional.
+        data_tests: [not_null]
+      - name: regional_rank
+        description: Posición dentro del ámbito indicado por `ranking_path`.
+        data_tests: [not_null]
+      - name: world_rank
+        description: Posición mundial publicada en el listado regional.
+      - name: impact_rank
+        description: >
+          Posición del indicador Impact, asociado con la visibilidad y
+          autoridad del ecosistema web externo de la institución.
+      - name: openness_rank
+        description: >
+          Posición del indicador Openness, asociado con la visibilidad
+          académica y la influencia de citas de la comunidad institucional.
+      - name: excellence_rank
+        description: >
+          Posición del indicador Excellence, asociado con el desempeño de la
+          investigación de alto impacto por campos académicos.
+      - name: ranking_path
+        description: Ámbito consultado; conserva el segmento utilizado en la URL.
+        data_tests: [not_null]
+      - name: ranking_year
+        description: Año de la edición observada.
+        data_tests: [not_null]
+      - name: ranking_edition
+        description: Edición observada dentro del año, normalizada en minúsculas.
+        data_tests: [not_null]
+      - name: source_url
+        description: URL de la página paginada de la que se obtuvo la fila.
+        data_tests: [not_null]
+      - name: extract_datetime
+        description: Fecha y hora de la consulta a Webometrics.
+        data_tests: [not_null]
+      - name: is_complete_extraction
+        description: Indica que se recuperó y validó el ranking regional completo.
+        data_tests: [not_null]
+      - name: load_datetime
+        description: Fecha y hora de carga en PostgreSQL mediante Kedro.
+        data_tests: [not_null]

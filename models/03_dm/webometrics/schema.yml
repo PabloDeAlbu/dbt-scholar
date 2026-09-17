@@ -1,0 +1,61 @@
+version: 2
+
+models:
+  - name: fct_webometrics_university_ranking
+    description: >
+      Hecho reutilizable de posiciones institucionales publicadas por
+      Webometrics. Conserva una observación por institución, ámbito, año y
+      edición sin aplicar reglas propias de una organización usuaria. Las
+      posiciones son ordinales y los indicadores no publicados permanecen
+      nulos.
+    config:
+      tags: [dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - university_url
+            - ranking_path
+            - ranking_year
+            - ranking_edition
+      - dbt_utils.expression_is_true:
+          name: webometrics_fact_regional_rank_is_positive
+          expression: "regional_rank > 0"
+    columns:
+      - name: university_name
+        description: Nombre publicado para la institución.
+        data_tests: [not_null]
+      - name: university_url
+        description: URL de la ficha institucional en Webometrics.
+        data_tests: [not_null]
+      - name: university_slug
+        description: Segmento identificador de la ficha institucional.
+        data_tests: [not_null]
+      - name: country_code
+        description: Código de país observado en el ranking.
+        data_tests: [not_null]
+      - name: ranking_path
+        description: Ámbito regional o global del ranking observado.
+        data_tests: [not_null]
+      - name: ranking_year
+        description: Año de la edición.
+        data_tests: [not_null]
+      - name: ranking_edition
+        description: Edición publicada dentro del año.
+        data_tests: [not_null]
+      - name: regional_rank
+        description: Posición de la institución dentro del ámbito observado.
+        data_tests: [not_null]
+      - name: world_rank
+        description: Posición mundial informada por Webometrics.
+      - name: impact_rank
+        description: Posición en Impact.
+      - name: openness_rank
+        description: Posición en Openness.
+      - name: excellence_rank
+        description: Posición en Excellence.
+      - name: extract_datetime
+        description: Fecha y hora de la observación de la fuente.
+        data_tests: [not_null]
+      - name: load_datetime
+        description: Fecha y hora de carga en landing.
+        data_tests: [not_null]
