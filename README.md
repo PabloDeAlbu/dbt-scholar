@@ -16,14 +16,14 @@ reusable models and analytical outputs.
 
 Physical schemas are generated according to the layer. For example:
 
-- `models/04_org/unlp/sedicidb` is materialized in `dm_unlp_sedicidb`.
+- `models/04_org/unlp/sources/sedicidb` is materialized in `dm_unlp_sedicidb`.
 - `models/05_analytics/unlp/sedici/revistas` is materialized in
   `analytics_unlp_sedici_revistas`.
 
 ## Institutional sources
 
 Local loading, modeling, and building of the SEDICI base are described in the
-[SEDICI model guide](models/04_org/unlp/sedicidb/LEEME.md), currently in Spanish.
+[SEDICI model guide](models/04_org/unlp/sources/sedicidb/LEEME.md), currently in Spanish.
 
 ## Export a model to CSV
 

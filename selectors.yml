@@ -3,7 +3,7 @@ selectors:
     description: Construye y prueba la capa organizacional SEDICI sin seleccionar tests de consumidores externos.
     definition:
       method: path
-      value: models/04_org/unlp/sedicidb
+      value: models/04_org/unlp/sources/sedicidb
       indirect_selection: cautious
   - name: cic_cicdigital
     description: Construye y prueba la base directa de CIC Digital sin seleccionar tests de consumidores externos.

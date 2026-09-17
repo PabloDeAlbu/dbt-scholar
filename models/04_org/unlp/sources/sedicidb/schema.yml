@@ -186,6 +186,45 @@ models:
             or community_path_titles = root_community_title
             or community_path_titles like root_community_title || ' > %'
 
+  - name: brg_unlp_sedicidb_item_doi
+    description: >
+      DOI normalizados observados en los metadatos de cada ítem de SEDICI, a
+      grano una fila por `item_id` y DOI. Conserva los metadatafields que
+      aportaron evidencia y no selecciona un único DOI cuando el ítem presenta
+      más de uno.
+    config:
+      meta:
+        organization: unlp
+        source_system: sedicidb
+        model_role: bridge
+        grain: item_id + doi
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_id, doi]
+      - dbt_utils.expression_is_true:
+          name: sedicidb_item_doi_is_normalized
+          expression: "doi = lower(doi) and doi ~ '^10[.][0-9]{4,9}/.+'"
+    columns:
+      - name: item_id
+        description: Identificador del ítem en la base de datos de SEDICI.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('fct_unlp_sedicidb_item_publication')
+              field: item_id
+      - name: doi
+        description: DOI en minúsculas, sin URL ni puntuación final.
+        data_tests: [not_null]
+      - name: metadatafields
+        description: Metadatafields que contienen el DOI, unidos con `|`.
+        data_tests: [not_null]
+      - name: observation_count
+        description: Cantidad de observaciones de metadatos que contienen el DOI.
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 1"
+
   - name: brg_unlp_sedicidb_item_author
     description: >
       Relación atómica entre ítems y observaciones de autoría SEDICI. Conserva

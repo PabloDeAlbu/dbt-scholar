@@ -18,6 +18,12 @@
 - En `models/02_dv/**`, preferir las macros de AutomateDV disponibles antes de escribir implementaciones SQL equivalentes.
 - `models/03_dm/**` presenta hechos, dimensiones y bridges reutilizables por fuente, sin reglas propias de una organizacion o caso analitico.
 - `models/04_org/**` define subconjuntos y semantica propios de una organizacion.
+- En `models/04_org/<organizacion>/sources/<fuente>`, conservar representaciones
+  institucionales construidas desde una fuente explicita.
+- En `models/04_org/<organizacion>/integration`, ubicar correspondencias entre
+  fuentes, conservando entidades de origen, regla, evidencia y ambiguedad.
+- Reservar la raiz de `models/04_org/<organizacion>` para hechos, dimensiones y
+  bridges institucionales reutilizables que articulan una o mas fuentes.
 - `models/05_analytics/**` responde casos analiticos concretos y organiza sus bases, dashboards, metricas y reportes sin reimplementar la ingesta ni la historizacion.
 
 ## Pendientes y cambios locales

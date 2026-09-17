@@ -9,7 +9,7 @@ repositorio y actualmente no pasa por Data Vault:
 
 ```text
 ldg_sedicidb
-    -> models/04_org/unlp/sedicidb
+    -> models/04_org/unlp/sources/sedicidb
     -> dm_unlp_sedicidb
     -> models/05_analytics/unlp/*
 ```

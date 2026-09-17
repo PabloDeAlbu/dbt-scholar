@@ -2,16 +2,23 @@
 
 Esta capa representa entidades y procesos desde la perspectiva de una
 institución. Una organización puede tener varias representaciones simultáneas,
-una por cada fuente disponible.
+una por cada fuente disponible, y modelos que integran esas representaciones
+sin perder su procedencia.
 
 ## Estructura
 
 ```text
-models/04_org/<organización>/<fuente>/
+models/04_org/<organización>/
+├── sources/<fuente>/
+├── integration/
+└── <hechos y dimensiones institucionales>
 ```
 
-La organización delimita el universo institucional. La fuente indica desde qué
-sistema y recorrido de datos se construye ese universo.
+La organización delimita el universo institucional. `sources` indica desde qué
+sistema y recorrido de datos se construye cada representación. `integration`
+contiene correspondencias explícitas entre fuentes. Los hechos y dimensiones
+ubicados en la raíz de la organización presentan resultados institucionales
+reutilizables construidos sobre esas relaciones.
 
 Por ejemplo, CIC puede representar publicaciones desde un dump directo de CIC
 Digital o desde los modelos compartidos de `dspacedb`. Ninguna representación
@@ -20,13 +27,16 @@ reemplaza silenciosamente a la otra.
 ## Responsabilidades
 
 - `03_dm` representa sistemas fuente de manera reutilizable entre instituciones.
-- `04_org` aplica el alcance y las reglas de una institución sobre una fuente explícita.
+- `04_org` aplica el alcance y las reglas de una institución sobre fuentes
+  explícitas y documenta sus correspondencias.
 - `05_analytics` elige qué representaciones utilizar para una pregunta o entrega concreta.
 
 Un modelo de `04_org` puede depender de un modelo reutilizable de `03_dm` o,
 cuando se trabaja con una fuente institucional directa, de su esquema `ldg`.
-Esa decisión debe quedar visible en la carpeta, el nombre del modelo y su
-`schema.yml`.
+Esa decisión debe quedar visible en `sources`, el nombre del modelo y su
+`schema.yml`. Los modelos de `integration` deben conservar las entidades de
+origen, la regla aplicada y la evidencia necesaria para auditar la
+correspondencia.
 
 ## Contratos y procedencia
 

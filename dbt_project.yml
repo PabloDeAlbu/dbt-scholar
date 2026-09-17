@@ -153,24 +153,28 @@ models:
       unlp:
         +schema: unlp
         +tags: [unlp]
-        googlescholar:
-          +schema: unlp_googlescholar
-          +tags: [unlp, googlescholar]
-        openalex:
-          +schema: unlp_openalex
-          +tags: [unlp, openalex]
-        openaire:
-          +schema: unlp_openaire
-          +tags: [unlp, openaire]
-        sedici:
-          +schema: unlp_sedici
-          +tags: [unlp, sedici]
-        sedicidb:
-          +schema: unlp_sedicidb
-          +tags: [unlp, sedicidb]
-        vocsedici:
+        sources:
+          googlescholar:
+            +schema: unlp_googlescholar
+            +tags: [unlp, googlescholar]
+          openalex:
+            +schema: unlp_openalex
+            +tags: [unlp, openalex]
+          openaire:
+            +schema: unlp_openaire
+            +tags: [unlp, openaire]
+          sedici:
+            +schema: unlp_sedici
+            +tags: [unlp, sedici]
+          sedicidb:
+            +schema: unlp_sedicidb
+            +tags: [unlp, sedicidb]
+          vocsedici:
+            +schema: unlp
+            +tags: [unlp, vocsedici]
+        integration:
           +schema: unlp
-          +tags: [unlp, vocsedici]
+          +tags: [unlp, integration]
     04_viz:
       core:
         audit:

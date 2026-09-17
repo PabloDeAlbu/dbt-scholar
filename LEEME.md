@@ -16,14 +16,14 @@ modelos reutilizables y salidas analíticas.
 
 Los esquemas físicos son generados según la capa. Por ejemplo:
 
-- `models/04_org/unlp/sedicidb` se materializa en `dm_unlp_sedicidb`.
+- `models/04_org/unlp/sources/sedicidb` se materializa en `dm_unlp_sedicidb`.
 - `models/05_analytics/unlp/sedici/revistas` se materializa en
   `analytics_unlp_sedici_revistas`.
 
 ## Fuentes institucionales
 
 La carga local, el modelado y la construcción de la base de SEDICI se describen
-en la [guía de los modelos de SEDICI](models/04_org/unlp/sedicidb/LEEME.md).
+en la [guía de los modelos de SEDICI](models/04_org/unlp/sources/sedicidb/LEEME.md).
 
 ## Exportar un modelo a CSV
 
