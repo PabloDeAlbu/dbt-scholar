@@ -1,0 +1,390 @@
+version: 2
+
+models:
+  - name: fct_unlp_sedicidb_publication_external_coverage
+    description: >
+      Cobertura de cada ítem de SEDICI en OpenAlex y OpenAIRE. Distingue la
+      existencia de correspondencias exactas, su unicidad y la confirmación
+      entre las dos fuentes externas, sin asignar todavía una identidad
+      canónica común a las publicaciones.
+    config:
+      meta:
+        organization: unlp
+        source_systems: [sedicidb, openalex, openaire]
+        model_role: coverage_fact
+        grain: item_id
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: unlp_external_coverage_openalex_count_flag
+          expression: "has_openalex_match = (openalex_match_count > 0)"
+      - dbt_utils.expression_is_true:
+          name: unlp_external_coverage_openaire_count_flag
+          expression: "has_openaire_match = (openaire_match_count > 0)"
+    columns:
+      - name: item_id
+        description: Identificador del ítem en la base de datos de SEDICI.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('fct_unlp_sedicidb_item_publication')
+              field: item_id
+      - name: has_openalex_match
+        description: Indica si existe al menos una correspondencia exacta con OpenAlex.
+        data_tests: [not_null]
+      - name: openalex_match_count
+        description: Cantidad de works de OpenAlex relacionados con el ítem.
+        data_tests: [not_null]
+      - name: has_unique_openalex_match
+        description: Indica si la relación SEDICI–OpenAlex es unívoca en ambos sentidos.
+        data_tests: [not_null]
+      - name: work_hk
+        description: Clave del work OpenAlex cuando la correspondencia es unívoca.
+      - name: work_id
+        description: Identificador canónico OpenAlex cuando la correspondencia es unívoca.
+      - name: has_openaire_match
+        description: Indica si existe al menos una correspondencia exacta con OpenAIRE.
+        data_tests: [not_null]
+      - name: openaire_match_count
+        description: Cantidad de productos OpenAIRE relacionados con el ítem.
+        data_tests: [not_null]
+      - name: has_unique_openaire_match
+        description: Indica si la relación SEDICI–OpenAIRE es unívoca en ambos sentidos.
+        data_tests: [not_null]
+      - name: researchproduct_hk
+        description: Clave del producto OpenAIRE cuando la correspondencia es unívoca.
+      - name: researchproduct_id
+        description: Identificador canónico OpenAIRE cuando la correspondencia es unívoca.
+      - name: external_pair_status
+        description: >
+          Estado de confirmación entre OpenAlex y OpenAIRE para los ítems que
+          poseen correspondencias unívocas con ambas fuentes.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - not_applicable
+                - not_confirmed_by_doi
+                - confirmed_unique
+                - confirmed_ambiguous
+
+  - name: brg_unlp_openalex_openaire_publication
+    description: >
+      Correspondencias entre works de OpenAlex y productos de OpenAIRE mediante
+      DOI exacto normalizado. Mantiene toda la evidencia disponible, señala las
+      correspondencias unívocas y distingue independientemente la inclusión en
+      los lotes recuperados mediante el ROR de la UNLP en cada fuente.
+    config:
+      meta:
+        organization: unlp
+        source_systems: [openalex, openaire]
+        model_role: bridge
+        grain: work_hk + researchproduct_hk + doi
+        matching_rule: exact_normalized_doi
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [work_hk, researchproduct_hk, doi]
+      - dbt_utils.expression_is_true:
+          name: unlp_openalex_openaire_doi_is_normalized
+          expression: "doi = lower(doi) and doi ~ '^10[.][0-9]{4,9}/.+'"
+      - dbt_utils.expression_is_true:
+          name: unlp_openalex_openaire_unique_flag_matches_counts
+          expression: >-
+            is_unique_match = (
+              openalex_match_count = 1
+              and openaire_match_count = 1
+            )
+      - dbt_utils.expression_is_true:
+          name: openalex_openaire_openalex_ror_flag
+          expression: >-
+            is_unlp_ror_work = (
+              openalex_unlp_last_extract_datetime is not null
+            )
+      - dbt_utils.expression_is_true:
+          name: openalex_openaire_openaire_ror_flag
+          expression: >-
+            is_unlp_ror_product = (
+              openaire_unlp_last_extract_datetime is not null
+            )
+    columns:
+      - name: work_hk
+        description: Clave del work en el Data Vault de OpenAlex.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('fct_openalex_work_publication')
+              field: work_hk
+      - name: work_id
+        description: Identificador canónico del work en OpenAlex.
+        data_tests: [not_null]
+      - name: doi_hk
+        description: Clave del DOI en el Data Vault de OpenAlex.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('hub_openalex_doi')
+              field: doi_hk
+      - name: openalex_doi_raw
+        description: DOI tal como fue conservado por OpenAlex.
+        data_tests: [not_null]
+      - name: doi
+        description: DOI normalizado usado para la correspondencia exacta.
+        data_tests: [not_null]
+      - name: researchproduct_hk
+        description: Clave del producto de investigación en el Data Vault de OpenAIRE.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('fct_openaire_researchproduct_publication')
+              field: researchproduct_hk
+      - name: researchproduct_id
+        description: Identificador canónico del producto en OpenAIRE.
+        data_tests: [not_null]
+      - name: openaire_doi_raw
+        description: Valores DOI originales conservados por OpenAIRE.
+        data_tests: [not_null]
+      - name: openaire_doi_observation_count
+        description: Cantidad de claves PID OpenAIRE agrupadas en el DOI normalizado.
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 1"
+      - name: openalex_match_count
+        description: Cantidad de productos OpenAIRE relacionados con el work OpenAlex.
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 1"
+      - name: openaire_match_count
+        description: Cantidad de works OpenAlex relacionados con el producto OpenAIRE.
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 1"
+      - name: is_unique_match
+        description: Indica si la correspondencia es unívoca en ambos sentidos.
+        data_tests: [not_null]
+      - name: is_unlp_ror_work
+        description: Indica si el work integra el lote OpenAlex recuperado por el ROR UNLP.
+        data_tests: [not_null]
+      - name: openalex_unlp_first_extract_datetime
+        description: Primera extracción del work en el lote ROR UNLP de OpenAlex.
+      - name: openalex_unlp_last_extract_datetime
+        description: Última extracción del work en el lote ROR UNLP de OpenAlex.
+      - name: is_unlp_ror_product
+        description: Indica si el producto integra el lote OpenAIRE recuperado por el ROR UNLP.
+        data_tests: [not_null]
+      - name: openaire_unlp_first_extract_datetime
+        description: Primera extracción del producto en el lote ROR UNLP de OpenAIRE.
+      - name: openaire_unlp_last_extract_datetime
+        description: Última extracción del producto en el lote ROR UNLP de OpenAIRE.
+      - name: match_rule
+        description: Regla determinística utilizada para establecer la correspondencia.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [doi_exact]
+
+  - name: brg_unlp_sedicidb_openalex_publication
+    description: >
+      Correspondencias entre ítems de SEDICI y works de OpenAlex mediante DOI
+      exacto normalizado. Mantiene todas las correspondencias, conserva la
+      evidencia del DOI en ambas fuentes y señala cuáles son unívocas. También
+      distingue los works incluidos en el lote recuperado mediante el ROR de
+      la UNLP.
+    config:
+      meta:
+        organization: unlp
+        source_systems: [sedicidb, openalex]
+        model_role: bridge
+        grain: item_id + work_hk + doi
+        matching_rule: exact_normalized_doi
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_id, work_hk, doi]
+      - dbt_utils.expression_is_true:
+          name: unlp_sedicidb_openalex_doi_is_normalized
+          expression: "doi = lower(doi) and doi ~ '^10[.][0-9]{4,9}/.+'"
+      - dbt_utils.expression_is_true:
+          name: unlp_sedicidb_openalex_unique_flag_matches_counts
+          expression: >-
+            is_unique_match = (
+              sedici_match_count = 1
+              and openalex_match_count = 1
+            )
+      - dbt_utils.expression_is_true:
+          name: unlp_sedicidb_openalex_ror_flag_matches_extract_context
+          expression: >-
+            is_unlp_ror_work = (
+              unlp_last_extract_datetime is not null
+            )
+    columns:
+      - name: item_id
+        description: Identificador del ítem en la base de datos de SEDICI.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('fct_unlp_sedicidb_item_publication')
+              field: item_id
+      - name: doi
+        description: DOI normalizado usado para la correspondencia exacta.
+        data_tests: [not_null]
+      - name: sedici_metadatafields
+        description: Metadatafields de SEDICI que contienen el DOI, unidos con `|`.
+        data_tests: [not_null]
+      - name: sedici_doi_observation_count
+        description: Cantidad de observaciones de metadatos SEDICI que contienen el DOI.
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 1"
+      - name: work_hk
+        description: Clave del work en el Data Vault de OpenAlex.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('fct_openalex_work_publication')
+              field: work_hk
+      - name: work_id
+        description: Identificador canónico del work en OpenAlex.
+        data_tests: [not_null]
+      - name: doi_hk
+        description: Clave del DOI en el Data Vault de OpenAlex.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('hub_openalex_doi')
+              field: doi_hk
+      - name: openalex_doi_raw
+        description: DOI tal como fue conservado por OpenAlex.
+        data_tests: [not_null]
+      - name: sedici_match_count
+        description: Cantidad de works OpenAlex relacionados con el ítem SEDICI.
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 1"
+      - name: openalex_match_count
+        description: Cantidad de ítems SEDICI relacionados con el work OpenAlex.
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 1"
+      - name: is_unique_match
+        description: Indica si la correspondencia es unívoca en ambos sentidos.
+        data_tests: [not_null]
+      - name: is_unlp_ror_work
+        description: Indica si el work integra el lote OpenAlex recuperado mediante el ROR UNLP.
+        data_tests: [not_null]
+      - name: unlp_first_extract_datetime
+        description: Primera extracción del work dentro del lote definido por el ROR UNLP.
+      - name: unlp_last_extract_datetime
+        description: Última extracción del work dentro del lote definido por el ROR UNLP.
+      - name: match_rule
+        description: Regla determinística utilizada para establecer la correspondencia.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [doi_exact]
+
+  - name: brg_unlp_sedicidb_openaire_publication
+    description: >
+      Correspondencias entre ítems de SEDICI y productos de OpenAIRE mediante
+      el handle institucional conservado al final de `original_id`. Mantiene
+      todas las correspondencias exactas y señala cuáles son unívocas. También
+      distingue los productos incluidos en el lote recuperado mediante el ROR
+      de la UNLP.
+    config:
+      meta:
+        organization: unlp
+        source_systems: [sedicidb, openaire]
+        model_role: bridge
+        grain: item_id + researchproduct_hk + handle
+        matching_rule: exact_handle_from_openaire_original_id
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - item_id
+            - researchproduct_hk
+            - handle
+      - dbt_utils.expression_is_true:
+          name: unlp_sedicidb_openaire_handle_matches_original_id
+          expression: "handle = substring(original_id from '(10915/[0-9]+)$')"
+      - dbt_utils.expression_is_true:
+          name: unlp_sedicidb_openaire_unique_flag_matches_counts
+          expression: >-
+            is_unique_match = (
+              sedici_match_count = 1
+              and openaire_match_count = 1
+            )
+      - dbt_utils.expression_is_true:
+          name: unlp_sedicidb_openaire_ror_flag_matches_extract_context
+          expression: >-
+            is_unlp_ror_product = (
+              unlp_last_extract_datetime is not null
+            )
+    columns:
+      - name: item_id
+        description: Identificador del ítem en la base de datos de SEDICI.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('fct_unlp_sedicidb_item_publication')
+              field: item_id
+
+      - name: handle
+        description: Handle SEDICI normalizado con la forma `10915/...`.
+        data_tests: [not_null]
+
+      - name: researchproduct_hk
+        description: Clave del producto de investigación en el Data Vault de OpenAIRE.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('fct_openaire_researchproduct_publication')
+              field: researchproduct_hk
+
+      - name: researchproduct_id
+        description: Identificador canónico del producto de investigación en OpenAIRE.
+        data_tests: [not_null]
+
+      - name: original_id
+        description: Identificador original informado por OpenAIRE que conserva el handle de SEDICI.
+        data_tests: [not_null]
+
+      - name: sedici_match_count
+        description: Cantidad de productos OpenAIRE relacionados con el ítem de SEDICI.
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 1"
+
+      - name: openaire_match_count
+        description: Cantidad de ítems SEDICI relacionados con el producto OpenAIRE.
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 1"
+
+      - name: is_unique_match
+        description: Indica si la correspondencia es unívoca en ambos sentidos.
+        data_tests: [not_null]
+
+      - name: is_unlp_ror_product
+        description: >
+          Indica si el producto integra el lote OpenAIRE recuperado mediante
+          el ROR de la UNLP.
+        data_tests: [not_null]
+
+      - name: unlp_first_extract_datetime
+        description: Primera extracción del producto dentro del lote definido por el ROR UNLP.
+
+      - name: unlp_last_extract_datetime
+        description: Última extracción del producto dentro del lote definido por el ROR UNLP.
+
+      - name: match_rule
+        description: Regla determinística utilizada para establecer la correspondencia.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [handle_from_original_id]

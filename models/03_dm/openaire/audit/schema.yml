@@ -51,8 +51,9 @@ models:
       - name: acronym
         description: OpenAIRE acronym.
       - name: extract_datetime
-        data_tests:
-          - not_null
+        description: >
+          Fecha de extracción informada por el lote de origen. Puede ser nula en
+          cargas históricas que solo conservaron la fecha de carga.
       - name: load_datetime
         data_tests:
           - not_null

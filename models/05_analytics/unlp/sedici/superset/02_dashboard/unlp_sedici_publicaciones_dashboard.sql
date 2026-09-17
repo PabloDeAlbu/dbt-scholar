@@ -3,6 +3,11 @@
 WITH publicacion AS (
     SELECT *
     FROM {{ ref('unlp_sedici_publicacion_digitalizacion') }}
+),
+
+cobertura_externa AS (
+    SELECT *
+    FROM {{ ref('unlp_sedici_publicacion_cobertura_externa') }}
 )
 
 SELECT
@@ -27,5 +32,12 @@ SELECT
     owning_root_child_community_title AS comunidad_principal,
     owning_community_title AS comunidad,
     owning_collection_title AS coleccion,
-    owning_community_path_titles AS ruta_en_sedici
+    owning_community_path_titles AS ruta_en_sedici,
+    cobertura_externa.en_openalex,
+    cobertura_externa.correspondencia_openalex,
+    cobertura_externa.en_openaire,
+    cobertura_externa.correspondencia_openaire,
+    cobertura_externa.confirmacion_entre_fuentes_externas
 FROM publicacion
+INNER JOIN cobertura_externa
+    USING (item_id)

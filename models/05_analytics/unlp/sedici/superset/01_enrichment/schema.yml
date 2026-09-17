@@ -1,6 +1,59 @@
 version: 2
 
 models:
+  - name: unlp_sedici_publicacion_cobertura_externa
+    description: >
+      Cobertura de las publicaciones de SEDICI en OpenAlex y OpenAIRE,
+      presentada con categorías aptas para su lectura en el dashboard. La
+      correspondencia con OpenAlex utiliza DOI; la correspondencia con
+      OpenAIRE utiliza el handle conservado como identificador original.
+    config:
+      meta:
+        organization: unlp
+        source_systems: [sedicidb, openalex, openaire]
+        model_role: analytical_enrichment
+        grain: item
+    columns:
+      - name: item_id
+        description: Identificador interno del ítem usado para vincular el enriquecimiento.
+        data_tests: [not_null, unique]
+      - name: en_openalex
+        description: Indica si se encontró alguna correspondencia exacta en OpenAlex.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Sí', 'No']
+      - name: correspondencia_openalex
+        description: Unicidad de la correspondencia entre SEDICI y OpenAlex.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Unívoca', 'Ambigua', 'No encontrada']
+      - name: en_openaire
+        description: Indica si se encontró alguna correspondencia exacta en OpenAIRE.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Sí', 'No']
+      - name: correspondencia_openaire
+        description: Unicidad de la correspondencia entre SEDICI y OpenAIRE.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Unívoca', 'Ambigua', 'No encontrada']
+      - name: confirmacion_entre_fuentes_externas
+        description: >
+          Confirmación por DOI entre OpenAlex y OpenAIRE cuando el ítem posee
+          una correspondencia unívoca con ambas fuentes.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - 'Confirmada de forma unívoca'
+                - 'Confirmada con ambigüedad'
+                - 'No confirmada por DOI'
+                - 'No aplica'
+
   - name: unlp_sedici_publicacion_digitalizacion
     description: >
       Publicaciones visibles de SEDICI enriquecidas con evidencia y posibles

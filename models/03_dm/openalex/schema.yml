@@ -114,6 +114,44 @@ models:
       - name: resource_type_uri
         description: URI COAR asociada al tipo de work cuando existe mapeo.
 
+  - name: brg_openalex_work_doi
+    description: >
+      Relación entre works y DOI historizados por OpenAlex, a grano una fila
+      por vínculo. Conserva el valor original del Hub y ofrece una versión
+      normalizada para correspondencias exactas con otras fuentes.
+    config:
+      tags: [dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [work_hk, doi_hk]
+      - dbt_utils.expression_is_true:
+          name: openalex_work_doi_is_normalized
+          expression: "doi = lower(doi) and doi ~ '^10[.][0-9]{4,9}/.+'"
+    columns:
+      - name: work_doi_hk
+        description: Clave hash del vínculo entre el work y el DOI.
+        data_tests: [not_null, unique]
+      - name: work_hk
+        description: Clave hash del work de OpenAlex.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('fct_openalex_work_publication')
+              field: work_hk
+      - name: doi_hk
+        description: Clave hash del DOI de OpenAlex.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('hub_openalex_doi')
+              field: doi_hk
+      - name: doi_raw
+        description: DOI conservado por el Hub de OpenAlex, normalmente como URL.
+        data_tests: [not_null]
+      - name: doi
+        description: DOI normalizado en minúsculas, sin URL ni puntuación final.
+        data_tests: [not_null]
+
   - name: dim_openalex_work_pid
     description: >
       Perfil de PIDs por work OpenAlex, con identificadores normalizados y flags

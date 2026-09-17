@@ -167,6 +167,39 @@ models:
       - name: pid_hk
         data_tests: [not_null]
 
+  - name: brg_openaire_researchproduct_doi
+    description: >
+      Relación entre research products y DOI registrados por OpenAIRE, a grano
+      publicación y DOI normalizado. Conserva los valores originales para
+      auditoría y evita que variantes técnicas dupliquen correspondencias.
+    config:
+      tags: [dm]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [researchproduct_hk, doi]
+      - dbt_utils.expression_is_true:
+          name: openaire_researchproduct_doi_is_normalized
+          expression: "doi = lower(doi) and doi ~ '^10[.][0-9]{4,9}/.+'"
+      - dbt_utils.expression_is_true:
+          expression: "observation_count >= 1"
+    columns:
+      - name: researchproduct_hk
+        description: Clave hash del research product de OpenAIRE.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('fct_openaire_researchproduct_publication')
+              field: researchproduct_hk
+      - name: doi
+        description: DOI normalizado en minúsculas, sin URL ni puntuación final.
+        data_tests: [not_null]
+      - name: doi_raw
+        description: Valores DOI originales agrupados, separados por una barra vertical.
+        data_tests: [not_null]
+      - name: observation_count
+        description: Cantidad de claves PID originales agrupadas en la relación normalizada.
+        data_tests: [not_null]
+
   - name: brg_openaire_researchproduct_pid_stats
     description: Estadísticos de PIDs por research product (conteos y flags por esquema).
     config:

@@ -15,7 +15,7 @@ models:
     config:
       meta:
         organization: unlp
-        source_system: sedicidb
+        source_systems: [sedicidb, openalex, openaire]
         model_role: dashboard_dataset
         grain: handle
         temporal_scope: current_snapshot
@@ -76,3 +76,24 @@ models:
         description: Colección dueña de la publicación.
       - name: ruta_en_sedici
         description: Ruta completa de comunidades de la publicación.
+      - name: en_openalex
+        description: Indica si se encontró una correspondencia exacta en OpenAlex.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Sí', 'No']
+      - name: correspondencia_openalex
+        description: Unicidad de la correspondencia con OpenAlex.
+        data_tests: [not_null]
+      - name: en_openaire
+        description: Indica si se encontró una correspondencia exacta en OpenAIRE.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Sí', 'No']
+      - name: correspondencia_openaire
+        description: Unicidad de la correspondencia con OpenAIRE.
+        data_tests: [not_null]
+      - name: confirmacion_entre_fuentes_externas
+        description: Confirmación de la correspondencia entre OpenAlex y OpenAIRE.
+        data_tests: [not_null]
