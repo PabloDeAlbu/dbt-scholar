@@ -1,0 +1,21 @@
+version: 2
+
+seeds:
+  - name: seed_unlp_persona_referencia
+    description: >
+      Personas de referencia para análisis institucionales de la UNLP. Cada fila
+      reúne los identificadores y variantes de nombre conocidos por quien realiza
+      el análisis; los modelos que la consuman deben conservar la evidencia con
+      la que resuelven cada persona en las fuentes disponibles.
+    columns:
+      - name: nombre
+        description: Nombre de referencia con el que se identifica a la persona.
+        data_tests: [not_null, unique]
+      - name: orcid
+        description: ORCID conocido, cuando está disponible.
+      - name: id_google_scholar
+        description: Identificador público del perfil de Google Scholar, cuando está disponible.
+      - name: autoridad_voc_sedici
+        description: URI de la autoridad de persona en VOC SEDICI, cuando está disponible.
+      - name: variantes_nombre
+        description: Variantes textuales conocidas del nombre, separadas por ` | `.
