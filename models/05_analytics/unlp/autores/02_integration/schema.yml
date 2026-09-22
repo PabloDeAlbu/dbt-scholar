@@ -1,0 +1,32 @@
+version: 2
+
+models:
+  - name: unlp_autor_cruce_sedici_googlescholar
+    description: >
+      Comparación entre publicaciones visibles de SEDICI asociadas con una
+      persona y publicaciones vinculadas con su perfil de Google Scholar.
+      Conserva la regla de cada correspondencia. Una ausencia no demuestra que
+      el documento no esté indexado en Google Scholar.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [persona, item_id]
+    columns:
+      - name: persona
+        data_tests: [not_null]
+      - name: item_id
+        data_tests: [not_null]
+      - name: url_sedici
+        data_tests: [not_null]
+      - name: nivel_confianza
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [alta, media, sin_correspondencia]
+      - name: vinculada_al_perfil
+        data_tests: [not_null]
+      - name: requiere_revision
+        data_tests: [not_null]
+      - name: lookup_url_scholar
+        data_tests: [not_null]
+      - name: busqueda_titulo_scholar
+        data_tests: [not_null]

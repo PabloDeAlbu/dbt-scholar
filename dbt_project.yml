@@ -225,6 +225,9 @@ models:
         googlescholar:
           +schema: unlp_googlescholar
           +tags: [googlescholar]
+        autores:
+          +schema: unlp_autores
+          +tags: [autores]
         organizaciones:
           +schema: unlp_organizaciones
           +tags: [organizaciones]

@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: unlp_autor_publicaciones_sedici
+    description: >
+      Publicaciones de SEDICI asociadas con las personas de referencia. La
+      identidad se resuelve primero contra dim_unlp_author mediante autoridad,
+      ORCID o Google Scholar ID; también se conservan coincidencias exactas con
+      variantes de nombre cuando la observación no posee autoridad.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [persona, item_id]
+    columns:
+      - name: persona
+        data_tests: [not_null]
+      - name: item_id
+        data_tests: [not_null]
+      - name: evidencia_identidad
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [autoridad_voc_sedici, orcid, id_google_scholar]
+      - name: evidencia_publicacion
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [identidad_resuelta, variante_nombre_sin_autoridad]
+      - name: esta_publicada_visible
+        data_tests: [not_null]
+
+  - name: unlp_autor_publicaciones_googlescholar
+    description: >
+      Publicaciones actualmente vinculadas con los perfiles de Google Scholar
+      declarados para las personas de referencia. La pertenencia al perfil no
+      equivale a una evaluación completa de la indexación en Google Scholar.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [persona, id_publicacion_scholar]
+    columns:
+      - name: persona
+        data_tests: [not_null]
+      - name: id_perfil_scholar
+        data_tests: [not_null]
+      - name: id_publicacion_scholar
+        data_tests: [not_null]
+      - name: titulo
+        data_tests: [not_null]
+      - name: fecha_observacion
+        data_tests: [not_null]
