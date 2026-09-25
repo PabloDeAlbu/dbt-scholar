@@ -235,6 +235,9 @@ models:
           +schema: unlp_vocsedici
           +tags: [vocsedici]
         sedici:
+          00_base:
+            +schema: unlp_sedici_base
+            +tags: [sedici, base]
           superset:
             +schema: unlp_sedici_dashboard
             +tags: [sedici, superset]

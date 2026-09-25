@@ -1,0 +1,101 @@
+version: 2
+
+models:
+  - name: unlp_sedici_publicacion_base
+    description: >
+      Publicaciones actualmente archivadas, visibles y no retiradas de SEDICI.
+      Constituye la base común para los casos analíticos de SEDICI.
+    config:
+      meta:
+        organization: unlp
+        source_system: sedicidb
+        model_role: analytical_base
+        grain: item
+        temporal_scope: current_snapshot
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: sedici_publicacion_base_contains_current_visible_items
+          expression: >
+            in_archive is true
+            and withdrawn is false
+            and discoverable is true
+    columns:
+      - name: item_id
+        description: Identificador interno del ítem en la base de SEDICI.
+        data_tests: [not_null, unique]
+
+  - name: unlp_sedici_publicaciones_base_dashboard
+    description: |
+      Los datos provienen del repositorio institucional SEDICI de la
+      Universidad Nacional de La Plata.
+
+      Reúnen las publicaciones actualmente archivadas, visibles y no
+      retiradas, junto con sus fechas, tipos y ubicación en la estructura del
+      repositorio.
+
+      Los nombres y formatos de las columnas están preparados para su
+      exploración en una herramienta de visualización. El modelo no incorpora
+      correspondencias con fuentes externas ni clasificaciones propias de un
+      caso analítico particular.
+    config:
+      meta:
+        organization: unlp
+        source_system: sedicidb
+        model_role: base_dashboard_dataset
+        grain: item
+        temporal_scope: current_snapshot
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: sedici_base_dashboard_handle_url
+          expression: >
+            handle is null
+            or url_handle = 'https://hdl.handle.net/' || handle
+      - dbt_utils.expression_is_true:
+          name: sedici_base_dashboard_publication_url
+          expression: >
+            handle is null
+            or url_publicacion = 'https://sedici.unlp.edu.ar/handle/' || handle
+    columns:
+      - name: item_id
+        description: Identificador interno del ítem en SEDICI.
+        data_tests: [not_null, unique]
+      - name: handle
+        description: Identificador persistente de la publicación.
+      - name: url_handle
+        description: URL de resolución del handle persistente.
+      - name: url_publicacion
+        description: URL pública del recurso en SEDICI.
+      - name: titulo
+        description: Título vigente de la publicación.
+      - name: titulo_truncado
+        description: Título limitado a 50 caracteres y terminado en `...` cuando fue recortado.
+      - name: tipo_publicacion
+        description: Tipo general informado mediante `dc.type`.
+      - name: subtipo_publicacion
+        description: Tipo específico informado mediante `sedici.subtype`.
+      - name: fecha_publicacion
+        description: Fecha de publicación informada en los metadatos del recurso.
+      - name: anio_publicacion
+        description: Año derivado de la fecha de publicación.
+      - name: fecha_ingreso_sedici
+        description: Fecha de ingreso al repositorio informada mediante `dc.date.accessioned`.
+      - name: mes_ingreso_sedici
+        description: Primer día del mes de ingreso, preparado para series temporales.
+      - name: anio_ingreso_sedici
+        description: Año de ingreso del ítem al repositorio.
+      - name: fecha_disponibilidad_sedici
+        description: Fecha de disponibilidad informada mediante `dc.date.available`.
+      - name: mes_disponibilidad_sedici
+        description: Primer día del mes de disponibilidad, preparado para series temporales.
+      - name: anio_disponibilidad_sedici
+        description: Año de disponibilidad del ítem en SEDICI.
+      - name: comunidad_raiz
+        description: Comunidad superior del recorrido del ítem en SEDICI.
+      - name: comunidad_nivel_2
+        description: Comunidad ubicada inmediatamente debajo de la comunidad raíz.
+      - name: comunidad
+        description: Comunidad propietaria de la colección.
+      - name: coleccion
+        description: Colección propietaria del ítem.
+      - name: ruta_en_sedici
+        description: Recorrido de comunidades desde la raíz hasta la colección.
