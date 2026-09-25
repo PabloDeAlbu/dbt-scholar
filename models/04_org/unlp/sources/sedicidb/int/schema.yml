@@ -182,6 +182,29 @@ models:
           - accepted_values:
               values: ['day', 'month', 'year']
 
+  - name: int_unlp_sedicidb_item_dc_date_accessioned
+    description: >
+      Valor vigente de `dc.date.accessioned` a grano una fila por `item_id`.
+      Representa la fecha de ingreso del ítem al repositorio y conserva el
+      valor original, la fecha derivada y su precisión.
+    columns:
+      - name: metadata_value_id
+        description: Identificador de la observación seleccionada.
+        data_tests: [not_null, unique]
+      - name: item_id
+        description: Ítem al que pertenece la fecha de ingreso.
+        data_tests: [not_null, unique]
+      - name: value_raw
+        description: Valor original de `dc.date.accessioned`.
+      - name: value
+        description: Fecha canónica de ingreso al repositorio.
+        data_tests: [not_null]
+      - name: value_precision
+        description: Precisión reconocida en la observación.
+        data_tests:
+          - accepted_values:
+              values: ['day', 'month', 'year']
+
   - name: int_unlp_sedicidb_item_sedici_date_exposure
     description: >
       Valor vigente de `sedici.date.exposure` a grano una fila por `item_id`.

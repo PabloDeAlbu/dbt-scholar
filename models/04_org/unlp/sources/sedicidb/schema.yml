@@ -404,6 +404,12 @@ models:
               values: ['day', 'month', 'year']
       - name: publication_year
         description: Año derivado de `dc_date_issued` para agrupaciones y gráficos.
+      - name: dc_date_accessioned_raw
+        description: Valor válido priorizado de `dc.date.accessioned`.
+      - name: dc_date_accessioned
+        description: >
+          Fecha de ingreso del ítem al repositorio según
+          `dc.date.accessioned`; se utiliza para medir el crecimiento de SEDICI.
       - name: dc_date_available_raw
         description: Valor válido priorizado de `dc.date.available`.
       - name: dc_date_available

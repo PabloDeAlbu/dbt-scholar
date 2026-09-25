@@ -65,6 +65,8 @@ final AS (
         date_issued.value AS dc_date_issued,
         date_issued.value_precision AS dc_date_issued_precision,
         EXTRACT(YEAR FROM date_issued.value)::int AS publication_year,
+        date_accessioned.value_raw AS dc_date_accessioned_raw,
+        date_accessioned.value AS dc_date_accessioned,
         date_available.value_raw AS dc_date_available_raw,
         date_available.value AS dc_date_available,
         exposure.value_raw AS sedici_date_exposure_raw,
@@ -87,6 +89,8 @@ final AS (
     LEFT JOIN {{ ref('int_unlp_sedicidb_item_dc_title') }} AS title
         USING (item_id)
     LEFT JOIN {{ ref('int_unlp_sedicidb_item_dc_date_issued') }} AS date_issued
+        USING (item_id)
+    LEFT JOIN {{ ref('int_unlp_sedicidb_item_dc_date_accessioned') }} AS date_accessioned
         USING (item_id)
     LEFT JOIN {{ ref('int_unlp_sedicidb_item_dc_date_available') }} AS date_available
         USING (item_id)
