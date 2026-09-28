@@ -84,6 +84,21 @@ classified AS (
         END AS match_status,
         openaire_match_count = 1 AS matched_by_unique_original_id,
         openaire_citation_count IS NOT NULL AS has_openaire_citation_data,
+        1::integer AS publication_count,
+        CASE WHEN openaire_match_count = 1 THEN 1 ELSE 0 END
+            AS matched_publication_count,
+        CASE
+            WHEN openaire_match_count = 1
+             AND openaire_citation_count IS NOT NULL
+                THEN 1
+            ELSE 0
+        END AS publication_with_citation_data_count,
+        CASE
+            WHEN openaire_match_count = 1
+             AND openaire_citation_count > 0
+                THEN 1
+            ELSE 0
+        END AS cited_publication_count,
         CASE
             WHEN openaire_match_count <> 1
                 THEN 'SIN CORRESPONDENCIA ÚNICA'
@@ -123,6 +138,10 @@ final AS (
         openaire_citation_class,
         has_openaire_citation_data,
         openaire_citation_status,
+        publication_count,
+        matched_publication_count,
+        publication_with_citation_data_count,
+        cited_publication_count,
         openaire_citation_count
     FROM classified
 )

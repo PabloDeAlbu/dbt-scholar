@@ -44,6 +44,15 @@ models:
               and openaire_citation_count > 0
               and openaire_citation_status = 'CON CITAS REGISTRADAS'
               and has_openaire_citation_data)
+      - dbt_utils.expression_is_true:
+          name: conicet_oai_openaire_additive_measures_are_consistent
+          expression: >
+            publication_count = 1
+            and matched_publication_count between 0 and publication_count
+            and publication_with_citation_data_count
+              between 0 and matched_publication_count
+            and cited_publication_count
+              between 0 and publication_with_citation_data_count
     columns:
       - name: record_id
         description: Identificador OAI del registro en CONICET Digital.
@@ -109,5 +118,23 @@ models:
                 - SIN DATOS DE CITAS
                 - SIN CITAS REGISTRADAS
                 - CON CITAS REGISTRADAS
+      - name: publication_count
+        description: Medida aditiva unitaria para contar publicaciones OAI.
+        data_tests: [not_null]
+      - name: matched_publication_count
+        description: >
+          Medida aditiva que vale uno cuando la publicación posee una
+          correspondencia única con OpenAIRE y cero en los demás casos.
+        data_tests: [not_null]
+      - name: publication_with_citation_data_count
+        description: >
+          Medida aditiva que vale uno cuando OpenAIRE informó un recuento de
+          citas para la publicación vinculada y cero en los demás casos.
+        data_tests: [not_null]
+      - name: cited_publication_count
+        description: >
+          Medida aditiva que vale uno cuando OpenAIRE informó al menos una cita
+          para la publicación vinculada y cero en los demás casos.
+        data_tests: [not_null]
       - name: openaire_citation_count
         description: Recuento de citas informado por OpenAIRE para el producto vinculado.
