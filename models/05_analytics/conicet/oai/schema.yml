@@ -22,9 +22,15 @@ models:
               and publication_type_group = 'OTRAS TIPOLOGÍAS'
               and not is_main_publication_type)
     columns:
+      - name: record_hk
+        description: Clave técnica del registro OAI, conservada para integrar otras fuentes.
+        data_tests: [not_null, unique]
       - name: record_id
         description: Identificador del registro dentro del repositorio OAI.
         data_tests: [not_null, unique]
+      - name: valid_date_issued
+        description: Indica si la fecha de publicación cumple las reglas de validez del modelo OAI.
+        data_tests: [not_null]
       - name: extract_date
         description: Fecha en que el registro fue recuperado mediante OAI-PMH.
         data_tests: [not_null]
@@ -46,5 +52,7 @@ models:
         data_tests: [not_null]
       - name: access_right
         description: Condición de acceso normalizada en español.
+      - name: dc_identifier_uri
+        description: URI institucional de la publicación en CONICET Digital.
       - name: doi
         description: DOI principal de la publicación, cuando está disponible.

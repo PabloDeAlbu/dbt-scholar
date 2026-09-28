@@ -1,73 +1,113 @@
 version: 2
 
 models:
-  - name: publication_openaire_enrichment
+  - name: conicet_oai_openaire_publication
     description: >
-      Base de publicaciones OAI de CONICET enriquecida mediante una correspondencia
-      única por identificador OAI original con productos de investigación de OpenAIRE.
-      Su grano es un registro OAI de CONICET.
+      Publicaciones de CONICET Digital enriquecidas con OpenAIRE mediante una
+      correspondencia exacta entre el identificador OAI institucional y el
+      identificador original informado por OpenAIRE. Conserva una fila por
+      registro OAI, incluidos aquellos sin una correspondencia única.
+    data_tests:
+      - dbt_utils.equal_rowcount:
+          compare_model: ref('conicet_oai_record_publication')
+      - dbt_utils.expression_is_true:
+          name: conicet_oai_openaire_match_status_is_consistent
+          expression: >
+            (openaire_match_count = 0
+              and match_status = 'SIN CORRESPONDENCIA EXACTA'
+              and not matched_by_unique_original_id)
+            or (openaire_match_count = 1
+              and match_status = 'CON CORRESPONDENCIA ÚNICA'
+              and matched_by_unique_original_id
+              and openaire_researchproduct_id is not null)
+            or (openaire_match_count > 1
+              and match_status = 'CORRESPONDENCIA AMBIGUA'
+              and not matched_by_unique_original_id)
+      - dbt_utils.expression_is_true:
+          name: conicet_oai_openaire_citation_count_is_nonnegative
+          expression: "openaire_citation_count is null or openaire_citation_count >= 0"
+      - dbt_utils.expression_is_true:
+          name: conicet_oai_openaire_citation_status_is_consistent
+          expression: >
+            (not matched_by_unique_original_id
+              and openaire_citation_status = 'SIN CORRESPONDENCIA ÚNICA'
+              and not has_openaire_citation_data)
+            or (matched_by_unique_original_id
+              and openaire_citation_count is null
+              and openaire_citation_status = 'SIN DATOS DE CITAS'
+              and not has_openaire_citation_data)
+            or (matched_by_unique_original_id
+              and openaire_citation_count = 0
+              and openaire_citation_status = 'SIN CITAS REGISTRADAS'
+              and has_openaire_citation_data)
+            or (matched_by_unique_original_id
+              and openaire_citation_count > 0
+              and openaire_citation_status = 'CON CITAS REGISTRADAS'
+              and has_openaire_citation_data)
     columns:
       - name: record_id
-        data_tests: [not_null, unique]
-      - name: matched_by_unique_original_id
-        description: Indica si el identificador OAI resolvió un único producto en OpenAIRE.
+        description: Identificador OAI del registro en CONICET Digital.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('conicet_oai_record_publication')
+              field: record_id
+      - name: institutional_uri
+        description: URI de la publicación en CONICET Digital.
+      - name: publication_date
+        description: Fecha de publicación cuando cumple las reglas de validez del modelo OAI.
+      - name: publication_type
+        description: Tipo documental normalizado a partir del registro OAI institucional.
+      - name: publication_type_group
+        description: Agrupación analítica del tipo documental para su presentación.
         data_tests: [not_null]
+      - name: subject_area
+        description: Área temática informada por el registro OAI de CONICET Digital.
+      - name: match_status
+        description: Estado de la correspondencia exacta con OpenAIRE.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - CON CORRESPONDENCIA ÚNICA
+                - CORRESPONDENCIA AMBIGUA
+                - SIN CORRESPONDENCIA EXACTA
+      - name: matched_by_unique_original_id
+        description: >
+          Indica si el identificador OAI institucional resolvió un único producto
+          de investigación en OpenAIRE.
+        data_tests: [not_null]
+      - name: openaire_match_count
+        description: Cantidad de productos OpenAIRE encontrados por identificador original exacto.
+        data_tests: [not_null]
+      - name: openaire_match_rule
+        description: Regla que produjo la correspondencia; actualmente `original_id_exact`.
+      - name: openaire_original_id
+        description: Identificador original mediante el cual OpenAIRE referencia el registro OAI.
+      - name: openaire_researchproduct_id
+        description: Identificador canónico del producto de investigación en OpenAIRE.
+      - name: openaire_first_load_datetime
+        description: Primera fecha y hora de incorporación del producto OpenAIRE al DW.
+      - name: openaire_last_load_datetime
+        description: Última fecha y hora de incorporación observada para el producto OpenAIRE en el DW.
+      - name: openaire_load_date
+        description: >
+          Fecha de la última incorporación observada del producto OpenAIRE al DW.
+      - name: has_openaire_citation_data
+        description: Indica si OpenAIRE informó un recuento de citas para el producto relacionado.
+        data_tests: [not_null]
+      - name: openaire_citation_status
+        description: >
+          Clasifica cada publicación según su correspondencia con OpenAIRE, la
+          disponibilidad del recuento de citas y la existencia de citas registradas.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - SIN CORRESPONDENCIA ÚNICA
+                - SIN DATOS DE CITAS
+                - SIN CITAS REGISTRADAS
+                - CON CITAS REGISTRADAS
       - name: openaire_citation_count
         description: Recuento de citas informado por OpenAIRE para el producto vinculado.
-      - name: openaire_last_load_datetime
-        description: Última fecha de carga del producto OpenAIRE en el Data Warehouse.
-
-  - name: publication_openaire_match_summary
-    description: >
-      Cobertura de correspondencia entre registros OAI de CONICET y productos de
-      OpenAIRE, con disponibilidad del recuento de citas en cada grupo.
-    columns:
-      - name: match_status
-        data_tests: [not_null, unique]
-      - name: publication_count
-        data_tests: [not_null]
-      - name: publication_share_pct
-        data_tests: [not_null]
-      - name: publication_with_citation_count
-        data_tests: [not_null]
-
-  - name: publication_openaire_top_cited
-    description: >
-      Diez publicaciones de CONICET con mayor recuento de citas informado por
-      OpenAIRE entre las correspondencias únicas por identificador OAI.
-    columns:
-      - name: citation_rank
-        data_tests: [not_null, unique]
-      - name: record_id
-        data_tests: [not_null, unique]
-      - name: openaire_citation_count
-        data_tests: [not_null]
-
-  - name: publication_openaire_citation_by_subject_area
-    description: >
-      Recuento acumulado de citas informado por OpenAIRE para las publicaciones
-      OAI de CONICET enlazadas de manera única por identificador original, agrupado
-      por el área temática del registro institucional. Su grano es un área temática.
-    columns:
-      - name: subject_area
-        description: Área temática informada por el registro OAI de CONICET.
-        data_tests: [not_null, unique]
-      - name: matched_publication_count
-        description: Cantidad de publicaciones enlazadas de manera única con OpenAIRE.
-        data_tests: [not_null]
-      - name: publication_with_citation_data_count
-        description: Cantidad de publicaciones para las que OpenAIRE informó un recuento de citas.
-        data_tests: [not_null]
-      - name: cited_publication_count
-        description: Cantidad de publicaciones con un recuento de citas mayor que cero.
-        data_tests: [not_null]
-      - name: openaire_citation_count
-        description: Suma del recuento de citas informado por OpenAIRE.
-        data_tests: [not_null]
-      - name: openaire_citation_share_pct
-        description: Participación porcentual del área en el total acumulado de citas.
-        data_tests: [not_null]
-      - name: openaire_average_citation_count
-        description: >
-          Promedio de citas entre las publicaciones para las que OpenAIRE informó
-          un recuento; no interpreta los valores nulos como cero.

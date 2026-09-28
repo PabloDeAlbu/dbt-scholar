@@ -5,21 +5,26 @@
 
 {% set main_publication_type_share_threshold_pct = 0.5 %}
 
+-- ¿Qué publicaciones componen el universo OAI de CONICET Digital?
 WITH base AS (
     SELECT
+        record_hk,
         record_id,
         title,
         date_issued,
+        valid_date_issued,
         extract_datetime::date AS extract_date,
         publication_type_label_es AS publication_type,
         publication_type_uri,
         access_right_label_es AS access_right,
+        dc_identifier_uri,
         dc_relation_doi AS doi,
         subject_area,
         subject_subarea
     FROM {{ ref('fct_conicet_oai_record_publication') }}
 ),
 
+-- ¿Cuántas publicaciones corresponden a cada tipo documental normalizado?
 publication_type_count AS (
     SELECT
         publication_type,
@@ -29,6 +34,7 @@ publication_type_count AS (
     GROUP BY publication_type, publication_type_uri
 ),
 
+-- ¿Qué participación tiene cada tipo documental en el corpus completo?
 publication_type_with_share AS (
     SELECT
         *,
@@ -40,6 +46,7 @@ publication_type_with_share AS (
     FROM publication_type_count
 ),
 
+-- ¿Qué tipos se muestran individualmente y cuáles se agrupan para su presentación?
 publication_type_classification AS (
     SELECT
         *,
@@ -57,6 +64,7 @@ publication_type_classification AS (
     FROM publication_type_with_share
 ),
 
+-- ¿Qué atributos quedan disponibles para analizar cada publicación de CONICET Digital?
 final AS (
     SELECT
         base.*,
