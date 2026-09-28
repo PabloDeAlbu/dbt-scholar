@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: conicet_oai_record_publication
+    description: >
+      Dataset principal del caso analítico de CONICET Digital. Conserva una fila
+      por registro OAI y agrega una clasificación estable de tipos documentales
+      calculada sobre la participación de cada tipo en el corpus completo.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: conicet_oai_publication_type_group_is_consistent
+          expression: >
+            (publication_type_uri is null
+              and publication_type_group = 'SIN TIPO NORMALIZADO'
+              and not is_main_publication_type)
+            or (publication_type_uri is not null
+              and publication_type_share_pct >= 0.5
+              and publication_type_group = publication_type
+              and is_main_publication_type)
+            or (publication_type_uri is not null
+              and publication_type_share_pct < 0.5
+              and publication_type_group = 'OTRAS TIPOLOGÍAS'
+              and not is_main_publication_type)
+    columns:
+      - name: record_id
+        description: Identificador del registro dentro del repositorio OAI.
+        data_tests: [not_null, unique]
+      - name: extract_date
+        description: Fecha en que el registro fue recuperado mediante OAI-PMH.
+        data_tests: [not_null]
+      - name: publication_type
+        description: Tipo documental normalizado en español.
+      - name: publication_type_uri
+        description: URI del tipo documental normalizado mediante COAR Resource Types.
+      - name: publication_type_share_pct
+        description: Porcentaje del corpus completo correspondiente al tipo documental.
+        data_tests: [not_null]
+      - name: publication_type_group
+        description: >
+          Etiqueta estable para la presentación. Conserva individualmente los tipos
+          con al menos 0,5 % del corpus, agrupa los restantes como OTRAS TIPOLOGÍAS
+          y mantiene separados los registros sin tipo normalizado.
+        data_tests: [not_null]
+      - name: is_main_publication_type
+        description: Indica si el tipo representa al menos el 0,5 % del corpus completo.
+        data_tests: [not_null]
+      - name: access_right
+        description: Condición de acceso normalizada en español.
+      - name: doi
+        description: DOI principal de la publicación, cuando está disponible.
