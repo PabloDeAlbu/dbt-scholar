@@ -5,6 +5,7 @@ WITH base AS (
         record_id,
         title,
         date_issued,
+        extract_datetime::date AS extract_date,
         publication_type_label_es AS publication_type,
         access_right_label_es AS access_right,
         dc_relation_doi AS doi,

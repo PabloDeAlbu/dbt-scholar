@@ -10,6 +10,9 @@ models:
       - name: record_id
         description: Identificador del registro dentro del repositorio OAI.
         data_tests: [not_null, unique]
+      - name: extract_date
+        description: Fecha en que el registro fue recuperado mediante OAI-PMH.
+        data_tests: [not_null]
       - name: publication_type
         description: Tipo documental normalizado en español.
       - name: access_right
