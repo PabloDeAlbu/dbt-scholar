@@ -1,0 +1,135 @@
+version: 2
+
+models:
+  - name: unlp_sedici_dal_issue_publicacion
+    description: >
+      Correspondencia entre los issues del snapshot de Redmine y las
+      publicaciones visibles de SEDICI. El único criterio de vinculación es el
+      handle extraído de `Link al recurso publicado`; no utiliza títulos ni
+      otras coincidencias aproximadas. Conserva también los issues sin URL o
+      sin correspondencia.
+    config:
+      meta:
+        organization: unlp
+        source_systems: [redmine, sedicidb]
+        model_role: analytical_enrichment
+        grain: extract_date, issue_id
+        matching_rule: exact_handle_from_published_resource_url
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [extract_date, issue_id]
+      - dbt_utils.expression_is_true:
+          name: dal_issue_match_flag_consistent
+          expression: "has_sedici_match = (sedici_item_id is not null)"
+      - dbt_utils.expression_is_true:
+          name: dal_issue_handle_count_consistent
+          expression: >
+            (sedici_handle is null and issues_per_sedici_handle = 0)
+            or
+            (sedici_handle is not null and issues_per_sedici_handle >= 1)
+    columns:
+      - name: extract_date
+        description: Fecha en que se extrajo de Redmine el conjunto de issues.
+        data_tests: [not_null]
+      - name: issue_id
+        description: Identificador del issue. Campo original de Redmine `#`.
+        data_tests: [not_null]
+      - name: published_resource_url
+        description: URL informada en el campo original `Link al recurso publicado`.
+      - name: sedici_handle
+        description: Handle `10915/...` extraído de la URL publicada.
+      - name: issues_per_sedici_handle
+        description: Cantidad de issues del mismo snapshot que apuntan al handle.
+        data_tests: [not_null]
+      - name: sedici_item_id
+        description: Identificador interno del ítem encontrado mediante el handle exacto.
+        data_tests:
+          - relationships:
+              to: ref('unlp_sedici_publicacion_base')
+              field: item_id
+      - name: has_sedici_match
+        description: Indica que el handle corresponde con una publicación de la base visible de SEDICI.
+        data_tests: [not_null]
+      - name: sedici_match_status
+        description: Resultado técnico del cruce entre la URL de Redmine y SEDICI.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - no_published_resource_url
+                - published_resource_url_without_sedici_handle
+                - published_resource_url_handle_exact
+                - sedici_handle_not_found
+
+  - name: unlp_sedici_dal_publicacion_digitalizacion
+    description: >
+      Evidencias de digitalización disponibles para cada issue y su posible
+      publicación de SEDICI. Una nota del ítem constituye una declaración
+      explícita. Redmine, el formato, la descripción de la colección y la
+      diferencia temporal se conservan como señales independientes y no se
+      convierten automáticamente en confirmaciones.
+    config:
+      meta:
+        organization: unlp
+        source_systems: [redmine, sedicidb]
+        model_role: analytical_enrichment
+        grain: extract_date, issue_id
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [extract_date, issue_id]
+      - dbt_utils.expression_is_true:
+          name: dal_item_note_is_primary_evidence
+          expression: >
+            not has_item_note_evidence
+            or digitalization_evidence_code = 'item_note'
+      - dbt_utils.expression_is_true:
+          name: dal_review_excludes_item_note
+          expression: >
+            not requires_digitalization_review
+            or not has_item_note_evidence
+    columns:
+      - name: extract_date
+        description: Fecha en que se extrajo de Redmine el conjunto de issues.
+        data_tests: [not_null]
+      - name: issue_id
+        description: Identificador del issue. Campo original de Redmine `#`.
+        data_tests: [not_null]
+      - name: has_item_note_evidence
+        description: Indica que `sedici.description.note` del ítem menciona digitalización.
+        data_tests: [not_null]
+      - name: has_item_format_evidence
+        description: Indica que `dc.format.medium` menciona digitalización o escaneo.
+        data_tests: [not_null]
+      - name: has_collection_description_evidence
+        description: Indica que la descripción de la colección menciona digitalización; aporta contexto, no confirmación individual.
+        data_tests: [not_null]
+      - name: has_redmine_published_resource_evidence
+        description: Indica que un `Recurso Digitalización` de Redmine contiene una URL vinculada exactamente con SEDICI.
+        data_tests: [not_null]
+      - name: has_temporal_hint
+        description: Indica una publicación anterior a 2000 ingresada en SEDICI al menos diez años después.
+        data_tests: [not_null]
+      - name: item_note_evidence
+        description: Valores de `sedici.description.note` que mencionan digitalización.
+      - name: item_format_evidence
+        description: Valores de `dc.format.medium` que mencionan digitalización o escaneo.
+      - name: collection_description_evidence
+        description: Descripciones de la colección que mencionan digitalización.
+      - name: digitalization_evidence_code
+        description: Evidencia principal seleccionada según una prioridad explícita.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - not_applicable
+                - item_note
+                - redmine_published_resource
+                - item_format
+                - collection_description
+                - temporal_hint
+                - none
+      - name: requires_digitalization_review
+        description: Indica una publicación vinculada con señales de digitalización pero sin nota explícita en el ítem.
+        data_tests: [not_null]
+      - name: digitalization_review_reason
+        description: Señales que motivan la revisión de los metadatos del ítem.

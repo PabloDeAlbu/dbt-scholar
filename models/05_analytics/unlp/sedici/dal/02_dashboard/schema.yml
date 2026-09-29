@@ -1,0 +1,164 @@
+version: 2
+
+models:
+  - name: unlp_sedici_dal_dashboard
+    description: |
+      Los datos provienen del proyecto de digitalización en Redmine y del
+      repositorio institucional SEDICI.
+
+      Los issues se vinculan con publicaciones de SEDICI exclusivamente
+      mediante el handle informado en `Link al recurso publicado`.
+
+      Una nota de digitalización en el ítem constituye una declaración
+      explícita. Los registros de Redmine y las menciones en el formato o en
+      la colección se muestran como evidencias independientes. Una diferencia
+      temporal solamente constituye un indicio para revisión.
+    config:
+      meta:
+        organization: unlp
+        source_systems: [redmine, sedicidb]
+        model_role: dashboard_dataset
+        grain: fecha_extraccion, id_issue_redmine
+        temporal_scope: snapshot_2026_09_28
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [fecha_extraccion, id_issue_redmine]
+      - dbt_utils.expression_is_true:
+          name: dal_dashboard_declared_is_not_review
+          expression: >
+            not declarada_digitalizacion_en_sedici
+            or not requiere_revision_digitalizacion
+    columns:
+      - name: fecha_extraccion
+        description: Fecha en que se extrajo de Redmine el conjunto de issues; no corresponde a un campo original de Redmine.
+        data_tests: [not_null]
+      - name: id_issue_redmine
+        description: Identificador del issue. Campo original de Redmine `#`.
+        data_tests: [not_null]
+      - name: tipo_issue
+        description: Tipo de issue. Campo original `Tipo`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Recurso Digitalización', 'Tarea', 'Nota interna']
+      - name: estado_issue
+        description: Estado del issue. Campo original `Estado`.
+        data_tests: [not_null]
+      - name: asunto
+        description: Descripción breve del issue. Campo original `Asunto`.
+        data_tests: [not_null]
+      - name: estado_cruce_sedici
+        description: Resultado del cruce exacto entre la URL publicada en Redmine y el handle visible en SEDICI.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - Sin URL publicada
+                - URL sin handle de SEDICI
+                - Encontrada en SEDICI por handle
+                - Handle no encontrado en la base visible de SEDICI
+      - name: evidencia_digitalizacion
+        description: Evidencia principal disponible, sin convertir señales indirectas en confirmaciones.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - Sin publicación vinculada
+                - Declarada en nota del ítem
+                - Registrada en DAL con publicación en SEDICI
+                - Indicada en el formato del ítem
+                - Mencionada solamente en la colección
+                - Solo indicio temporal
+                - Sin evidencia
+      - name: declarada_digitalizacion_en_sedici
+        description: Indica que `sedici.description.note` del ítem menciona digitalización.
+        data_tests: [not_null]
+      - name: requiere_revision_digitalizacion
+        description: Indica una publicación con señales de digitalización pero sin nota explícita en el ítem.
+        data_tests: [not_null]
+      - name: motivo_revision_digitalizacion
+        description: Señales que motivan la revisión de los metadatos del ítem.
+      - name: handle_sedici
+        description: Handle extraído del campo original `Link al recurso publicado`.
+      - name: url_sedici
+        description: URL pública del ítem encontrado en SEDICI.
+      - name: titulo_sedici
+        description: Título vigente del ítem encontrado en SEDICI.
+      - name: tipo_publicacion_sedici
+        description: Tipo general informado mediante `dc.type`.
+      - name: subtipo_publicacion_sedici
+        description: Tipo específico informado mediante `sedici.subtype`.
+      - name: fecha_publicacion_sedici
+        description: Fecha de publicación informada en SEDICI.
+      - name: anio_publicacion_sedici
+        description: Año derivado de la fecha de publicación en SEDICI.
+      - name: fecha_ingreso_sedici
+        description: Fecha de ingreso informada mediante `dc.date.accessioned`.
+      - name: coleccion_sedici
+        description: Colección propietaria del ítem encontrado.
+      - name: comunidad_sedici
+        description: Comunidad propietaria de la colección.
+      - name: ruta_comunidades_sedici
+        description: Recorrido de comunidades desde la raíz hasta la colección.
+      - name: issues_mismo_handle
+        description: Cantidad de issues del snapshot que apuntan al mismo handle.
+        data_tests: [not_null]
+      - name: nota_digitalizacion_sedici
+        description: Valores de `sedici.description.note` que mencionan digitalización.
+      - name: formato_digitalizacion_sedici
+        description: Valores de `dc.format.medium` que mencionan digitalización o escaneo.
+      - name: descripcion_coleccion_digitalizacion
+        description: Descripción de la colección que menciona digitalización; aporta contexto, no una confirmación individual.
+      - name: prioridad
+        description: Prioridad del issue. Campo original `Prioridad`.
+      - name: avance_porcentaje
+        description: Porcentaje declarado de realización. Campo original `% Realizado`.
+      - name: complejidad
+        description: Complejidad declarada. Campo original `Complejidad`.
+      - name: escaner_asignado
+        description: Equipamiento asignado. Campo original `Escáner`.
+      - name: es_dal
+        description: Indica que el valor original de `Escáner` es `DAL`.
+        data_tests: [not_null]
+      - name: condicion_desarmado
+        description: Restricción de manipulación. Campo original `Desarmado`.
+      - name: tipo_recurso
+        description: Tipología declarada del material. Campo original `Tipo de recurso`.
+      - name: institucion_contacto
+        description: Valor sin agrupar del campo original `Contacto (institución)`.
+      - name: institucion_contacto_normalizada
+        description: Copia de `Contacto (institución)` con guiones y espacios uniformados; no constituye una autoridad institucional.
+      - name: persona_contacto
+        description: Persona informada en el campo original `Contacto (persona)`.
+      - name: responsable
+        description: Persona o grupo informado en el campo original `Asignado a`.
+      - name: creado_por
+        description: Persona informada en el campo original `Autor`.
+        data_tests: [not_null]
+      - name: ultima_actualizacion_por
+        description: Persona informada en el campo original `Última actualización de`.
+      - name: fecha_creacion
+        description: Marca temporal interpretada a partir del campo original `Creado`.
+        data_tests: [not_null]
+      - name: fecha_actualizacion
+        description: Marca temporal interpretada a partir del campo original `Actualizado`.
+        data_tests: [not_null]
+      - name: fecha_cierre
+        description: Marca temporal interpretada a partir del campo original `Cerrada`.
+      - name: destino_previsto
+        description: Destino o versión prevista. Campo original `Versión prevista`.
+      - name: fue_devuelto
+        description: Indica si el campo original `Devuelto` contiene `Sí`; el valor vacío se interpreta como falso.
+        data_tests: [not_null]
+      - name: tiene_recurso_publicado
+        description: Indica que el campo original `Link al recurso publicado` contiene una URL.
+        data_tests: [not_null]
+      - name: url_recurso_publicado
+        description: URL del campo original `Link al recurso publicado`.
+      - name: tiene_carpeta_google_drive
+        description: Indica que el campo original `Link a Google Drive` contiene una URL; la URL no se expone en este dashboard.
+        data_tests: [not_null]
+      - name: id_tarea_padre
+        description: Identificador informado en el campo original `Tarea padre`.
+      - name: asunto_tarea_padre
+        description: Texto informado en el campo original `Asunto de la tarea padre`.
