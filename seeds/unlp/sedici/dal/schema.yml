@@ -1,0 +1,94 @@
+version: 2
+
+seeds:
+  - name: seed_unlp_sedici_dal_redmine_issue_example
+    description: >
+      Muestra ficticia de la estructura exportada por el proyecto de
+      digitalización en Redmine. Se utiliza temporalmente para validar los
+      modelos sin versionar nombres, enlaces de trabajo ni otros datos
+      operativos del export completo. No representa el universo real ni debe
+      utilizarse para producir indicadores.
+    config:
+      column_types:
+        extract_date: date
+        issue_id: integer
+        parent_issue_id: text
+        completion_percentage: integer
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [extract_date, issue_id]
+    columns:
+      - name: extract_date
+        description: Fecha ficticia de extracción utilizada por la muestra; no corresponde a un campo original de Redmine.
+        data_tests: [not_null]
+      - name: issue_id
+        description: Identificador del issue. Campo original de Redmine `#`.
+        data_tests: [not_null]
+      - name: project_name
+        description: Proyecto al que pertenece el issue. Campo original `Proyecto`.
+        data_tests: [not_null]
+      - name: issue_type
+        description: Tipo de issue en Redmine. Campo original `Tipo`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Recurso Digitalización', 'Tarea', 'Nota interna']
+      - name: parent_issue_id
+        description: Valor textual del campo original `Tarea padre`.
+      - name: parent_issue_subject
+        description: Asunto de la tarea padre. Campo original `Asunto de la tarea padre`.
+      - name: status
+        description: Estado del issue. Campo original `Estado`.
+        data_tests: [not_null]
+      - name: priority
+        description: Prioridad del issue. Campo original `Prioridad`.
+        data_tests: [not_null]
+      - name: subject
+        description: Asunto del issue. Campo original `Asunto`.
+        data_tests: [not_null]
+      - name: author_name
+        description: Persona que creó el issue. Campo original `Autor`.
+        data_tests: [not_null]
+      - name: assignee_name
+        description: Persona o grupo asignado. Campo original `Asignado a`.
+      - name: updated_at_raw
+        description: Fecha y hora de actualización sin transformar. Campo original `Actualizado`.
+        data_tests: [not_null]
+      - name: category
+        description: Categoría informada en Redmine. Campo original `Categoría`.
+      - name: target_version
+        description: Versión prevista del issue. Campo original `Versión prevista`.
+      - name: completion_percentage
+        description: Porcentaje declarado de realización. Campo original `% Realizado`.
+      - name: created_at_raw
+        description: Fecha y hora de creación sin transformar. Campo original `Creado`.
+        data_tests: [not_null]
+      - name: closed_at_raw
+        description: Fecha y hora de cierre sin transformar. Campo original `Cerrada`.
+      - name: last_updated_by
+        description: Persona responsable de la última actualización. Campo original `Última actualización de`.
+      - name: related_requests
+        description: Relaciones declaradas con otros issues. Campo original `Peticiones relacionadas`.
+      - name: files
+        description: Nombres de archivos adjuntos exportados por Redmine. Campo original `Ficheros`.
+      - name: complexity
+        description: Complejidad declarada del recurso o tarea. Campo original `Complejidad`.
+      - name: scanner_type
+        description: Escáner asignado. Campo original `Escáner`.
+      - name: disassembly_condition
+        description: Condición informada para desarmar el material. Campo original `Desarmado`.
+      - name: resource_type
+        description: Tipología declarada del material. Campo original `Tipo de recurso`.
+      - name: contact_person
+        description: Persona de contacto del recurso. Campo original `Contacto (persona)`.
+      - name: contact_institution
+        description: Institución de contacto del recurso. Campo original `Contacto (institución)`.
+      - name: published_resource_url
+        description: Enlace al recurso resultante. Campo original `Link al recurso publicado`.
+      - name: google_drive_url
+        description: Enlace de trabajo en Google Drive. Campo original `Link a Google Drive`.
+      - name: returned
+        description: Indicación de devolución del material. Campo original `Devuelto`.
+      - name: is_private
+        description: Indicación de privacidad del issue. Campo original `Privada`.
+        data_tests: [not_null]

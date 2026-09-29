@@ -1,0 +1,119 @@
+version: 2
+
+models:
+  - name: unlp_sedici_dal_recurso_base
+    description: >
+      Issues registrados en el snapshot de Redmine del 28 de septiembre de
+      2026. Conserva una fila por issue y fecha de corte. Los
+      tipos y valores vacíos se adaptan para su análisis sin modificar el
+      significado declarado en Redmine.
+    config:
+      meta:
+        organization: unlp
+        source_system: redmine
+        model_role: analytical_base
+        grain: extract_date, issue_id
+        temporal_scope: snapshot_2026_09_28
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [extract_date, issue_id]
+      - dbt_utils.expression_is_true:
+          name: dal_parent_issue_id_is_parseable
+          expression: parent_issue_id_raw is null or parent_issue_id is not null
+    columns:
+      - name: extract_date
+        description: Fecha en que se extrajo de Redmine el conjunto de issues; no corresponde a un campo original de Redmine.
+        data_tests: [not_null]
+      - name: issue_id
+        description: Identificador del issue. Campo original de Redmine `#`.
+        data_tests: [not_null]
+      - name: project_name
+        description: Nombre del proyecto. Campo original `Proyecto`.
+        data_tests: [not_null]
+      - name: issue_type
+        description: Tipo de issue. Campo original `Tipo`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['Recurso Digitalización', 'Tarea', 'Nota interna']
+      - name: parent_issue_id
+        description: Identificador numérico interpretado desde el campo original `Tarea padre`.
+      - name: parent_issue_id_raw
+        description: Valor textual sin transformar del campo original `Tarea padre`.
+      - name: parent_issue_subject
+        description: Asunto de la tarea padre. Campo original `Asunto de la tarea padre`.
+      - name: status
+        description: Estado del recurso. Campo original `Estado`.
+        data_tests: [not_null]
+      - name: priority
+        description: Prioridad del recurso. Campo original `Prioridad`.
+        data_tests: [not_null]
+      - name: subject
+        description: Descripción breve del recurso. Campo original `Asunto`.
+        data_tests: [not_null]
+      - name: author_name
+        description: Persona que creó el issue. Campo original `Autor`.
+        data_tests: [not_null]
+      - name: assignee_name
+        description: Persona o grupo asignado. Campo original `Asignado a`.
+      - name: updated_at_raw
+        description: Valor textual sin transformar del campo original `Actualizado`.
+        data_tests: [not_null]
+      - name: updated_at
+        description: Marca temporal interpretada a partir del campo original `Actualizado`.
+        data_tests: [not_null]
+      - name: category
+        description: Categoría del issue. Campo original `Categoría`.
+      - name: target_version
+        description: Destino o versión prevista. Campo original `Versión prevista`.
+      - name: completion_percentage
+        description: Porcentaje declarado de realización. Campo original `% Realizado`.
+      - name: created_at_raw
+        description: Valor textual sin transformar del campo original `Creado`.
+        data_tests: [not_null]
+      - name: created_at
+        description: Marca temporal interpretada a partir del campo original `Creado`.
+        data_tests: [not_null]
+      - name: closed_at_raw
+        description: Valor textual sin transformar del campo original `Cerrada`.
+      - name: closed_at
+        description: Marca temporal interpretada a partir del campo original `Cerrada`.
+      - name: last_updated_by
+        description: Persona de la última actualización. Campo original `Última actualización de`.
+      - name: related_requests
+        description: Relaciones con otros issues. Campo original `Peticiones relacionadas`.
+      - name: files
+        description: Archivos adjuntos informados. Campo original `Ficheros`.
+      - name: complexity
+        description: Complejidad declarada. Campo original `Complejidad`.
+      - name: scanner_type
+        description: Equipo asignado al recurso. Campo original `Escáner`.
+      - name: disassembly_condition
+        description: Condición de manipulación declarada. Campo original `Desarmado`.
+      - name: resource_type
+        description: Tipología declarada del material. Campo original `Tipo de recurso`.
+      - name: contact_person
+        description: Persona de contacto. Campo original `Contacto (persona)`.
+      - name: contact_institution
+        description: Institución de contacto. Campo original `Contacto (institución)`.
+      - name: published_resource_url
+        description: URL informada en el campo original `Link al recurso publicado`.
+      - name: google_drive_url
+        description: URL informada en el campo original `Link a Google Drive`.
+      - name: returned_raw
+        description: Valor sin transformar del campo original `Devuelto`.
+      - name: is_returned
+        description: Indica si el campo original `Devuelto` contiene `Sí`; el valor vacío se interpreta como falso.
+        data_tests: [not_null]
+      - name: is_private_raw
+        description: Valor sin transformar del campo original `Privada`.
+        data_tests: [not_null]
+      - name: is_private
+        description: Indica si el campo original `Privada` contiene `Sí`.
+        data_tests: [not_null]
+      - name: has_published_resource_url
+        description: Indica que `Link al recurso publicado` contiene una URL no vacía.
+        data_tests: [not_null]
+      - name: has_google_drive_url
+        description: Indica que `Link a Google Drive` contiene una URL no vacía.
+        data_tests: [not_null]

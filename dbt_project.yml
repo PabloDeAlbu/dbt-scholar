@@ -250,6 +250,9 @@ models:
           malvinas:
             +schema: unlp_sedici_malvinas
             +tags: [sedici, malvinas]
+          dal:
+            +schema: unlp_sedici_dal
+            +tags: [sedici, dal]
           revistas:
             +schema: unlp_sedici_revistas
             +tags: [sedici, revistas]
