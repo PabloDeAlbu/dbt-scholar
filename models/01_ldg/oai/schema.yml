@@ -24,6 +24,21 @@ sources:
           - name: load_datetime
       - name: identifiers
         description: Manifiesto del batch, incluidos los encabezados eliminados.
+      - name: sets
+        description: >
+          Directorio de sets expuesto por `ListSets`, con el identificador
+          `setSpec`, su nombre legible y las fechas técnicas del batch.
+        columns:
+          - name: setSpec
+            quote: true
+            data_tests: [not_null, unique]
+          - name: setName
+            quote: true
+            data_tests: [not_null]
+          - name: extract_datetime
+            data_tests: [not_null]
+          - name: load_datetime
+            data_tests: [not_null]
       - name: map_identifier_set
         description: Relación multivaluada entre encabezados OAI y sets.
       - name: map_record_creator

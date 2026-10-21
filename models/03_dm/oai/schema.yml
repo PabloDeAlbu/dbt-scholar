@@ -52,8 +52,9 @@ models:
 
   - name: dim_oai_set
     description: >
-      Dimensión de sets OAI-PMH (setSpec + setName), utilizada para segmentar
-      colecciones/series en la capa de Data Mart.
+      Dimensión global de sets OAI-PMH. Conserva `setSpec` y `setName` y
+      distingue comunidades, colecciones y conjuntos transversales de cosecha
+      sin incorporar reglas propias de una organización.
     config:
       tags: [dm]
     columns:
@@ -66,6 +67,19 @@ models:
         description: Identificador (setSpec) provisto por el endpoint OAI-PMH.
         data_tests:
           - not_null
+          - unique
+      - name: set_name
+        description: Nombre legible del set informado por `ListSets`.
+        data_tests: [not_null]
+      - name: set_type
+        description: >
+          Tipo estructural inferido desde `setSpec`: `community` para `com_*`,
+          `collection` para `col_*`, `harvest_set` para `snrd`, `unknown` para
+          el miembro técnico y `other` para otros esquemas de identificación.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [community, collection, harvest_set, other, unknown]
 
   - name: fct_oai_record_publication
     description: >

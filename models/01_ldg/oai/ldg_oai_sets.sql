@@ -2,23 +2,24 @@
 
 WITH source AS (
     SELECT *
-    FROM {{ source('oai', 'map_identifier_set') }}
+    FROM {{ source('oai', 'sets') }}
 ),
 
 renamed AS (
     SELECT
-        "set_id"::text as set_id,
-        "set_id"::text as set_name,
-        max("_load_datetime"::timestamp) as _load_datetime
+        "setSpec"::text AS set_id,
+        "setName"::text AS set_name,
+        "extract_datetime"::timestamp AS extract_datetime,
+        "load_datetime"::timestamp AS _load_datetime
     FROM source
-    WHERE "set_id" IS NOT NULL
-    GROUP BY "set_id"
+    WHERE "setSpec" IS NOT NULL
 ),
 ghost_record AS (
     SELECT
-        '!UNKNOWN'::text as set_id,
-        '!UNKNOWN'::text as set_name,
-        {{ dbt_date.today() }} as _load_datetime
+        '!UNKNOWN'::text AS set_id,
+        '!UNKNOWN'::text AS set_name,
+        '1900-01-01'::timestamp AS extract_datetime,
+        '1900-01-01'::timestamp AS _load_datetime
 )
 
 SELECT * FROM renamed
