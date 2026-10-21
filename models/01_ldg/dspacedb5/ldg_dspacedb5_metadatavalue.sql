@@ -42,11 +42,11 @@ base AS (
 final AS (
   SELECT
     base.*,
-    scope.source_label,
-    scope.institution_ror,
-    scope.base_url,
-    scope.extract_datetime,
-    scope.load_datetime
+    CASE WHEN base.metadata_value_id = -1 THEN '!UNKNOWN' ELSE scope.source_label END AS source_label,
+    CASE WHEN base.metadata_value_id = -1 THEN '!UNKNOWN' ELSE scope.institution_ror END AS institution_ror,
+    CASE WHEN base.metadata_value_id = -1 THEN '!UNKNOWN' ELSE scope.base_url END AS base_url,
+    CASE WHEN base.metadata_value_id = -1 THEN '1900-01-01'::timestamp ELSE scope.extract_datetime END AS extract_datetime,
+    CASE WHEN base.metadata_value_id = -1 THEN '1900-01-01'::timestamp ELSE scope.load_datetime END AS load_datetime
   FROM base
   CROSS JOIN scope
 )

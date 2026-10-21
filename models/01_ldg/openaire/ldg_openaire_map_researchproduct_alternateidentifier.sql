@@ -16,7 +16,7 @@ ghost_record AS (
     '!UNKNOWN'::text as researchproduct_id,
     '!UNKNOWN'::text as scheme,
     '!UNKNOWN'::text as value,
-    {{ dbt_date.today() }} as _load_datetime
+    '1900-01-01'::timestamp as _load_datetime
 )
 
 SELECT * FROM renamed
