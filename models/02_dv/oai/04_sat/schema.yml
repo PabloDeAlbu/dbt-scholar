@@ -1,0 +1,37 @@
+version: 2
+
+models:
+  - name: sat_oai_repository_set
+    description: >
+      Conserva la historia descriptiva de cada set dentro de su repositorio:
+      el nombre informado por `ListSets` y el contexto institucional de la
+      extracción.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [set_hk, load_datetime]
+    columns:
+      - name: set_hk
+        description: Clave hash de la identidad registrada en el Hub.
+        data_tests: [not_null]
+      - name: hashdiff
+        description: >
+          Huella utilizada para detectar cambios en los atributos descriptivos.
+        data_tests: [not_null]
+      - name: set_name
+        description: Nombre legible informado por `ListSets`.
+        data_tests: [not_null]
+      - name: institution_ror
+        description: >
+          Identificador ROR de la institución asociada con la extracción.
+        data_tests: [not_null]
+      - name: base_url
+        description: URL base del endpoint OAI-PMH consultado.
+      - name: context
+        description: Ruta del endpoint utilizada para ejecutar `ListSets`.
+      - name: effective_from
+        description: Fecha y hora de extracción de los atributos observados.
+      - name: load_datetime
+        description: Fecha y hora de carga de la observación en landing.
+        data_tests: [not_null]
+      - name: source
+        description: Fuente institucional en la que se observó el set.

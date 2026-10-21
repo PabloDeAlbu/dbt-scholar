@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: hub_oai_repository_set
+    description: >
+      Registra las identidades de los sets OAI-PMH. Su clave de negocio es
+      `repository_identifier + set_id`.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [repository_identifier, set_id]
+    columns:
+      - name: set_hk
+        description: >
+          Clave hash derivada del repositorio y del identificador del set.
+        data_tests: [not_null, unique]
+      - name: repository_identifier
+        description: Identificador del repositorio OAI-PMH que expone el set.
+        data_tests: [not_null]
+      - name: set_id
+        description: Identificador `setSpec` asignado por el repositorio.
+        data_tests: [not_null]
+      - name: load_datetime
+        description: Primera fecha de carga observada para la identidad.
+      - name: source
+        description: Fuente institucional en la que se observó la identidad.
