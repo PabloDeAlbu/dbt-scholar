@@ -26,14 +26,32 @@ sources:
         description: Manifiesto del batch, incluidos los encabezados eliminados.
       - name: sets
         description: >
-          Directorio de sets expuesto por `ListSets`, con el identificador
-          `setSpec`, su nombre legible y las fechas técnicas del batch.
+          Particiones incrementales del directorio expuesto por `ListSets`.
+          Cada observación conserva el repositorio, la institución y las
+          fechas técnicas de extracción y carga.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns:
+                [_repository_identifier, setSpec, extract_datetime]
+              quote_columns: true
         columns:
           - name: setSpec
             quote: true
-            data_tests: [not_null, unique]
+            data_tests: [not_null]
           - name: setName
             quote: true
+            data_tests: [not_null]
+          - name: _source_key
+            data_tests: [not_null]
+          - name: _repository_identifier
+            data_tests: [not_null]
+          - name: _institution_ror
+            data_tests: [not_null]
+          - name: _base_url
+            data_tests: [not_null]
+          - name: _context
+            data_tests: [not_null]
+          - name: _partition_id
             data_tests: [not_null]
           - name: extract_datetime
             data_tests: [not_null]
@@ -51,6 +69,18 @@ sources:
       - name: map_record_relation
       - name: map_record_right
       - name: map_record_set
+        description: >
+          Relación multivaluada entre registros y sets. La procedencia se
+          recupera en LDG desde el registro padre del mismo batch.
+        columns:
+          - name: record_id
+            data_tests: [not_null]
+          - name: set_id
+            data_tests: [not_null]
+          - name: extract_datetime
+            data_tests: [not_null]
+          - name: load_datetime
+            data_tests: [not_null]
       - name: map_record_subject
       - name: map_record_type
       - name: record_by_set
