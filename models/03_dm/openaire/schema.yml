@@ -16,7 +16,10 @@ models:
   - name: fct_openaire_researchproduct_extraction
     description: >
       Hecho base de eventos de extracción de OpenAIRE a nivel research product.
-      Conserva el filtro aplicado y los timestamps técnicos del evento.
+      Conserva el filtro aplicado y los timestamps técnicos disponibles del
+      evento. En batches históricos, la fecha de extracción puede no haber
+      sido informada; la fecha de carga conserva la trazabilidad de su ingreso
+      al Data Warehouse sin sustituir ese dato ausente.
     config:
       tags: [dm]
     columns:
@@ -31,8 +34,12 @@ models:
       - name: _filter_value
         data_tests: [not_null]
       - name: extract_datetime
-        data_tests: [not_null]
+        description: >
+          Fecha y hora informada por el proceso de extracción. Puede ser nula
+          en batches históricos que solo conservan la fecha de carga; no debe
+          inferirse a partir de `load_datetime`.
       - name: load_datetime
+        description: Fecha y hora de incorporación del batch al Data Warehouse.
         data_tests: [not_null]
 
   - name: dim_openaire_researchproduct
