@@ -38,10 +38,10 @@ final AS (
         COUNT(*) AS fil_count,
         COUNT(DISTINCT author) AS fil_author_count,
         TRUE AS has_fil,
-        BOOL_OR(has_unlp_fil) AS has_unlp_fil,
+        COALESCE(BOOL_OR(has_unlp_fil), FALSE) AS has_unlp_fil,
         COUNT(*) FILTER (WHERE has_unlp_fil) AS unlp_fil_count,
         COUNT(DISTINCT author) FILTER (WHERE has_unlp_fil) AS unlp_fil_author_count,
-        BOOL_OR(has_cic_fil) AS has_cic_fil,
+        COALESCE(BOOL_OR(has_cic_fil), FALSE) AS has_cic_fil,
         COUNT(*) FILTER (WHERE has_cic_fil) AS cic_fil_count,
         COUNT(DISTINCT author) FILTER (WHERE has_cic_fil) AS cic_fil_author_count
     FROM classified
