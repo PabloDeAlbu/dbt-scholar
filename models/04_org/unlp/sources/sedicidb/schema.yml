@@ -379,16 +379,16 @@ models:
       - name: owning_community_path_titles
         description: Camino de títulos de comunidades desde la raíz hasta la inmediata.
       - name: dc_type
-        description: Último valor no vacío de `dc.type`, según el mayor `metadata_value_id`.
+        description: Valor no vacío de `dc.type` seleccionado por el mayor `metadata_value_id`.
       - name: sedici_subtype
-        description: Último valor no vacío de `sedici.subtype`, según el mayor `metadata_value_id`.
+        description: Valor no vacío de `sedici.subtype` seleccionado por el mayor `metadata_value_id`.
       - name: dc_title_raw
         description: >
-          Valor original de la observación vigente de `dc.title`, seleccionada
+          Valor original de la observación de `dc.title` seleccionada
           por el mayor `metadata_value_id`.
       - name: dc_title
         description: >
-          Título vigente normalizado por la capa `int`.
+          Título seleccionado y normalizado por la capa `int`.
       - name: dc_date_issued_raw
         description: >
           Valor válido priorizado de `dc.date.issued`, conservando la precisión

@@ -10,6 +10,7 @@
     ]
 ) }}
 
+-- ¿Cómo se identifica cada metadatafield?
 WITH metadatafield AS (
     SELECT
         field.metadata_field_id,
@@ -27,6 +28,7 @@ WITH metadatafield AS (
         USING (metadata_schema_id)
 ),
 
+-- ¿Qué observaciones pertenecen a ítems?
 final AS (
     SELECT
         value.resource_id AS item_id,
@@ -38,7 +40,26 @@ final AS (
         field.qualifier,
         field.metadatafield_fullname,
         value.text_value AS text_value_raw,
-        NULLIF({{ clean_text('value.text_value') }}, '') AS text_value,
+        NULLIF(
+            TRIM(
+                REGEXP_REPLACE(
+                    REPLACE(
+                        REPLACE(
+                            REPLACE(
+                                REPLACE(value.text_value::text, chr(8232), ' '),
+                                chr(8233), ' '
+                            ),
+                            chr(160), ' '
+                        ),
+                        chr(65279), ''
+                    ),
+                    '\s+',
+                    ' ',
+                    'g'
+                )
+            ),
+            ''
+        ) AS text_value,
         value.text_lang AS text_lang_raw,
         NULLIF(LOWER(BTRIM(value.text_lang)), '') AS text_lang,
         value.authority AS authority_raw,

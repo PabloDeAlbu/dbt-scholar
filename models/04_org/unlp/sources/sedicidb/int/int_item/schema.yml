@@ -1,0 +1,81 @@
+version: 2
+
+models:
+  - name: int_unlp_sedicidb_item_metadatafield
+    description: >
+      Resumen de los metadatos de cada ítem, con una fila por `item_id` y
+      `metadatafield_fullname`. Conserva todos los valores no nulos en un array
+      y expone como representación la observación no nula con mayor
+      `metadata_value_id`.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_id, metadatafield_fullname]
+    columns:
+      - name: item_id
+        data_tests: [not_null]
+      - name: metadatafield_fullname
+        data_tests: [not_null]
+      - name: metadata_value_id
+        description: Identificador de la observación elegida para `value`.
+        data_tests: [not_null]
+      - name: value_raw
+        description: Valor original de la observación elegida.
+      - name: value
+        description: Valor normalizado de la observación elegida.
+      - name: values
+        description: Valores normalizados no nulos, ordenados por `metadata_value_id`.
+      - name: observation_count
+        description: Cantidad total de observaciones, incluidos los valores vacíos.
+        data_tests: [not_null]
+      - name: value_count
+        description: Cantidad de observaciones cuyo valor normalizado no es nulo.
+        data_tests: [not_null]
+      - name: distinct_value_count
+        description: Cantidad de valores normalizados distintos.
+        data_tests: [not_null]
+      - name: has_conflicting_values
+        description: Indica si el ítem presenta más de un valor normalizado distinto.
+        data_tests: [not_null]
+
+  - name: int_unlp_sedicidb_item_date_metadatafield
+    description: >
+      Interpretación conjunta de los metadatafields de fecha usados por las
+      publicaciones, con una fila por ítem y metadatafield. Acepta precisión de
+      día, mes o año y completa los componentes ausentes con uno.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_id, metadatafield_fullname]
+    columns:
+      - name: item_id
+        data_tests: [not_null]
+      - name: metadatafield_fullname
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - dc.date.accessioned
+                - dc.date.available
+                - dc.date.issued
+                - sedici.date.exposure
+      - name: metadata_value_id
+        description: Identificador de la observación elegida para `value`.
+        data_tests: [not_null]
+      - name: value_raw
+        description: Valor original de la observación elegida.
+      - name: value
+        description: Fecha interpretada de la observación elegida.
+      - name: date_precision
+        description: Precisión original de la fecha elegida.
+        data_tests:
+          - accepted_values:
+              values: [day, month, year]
+      - name: values
+        description: Fechas interpretadas no nulas, ordenadas por `metadata_value_id`.
+      - name: observation_count
+        data_tests: [not_null]
+      - name: value_count
+        data_tests: [not_null]
+      - name: distinct_value_count
+        data_tests: [not_null]
+      - name: has_conflicting_values
+        data_tests: [not_null]
