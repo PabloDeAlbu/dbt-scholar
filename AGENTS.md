@@ -31,3 +31,32 @@
 - No agregar comentarios `TODO` o `FIXME` al codigo versionado para recordar tareas operativas personales.
 - Registrar esos pendientes en `TODO.local.md`, excluido localmente mediante `.git/info/exclude`.
 - Los commits `dev(...)` pueden utilizarse como checkpoints locales, pero deben reescribirse con un tipo semantico antes de publicar la rama.
+
+## Descripciones de modelos
+
+- Escribir descripciones breves, con una oracion por linea.
+- Cada oracion debe aportar una sola idea.
+- Indicar primero que representa el modelo.
+- Mencionar el modelo de origen sin volver a describir su logica.
+- Documentar reglas de inclusion o exclusion cuando definan el significado del resultado.
+- No repetir transformaciones, pruebas ni detalles que puedan leerse directamente en el SQL.
+- Describir las columnas por su significado, no por la expresion SQL que las produce.
+
+## Metadatos de modelos
+
+- Usar `config.meta` para documentar propiedades estructuradas del modelo.
+- Incluir solamente propiedades conocidas y utiles; no inferir valores para completar el bloque.
+- Usar `organization` para la organizacion responsable del modelo.
+- Usar `source_system` para una fuente y `source_systems` para varias fuentes.
+- Usar `model_role` para la funcion del modelo dentro del DAG.
+- Usar `grain` para expresar que representa cada fila.
+- Usar `temporal_scope` para distinguir estado actual, ultima observacion o historia.
+- Mantener el grano tambien en la descripcion cuando sea importante para interpretar el modelo.
+- No incorporar estos metadatos retrospectivamente de forma masiva sin auditar cada modelo.
+
+## Estructura de modelos SQL
+
+- Anteponer a cada CTE una pregunta breve que exprese su responsabilidad.
+- Evitar calificativos subjetivos cuando puedan reemplazarse por la regla aplicada.
+- En modelos organizados mediante CTE, llamar `final` a la CTE que define el contrato de salida.
+- Terminar esos modelos con `SELECT * FROM final`.
