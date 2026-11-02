@@ -54,6 +54,13 @@
 - Mantener el grano tambien en la descripcion cuando sea importante para interpretar el modelo.
 - No incorporar estos metadatos retrospectivamente de forma masiva sin auditar cada modelo.
 
+## Contratos en schema.yml
+
+- Ordenar las propiedades de cada modelo como `description`, `config`, `columns` y `data_tests`.
+- Ubicar las pruebas generales del modelo después de la definición de sus columnas.
+- Mantener las pruebas propias de cada columna dentro de su definición.
+- Aplicar esta convención al crear o modificar un contrato sin reorganizar otros archivos de forma masiva.
+
 ## Estructura de modelos SQL
 
 - Anteponer a cada CTE una pregunta breve que exprese su responsabilidad.
