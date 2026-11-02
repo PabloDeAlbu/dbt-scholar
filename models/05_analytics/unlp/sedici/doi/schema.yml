@@ -1,0 +1,79 @@
+version: 2
+
+models:
+  - name: unlp_sedici_publicacion_doi_cobertura
+    description: >
+      Cobertura de DOI de las publicaciones visibles de SEDICI.
+      Cada fila representa un ítem.
+      Parte de `unlp_sedici_publicacion_base` y `unlp_sedici_dedup_publication_doi`.
+      Incluye las publicaciones sin DOI reconocido.
+    config:
+      meta:
+        organization: unlp
+        source_system: sedicidb
+        grain: item
+        temporal_scope: current_snapshot
+    columns:
+      - name: item_id
+        description: Identificador interno del ítem en SEDICI.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('unlp_sedici_publicacion_base')
+              field: item_id
+      - name: handle
+        description: Handle público del ítem en formato `10915/...`.
+        data_tests: [not_null, unique]
+      - name: dc_title
+        description: Título normalizado de la publicación.
+        data_tests: [not_null]
+      - name: dc_type
+        description: Tipo general declarado en `dc.type`.
+        data_tests: [not_null]
+      - name: sedici_subtype
+        description: Subtipo declarado en `sedici.subtype`.
+        data_tests: [not_null]
+      - name: publication_year
+        description: Año de publicación interpretado.
+      - name: dc_date_accessioned
+        description: Fecha de ingreso interpretada.
+      - name: owning_collection
+        description: Identificador de la colección propietaria.
+        data_tests: [not_null]
+      - name: owning_collection_title
+        description: Título de la colección propietaria.
+        data_tests: [not_null]
+      - name: doi_count
+        description: Cantidad de DOI reconocidos para la publicación.
+        data_tests: [not_null]
+      - name: doi_values
+        description: DOI reconocidos separados por `|`.
+      - name: has_doi
+        description: Indica si la publicación posee algún DOI reconocido.
+        data_tests: [not_null]
+      - name: has_multiple_doi
+        description: Indica si la publicación posee más de un DOI reconocido.
+        data_tests: [not_null]
+      - name: sedici_identifier_doi_count
+        description: Cantidad de DOI respaldados por `sedici.identifier.doi`.
+        data_tests: [not_null]
+      - name: sedici_identifier_other_doi_count
+        description: Cantidad de DOI respaldados por `sedici.identifier.other`.
+        data_tests: [not_null]
+      - name: dc_identifier_uri_institutional_doi_count
+        description: Cantidad de DOI institucionales respaldados por `dc.identifier.uri`.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: sedici_publicacion_doi_cobertura_is_consistent
+          expression: >
+            doi_count >= 0
+            and has_doi = (doi_count > 0)
+            and has_multiple_doi = (doi_count > 1)
+      - dbt_utils.expression_is_true:
+          name: sedici_publicacion_doi_source_counts_are_consistent
+          expression: >
+            sedici_identifier_doi_count between 0 and doi_count
+            and sedici_identifier_other_doi_count between 0 and doi_count
+            and dc_identifier_uri_institutional_doi_count between 0 and doi_count
