@@ -3,8 +3,11 @@ version: 2
 models:
   - name: unlp_sedici_publicacion_base
     description: >
-      Publicaciones actualmente archivadas, visibles y no retiradas de SEDICI.
-      Constituye la base común para los casos analíticos de SEDICI.
+      Publicaciones visibles de SEDICI.
+      Cada fila representa un ítem.
+      Parte de `fct_unlp_sedicidb_item_publication`.
+      Conserva el estado, los metadatos principales y la ubicación del ítem.
+      La ubicación corresponde a la colección propietaria.
     config:
       meta:
         organization: unlp
@@ -19,9 +22,97 @@ models:
             in_archive is true
             and withdrawn is false
             and discoverable is true
+      - dbt_utils.expression_is_true:
+          name: sedici_publicacion_base_uri_matches_handle
+          expression: >
+            dc_identifier_uri =
+            'https://' || base_url || '/handle/' || handle
     columns:
       - name: item_id
         description: Identificador interno del ítem en la base de SEDICI.
+        data_tests: [not_null, unique]
+      - name: source_label
+        description: Etiqueta de la fuente institucional.
+        data_tests: [not_null]
+      - name: institution_ror
+        description: ROR de la institución responsable del repositorio.
+        data_tests: [not_null]
+      - name: base_url
+        description: Dominio público de SEDICI.
+        data_tests: [not_null]
+      - name: submitter_id
+        description: Identificador interno de la persona que depositó el ítem.
+      - name: in_archive
+        description: Indica si el ítem está archivado.
+        data_tests: [not_null]
+      - name: withdrawn
+        description: Indica si el ítem fue retirado.
+        data_tests: [not_null]
+      - name: discoverable
+        description: Indica si el ítem es visible en las búsquedas.
+        data_tests: [not_null]
+      - name: owning_collection
+        description: Identificador de la colección propietaria.
+        data_tests: [not_null]
+      - name: owning_collection_title
+        description: Título de la colección propietaria.
+        data_tests: [not_null]
+      - name: owning_community_id
+        description: Identificador de la comunidad de la colección propietaria.
+      - name: owning_community_title
+        description: Título de la comunidad de la colección propietaria.
+      - name: owning_root_community_id
+        description: Identificador de la comunidad raíz propietaria.
+      - name: owning_root_community_title
+        description: Título de la comunidad raíz propietaria.
+      - name: owning_root_child_community_id
+        description: Identificador de la comunidad ubicada debajo de la raíz.
+      - name: owning_root_child_community_title
+        description: Título de la comunidad ubicada debajo de la raíz.
+      - name: owning_community_path_ids
+        description: Recorrido de identificadores de las comunidades propietarias.
+      - name: owning_community_path_titles
+        description: Recorrido de títulos de las comunidades propietarias.
+      - name: last_modified
+        description: Fecha de última modificación del ítem en SEDICI.
+      - name: dc_type
+        description: Tipo general declarado en `dc.type`.
+        data_tests: [not_null]
+      - name: sedici_subtype
+        description: Subtipo declarado en `sedici.subtype`.
+        data_tests: [not_null]
+      - name: dc_title_raw
+        description: Valor original del título seleccionado.
+      - name: dc_title
+        description: Título normalizado de la publicación.
+        data_tests: [not_null]
+      - name: dc_date_issued_raw
+        description: Valor original de la fecha de publicación seleccionada.
+      - name: dc_date_issued
+        description: Fecha de publicación interpretada.
+      - name: dc_date_issued_precision
+        description: Precisión de la fecha de publicación interpretada.
+      - name: publication_year
+        description: Año de la fecha de publicación interpretada.
+      - name: dc_date_accessioned_raw
+        description: Valor original de la fecha de ingreso seleccionada.
+      - name: dc_date_accessioned
+        description: Fecha de ingreso interpretada.
+      - name: dc_date_available_raw
+        description: Valor original de la fecha de disponibilidad seleccionada.
+      - name: dc_date_available
+        description: Fecha de disponibilidad interpretada.
+      - name: sedici_date_exposure_raw
+        description: Valor original de la fecha de exposición seleccionada.
+      - name: sedici_date_exposure
+        description: Fecha de exposición interpretada.
+      - name: sedici_date_exposure_precision
+        description: Precisión de la fecha de exposición interpretada.
+      - name: handle
+        description: Handle público del ítem en formato `10915/...`.
+        data_tests: [not_null, unique]
+      - name: dc_identifier_uri
+        description: URL pública del ítem en SEDICI.
         data_tests: [not_null, unique]
 
   - name: unlp_sedici_publicaciones_base_dashboard
