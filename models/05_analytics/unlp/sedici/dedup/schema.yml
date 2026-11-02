@@ -1,0 +1,80 @@
+version: 2
+
+models:
+  - name: unlp_sedici_dedup_publication_doi
+    description: >
+      DOI de las publicaciones visibles de SEDICI.
+      Cada fila relaciona un ítem con un DOI.
+      Parte de `unlp_sedici_publicacion_base`.
+      Usa `sedici.identifier.doi`, `sedici.identifier.other` y `dc.identifier.uri`.
+      El valor debe contener un DOI reconocible.
+      El DOI debe poder normalizarse.
+      El resultado no conserva `%`, `?` ni `#`.
+      En `dc.identifier.uri`, el DOI debe coincidir con `10.35537/{handle}`.
+      Los DOI `10.35537/{handle}` declarados en `dc.identifier.uri` son generados por SEDICI.
+    config:
+      meta:
+        organization: unlp
+        source_system: sedicidb
+        model_role: dedup_identifier_adapter
+        grain: item_id + doi
+        temporal_scope: current_snapshot
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_id, doi]
+      - dbt_utils.expression_is_true:
+          name: unlp_sedici_dedup_publication_doi_is_normalized
+          expression: >
+            doi = lower(doi)
+            and doi ~ '^10[.][0-9]{4,9}/.+'
+            and doi !~ '[%?#]'
+      - dbt_utils.expression_is_true:
+          name: unlp_sedici_dedup_publication_doi_has_evidence
+          expression: >
+            has_explicit_doi
+            or has_sedici_identifier_other
+            or has_institutional_doi_uri
+      - dbt_utils.expression_is_true:
+          name: dedup_doi_uri_matches_handle
+          expression: >
+            not has_institutional_doi_uri
+            or doi = '10.35537/' || handle
+    columns:
+      - name: item_id
+        description: Identificador interno del ítem en SEDICI.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('unlp_sedici_publicacion_base')
+              field: item_id
+      - name: handle
+        description: Handle público del ítem en formato `10915/...`.
+        data_tests: [not_null]
+      - name: doi
+        description: DOI normalizado en minúsculas y sin componentes de URL.
+        data_tests: [not_null]
+      - name: metadatafields
+        description: Metadatafields que respaldan el DOI, separados por `|`.
+        data_tests: [not_null]
+      - name: metadata_value_ids
+        description: Identificadores de las observaciones que respaldan el DOI.
+        data_tests: [not_null]
+      - name: observation_count
+        description: Cantidad de observaciones que respaldan el DOI.
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 1"
+          - dbt_utils.expression_is_true:
+              name: dedup_doi_count_matches_evidence
+              expression: "= cardinality(metadata_value_ids)"
+      - name: has_explicit_doi
+        description: Indica si el DOI aparece en `sedici.identifier.doi`.
+        data_tests: [not_null]
+      - name: has_sedici_identifier_other
+        description: Indica si el DOI aparece en `sedici.identifier.other`.
+        data_tests: [not_null]
+      - name: has_institutional_doi_uri
+        description: >
+          Indica si `dc.identifier.uri` contiene el DOI institucional del ítem.
+        data_tests: [not_null]
