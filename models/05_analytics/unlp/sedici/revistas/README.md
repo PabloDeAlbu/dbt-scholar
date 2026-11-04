@@ -15,10 +15,12 @@ Los modelos se materializan en el esquema `analytics_unlp_sedici_revistas`.
 
 ## Fuentes
 
-- Publicaciones y jerarquía: `fct_unlp_sedicidb_item_publication` y
-  `dim_unlp_sedicidb_community`.
-- Autorías e identidades: `brg_unlp_sedicidb_item_author` y
-  `dim_unlp_sedicidb_author`.
+- El universo de publicaciones visibles parte de
+  `unlp_sedici_publicacion_base`, la interfaz analytics común de SEDICI.
+- La jerarquía de revistas parte de `dim_unlp_sedicidb_community`.
+- Las autorías e identidades parten de `brg_unlp_sedicidb_item_author` y
+  `dim_unlp_sedicidb_author`, para los que todavía no existe una interfaz
+  analytics común.
 - El enriquecimiento con VOC SEDICI se mantiene en una capa separada y utiliza
   `dim_unlp_author` y `fct_unlp_author_affiliation`.
 

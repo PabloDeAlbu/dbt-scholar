@@ -29,11 +29,8 @@ SELECT
     item.in_archive,
     item.withdrawn,
     item.discoverable
-FROM {{ ref('fct_unlp_sedicidb_item_publication') }} AS item
+FROM {{ ref('unlp_sedici_publicacion_base') }} AS item
 INNER JOIN {{ ref('dim_unlp_sedici_revista') }} AS revista
     ON revista.sedici_community_id = item.owning_root_child_community_id
-WHERE item.in_archive IS TRUE
-  AND item.withdrawn IS FALSE
-  AND item.discoverable IS TRUE
-  AND item.handle IS NOT NULL
+WHERE item.handle IS NOT NULL
   AND item.owning_root_community_title = 'Revistas'

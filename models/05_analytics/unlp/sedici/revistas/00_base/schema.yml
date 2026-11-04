@@ -70,7 +70,7 @@ models:
           - unique
           - relationships:
               name: sedici_revistas_revista_item_in_sedici_fact
-              to: ref('fct_unlp_sedicidb_item_publication')
+              to: ref('unlp_sedici_publicacion_base')
               field: item_id
       - name: handle
         description: Handle institucional del ítem.

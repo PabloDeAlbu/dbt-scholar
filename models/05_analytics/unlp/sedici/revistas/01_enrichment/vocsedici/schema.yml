@@ -43,7 +43,7 @@ models:
           - not_null
           - relationships:
               name: sedici_revistas_revista_publication_author_item_in_sedici_fact
-              to: ref('fct_unlp_sedicidb_item_publication')
+              to: ref('fct_unlp_sedici_revista_publicacion')
               field: item_id
       - name: sedicidb_author_id
         description: Identificador de autor en SEDICI.
