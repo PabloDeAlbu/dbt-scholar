@@ -19,26 +19,6 @@ models:
         model_role: dedup_identifier_adapter
         grain: item_id + doi
         temporal_scope: current_snapshot
-    data_tests:
-      - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [item_id, doi]
-      - dbt_utils.expression_is_true:
-          name: unlp_sedici_dedup_publication_doi_is_normalized
-          expression: >
-            doi = lower(doi)
-            and doi ~ '^10[.][0-9]{4,9}/.+'
-            and doi !~ '[%?#]'
-      - dbt_utils.expression_is_true:
-          name: unlp_sedici_dedup_publication_doi_has_evidence
-          expression: >
-            has_explicit_doi
-            or has_sedici_identifier_other
-            or has_institutional_doi_uri
-      - dbt_utils.expression_is_true:
-          name: dedup_doi_uri_matches_handle
-          expression: >
-            not has_institutional_doi_uri
-            or doi = '10.35537/' || handle
     columns:
       - name: item_id
         description: Identificador interno del ítem en SEDICI.
@@ -78,3 +58,23 @@ models:
         description: >
           Indica si `dc.identifier.uri` contiene el DOI institucional del ítem.
         data_tests: [not_null]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_id, doi]
+      - dbt_utils.expression_is_true:
+          name: unlp_sedici_dedup_publication_doi_is_normalized
+          expression: >
+            doi = lower(doi)
+            and doi ~ '^10[.][0-9]{4,9}/.+'
+            and doi !~ '[%?#]'
+      - dbt_utils.expression_is_true:
+          name: unlp_sedici_dedup_publication_doi_has_evidence
+          expression: >
+            has_explicit_doi
+            or has_sedici_identifier_other
+            or has_institutional_doi_uri
+      - dbt_utils.expression_is_true:
+          name: dedup_doi_uri_matches_handle
+          expression: >
+            not has_institutional_doi_uri
+            or doi = '10.35537/' || handle
