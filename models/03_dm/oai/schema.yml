@@ -163,6 +163,44 @@ models:
       - name: dc_creator
         description: Valor textual del creador según el proveedor OAI.
 
+  - name: brg_oai_record_description
+    description: Bridge entre registros OAI y metadatos `dc.description`.
+    config:
+      tags: [dm]
+    columns:
+      - name: record_description_hk
+        description: Clave hash del vínculo record-description.
+        data_tests:
+          - not_null
+          - unique
+      - name: record_hk
+        description: Clave hash del registro OAI.
+        data_tests: [not_null]
+      - name: dc_description_hk
+        description: Clave hash de la descripción OAI.
+        data_tests: [not_null]
+      - name: dc_description
+        description: Metadato `dc.description` del registro.
+
+  - name: brg_oai_record_format
+    description: Bridge entre registros OAI y metadatos `dc.format`.
+    config:
+      tags: [dm]
+    columns:
+      - name: record_format_hk
+        description: Clave hash del vínculo record-format.
+        data_tests:
+          - not_null
+          - unique
+      - name: record_hk
+        description: Clave hash del registro OAI.
+        data_tests: [not_null]
+      - name: dc_format_hk
+        description: Clave hash del formato OAI.
+        data_tests: [not_null]
+      - name: dc_format
+        description: Metadato `dc.format` del registro.
+
   - name: brg_oai_record_identifier
     description: Bridge record-identifier (dc.identifier), incluyendo URIs y PIDs crudos.
     config:
