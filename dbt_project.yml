@@ -120,6 +120,12 @@ models:
     04_org:
       # Nuevo layout objetivo: vistas institucionales por organización y fuente
       # bajo `models/04_org/<org>/<fuente>/`, materializando en schemas `dm_*`.
+      cendie:
+        +schema: cendie
+        +tags: [cendie]
+        oai:
+          +schema: cendie
+          +tags: [cendie, oai]
       cic:
         +schema: cic
         +tags: [cic]

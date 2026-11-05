@@ -46,7 +46,7 @@ sources:
           - name: _repository_identifier
             data_tests: [not_null]
           - name: _institution_ror
-            data_tests: [not_null]
+            description: ROR de la institución cuando está disponible para el repositorio.
           - name: _base_url
             data_tests: [not_null]
           - name: _context

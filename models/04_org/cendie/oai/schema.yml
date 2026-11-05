@@ -1,0 +1,100 @@
+version: 2
+
+models:
+  - name: fct_cendie_oai_record_publication
+    description: >
+      Representa la última versión de cada publicación cosechada desde el
+      repositorio OAI-PMH de CENDIE.
+      Clasifica cada registro por revista y conserva sus secciones declaradas
+      mediante sets OAI.
+    config:
+      tags: [cendie, oai, dm]
+      meta:
+        organization: cendie
+        source_system: oai
+        model_role: fact
+        grain: one row per CENDIE OAI record
+        temporal_scope: latest observation
+    columns:
+      - name: record_hk
+        description: Clave hash del registro OAI que define el grano del modelo.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('fct_oai_record_publication')
+              field: record_hk
+      - name: record_id
+        description: Identificador OAI-PMH informado por CENDIE.
+        data_tests: [not_null, unique]
+      - name: title
+        description: Primer valor `dc.title` informado para el registro.
+      - name: date_issued
+        description: Fecha normalizada desde el primer valor `dc.date` informado para el registro.
+      - name: journal_id
+        description: Identificador de la revista derivado del prefijo de `setSpec`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [revistaanales, abame]
+      - name: journal_name
+        description: Nombre de la revista asignado a partir de `journal_id`.
+        data_tests: [not_null]
+      - name: section_ids
+        description: Identificadores de sección distintos concatenados con `|`.
+      - name: section_names
+        description: Nombres de sección distintos concatenados con `|`.
+      - name: journal_count
+        description: Cantidad de revistas distintas asociadas al registro.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [1]
+      - name: section_count
+        description: Cantidad de secciones distintas asociadas al registro.
+        data_tests: [not_null]
+      - name: _context
+        description: Segmento de ruta utilizado para consultar el endpoint OAI-PMH de CENDIE.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [oai]
+      - name: repository_identifier
+        description: Identificador del repositorio OAI-PMH de CENDIE.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [ojs.cendie.abc.gob.ar]
+      - name: institution_ror
+        description: ROR institucional asignado al contexto de extracción cuando está disponible.
+      - name: extract_datetime
+        description: Momento de extracción de la observación seleccionada.
+        data_tests: [not_null]
+      - name: load_datetime
+        description: Momento de carga de la observación seleccionada.
+        data_tests: [not_null]
+      - name: dc_type
+        description: Valores de `dc.type` distintos concatenados con `|`.
+      - name: dc_type_count
+        description: Cantidad de valores distintos de `dc.type` detectados para el registro.
+        data_tests: [not_null]
+      - name: has_multiple_dc_type
+        description: Indica si el registro tiene más de un valor `dc.type` distinto.
+        data_tests: [not_null]
+      - name: dc_right
+        description: Valores de `dc.right` distintos concatenados con `|`.
+      - name: dc_right_count
+        description: Cantidad de valores distintos de `dc.right` detectados para el registro.
+        data_tests: [not_null]
+      - name: has_multiple_dc_right
+        description: Indica si el registro tiene más de un valor `dc.right` distinto.
+        data_tests: [not_null]
+      - name: valid_date_issued
+        description: Indica si `date_issued` pertenece al intervalo temporal aceptado por el modelo.
+        data_tests: [not_null]
+      - name: valid_dc_type
+        description: Indica si el registro tiene al menos un valor `dc.type`.
+        data_tests: [not_null]
+      - name: valid_dc_right
+        description: Indica si el registro tiene al menos un valor `dc.right`.
+        data_tests: [not_null]
