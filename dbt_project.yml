@@ -215,6 +215,12 @@ models:
           sedici:
             +schema: unlp_sedici
     05_analytics:
+      cendie:
+        +schema: cendie
+        +tags: [cendie, analytics]
+        +materialized: table
+        oai:
+          +tags: [oai]
       conicet:
         +schema: conicet
         +tags: [conicet, analytics]

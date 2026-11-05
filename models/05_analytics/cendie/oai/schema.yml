@@ -1,0 +1,78 @@
+version: 2
+
+models:
+  - name: cendie_oai_record_metadata
+    description: >
+      Extracto de metadatos Dublin Core de las publicaciones OAI de CENDIE.
+      Cada fila representa un registro y concatena con `|` los metadatos multivaluados.
+    config:
+      tags: [cendie, oai, analytics]
+      meta:
+        organization: cendie
+        source_system: oai
+        model_role: analytics
+        grain: one row per CENDIE OAI record
+        temporal_scope: latest observation
+    columns:
+      - name: record_hk
+        description: Clave hash del registro OAI que define el grano del modelo.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('fct_cendie_oai_record_publication')
+              field: record_hk
+      - name: record_id
+        description: Identificador OAI-PMH del registro.
+        data_tests: [not_null, unique]
+      - name: journal_id
+        description: Identificador de la revista.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [revistaanales, abame]
+      - name: journal_name
+        description: Nombre de la revista.
+        data_tests: [not_null]
+      - name: section_ids
+        description: Identificadores de sección concatenados con `|`.
+      - name: section_names
+        description: Nombres de sección concatenados con `|`.
+      - name: dc_title
+        description: Metadato `dc.title` del registro.
+        data_tests: [not_null]
+      - name: dc_date
+        description: Metadato `dc.date` normalizado como fecha.
+        data_tests: [not_null]
+      - name: dc_creator
+        description: Metadatos `dc.creator` concatenados con `|`.
+      - name: dc_description
+        description: Metadatos `dc.description` concatenados con `|`.
+      - name: dc_subject
+        description: Metadatos `dc.subject` concatenados con `|`.
+      - name: dc_publisher
+        description: Metadatos `dc.publisher` concatenados con `|`.
+      - name: dc_language
+        description: Metadatos `dc.language` concatenados con `|`.
+      - name: dc_type
+        description: Metadatos `dc.type` concatenados con `|`.
+      - name: dc_format
+        description: Metadatos `dc.format` concatenados con `|`.
+      - name: dc_identifier
+        description: Metadatos `dc.identifier` concatenados con `|`.
+      - name: dc_relation
+        description: Metadatos `dc.relation` concatenados con `|`.
+      - name: dc_right
+        description: Metadatos `dc.right` concatenados con `|`.
+      - name: repository_identifier
+        description: Identificador del repositorio OAI-PMH de CENDIE.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [ojs.cendie.abc.gob.ar]
+      - name: extract_datetime
+        description: Momento de extracción del registro.
+        data_tests: [not_null]
+      - name: load_datetime
+        description: Momento de carga del registro.
+        data_tests: [not_null]
