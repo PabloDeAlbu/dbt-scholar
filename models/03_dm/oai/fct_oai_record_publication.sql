@@ -1,15 +1,18 @@
 {{ config(materialized = 'table') }}
 
+-- ¿Cuál es la última versión de los metadatos y el contexto de cada registro OAI?
 WITH latest_sat AS (
     SELECT *
     FROM {{ ref('latest_sat_oai_record') }}
 ),
 
+-- ¿Qué observaciones de extracción fueron registradas para cada registro OAI?
 latest_extract AS (
     SELECT *
     FROM {{ ref('latest_sat_oai_record__extract') }}
 ),
 
+-- ¿Cuál es el contexto de extracción más reciente de cada registro?
 latest_extract_by_record AS (
     SELECT
         record_hk,
@@ -33,6 +36,7 @@ latest_extract_by_record AS (
     WHERE extract_rank = 1
 ),
 
+-- ¿Qué valores dc.type distintos tiene cada registro?
 type_agg AS (
     SELECT
         brg.record_hk,
@@ -44,6 +48,7 @@ type_agg AS (
     GROUP BY brg.record_hk
 ),
 
+-- ¿Qué valores dc.right distintos tiene cada registro?
 right_agg AS (
     SELECT
         brg.record_hk,
@@ -54,12 +59,14 @@ right_agg AS (
     GROUP BY brg.record_hk
 ),
 
-base as (
+-- ¿Cómo se combinan el registro, su extracción más reciente, sus tipos y sus derechos?
+record_publication AS (
     SELECT
         sat_r.record_id,
         sat_r.title,
         sat_r.date_issued,
         sat_r.record_hk,
+        sat_r._context,
         extract.repository_identifier,
         extract.institution_ror,
         extract.extract_datetime,
@@ -87,7 +94,31 @@ base as (
     LEFT JOIN latest_extract_by_record extract USING (record_hk)
     LEFT JOIN type_agg USING (record_hk)
     LEFT JOIN right_agg USING (record_hk)
-    WHERE sat_r._context = 'request'
+),
+
+-- ¿Qué atributos expone fct_oai_record_publication?
+final AS (
+    SELECT
+        record_id,
+        title,
+        date_issued,
+        record_hk,
+        _context,
+        repository_identifier,
+        institution_ror,
+        extract_datetime,
+        load_datetime,
+        dc_type,
+        dc_type_count,
+        has_multiple_dc_type,
+        dc_right,
+        dc_right_count,
+        has_multiple_dc_right,
+        valid_date_issued,
+        valid_dc_type,
+        valid_dc_right
+    FROM record_publication
 )
 
-SELECT * FROM base
+SELECT *
+FROM final
