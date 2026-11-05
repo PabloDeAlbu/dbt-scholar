@@ -19,6 +19,7 @@ WITH base AS (
     FROM {{ ref('fct_entity_extract') }}
 ),
 
+-- ¿Qué atributos expone fct_entity_extract_by_ror?
 final AS (
     SELECT
         extract_date,
@@ -52,4 +53,5 @@ final AS (
         source_label
 )
 
-SELECT * FROM final
+SELECT *
+FROM final

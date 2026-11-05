@@ -103,6 +103,7 @@ unioned AS (
     SELECT * FROM dspacedb5_extract
 ),
 
+-- ¿Qué atributos expone fct_entity_extract?
 final AS (
     SELECT
         extract.source_system,
@@ -136,4 +137,5 @@ final AS (
         ON extract.institution_ror = org.organization_ror
 )
 
-SELECT * FROM final
+SELECT *
+FROM final

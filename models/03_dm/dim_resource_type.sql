@@ -1,6 +1,7 @@
 {{ config(materialized = 'table') }}
 
-WITH base AS (
+-- ¿Qué atributos expone dim_resource_type?
+WITH final AS (
     SELECT
         coar_uri AS resource_type_uri,
         label AS resource_type_label,
@@ -11,4 +12,5 @@ WITH base AS (
     FROM {{ ref('dim_coar_resource_type') }}
 )
 
-SELECT * FROM base
+SELECT *
+FROM final

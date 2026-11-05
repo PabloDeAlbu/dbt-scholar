@@ -1,6 +1,7 @@
 {{ config(materialized = 'table') }}
 
-WITH base AS (
+-- ¿Qué atributos expone dim_access_right?
+WITH final AS (
     SELECT
         coar_uri AS access_right_uri,
         coar_label AS access_right_label,
@@ -9,4 +10,5 @@ WITH base AS (
     FROM {{ ref('seed_coar_access_right') }}
 )
 
-SELECT * FROM base
+SELECT *
+FROM final

@@ -40,7 +40,8 @@ merged AS (
         ON openaire_organization.organization_ror = openalex_institution.organization_ror
 ),
 
-dim AS (
+-- ¿Qué atributos expone dim_organization?
+final AS (
     SELECT
         organization_ror,
         COALESCE(openaire_organization_name, openalex_institution_name, organization_ror) AS organization_name,
@@ -57,4 +58,5 @@ dim AS (
     FROM merged
 )
 
-SELECT * FROM dim
+SELECT *
+FROM final

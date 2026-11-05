@@ -359,31 +359,37 @@ unioned AS (
         extract_datetime,
         load_datetime
     FROM openalex_publication
+),
+
+-- ¿Qué atributos expone fct_entity_publication?
+final AS (
+    SELECT
+        unioned.source_system,
+        source_labels.source_label,
+        CASE
+            WHEN unioned.source_system IN ('dspacedb', 'dspacedb5', 'oai') THEN 'RI'
+            WHEN unioned.source_system = 'openaire' THEN 'OpenAIRE'
+            WHEN unioned.source_system = 'openalex' THEN 'OpenAlex'
+        END AS source_short_label,
+        unioned.entity_type,
+        unioned.entity_hk,
+        unioned.entity_id,
+        unioned.institution_ror,
+        COALESCE(organization.openaire_acronym, organization.organization_name, unioned.institution_ror) AS institution_short_label,
+        COALESCE(organization.organization_name, unioned.institution_ror) AS institution_label,
+        unioned.publication_date,
+        unioned.publication_year,
+        unioned.doi,
+        unioned.title,
+        unioned.publication_type,
+        unioned.extract_datetime,
+        unioned.load_datetime
+    FROM unioned
+    INNER JOIN source_labels
+        USING (source_system)
+    LEFT JOIN organization
+        ON unioned.institution_ror = organization.organization_ror
 )
 
-SELECT
-    unioned.source_system,
-    source_labels.source_label,
-    CASE
-        WHEN unioned.source_system IN ('dspacedb', 'dspacedb5', 'oai') THEN 'RI'
-        WHEN unioned.source_system = 'openaire' THEN 'OpenAIRE'
-        WHEN unioned.source_system = 'openalex' THEN 'OpenAlex'
-    END AS source_short_label,
-    unioned.entity_type,
-    unioned.entity_hk,
-    unioned.entity_id,
-    unioned.institution_ror,
-    COALESCE(organization.openaire_acronym, organization.organization_name, unioned.institution_ror) AS institution_short_label,
-    COALESCE(organization.organization_name, unioned.institution_ror) AS institution_label,
-    unioned.publication_date,
-    unioned.publication_year,
-    unioned.doi,
-    unioned.title,
-    unioned.publication_type,
-    unioned.extract_datetime,
-    unioned.load_datetime
-FROM unioned
-INNER JOIN source_labels
-    USING (source_system)
-LEFT JOIN organization
-    ON unioned.institution_ror = organization.organization_ror
+SELECT *
+FROM final
