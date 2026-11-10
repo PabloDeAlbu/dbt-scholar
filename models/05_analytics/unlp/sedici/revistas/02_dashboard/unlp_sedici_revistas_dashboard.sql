@@ -3,7 +3,7 @@
 WITH vocsedici AS (
     SELECT
         item_id,
-        sedicidb_author_id,
+        metadata_value_id,
         has_voc_match,
         voc_person_url,
         affiliation_status,
@@ -46,7 +46,7 @@ SELECT
         ELSE 'Sin autor en VOC SEDICI'
     END AS correspondencia_voc_publicacion,
     authorship.author_name AS nombre_autor,
-    authorship.sedicidb_author_id IS NOT NULL AS tiene_autor_reconocido,
+    authorship.metadata_value_id IS NOT NULL AS tiene_autoria_declarada,
     authorship.has_authority_control AS tiene_autoridad,
     vocsedici.has_voc_match AS tiene_correspondencia_voc,
     vocsedici.voc_person_url AS url_autor_voc,
@@ -61,15 +61,15 @@ SELECT
     END AS tiene_afiliacion_unlp,
     vocsedici.unlp_institution_count AS afiliaciones_unlp,
     vocsedici.external_institution_count AS otras_afiliaciones,
-    authorship.sedicidb_author_id AS id_autor,
+    authorship.authority AS id_autor,
     CASE
-        WHEN authorship.sedicidb_author_id IS NOT NULL
-            THEN item.handle || '|' || authorship.sedicidb_author_id
+        WHEN authorship.metadata_value_id IS NOT NULL
+            THEN authorship.metadata_value_id::text
     END AS id_autoria
 FROM {{ ref('fct_unlp_sedici_revista_publicacion') }} AS item
 LEFT JOIN {{ ref('brg_unlp_sedici_revista_publicacion_autor') }} AS authorship
     USING (item_id)
 LEFT JOIN vocsedici
-    USING (item_id, sedicidb_author_id)
+    USING (item_id, metadata_value_id)
 LEFT JOIN publication_voc_status
     USING (item_id)

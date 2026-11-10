@@ -1,86 +1,54 @@
 {{ config(
     materialized='table',
     indexes=[
-        {'columns': ['author_id'], 'unique': true},
-        {'columns': ['authority'], 'unique': true},
-        {'columns': ['author_name_normalized']}
+        {'columns': ['authority'], 'unique': true}
     ],
     post_hook=[
         "analyze {{ this }}"
     ]
 ) }}
 
-WITH author_observation AS (
-    SELECT *
-    FROM {{ ref('brg_unlp_sedicidb_item_author') }}
-),
-
-name_variant_stats AS (
+-- ¿Qué nombres se observan para cada autoridad de autor?
+WITH authority_name AS (
     SELECT
-        author_bk,
+        authority,
         author_name,
-        author_name_raw,
-        COUNT(*)::bigint AS observation_count
-    FROM author_observation
-    GROUP BY author_bk, author_name, author_name_raw
+        COUNT(*)::bigint AS name_count
+    FROM {{ ref('brg_unlp_sedicidb_item_author') }}
+    WHERE authority IS NOT NULL
+    GROUP BY authority, author_name
 ),
 
+-- ¿Qué nombre se prioriza para representar cada autoridad?
 preferred_name AS (
     SELECT
-        author_bk,
-        author_name AS author_name_normalized,
-        author_name_raw AS author_name_preferred,
+        authority,
+        author_name AS preferred_name,
         ROW_NUMBER() OVER (
-            PARTITION BY author_bk
-            ORDER BY observation_count DESC, author_name, author_name_raw
+            PARTITION BY authority
+            ORDER BY name_count DESC, author_name
         ) AS name_rank
-    FROM name_variant_stats
+    FROM authority_name
 ),
 
-author_stats AS (
+-- ¿Qué nombres distintos están asociados con cada autoridad?
+authority_names AS (
     SELECT
-        author_bk,
-        MIN(author_id) AS author_id,
-        CASE
-            WHEN COUNT(DISTINCT author_type) = 1 THEN MIN(author_type)
-            ELSE 'mixed'
-        END AS author_type,
-        STRING_AGG(DISTINCT author_role, '|' ORDER BY author_role) AS author_roles,
-        STRING_AGG(
-            DISTINCT metadatafield_fullname,
-            '|'
-            ORDER BY metadatafield_fullname
-        ) AS metadatafields,
-        MIN(authority) AS authority,
-        BOOL_OR(has_authority_control) AS has_authority_control,
-        MIN(confidence) AS min_confidence,
-        MAX(confidence) AS max_confidence,
-        COUNT(*)::bigint AS observation_count,
-        COUNT(DISTINCT item_id)::bigint AS item_count,
-        COUNT(DISTINCT author_name_raw)::bigint AS observed_name_variant_count
-    FROM author_observation
-    GROUP BY author_bk
+        authority,
+        STRING_AGG(author_name, '|' ORDER BY author_name) AS names
+    FROM authority_name
+    GROUP BY authority
 ),
 
+-- ¿Qué autoridades de autor existen y cómo se representan de forma legible?
 final AS (
     SELECT
-        stats.author_id,
-        stats.author_bk,
-        preferred.author_name_preferred,
-        preferred.author_name_normalized,
-        stats.author_type,
-        stats.author_roles,
-        stats.metadatafields,
-        stats.authority,
-        stats.has_authority_control,
-        stats.min_confidence,
-        stats.max_confidence,
-        stats.observation_count,
-        stats.item_count,
-        stats.observed_name_variant_count
-    FROM author_stats AS stats
+        names.authority,
+        preferred.preferred_name,
+        names.names
+    FROM authority_names AS names
     INNER JOIN preferred_name AS preferred
-        ON preferred.author_bk = stats.author_bk
+        ON preferred.authority = names.authority
        AND preferred.name_rank = 1
 )
 

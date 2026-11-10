@@ -4,11 +4,12 @@ models:
   - name: fct_unlp_sedici_revista_autoria_afiliacion_vocsedici
     description: >
       Autorías de publicaciones de revistas UNLP. Una fila por `item_id` y
-      `sedicidb_author_id`, con afiliación a la fecha de publicación.
+      `metadata_value_id`, con afiliación a la fecha de publicación cuando la
+      autoría posee una autoridad vinculada con VOC SEDICI.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
           name: sedici_revistas_revista_publication_author_unique_grain
-          combination_of_columns: [item_id, sedicidb_author_id]
+          combination_of_columns: [item_id, metadata_value_id]
       - dbt_utils.expression_is_true:
           name: sedici_revistas_revista_publication_author_is_valid_sedici_item
           expression: >
@@ -45,14 +46,11 @@ models:
               name: sedici_revistas_revista_publication_author_item_in_sedici_fact
               to: ref('fct_unlp_sedici_revista_publicacion')
               field: item_id
-      - name: sedicidb_author_id
-        description: Identificador de autor en SEDICI.
+      - name: metadata_value_id
+        description: Identificador de la autoría declarada en SEDICIDB.
         data_tests:
           - not_null
-          - relationships:
-              name: sedici_revistas_revista_publication_author_in_sedici_author_dim
-              to: ref('dim_unlp_sedicidb_author')
-              field: author_id
+          - unique
       - name: author_name
         description: Nombre preferido del autor.
         data_tests: [not_null]
@@ -109,12 +107,6 @@ models:
       - name: has_authority_control
         description: Indica si el autor tiene URI de autoridad.
         data_tests: [not_null]
-      - name: author_identity_basis
-        description: Base institucional usada para construir la identidad del autor.
-        data_tests:
-          - not_null
-          - accepted_values:
-              values: [autoridad, nombre_normalizado]
       - name: voc_person_node_id
         description: Identificador de persona en VOC.
       - name: has_voc_match

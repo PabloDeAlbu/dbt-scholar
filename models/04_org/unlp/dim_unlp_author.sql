@@ -1,14 +1,19 @@
 {{ config(materialized='table') }}
 
-WITH author AS (
-    SELECT *
+-- ¿Qué autoridades y nombres de autor aporta SEDICIDB?
+WITH sedicidb_author AS (
+    SELECT
+        authority,
+        preferred_name AS sedicidb_preferred_name,
+        names AS sedicidb_names
     FROM {{ ref('dim_unlp_sedicidb_author') }}
 ),
 
+-- ¿Qué personas e identificadores aporta el estado actual de VOC SEDICI?
 voc_person AS (
     SELECT
         person_node_id,
-        nombre_completo,
+        nombre_completo AS voc_name,
         persona_url,
         orcid,
         scholar_user_id,
@@ -16,30 +21,20 @@ voc_person AS (
     FROM {{ ref('dim_vocsedici_persona') }}
 ),
 
+-- ¿Qué autoridades observadas en SEDICIDB se relacionan con personas de VOC SEDICI?
 final AS (
     SELECT
-        author.author_id,
-        author.author_bk,
-        author.author_name_preferred,
-        author.author_name_normalized,
-        author.author_type,
-        author.author_roles,
         author.authority,
-        author.has_authority_control,
-        CASE
-            WHEN author.has_authority_control THEN 'autoridad'
-            ELSE 'nombre_normalizado'
-        END::text AS author_identity_basis,
+        author.sedicidb_preferred_name,
+        author.sedicidb_names,
         voc.person_node_id AS voc_person_node_id,
+        voc.voc_name,
         voc.person_node_id IS NOT NULL AS has_voc_match,
         voc.persona_url AS voc_person_url,
         voc.orcid,
         voc.scholar_user_id,
-        voc.scholar_profile_url,
-        author.observation_count,
-        author.item_count,
-        author.observed_name_variant_count
-    FROM author
+        voc.scholar_profile_url
+    FROM sedicidb_author AS author
     LEFT JOIN voc_person AS voc
         ON voc.persona_url = author.authority
 )

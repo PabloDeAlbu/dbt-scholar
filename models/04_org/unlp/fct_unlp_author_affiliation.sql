@@ -1,15 +1,15 @@
 {{ config(materialized='table') }}
 
--- Afiliaciones institucionales publicadas de las identidades de autor UNLP.
-
+-- ¿Qué autoridades de autor tienen correspondencia con una persona de VOC SEDICI?
 WITH author AS (
     SELECT
-        author_id,
+        authority,
         voc_person_node_id
     FROM {{ ref('dim_unlp_author') }}
     WHERE has_voc_match IS TRUE
 ),
 
+-- ¿Qué afiliaciones publicadas vinculan personas e instituciones en VOC SEDICI?
 affiliation AS (
     SELECT
         paragraph_id AS affiliation_id,
@@ -24,6 +24,7 @@ affiliation AS (
       AND institution_esta_publicada IS TRUE
 ),
 
+-- ¿Qué contexto institucional aporta VOC SEDICI para cada afiliación?
 institution AS (
     SELECT
         institution_node_id,
@@ -34,15 +35,17 @@ institution AS (
     FROM {{ ref('dim_vocsedici_institucion') }}
 ),
 
+-- ¿Qué instituciones observadas pertenecen al árbol organizacional de la UNLP?
 unlp_organization AS (
     SELECT
         organization_id
     FROM {{ ref('dim_unlp_organization') }}
 ),
 
+-- ¿Qué afiliaciones institucionales pueden atribuirse a cada autoridad de autor?
 final AS (
     SELECT
-        author.author_id,
+        author.authority,
         author.voc_person_node_id,
         affiliation.affiliation_id,
         affiliation.institution_node_id,

@@ -28,11 +28,11 @@ models:
       meta:
         organization: unlp
         model_role: dashboard_dataset
-        grain: handle_publicacion, id_autor
+        grain: handle_publicacion, id_autoria
     data_tests:
       - dbt_utils.unique_combination_of_columns:
           name: sedici_revistas_dashboard_unique_grain
-          combination_of_columns: [handle_publicacion, id_autor]
+          combination_of_columns: [handle_publicacion, id_autoria]
       - dbt_utils.expression_is_true:
           name: sedici_revistas_dashboard_author_fields_are_consistent
           expression: >
@@ -40,22 +40,22 @@ models:
               id_autor is null
               and id_autoria is null
               and nombre_autor is null
-              and not tiene_autor_reconocido
+              and not tiene_autoria_declarada
               and tiene_autoridad is null
             )
             or
             (
-              id_autor is not null
-              and id_autoria is not null
+              id_autoria is not null
               and nombre_autor is not null
-              and tiene_autor_reconocido
+              and tiene_autoria_declarada
               and tiene_autoridad is not null
+              and tiene_autoridad = (id_autor is not null)
             )
       - dbt_utils.expression_is_true:
           name: sedici_revistas_dashboard_voc_evidence_is_consistent
           expression: >
             (
-              id_autor is null
+              id_autoria is null
               and tiene_correspondencia_voc is null
               and situacion_afiliacion is null
               and afiliaciones_unlp is null
@@ -63,7 +63,7 @@ models:
             )
             or
             (
-              id_autor is not null
+              id_autoria is not null
               and tiene_correspondencia_voc is not null
               and situacion_afiliacion is not null
               and afiliaciones_unlp >= 0
@@ -130,8 +130,8 @@ models:
                 - Sin autor en VOC SEDICI
       - name: nombre_autor
         description: Nombre preferido del autor.
-      - name: tiene_autor_reconocido
-        description: Indica si la fila representa una relación ítem-autor reconocida.
+      - name: tiene_autoria_declarada
+        description: Indica si la fila representa una autoría declarada en SEDICIDB.
         data_tests: [not_null]
       - name: tiene_autoridad
         description: Indica si la identidad del autor se construyó con una authority.
@@ -158,14 +158,12 @@ models:
       - name: otras_afiliaciones
         description: Cantidad de instituciones externas aplicables a la fecha de publicación.
       - name: id_autor
-        description: >
-          Clave analítica provisional de la identidad de autor en SEDICI. Se
-          conserva para realizar conteos distintos sin mezclar homónimos.
+        description: Autoridad informada para el autor, cuando existe.
         data_tests:
           - relationships:
               name: sedici_revistas_dashboard_author_in_dimension
               to: ref('dim_unlp_sedicidb_author')
-              field: author_id
+              field: authority
       - name: id_autoria
-        description: Clave analítica de la relación entre publicación y autor.
+        description: Identificador del valor de metadatos que declara la autoría.
         data_tests: [unique]

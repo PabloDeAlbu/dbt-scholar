@@ -6,8 +6,8 @@ autor_resuelto AS (
     SELECT
         persona.nombre AS persona,
         persona.variantes_nombre,
-        autor.author_id,
-        autor.author_name_preferred,
+        autor.authority,
+        autor.sedicidb_preferred_name,
         CASE
             WHEN autor.authority = persona.autoridad_voc_sedici THEN 'autoridad_voc_sedici'
             WHEN autor.orcid = persona.orcid THEN 'orcid'
@@ -19,7 +19,7 @@ autor_resuelto AS (
                 WHEN autor.authority = persona.autoridad_voc_sedici THEN 1
                 WHEN autor.orcid = persona.orcid THEN 2
                 WHEN autor.scholar_user_id = persona.id_google_scholar THEN 3
-            END, autor.author_id
+            END, autor.authority
         ) AS prioridad
     FROM persona_referencia AS persona
     INNER JOIN {{ ref('dim_unlp_author') }} AS autor
@@ -41,8 +41,8 @@ variante_nombre AS (
 observacion_autor AS (
     SELECT
         resuelto.persona,
-        resuelto.author_id AS id_autor_resuelto,
-        resuelto.author_name_preferred AS autor_resuelto,
+        resuelto.authority AS id_autor_resuelto,
+        resuelto.sedicidb_preferred_name AS autor_resuelto,
         resuelto.evidencia_identidad,
         autoria.item_id,
         autoria.metadatafield_fullname,
@@ -50,17 +50,17 @@ observacion_autor AS (
         autoria.authority,
         autoria.author_place,
         CASE
-            WHEN autoria.author_id = resuelto.author_id THEN 'identidad_resuelta'
+            WHEN autoria.authority = resuelto.authority THEN 'autoridad_resuelta'
             ELSE 'variante_nombre_sin_autoridad'
         END AS evidencia_publicacion,
         ROW_NUMBER() OVER (
             PARTITION BY resuelto.persona, autoria.item_id
-            ORDER BY CASE WHEN autoria.author_id = resuelto.author_id THEN 1 ELSE 2 END,
+            ORDER BY CASE WHEN autoria.authority = resuelto.authority THEN 1 ELSE 2 END,
                 autoria.author_place NULLS LAST, autoria.metadata_value_id
         ) AS prioridad
     FROM autor_resuelto AS resuelto
     INNER JOIN {{ ref('brg_unlp_sedicidb_item_author') }} AS autoria
-        ON autoria.author_id = resuelto.author_id
+        ON autoria.authority = resuelto.authority
         OR (
             autoria.authority IS NULL
             AND EXISTS (

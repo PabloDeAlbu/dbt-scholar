@@ -3,7 +3,6 @@
     indexes=[
         {'columns': ['metadata_value_id'], 'unique': true},
         {'columns': ['item_id']},
-        {'columns': ['author_id']},
         {'columns': ['authority']}
     ],
     post_hook=[
@@ -11,8 +10,8 @@
     ]
 ) }}
 
--- ¿Qué observaciones representan autorías?
-WITH author_observation AS (
+-- ¿Qué valores de metadatos de ítem corresponden a autores o compiladores?
+WITH item_author_metadatavalue AS (
     SELECT
         item_id,
         metadata_value_id,
@@ -43,8 +42,8 @@ WITH author_observation AS (
     )
 ),
 
--- ¿Cómo se identifica cada autoría?
-identified AS (
+-- ¿Qué ítems se relacionan con qué autores o compiladores?
+final AS (
     SELECT
         item_id,
         metadata_value_id,
@@ -57,22 +56,9 @@ identified AS (
         authority,
         authority IS NOT NULL AS has_authority_control,
         confidence,
-        author_place,
-        CASE
-            WHEN authority IS NOT NULL
-                THEN 'authority||' || authority
-            ELSE 'name||' || author_type || '||' || LOWER(author_name)
-        END AS author_bk
-    FROM author_observation
+        author_place
+    FROM item_author_metadatavalue
     WHERE author_name IS NOT NULL
-),
-
--- ¿Qué clave técnica tiene cada autoría?
-final AS (
-    SELECT
-        MD5(author_bk) AS author_id,
-        *
-    FROM identified
 )
 
 SELECT *

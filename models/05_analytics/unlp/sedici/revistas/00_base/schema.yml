@@ -131,12 +131,14 @@ models:
 
   - name: brg_unlp_sedici_revista_publicacion_autor
     description: >
-      Relación descriptiva entre ítems de revistas e identidades de autores
-      personales. Una fila por `item_id` y `sedicidb_author_id`, sin afiliaciones.
+      Relación entre publicaciones de revistas y autorías personales registradas
+      mediante el metadatafield `sedici.creator.person`. Excluye autores
+      corporativos y compiladores. Presenta una fila por `metadata_value_id`,
+      sin conciliar personas ni incorporar afiliaciones.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
           name: sedici_revistas_revista_item_author_unique_grain
-          combination_of_columns: [item_id, sedicidb_author_id]
+          combination_of_columns: [item_id, metadata_value_id]
       - dbt_utils.expression_is_true:
           name: sedici_revistas_revista_item_author_authority_is_consistent
           expression: "has_authority_control = (authority is not null)"
@@ -149,27 +151,20 @@ models:
               name: sedici_revistas_revista_item_author_item_in_fact
               to: ref('fct_unlp_sedici_revista_publicacion')
               field: item_id
-      - name: sedicidb_author_id
-        description: Identificador técnico de la identidad de autor.
+      - name: metadata_value_id
+        description: Identificador de la autoría declarada en los metadatos del ítem.
         data_tests:
           - not_null
-          - relationships:
-              name: sedici_revistas_revista_item_author_in_sedici_author_dim
-              to: ref('dim_unlp_sedicidb_author')
-              field: author_id
+          - unique
       - name: author_name
-        description: Forma preferida del nombre del autor.
+        description: Nombre limpio informado en la autoría.
         data_tests: [not_null]
-      - name: author_name_normalized
-        description: Nombre normalizado de la identidad.
-        data_tests: [not_null]
+      - name: author_name_raw
+        description: Nombre original informado en la autoría.
       - name: author_place
         description: Posición informada en la lista de autores.
-      - name: metadata_value_id
-        description: Observación de metadato elegida para la relación.
-        data_tests: [not_null]
       - name: authority
-        description: Clave de autoridad de la identidad, cuando existe.
+        description: Clave de autoridad informada en la autoría, cuando existe.
       - name: has_authority_control
         description: Indica si la identidad tiene una authority.
         data_tests: [not_null]

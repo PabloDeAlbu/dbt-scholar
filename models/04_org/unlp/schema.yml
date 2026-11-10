@@ -3,38 +3,26 @@ version: 2
 models:
   - name: dim_unlp_author
     description: >
-      Identidades de autor relevantes para los procesos analíticos de la UNLP,
-      observadas inicialmente en SEDICI. Conserva identidades con afiliación
-      UNLP, externa o desconocida y las enriquece con los identificadores
-      disponibles en VOC SEDICI. La pertenencia institucional se modela por
-      separado y no está implícita en esta dimensión.
+      Autoridades observadas en SEDICIDB enriquecidas con el estado actual de
+      las personas correspondientes en VOC SEDICI. La inclusión no demuestra
+      pertenencia a la UNLP y los nombres de ambas fuentes se conservan por
+      separado porque no existe sincronización automática entre ellas.
     config:
       meta:
         organization: unlp
         model_role: dimension
-        grain: author_id
+        grain: authority
         temporal_scope: current_snapshot
     columns:
-      - name: author_id
-        description: Clave técnica de la identidad de autor.
-        data_tests: [not_null, unique]
-      - name: author_bk
-        description: Clave de negocio controlada o nominal de respaldo.
-        data_tests: [not_null, unique]
-      - name: author_name_preferred
-        description: Nombre preferido observado en SEDICI.
-        data_tests: [not_null]
       - name: authority
-        description: Clave de autoridad observada en SEDICI cuando existe control de autoridades.
-      - name: has_authority_control
-        description: Indica si la identidad posee una authority.
+        description: Clave de autoridad observada en SEDICIDB.
+        data_tests: [not_null, unique]
+      - name: sedicidb_preferred_name
+        description: Nombre más frecuente asociado con la autoridad en el dump SEDICIDB.
         data_tests: [not_null]
-      - name: author_identity_basis
-        description: Base usada para construir la identidad; `autoridad` o `nombre_normalizado`.
-        data_tests:
-          - not_null
-          - accepted_values:
-              values: [autoridad, nombre_normalizado]
+      - name: sedicidb_names
+        description: Nombres distintos asociados con la autoridad en el dump SEDICIDB.
+        data_tests: [not_null]
       - name: voc_person_node_id
         description: Identificador de la persona cuando la authority corresponde con un nodo existente en VOC.
         data_tests:
@@ -46,6 +34,8 @@ models:
       - name: has_voc_match
         description: Indica si la authority corresponde con una persona existente en VOC.
         data_tests: [not_null]
+      - name: voc_name
+        description: Nombre completo informado por el estado actual de VOC SEDICI.
       - name: voc_person_url
         description: URL pública de la persona en VOC cuando existe correspondencia.
       - name: orcid
@@ -64,23 +54,23 @@ models:
       meta:
         organization: unlp
         model_role: fact
-        grain: author_id, affiliation_id
+        grain: authority, affiliation_id
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [author_id, affiliation_id]
+          combination_of_columns: [authority, affiliation_id]
       - dbt_utils.expression_is_true:
           expression: "valid_from is null or valid_to is null or valid_from <= valid_to"
       - dbt_utils.expression_is_true:
           name: unlp_author_affiliation_organization_is_consistent
           expression: "is_unlp_affiliation = (unlp_organization_id is not null)"
     columns:
-      - name: author_id
-        description: Identificador de la identidad institucional de autor.
+      - name: authority
+        description: Clave de autoridad de la persona vinculada con la afiliación.
         data_tests:
           - not_null
           - relationships:
               to: ref('dim_unlp_author')
-              field: author_id
+              field: authority
       - name: voc_person_node_id
         description: Persona VOC vinculada con la identidad de autor.
         data_tests: [not_null]

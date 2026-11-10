@@ -1,6 +1,6 @@
 {{ config(
     indexes=[
-        {'columns': ['item_id', 'sedicidb_author_id'], 'unique': true},
+        {'columns': ['metadata_value_id'], 'unique': true},
         {'columns': ['sedici_community_id', 'publication_year']},
         {'columns': ['affiliation_status']},
         {'columns': ['voc_person_node_id']}
@@ -8,6 +8,7 @@
     post_hook=["analyze {{ this }}"]
 ) }}
 
+-- ¿Qué atributos describen las publicaciones del universo de revistas?
 WITH revista_publication AS (
     SELECT
         base.item_id,
@@ -29,15 +30,15 @@ WITH revista_publication AS (
     FROM {{ ref('fct_unlp_sedici_revista_publicacion') }} AS base
 ),
 
+-- ¿Qué autorías declaradas pueden vincularse con una autoridad de VOC SEDICI?
 authorship AS (
     SELECT
         revista_publication.*,
-        author.sedicidb_author_id,
+        author.metadata_value_id,
         author.author_name,
         author.author_place,
         author.authority,
         author.has_authority_control,
-        identity.author_identity_basis,
         identity.voc_person_node_id,
         identity.has_voc_match,
         identity.voc_person_url
@@ -45,13 +46,14 @@ authorship AS (
     INNER JOIN {{ ref('brg_unlp_sedici_revista_publicacion_autor') }} AS author
         USING (item_id)
     LEFT JOIN {{ ref('dim_unlp_author') }} AS identity
-        ON identity.author_id = author.sedicidb_author_id
+        ON identity.authority = author.authority
 ),
 
+-- ¿Qué afiliaciones estaban vigentes para cada autoría al publicarse el ítem?
 affiliation_stats AS (
     SELECT
         author.item_id,
-        author.sedicidb_author_id,
+        author.metadata_value_id,
         COUNT(DISTINCT affiliation.institution_node_id) FILTER (
             WHERE affiliation.is_unlp_affiliation IS TRUE
         )::integer AS unlp_institution_count,
@@ -60,16 +62,17 @@ affiliation_stats AS (
         )::integer AS external_institution_count
     FROM authorship AS author
     LEFT JOIN {{ ref('fct_unlp_author_affiliation') }} AS affiliation
-        ON affiliation.author_id = author.sedicidb_author_id
+        ON affiliation.authority = author.authority
        AND (affiliation.valid_from IS NULL OR affiliation.valid_from <= author.publication_date)
        AND (affiliation.valid_to IS NULL OR affiliation.valid_to >= author.publication_date)
-    GROUP BY author.item_id, author.sedicidb_author_id
+    GROUP BY author.item_id, author.metadata_value_id
 ),
 
+-- ¿Cómo se clasifica la afiliación de cada autoría de una publicación de revista?
 final AS (
     SELECT
         author.item_id,
-        author.sedicidb_author_id,
+        author.metadata_value_id,
         author.author_name,
         author.author_place,
         author.handle,
@@ -89,7 +92,6 @@ final AS (
         author.discoverable,
         author.authority,
         author.has_authority_control,
-        author.author_identity_basis,
         author.voc_person_node_id,
         author.has_voc_match,
         author.voc_person_url,
@@ -108,7 +110,7 @@ final AS (
         affiliation.external_institution_count
     FROM authorship AS author
     INNER JOIN affiliation_stats AS affiliation
-        USING (item_id, sedicidb_author_id)
+        USING (item_id, metadata_value_id)
 )
 
 SELECT *
