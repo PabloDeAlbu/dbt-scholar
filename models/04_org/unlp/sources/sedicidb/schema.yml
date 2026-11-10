@@ -24,22 +24,8 @@ sources:
 models:
   - name: fct_unlp_sedicidb_metadatafield_usage
     description: >
-      Inventario vigente de metadatafields registrados en el dump SEDICI, a
-      grano una fila por `metadata_field_id`. Incluye campos sin uso y métricas
-      de cobertura, volumen y multivaluación sobre recursos de tipo ítem.
-    data_tests:
-      - dbt_utils.expression_is_true:
-          name: sedicidb_metadata_usage_lang_counts_reconcile
-          expression: "text_lang_value_count + missing_text_lang_value_count = metadata_value_count"
-      - dbt_utils.expression_is_true:
-          name: sedicidb_metadata_usage_lang_coverage_range
-          expression: "text_lang_coverage_pct between 0 and 100"
-      - dbt_utils.expression_is_true:
-          name: sedicidb_metadata_usage_authority_counts_reconcile
-          expression: "authority_value_count + missing_authority_value_count = metadata_value_count"
-      - dbt_utils.expression_is_true:
-          name: sedicidb_metadata_usage_authority_coverage_range
-          expression: "authority_coverage_pct between 0 and 100"
+      Uso general de los metadatafields registrados en SEDICIDB. Presenta una
+      fila por `metadata_field_id`, incluidos los campos sin valores.
     columns:
       - name: metadata_field_id
         description: Identificador del metadatafield en DSpace 5.
@@ -47,58 +33,15 @@ models:
       - name: metadatafield_fullname
         description: Nombre completo formado por schema, element y qualifier.
         data_tests: [not_null, unique]
-      - name: item_count
-        description: Cantidad de ítems con al menos una observación del campo.
-        data_tests: [not_null]
       - name: metadata_value_count
-        description: Cantidad total de observaciones del campo en ítems.
-        data_tests: [not_null]
-      - name: empty_metadata_value_count
-        description: Cantidad de observaciones cuyo valor textual es nulo o vacío luego de aplicar `BTRIM`.
-        data_tests: [not_null]
-      - name: distinct_nonempty_text_value_count
-        description: Cantidad de valores textuales no vacíos distintos en todo el repositorio.
-        data_tests: [not_null]
-      - name: multivalued_item_count
-        description: Cantidad de ítems con más de un valor textual distinto y no vacío para el campo.
-        data_tests: [not_null]
-      - name: item_coverage_pct
-        description: Porcentaje de ítems del dump que observan el metadatafield.
-        data_tests: [not_null]
-      - name: text_lang_value_count
-        description: Cantidad de observaciones del metadatafield con `text_lang` no nulo ni vacío.
-        data_tests: [not_null]
-      - name: missing_text_lang_value_count
-        description: Cantidad de observaciones del metadatafield sin `text_lang` informado.
-        data_tests: [not_null]
-      - name: text_lang_coverage_pct
-        description: Porcentaje de observaciones del metadatafield que tienen `text_lang` informado.
-        data_tests: [not_null]
-      - name: distinct_text_lang_count
-        description: Cantidad de idiomas distintos observados después de normalizar espacios y mayúsculas.
-        data_tests: [not_null]
-      - name: text_langs
-        description: Idiomas observados, ordenados y unidos con `|`; por ejemplo `en|es|pt`.
-      - name: text_lang_value_counts
-        description: Conteo de observaciones por idioma en formato `idioma=cantidad`, unido con `|`.
-      - name: authority_value_count
-        description: Cantidad de observaciones con `authority` no nula ni vacía.
-        data_tests: [not_null]
-      - name: missing_authority_value_count
-        description: Cantidad de observaciones sin `authority` informada.
-        data_tests: [not_null]
-      - name: authority_coverage_pct
-        description: Porcentaje de observaciones del metadatafield con `authority` informada.
-        data_tests: [not_null]
-      - name: distinct_authority_count
-        description: Cantidad de valores de `authority` distintos observados en el metadatafield.
+        description: Cantidad de valores asociados al metadatafield en todos los tipos de recurso.
         data_tests: [not_null]
 
   - name: dim_unlp_sedicidb_community
     description: >
-      Dimensión vigente de comunidades SEDICI, a grano una fila por
-      `community_id`. Resuelve el título preferido, la comunidad padre, la raíz
-      y los caminos jerárquicos directamente desde el dump DSpace 5.
+      Dimensión de comunidades de SEDICI. Presenta una fila por `community_id`.
+      Resuelve el título preferido, la comunidad padre, la raíz y el recorrido
+      jerárquico.
     columns:
       - name: community_id
         description: Identificador de la comunidad en DSpace 5.
@@ -145,10 +88,8 @@ models:
 
   - name: dim_unlp_sedicidb_collection
     description: >
-      Dimensión vigente de colecciones SEDICI, a grano una fila por
-      `collection_id`. Resuelve el título preferido y todo el contexto de la
-      comunidad contenedora para que los modelos de publicaciones no tengan que
-      reconstruir la jerarquía.
+      Dimensión de colecciones de SEDICI. Presenta una fila por `collection_id`.
+      Resuelve el título preferido y el contexto de la comunidad contenedora.
     columns:
       - name: collection_id
         description: Identificador de la colección en DSpace 5.
@@ -188,10 +129,9 @@ models:
 
   - name: brg_unlp_sedicidb_item_doi
     description: >
-      DOI normalizados observados en los metadatos de cada ítem de SEDICI, a
-      grano una fila por `item_id` y DOI. Conserva los metadatafields que
-      aportaron evidencia y no selecciona un único DOI cuando el ítem presenta
-      más de uno.
+      Relación entre ítems y DOI normalizados observados en los metadatos de
+      SEDICIDB. Presenta una fila por `item_id` y DOI, y conserva los
+      metadatafields que aportaron evidencia.
     config:
       meta:
         organization: unlp

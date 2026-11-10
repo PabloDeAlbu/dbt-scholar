@@ -10,6 +10,7 @@
     ]
 ) }}
 
+-- ¿Qué títulos están informados para cada colección?
 WITH title_value AS (
     SELECT
         collection.collection_id,
@@ -30,6 +31,7 @@ WITH title_value AS (
       AND NULLIF(BTRIM(field.qualifier), '') IS NULL
 ),
 
+-- ¿Qué título se prioriza para cada colección?
 title_ranked AS (
     SELECT
         *,
@@ -45,6 +47,7 @@ title_ranked AS (
     WHERE collection_title IS NOT NULL
 ),
 
+-- ¿Con qué comunidad se relaciona cada colección?
 collection_community AS (
     SELECT DISTINCT ON (relation.collection_id)
         relation.collection_id,
@@ -53,6 +56,7 @@ collection_community AS (
     ORDER BY relation.collection_id, relation.community_id
 ),
 
+-- ¿Qué colecciones existen y cuál es su contexto dentro de la jerarquía?
 final AS (
     SELECT
         collection.collection_id,

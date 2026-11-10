@@ -10,6 +10,7 @@
     ]
 ) }}
 
+-- ¿Cuál es el nombre completo de cada metadatafield registrado?
 WITH RECURSIVE metadatafield AS (
     SELECT
         field.metadata_field_id,
@@ -23,6 +24,7 @@ WITH RECURSIVE metadatafield AS (
         USING (metadata_schema_id)
 ),
 
+-- ¿Qué títulos están informados para cada comunidad?
 title_value AS (
     SELECT
         value.resource_id AS community_id,
@@ -37,6 +39,7 @@ title_value AS (
       AND field.metadatafield_fullname = 'dc.title'
 ),
 
+-- ¿Qué título se prioriza para cada comunidad?
 title_ranked AS (
     SELECT
         *,
@@ -52,6 +55,7 @@ title_ranked AS (
     WHERE community_title IS NOT NULL
 ),
 
+-- ¿Qué comunidades existen y cuál es su título preferido?
 community_node AS (
     SELECT
         community.community_id,
@@ -62,6 +66,7 @@ community_node AS (
        AND title.title_rank = 1
 ),
 
+-- ¿Cuál es la comunidad padre directa de cada comunidad?
 community_parent AS (
     SELECT DISTINCT ON (relation.child_comm_id)
         relation.child_comm_id AS community_id,
@@ -70,6 +75,7 @@ community_parent AS (
     ORDER BY relation.child_comm_id, relation.parent_comm_id
 ),
 
+-- ¿Qué ancestros forman el linaje de cada comunidad?
 lineage AS (
     SELECT
         community.community_id AS leaf_community_id,
@@ -100,6 +106,7 @@ lineage AS (
     WHERE NOT ancestor.community_id = ANY(lineage.visited_community_ids)
 ),
 
+-- ¿Cuál es la profundidad y el recorrido completo de cada comunidad?
 lineage_aggregate AS (
     SELECT
         leaf_community_id AS community_id,
@@ -118,6 +125,7 @@ lineage_aggregate AS (
     GROUP BY leaf_community_id
 ),
 
+-- ¿Cuál es la comunidad raíz de cada comunidad?
 root_community AS (
     SELECT DISTINCT ON (leaf_community_id)
         leaf_community_id AS community_id,
@@ -127,6 +135,7 @@ root_community AS (
     ORDER BY leaf_community_id, depth_from_leaf DESC, ancestor_community_id
 ),
 
+-- ¿Qué comunidad hija de la raíz contiene a cada comunidad?
 root_child_community AS (
     SELECT
         lineage.leaf_community_id AS community_id,
@@ -138,6 +147,7 @@ root_child_community AS (
        AND root.root_community_id = lineage.parent_community_id
 ),
 
+-- ¿Qué comunidades existen y cuál es su contexto dentro de la jerarquía?
 final AS (
     SELECT
         community.community_id,

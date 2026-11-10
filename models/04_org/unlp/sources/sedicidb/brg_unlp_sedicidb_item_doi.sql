@@ -1,5 +1,6 @@
 {{ config(materialized='table') }}
 
+-- ¿Qué valores de metadatos de ítem pueden contener un DOI?
 WITH metadata_value AS (
     SELECT
         item_id,
@@ -18,6 +19,7 @@ WITH metadata_value AS (
       AND text_value IS NOT NULL
 ),
 
+-- ¿Qué DOI se observan en esos valores de metadatos?
 doi_observation AS (
     SELECT
         item_id,
@@ -36,18 +38,24 @@ doi_observation AS (
         LOWER(text_value)
         FROM '(10[.][0-9]{4,9}/[^[:space:]<>|";]+)'
     ) IS NOT NULL
+),
+
+-- ¿Qué ítems se relacionan con qué DOI?
+final AS (
+    SELECT
+        item_id,
+        doi,
+        STRING_AGG(
+            DISTINCT metadatafield_fullname,
+            '|'
+            ORDER BY metadatafield_fullname
+        ) AS metadatafields,
+        COUNT(DISTINCT metadata_value_id)::int AS observation_count
+    FROM doi_observation
+    GROUP BY
+        item_id,
+        doi
 )
 
-SELECT
-    item_id,
-    doi,
-    STRING_AGG(
-        DISTINCT metadatafield_fullname,
-        '|'
-        ORDER BY metadatafield_fullname
-    ) AS metadatafields,
-    COUNT(DISTINCT metadata_value_id)::int AS observation_count
-FROM doi_observation
-GROUP BY
-    item_id,
-    doi
+SELECT *
+FROM final
