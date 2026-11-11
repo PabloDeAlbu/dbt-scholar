@@ -1,0 +1,68 @@
+version: 2
+
+models:
+  - name: unlp_autores_dashboard
+    description: >
+      Autores con clave de autoridad observados en SEDICIDB y enriquecidos con
+      los datos actuales de VOC SEDICI.
+      Presenta una fila por autoridad con nombres, identificadores y un resumen
+      de sus afiliaciones para la exploración institucional de la UNLP.
+      La presencia de una afiliación no certifica una relación vigente con la Universidad.
+    config:
+      meta:
+        organization: unlp
+        source_systems: [sedicidb, vocsedici]
+        model_role: dashboard_source
+        grain: id_autor
+        temporal_scope: current_snapshot
+    columns:
+      - name: id_autor
+        description: Clave de autoridad observada en SEDICIDB que identifica la fila.
+        data_tests: [not_null, unique]
+      - name: autor
+        description: Nombre más frecuente asociado con la autoridad en SEDICIDB.
+        data_tests: [not_null]
+      - name: nombres_sedici
+        description: Nombres distintos asociados con la autoridad en SEDICIDB.
+        data_tests: [not_null]
+      - name: nombre_voc
+        description: Nombre actual de la persona correspondiente en VOC SEDICI.
+      - name: tiene_correspondencia_voc
+        description: Indica si la autoridad corresponde con una persona registrada en VOC SEDICI.
+        data_tests: [not_null]
+      - name: url_persona_voc
+        description: URL pública de la persona correspondiente en VOC SEDICI.
+      - name: orcid
+        description: ORCID informado por VOC SEDICI.
+      - name: tiene_orcid
+        description: Indica si VOC SEDICI informa un ORCID para la persona.
+        data_tests: [not_null]
+      - name: id_perfil_scholar
+        description: Identificador del perfil de Google Scholar informado por VOC SEDICI.
+      - name: url_perfil_scholar
+        description: URL pública del perfil de Google Scholar informado por VOC SEDICI.
+      - name: tiene_perfil_scholar
+        description: Indica si VOC SEDICI informa un perfil de Google Scholar para la persona.
+        data_tests: [not_null]
+      - name: cantidad_afiliaciones
+        description: Cantidad de afiliaciones publicadas en VOC SEDICI asociadas con la identidad.
+        data_tests: [not_null]
+      - name: tiene_afiliacion_registrada
+        description: Indica si VOC SEDICI registra al menos una afiliación para la persona.
+        data_tests: [not_null]
+      - name: tiene_afiliacion_unlp
+        description: Indica si alguna afiliación se relaciona con el árbol organizacional de la UNLP.
+        data_tests: [not_null]
+      - name: tiene_afiliacion_unlp_vigente
+        description: >
+          Indica si alguna afiliación UNLP está vigente según las fechas registradas.
+          Es evidencia disponible en VOC SEDICI y no una certificación administrativa.
+        data_tests: [not_null]
+      - name: unidades_principales_unlp
+        description: Unidades principales de la UNLP relacionadas con las afiliaciones registradas.
+      - name: fuente_identidad
+        description: Fuente en la que se observó inicialmente la identidad.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [sedicidb]
