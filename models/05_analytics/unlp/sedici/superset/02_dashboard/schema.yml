@@ -60,6 +60,15 @@ models:
         description: Fecha de publicación informada en los metadatos del recurso.
       - name: anio_publicacion
         description: Año derivado de la fecha de publicación.
+      - name: fecha_ingreso_sedici
+        description: >
+          Fecha de ingreso del ítem al repositorio según
+          `dc.date.accessioned`. Es el eje temporal para medir el crecimiento
+          de contenidos en SEDICI.
+      - name: mes_ingreso_sedici
+        description: Primer día del mes de ingreso, preparado para series temporales.
+      - name: anio_ingreso_sedici
+        description: Año de ingreso del ítem al repositorio.
       - name: fecha_disponibilidad_sedici
         description: Fecha en que el recurso quedó disponible en SEDICI.
       - name: mes_disponibilidad_sedici
@@ -68,8 +77,24 @@ models:
         description: Año de disponibilidad en SEDICI.
       - name: comunidad_raiz
         description: Comunidad raíz a la que pertenece la publicación.
+      - name: comunidad_nivel_2
+        description: Comunidad ubicada inmediatamente debajo de la comunidad raíz.
       - name: comunidad_principal
-        description: Primera comunidad ubicada debajo de la comunidad raíz.
+        description: >
+          Nombre anterior de `comunidad_nivel_2`, conservado temporalmente
+          para no afectar los gráficos existentes.
+      - name: es_unidad_academica
+        description: >
+          Indica que la comunidad de nivel 2 pertenece a la raíz `Unidades
+          académicas` en la organización de SEDICI.
+        data_tests: [not_null]
+      - name: unidad_academica
+        description: >
+          Unidad académica derivada de la comunidad de nivel 2 cuando existe
+          evidencia aplicable.
+      - name: unidad_academica_evidencia
+        description: Regla utilizada para asignar la unidad académica.
+        data_tests: [not_null]
       - name: comunidad
         description: Comunidad inmediata que contiene la colección de la publicación.
       - name: coleccion

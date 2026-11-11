@@ -1,6 +1,64 @@
 version: 2
 
 models:
+  - name: unlp_sedici_publicacion_unidad_academica
+    description: >
+      Ubicación de cada publicación en la comunidad raíz y la comunidad de
+      nivel 2 del árbol de SEDICI.
+      Presenta una fila por ítem de `unlp_sedici_publicacion_base`.
+      Asigna una unidad académica cuando la comunidad de nivel 2 se encuentra
+      bajo la raíz `Unidades académicas`.
+      La clasificación describe la organización del repositorio, no la afiliación
+      de los autores ni la responsabilidad institucional sobre la publicación.
+    config:
+      meta:
+        organization: unlp
+        source_system: sedicidb
+        model_role: analytical_enrichment
+        grain: item_id
+    columns:
+      - name: item_id
+        description: Identificador interno de la publicación.
+        data_tests: [not_null, unique]
+      - name: comunidad_raiz
+        description: Comunidad superior del árbol de SEDICI.
+      - name: comunidad_nivel_2
+        description: Comunidad ubicada inmediatamente debajo de la comunidad raíz.
+      - name: es_unidad_academica
+        description: >
+          Indica que la comunidad de nivel 2 se encuentra bajo la raíz
+          `Unidades académicas` de SEDICI. Puede incluir facultades,
+          Presidencia, colegios y escuelas según la organización del
+          repositorio.
+        data_tests: [not_null]
+      - name: unidad_academica
+        description: >
+          Comunidad de nivel 2 clasificada inicialmente como unidad académica;
+          es nula cuando todavía no existe evidencia aplicable.
+      - name: unidad_academica_evidencia
+        description: Regla utilizada para obtener la unidad académica.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - 'Comunidad de nivel 2 bajo Unidades académicas'
+                - 'Sin evidencia'
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: sedici_publicacion_unidad_academica_flag_is_consistent
+          expression: "es_unidad_academica = (unidad_academica is not null)"
+      - dbt_utils.expression_is_true:
+          name: sedici_publicacion_unidad_academica_evidence_is_consistent
+          expression: >
+            (es_unidad_academica
+             and comunidad_raiz = 'Unidades académicas'
+             and unidad_academica = comunidad_nivel_2
+             and unidad_academica_evidencia = 'Comunidad de nivel 2 bajo Unidades académicas')
+            or
+            (not es_unidad_academica
+             and unidad_academica is null
+             and unidad_academica_evidencia = 'Sin evidencia')
+
   - name: unlp_sedici_publicacion_cobertura_externa
     description: >
       Cobertura de las publicaciones de SEDICI en OpenAlex y OpenAIRE,
