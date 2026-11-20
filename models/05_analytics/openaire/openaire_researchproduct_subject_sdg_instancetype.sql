@@ -3,7 +3,7 @@ WITH base AS (
         researchproduct_id,
         subject_value,
         instance_type as type
-    FROM {{ ref('viz_openaire_researchproduct_subject_sdg') }}
+    FROM {{ ref('openaire_researchproduct_subject_sdg') }}
     LEFT JOIN {{ ref('brg_openaire_researchproduct_instances') }} USING (researchproduct_hk)
     LEFT JOIN {{ ref('dim_openaire_instance_type') }} USING (instancetype_hk)
 )

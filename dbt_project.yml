@@ -194,12 +194,6 @@ models:
         dspacedb:
           +schema: dspacedb
           +tags: [dspacedb]
-        openaire:
-          +schema: openaire
-          +tags: [openaire]
-        openalex:
-          +schema: openalex
-          +tags: [openalex]
       custom:
         unlp:
           +schema: unlp
@@ -224,6 +218,14 @@ models:
       conicet:
         +schema: conicet
         +tags: [conicet, analytics]
+        +materialized: table
+      openaire:
+        +schema: openaire
+        +tags: [openaire, analytics]
+        +materialized: table
+      openalex:
+        +schema: openalex
+        +tags: [openalex, analytics]
         +materialized: table
       unlp:
         +schema: unlp

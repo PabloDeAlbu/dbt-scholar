@@ -10,7 +10,7 @@ WITH base AS (
         COUNT(DISTINCT work_hk) AS distinct_works_count,
         MIN(publication_year) AS min_publication_year,
         MAX(publication_year) AS max_publication_year
-    FROM {{ ref('viz_openalex_work_extraction_seguimiento') }}
+    FROM {{ ref('openalex_work_extraction_seguimiento') }}
     GROUP BY 1, 2, 3, 4
 )
 

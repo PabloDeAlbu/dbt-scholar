@@ -1,12 +1,15 @@
 version: 2
 
 models:
-  - name: viz_openalex_work_extraction_seguimiento
+  - name: openalex_work_extraction_seguimiento
     description: >
       Vista analítica de seguimiento de extracciones OpenAlex a nivel evento-work,
       enriquecida con título y año de publicación para inspección operativa.
     config:
-      tags: [viz]
+      meta:
+        source_system: openalex
+        model_role: extraction_monitoring
+        grain: extraction_event_work
     columns:
       - name: extract_cdk
         description: Identificador único del evento de extracción.
@@ -30,12 +33,15 @@ models:
         description: Timestamp técnico de carga del evento.
         data_tests: [not_null]
 
-  - name: viz_openalex_work_extraction_resumen
+  - name: openalex_work_extraction_resumen
     description: >
       Resumen diario por filtro de las extracciones OpenAlex, útil para monitoreo
       del universo recuperado y rango temporal de publicación.
     config:
-      tags: [viz]
+      meta:
+        source_system: openalex
+        model_role: extraction_monitoring_summary
+        grain: filter_value_extract_date
     data_tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns: [_filter_param, _filter_value, extract_date]
