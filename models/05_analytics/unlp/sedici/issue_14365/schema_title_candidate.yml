@@ -1,16 +1,20 @@
 version: 2
 
 models:
-  - name: viz_unlp_sedici_14365_libros
+  - name: unlp_sedici_00_match_book_title_candidate
     description: >
-      Cruce operativo del listado de libros de cátedra FDA contra
-      `fct_unlp_sedici_item_publication`, buscando candidatos de linkeo exacto por
-      título normalizado.
+      Candidatos exploratorios de correspondencia entre los libros de cátedra
+      recibidos de Koha FDA y las publicaciones de SEDICI.
+      Compara el título completo y el título base normalizados.
+      Cada fila representa un libro de Koha y un candidato de SEDICI, o un libro
+      sin candidato.
     config:
-      tags: [viz, unlp]
-    data_tests:
-      - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [seed_row_id, item_hk]
+      meta:
+        organization: unlp
+        source_systems: [koha, sedici]
+        model_role: title_match_candidate
+        grain: seed_row_id + item_hk
+        temporal_scope: current_snapshot
     columns:
       - name: seed_row_id
         description: Identificador técnico de la fila del seed.
@@ -82,17 +86,24 @@ models:
       - name: has_title_match
         description: Flag que indica si la fila del seed tuvo al menos un candidato por título.
         data_tests: [not_null]
-
-  - name: viz_unlp_sedici_14365_tesis
-    description: >
-      Cruce operativo del listado de tesis FDA contra
-      `fct_unlp_sedici_item_publication`, buscando candidatos de linkeo exacto por
-      título normalizado.
-    config:
-      tags: [viz, unlp]
     data_tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns: [seed_row_id, item_hk]
+
+  - name: unlp_sedici_00_match_thesis_title_candidate
+    description: >
+      Candidatos exploratorios de correspondencia entre las tesis recibidas de
+      Koha FDA y las publicaciones de SEDICI.
+      Compara el título completo y el título base normalizados.
+      Cada fila representa una tesis de Koha y un candidato de SEDICI, o una
+      tesis sin candidato.
+    config:
+      meta:
+        organization: unlp
+        source_systems: [koha, sedici]
+        model_role: title_match_candidate
+        grain: seed_row_id + item_hk
+        temporal_scope: current_snapshot
     columns:
       - name: seed_row_id
         description: Identificador técnico de la fila del seed.
@@ -164,3 +175,6 @@ models:
       - name: has_title_match
         description: Flag que indica si la fila del seed tuvo al menos un candidato por título.
         data_tests: [not_null]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [seed_row_id, item_hk]

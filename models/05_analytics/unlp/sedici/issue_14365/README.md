@@ -3,11 +3,17 @@
 Modelos e insumos utilizados para preparar, conciliar y exportar las
 deduplicaciones de libros y tesis entre Koha FDA y SEDICI.
 
+El issue operativo se encuentra cerrado. Estos modelos se conservan para
+documentar y reproducir el proceso realizado. La etapa `00` expone candidatos
+exploratorios por título y no representa por sí misma una decisión de
+correspondencia.
+
 Los modelos se materializan en el esquema
 `analytics_unlp_sedici_issue_14365`. Sus nombres siguen el patrón
 `unlp_sedici_<etapa>_<acción>_<descripción>` para que el orden alfabético
 represente el orden de trabajo:
 
+- `00`: candidatos exploratorios por título normalizado para libros y tesis.
 - `01`: dedup de libros Koha FDA → SEDICI.
 - `02`: dedup de libros SEDICI FDA → Koha y filtro de candidatos sin match.
 - `03`: dedup de tesis Koha FDA → SEDICI, revisión y CSV de actualización.

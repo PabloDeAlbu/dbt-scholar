@@ -1,22 +1,23 @@
 {{ config(materialized='view') }}
 
+-- ¿Qué libros entregó Koha FDA y qué claves de título permiten compararlos?
 WITH seed_base AS (
     SELECT
-        'tesis_fda:' || id_koha::text AS seed_row_id,
+        'libros_catedra_fda:' || id_koha::text AS seed_row_id,
         id_koha::text AS id_koha,
-        titulo::text AS seed_title,
-        autor::text AS seed_author,
-        COALESCE(anio_titulo::text, anio_publicacion::text) AS seed_year_raw,
-        titulo::text AS titulo,
-        autor::text AS autor,
-        anio_publicacion::text AS anio_publicacion,
-        tipo_tesis::text AS tipo_tesis,
-        institucion::text AS institucion,
-        anio_titulo::text AS anio_titulo,
+        titulo_completo::text AS seed_title,
+        autor_100a::text AS seed_author,
+        fecha::text AS seed_year_raw,
+        titulo_completo::text AS titulo_completo,
+        autor_100a::text AS autor_100a,
+        serie::text AS serie,
+        lugar::text AS lugar,
+        editor::text AS editor,
+        fecha::text AS fecha,
         NULLIF(
             BTRIM(
                 REGEXP_REPLACE(
-                    LOWER(REGEXP_REPLACE(titulo::text, '[^[:alnum:]]+', ' ', 'g')),
+                    LOWER(REGEXP_REPLACE(titulo_completo::text, '[^[:alnum:]]+', ' ', 'g')),
                     '\s+',
                     ' ',
                     'g'
@@ -29,7 +30,7 @@ WITH seed_base AS (
                 REGEXP_REPLACE(
                     LOWER(
                         REGEXP_REPLACE(
-                            SPLIT_PART(SPLIT_PART(titulo::text, ':', 1), '/', 1),
+                            SPLIT_PART(SPLIT_PART(titulo_completo::text, ':', 1), '/', 1),
                             '[^[:alnum:]]+',
                             ' ',
                             'g'
@@ -42,9 +43,10 @@ WITH seed_base AS (
             ),
             ''
         ) AS seed_title_base_match_key
-    FROM {{ ref('tesis_fda_koha_sedici_cruce_2026') }}
+    FROM {{ ref('libros_catedra_fda_koha_sedici_cruce_2026') }}
 ),
 
+-- ¿Qué publicaciones de SEDICI pueden corresponder a libros por su tipo?
 ir_base AS (
     SELECT
         item_hk,
@@ -92,22 +94,23 @@ ir_base AS (
         ) AS ir_title_base_match_key
     FROM {{ ref('fct_unlp_sedici_item_publication') }}
     WHERE title IS NOT NULL
-      AND LOWER(COALESCE(type, '')) LIKE '%tesis%'
+      AND LOWER(COALESCE(type, '')) LIKE '%libro%'
 ),
 
-matched AS (
+-- ¿Qué candidatos de SEDICI comparten el título completo o base con cada libro de Koha?
+candidate AS (
     SELECT
         sb.seed_row_id,
         sb.id_koha,
         sb.seed_title,
         sb.seed_author,
         sb.seed_year_raw,
-        sb.titulo,
-        sb.autor,
-        sb.anio_publicacion,
-        sb.tipo_tesis,
-        sb.institucion,
-        sb.anio_titulo,
+        sb.titulo_completo,
+        sb.autor_100a,
+        sb.serie,
+        sb.lugar,
+        sb.editor,
+        sb.fecha,
         sb.seed_title_match_key,
         sb.seed_title_base_match_key,
         ir.item_hk,
@@ -151,40 +154,45 @@ matched AS (
             sb.seed_title_match_key = ir.ir_title_match_key
          OR sb.seed_title_base_match_key = ir.ir_title_base_match_key
       )
+),
+
+-- ¿Qué evidencia de correspondencia se expone para revisar cada libro de Koha?
+final AS (
+    SELECT
+        seed_row_id,
+        id_koha,
+        seed_title,
+        seed_author,
+        seed_year_raw,
+        titulo_completo,
+        autor_100a,
+        serie,
+        lugar,
+        editor,
+        fecha,
+        seed_title_match_key,
+        seed_title_base_match_key,
+        item_hk,
+        item_id,
+        institutional_uri,
+        ir_title,
+        ir_author,
+        ir_type,
+        ir_subtype,
+        date_issued,
+        date_accessioned,
+        isbn,
+        doi,
+        owning_collection_title,
+        owning_community_title,
+        owning_root_community_title,
+        ir_title_match_key,
+        ir_title_base_match_key,
+        title_match_strategy,
+        title_match_count,
+        title_match_rank,
+        title_match_count > 0 AS has_title_match
+    FROM candidate
 )
 
-SELECT
-    seed_row_id,
-    id_koha,
-    seed_title,
-    seed_author,
-    seed_year_raw,
-    titulo,
-    autor,
-    anio_publicacion,
-    tipo_tesis,
-    institucion,
-    anio_titulo,
-    seed_title_match_key,
-    seed_title_base_match_key,
-    item_hk,
-    item_id,
-    institutional_uri,
-    ir_title,
-    ir_author,
-    ir_type,
-    ir_subtype,
-    date_issued,
-    date_accessioned,
-    isbn,
-    doi,
-    owning_collection_title,
-    owning_community_title,
-    owning_root_community_title,
-    ir_title_match_key,
-    ir_title_base_match_key,
-    title_match_strategy,
-    title_match_count,
-    title_match_rank,
-    title_match_count > 0 AS has_title_match
-FROM matched
+SELECT * FROM final
