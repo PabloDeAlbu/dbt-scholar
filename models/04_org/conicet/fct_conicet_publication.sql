@@ -1,5 +1,6 @@
 {{ config(materialized = 'table') }}
 
+-- ¿Qué atributos de cada registro OAI necesita el hecho institucional?
 WITH base AS (
     SELECT
         record_hk,
@@ -23,6 +24,7 @@ WITH base AS (
     FROM {{ ref('fct_conicet_oai_record_publication') }}
 ),
 
+-- ¿Qué valores de tipo documental declara cada registro?
 record_dc_type AS (
     SELECT DISTINCT
         base.record_hk,
@@ -32,22 +34,22 @@ record_dc_type AS (
     WHERE NULLIF(dc_type_value, '') IS NOT NULL
 ),
 
+-- ¿Qué tipos documentales resuelve la representación OAI de CONICET?
 dim_publication_type AS (
     SELECT
         record_dc_type.record_hk,
-        MIN(dim.resource_type_label) AS publication_type,
-        MIN(dim.resource_type_uri) AS publication_type_uri,
-        COUNT(DISTINCT dim.resource_type_uri) AS publication_type_count,
-        (COUNT(DISTINCT dim.resource_type_uri) > 1) AS has_multiple_publication_type
+        MIN(dim.publication_type) AS publication_type,
+        MIN(dim.publication_type_uri) AS publication_type_uri,
+        COUNT(DISTINCT dim.publication_type_uri) AS publication_type_count,
+        (COUNT(DISTINCT dim.publication_type_uri) > 1) AS has_multiple_publication_type
     FROM record_dc_type
-    INNER JOIN {{ ref('seed_coar_resource_types2conicet_oai_dc_types') }} seed
-        ON record_dc_type.dc_type = seed.record_type
-    INNER JOIN {{ ref('dim_resource_type') }} dim
-        ON seed.coar_uri = dim.resource_type_uri
-    WHERE seed.coar_uri != '#N/A'
+    INNER JOIN {{ ref('dim_conicet_oai_record_type') }} AS dim
+        USING (dc_type)
+    WHERE dim.is_publication_type
     GROUP BY record_dc_type.record_hk
 ),
 
+-- ¿Qué condición de acceso canónica tiene cada registro?
 dim_access_right AS (
     SELECT
         brg.record_hk,
@@ -59,6 +61,7 @@ dim_access_right AS (
     GROUP BY brg.record_hk
 ),
 
+-- ¿A qué sets OAI pertenece cada registro?
 record_set AS (
     SELECT
         brg.record_hk,
@@ -69,6 +72,7 @@ record_set AS (
     GROUP BY brg.record_hk
 ),
 
+-- ¿Qué registros poseen una correspondencia unívoca en OpenAIRE?
 unique_originalid_match AS (
     SELECT
         record_hk,
@@ -79,6 +83,7 @@ unique_originalid_match AS (
     WHERE is_unique_match
 ),
 
+-- ¿Qué atributos aporta OpenAIRE para las correspondencias unívocas?
 openaire_enrichment AS (
     SELECT
         match.record_hk,
@@ -128,6 +133,7 @@ openaire_enrichment AS (
         USING (researchproduct_hk)
 ),
 
+-- ¿Qué filiaciones institucionales se detectaron en cada publicación?
 fil_enrichment AS (
     SELECT
         record_hk,
@@ -143,6 +149,7 @@ fil_enrichment AS (
     FROM {{ ref('brg_conicet_publication_fil') }}
 ),
 
+-- ¿Qué representación institucional se expone para cada publicación?
 final AS (
     SELECT
         base.record_hk,

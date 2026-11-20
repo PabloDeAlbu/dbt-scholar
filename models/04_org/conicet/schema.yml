@@ -29,9 +29,9 @@ models:
         description: Source system desde el cual se resuelve la publicación canónica.
         data_tests: [not_null]
       - name: publication_type
-        description: Tipo canónico de publicación, resuelto fuera de OAI desde dimensiones core.
+        description: Tipo de publicación normalizado desde los valores `dc.type` mediante la dimensión OAI de CONICET.
       - name: publication_type_uri
-        description: URI COAR asociada al tipo canónico de publicación.
+        description: URI COAR asociada al tipo de publicación normalizado.
       - name: publication_type_count
         description: Cantidad de tipos canónicos distintos resueltos desde los valores raw de `dc.type`.
         data_tests: [not_null]
