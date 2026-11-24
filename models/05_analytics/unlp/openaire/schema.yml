@@ -12,9 +12,6 @@ models:
         source_system: openaire
         model_role: analytics
         grain: researchproduct_hk + subject_hk
-    data_tests:
-      - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [researchproduct_hk, subject_hk]
     columns:
       - name: researchproduct_hk
         description: Clave hash del producto de investigación OpenAIRE.
@@ -35,3 +32,121 @@ models:
       - name: sdg
         description: Valor textual del Objetivo de Desarrollo Sostenible.
         data_tests: [not_null]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [researchproduct_hk, subject_hk]
+
+  - name: unlp_sedici_publication_openaire_coverage
+    description: >
+      Cobertura de cada publicación vigente y visible de SEDICI en OpenAIRE.
+      Conserva el número de correspondencias exactas y sólo expone un producto
+      cuando la relación es unívoca en ambos sentidos.
+    config:
+      meta:
+        organization: unlp
+        source_systems: [sedicidb, openaire]
+        model_role: analytical_enrichment
+        grain: item_id
+        temporal_scope: current_snapshot
+    columns:
+      - name: item_id
+        description: Identificador del ítem en el snapshot vigente de SEDICI.
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('unlp_sedici_publicacion_base')
+              field: item_id
+      - name: has_openaire_match
+        description: Indica si existe al menos una correspondencia exacta con OpenAIRE.
+        data_tests: [not_null]
+      - name: openaire_match_count
+        description: Cantidad de productos OpenAIRE relacionados con la publicación.
+        data_tests: [not_null]
+      - name: has_unique_openaire_match
+        description: Indica si la correspondencia es unívoca en ambos sentidos.
+        data_tests: [not_null]
+      - name: researchproduct_hk
+        description: Clave del producto OpenAIRE cuando la correspondencia es unívoca.
+        data_tests:
+          - relationships:
+              to: ref('fct_openaire_researchproduct_publication')
+              field: researchproduct_hk
+      - name: researchproduct_id
+        description: Identificador canónico OpenAIRE cuando la correspondencia es unívoca.
+      - name: openaire_original_id
+        description: Identificador original que evidencia el Handle cuando la correspondencia es unívoca.
+      - name: openaire_match_rule
+        description: Regla utilizada para resolver la correspondencia unívoca con OpenAIRE.
+      - name: openaire_is_unlp_ror_product
+        description: Indica si el producto unívoco integra el lote recuperado mediante el ROR UNLP.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: unlp_openaire_coverage_count_flag
+          expression: "has_openaire_match = (openaire_match_count > 0)"
+      - dbt_utils.expression_is_true:
+          name: unlp_openaire_coverage_unique_product
+          expression: "has_unique_openaire_match = (researchproduct_hk is not null)"
+
+  - name: unlp_sedici_publication_sdg
+    description: >
+      Publicaciones vigentes y visibles de SEDICI con su cobertura en OpenAIRE
+      y los Objetivos de Desarrollo Sostenible de las correspondencias
+      unívocas. Conserva una fila sin ODS para publicaciones no vinculadas,
+      ambiguas o vinculadas con productos sin ODS.
+    config:
+      meta:
+        organization: unlp
+        source_systems: [sedicidb, openaire]
+        model_role: analytics
+        grain: item_id + nullable subject_hk
+        temporal_scope: current_snapshot
+    columns:
+      - name: item_id
+        description: Identificador del ítem en el snapshot vigente de SEDICI.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('fct_unlp_sedicidb_item_publication')
+              field: item_id
+      - name: handle
+        description: Handle institucional de la publicación en SEDICI.
+        data_tests: [not_null]
+      - name: has_openaire_match
+        description: Indica si existe al menos una correspondencia exacta con OpenAIRE.
+        data_tests: [not_null]
+      - name: openaire_match_count
+        description: Cantidad de productos OpenAIRE relacionados con la publicación.
+        data_tests: [not_null]
+      - name: has_unique_openaire_match
+        description: Indica si la correspondencia es unívoca en ambos sentidos.
+        data_tests: [not_null]
+      - name: researchproduct_hk
+        description: Clave del producto OpenAIRE cuando la correspondencia es unívoca.
+        data_tests:
+          - relationships:
+              to: ref('fct_openaire_researchproduct_publication')
+              field: researchproduct_hk
+      - name: subject_hk
+        description: Clave del ODS informado por OpenAIRE cuando existe.
+        data_tests:
+          - relationships:
+              to: ref('dim_openaire_subject')
+              field: subject_hk
+      - name: sdg
+        description: Valor textual del Objetivo de Desarrollo Sostenible.
+      - name: sdg_count
+        description: Cantidad de ODS asociados al producto OpenAIRE resuelto.
+        data_tests: [not_null]
+      - name: has_sdg
+        description: Indica si la fila representa un ODS informado por OpenAIRE.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [item_id, subject_hk]
+      - dbt_utils.expression_is_true:
+          name: unlp_sedici_publication_sdg_flag_matches_subject
+          expression: "has_sdg = (subject_hk is not null)"
+      - dbt_utils.expression_is_true:
+          name: unlp_sedici_publication_unique_match_has_product
+          expression: "has_unique_openaire_match = (researchproduct_hk is not null)"

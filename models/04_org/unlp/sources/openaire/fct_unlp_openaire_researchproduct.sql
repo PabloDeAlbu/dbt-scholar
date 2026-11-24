@@ -1,5 +1,4 @@
-{%- set unlp_ror = 'https://ror.org/01tjs6929' -%}
-
+-- ¿Qué productos OpenAIRE fueron observados en extracciones por el ROR de la UNLP?
 WITH unlp_extract AS (
     SELECT
         researchproduct_hk,
@@ -10,6 +9,7 @@ WITH unlp_extract AS (
     GROUP BY researchproduct_hk
 ),
 
+-- ¿Qué Objetivos de Desarrollo Sostenible tiene asignados cada producto?
 sdg AS (
     SELECT
         researchproduct_hk,
@@ -19,7 +19,9 @@ sdg AS (
     GROUP BY researchproduct_hk
 ),
 
-base AS (
+-- ¿Qué atributos de los researchproducts recuperados de OpenAIRE mediante
+-- el ROR de la UNLP se exponen para su análisis?
+final AS (
     SELECT
         fct.researchproduct_hk,
         fct.researchproduct_id,
@@ -92,4 +94,5 @@ base AS (
     LEFT JOIN sdg USING (researchproduct_hk)
 )
 
-SELECT * FROM base
+SELECT *
+FROM final
