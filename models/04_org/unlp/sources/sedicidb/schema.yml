@@ -2,13 +2,18 @@ version: 2
 
 sources:
   - name: sedicidb
-    description: Dump completo vigente de la base de datos DSpace 5 de SEDICI.
+    description: >
+      Dump completo vigente de la base de datos DSpace 5 de SEDICI, consultado
+      directamente como snapshot relacional. Esta familia no pasa por Data
+      Vault ni conserva por sí misma la historia entre dumps.
     schema: ldg_sedicidb
     meta:
       organization: unlp
       source_system: sedicidb
       input_layer: ldg
       temporal_scope: current_snapshot
+      ingestion_mode: direct_database_dump
+      history_strategy: none
     tables:
       - name: item
       - name: handle
@@ -24,8 +29,9 @@ sources:
 models:
   - name: fct_unlp_sedicidb_metadatafield_usage
     description: >
-      Uso general de los metadatafields registrados en SEDICIDB. Presenta una
-      fila por `metadata_field_id`, incluidos los campos sin valores.
+      Uso general de los metadatafields registrados en el dump directo vigente
+      de SEDICIDB. Presenta una fila por `metadata_field_id`, incluidos los
+      campos sin valores; no representa historia entre dumps.
     columns:
       - name: metadata_field_id
         description: Identificador del metadatafield en DSpace 5.
@@ -39,9 +45,9 @@ models:
 
   - name: dim_unlp_sedicidb_community
     description: >
-      Dimensión de comunidades de SEDICI. Presenta una fila por `community_id`.
-      Resuelve el título preferido, la comunidad padre, la raíz y el recorrido
-      jerárquico.
+      Dimensión de comunidades construida directamente desde el dump vigente de
+      SEDICI. Presenta una fila por `community_id`. Resuelve el título preferido,
+      la comunidad padre, la raíz y el recorrido jerárquico.
     columns:
       - name: community_id
         description: Identificador de la comunidad en DSpace 5.
@@ -88,8 +94,9 @@ models:
 
   - name: dim_unlp_sedicidb_collection
     description: >
-      Dimensión de colecciones de SEDICI. Presenta una fila por `collection_id`.
-      Resuelve el título preferido y el contexto de la comunidad contenedora.
+      Dimensión de colecciones construida directamente desde el dump vigente de
+      SEDICI. Presenta una fila por `collection_id` y resuelve el título
+      preferido y el contexto de la comunidad contenedora.
     columns:
       - name: collection_id
         description: Identificador de la colección en DSpace 5.
@@ -129,9 +136,9 @@ models:
 
   - name: brg_unlp_sedicidb_item_doi
     description: >
-      Relación entre ítems y DOI normalizados observados en los metadatos de
-      SEDICIDB. Presenta una fila por `item_id` y DOI, y conserva los
-      metadatafields que aportaron evidencia.
+      Relación entre ítems y DOI normalizados observados directamente en el
+      dump vigente de SEDICIDB. Presenta una fila por `item_id` y DOI, y
+      conserva los metadatafields que aportaron evidencia.
     config:
       meta:
         organization: unlp
@@ -168,8 +175,9 @@ models:
   - name: brg_unlp_sedicidb_item_author
     description: >
       Relación entre ítems y autores o compiladores representados por metadatos
-      de SEDICIDB. Presenta una fila por `metadata_value_id` y no concilia
-      personas mediante nombres ni autoridades.
+      del dump vigente de SEDICIDB. Presenta una fila por `metadata_value_id`,
+      no conserva historia entre dumps y no concilia personas mediante nombres
+      ni autoridades.
     columns:
       - name: metadata_value_id
         description: Identificador de la observación original de metadatos.
@@ -210,9 +218,10 @@ models:
 
   - name: dim_unlp_sedicidb_author
     description: >
-      Autoridades de autor informadas en SEDICIDB. Presenta una fila por
-      `authority`, excluye autorías sin autoridad y describe los nombres
-      conservados en el dump, que pueden no estar sincronizados con VOC SEDICI.
+      Autoridades de autor informadas en el dump vigente de SEDICIDB. Presenta
+      una fila por `authority`, excluye autorías sin autoridad y describe los
+      nombres conservados en el snapshot, que pueden no estar sincronizados con
+      VOC SEDICI.
     columns:
       - name: authority
         description: Clave de autoridad almacenada en SEDICIDB.
@@ -226,8 +235,10 @@ models:
 
   - name: fct_unlp_sedicidb_item_publication
     description: >
-      Una fila por ítem vigente del dump SEDICI, con estados DSpace y metadatos
-      escalares reutilizables.
+      Una fila por ítem del dump directo vigente de SEDICI, con estados DSpace
+      y metadatos escalares reutilizables. Representa el snapshot corriente
+      cargado en `ldg_sedicidb`; no pasa por Data Vault ni conserva versiones
+      anteriores.
     config:
       meta:
         organization: unlp
@@ -237,6 +248,9 @@ models:
         business_process: item_publication
         grain: item_id
         temporal_scope: current_snapshot
+        ingestion_mode: direct_database_dump
+        history_strategy: none
+        source_family: sedicidb
     columns:
       - name: item_id
         description: Identificador del ítem en DSpace 5.

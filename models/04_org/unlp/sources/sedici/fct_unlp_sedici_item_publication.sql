@@ -1,10 +1,13 @@
 {{ config(materialized='table') }}
 
+-- ¿Qué ítems UNLP aporta la última observación de la rama historizada dspacedb5/Data Vault?
 WITH base AS (
     SELECT *
     FROM {{ ref('fct_dspacedb5_item_publication') }}
     WHERE institution_ror = 'https://ror.org/01tjs6929'
 ),
+
+-- ¿Qué metadatos necesita la representación institucional de una publicación SEDICI?
 metadata_usage AS NOT MATERIALIZED (
     SELECT
         b.item_hk,
@@ -42,6 +45,7 @@ metadata_usage AS NOT MATERIALIZED (
     )
 ),
 
+-- ¿Cuál es la colección propietaria y su camino de comunidades para cada ítem?
 owning_community AS (
     SELECT
         item_hk,
@@ -63,6 +67,7 @@ owning_community AS (
     WHERE is_owning_collection
 ),
 
+-- ¿Qué URI institucional de SEDICI identifica canónicamente cada ítem?
 id AS (
     SELECT
         item_hk,
@@ -80,6 +85,7 @@ id AS (
     GROUP BY item_hk
 ),
 
+-- ¿Qué fecha de alta declaró SEDICI para cada ítem?
 date_accessioned AS (
     SELECT
         item_hk,
@@ -91,6 +97,7 @@ date_accessioned AS (
     WHERE metadatafield_fullname = 'dc.date.accessioned'
 ),
 
+-- ¿Qué fecha de disponibilidad declaró SEDICI para cada ítem?
 date_available AS (
     SELECT
         item_hk,
@@ -102,6 +109,7 @@ date_available AS (
     WHERE metadatafield_fullname = 'dc.date.available'
 ),
 
+-- ¿Qué fecha de publicación declaró SEDICI para cada ítem?
 date_issued AS (
     SELECT
         item_hk,
@@ -113,6 +121,7 @@ date_issued AS (
     WHERE metadatafield_fullname = 'dc.date.issued'
 ),
 
+-- ¿Qué tipo documental principal declaró SEDICI para cada ítem?
 dc_type AS (
     SELECT
         item_hk,
@@ -121,6 +130,7 @@ dc_type AS (
     WHERE metadatafield_fullname = 'dc.type'
 ),
 
+-- ¿Cuál es el título principal de cada ítem?
 title AS (
     SELECT
         item_hk,
@@ -129,6 +139,7 @@ title AS (
     WHERE metadatafield_fullname = 'dc.title'
 ),
 
+-- ¿Qué títulos alternativos o subtítulos posee cada ítem?
 subtitle AS (
     SELECT
         item_hk,
@@ -137,6 +148,7 @@ subtitle AS (
     WHERE metadatafield_fullname = 'dc.title.alternative'
 ),
 
+-- ¿Qué descripciones y resúmenes posee cada ítem?
 description AS (
     SELECT
         item_hk,
@@ -146,6 +158,7 @@ description AS (
     GROUP BY item_hk
 ),
 
+-- ¿Qué materias fueron declaradas para cada ítem?
 subject AS (
     SELECT
         item_hk,
@@ -154,6 +167,7 @@ subject AS (
     WHERE metadatafield_fullname = 'dc.subject'
 ),
 
+-- ¿Qué subtipos propios de SEDICI fueron declarados para cada ítem?
 subtype AS (
     SELECT
         item_hk,
@@ -162,6 +176,7 @@ subtype AS (
     WHERE metadatafield_fullname = 'sedici.subtype'
 ),
 
+-- ¿Qué personas creadoras fueron declaradas para cada ítem?
 sedici_creator_person AS (
     SELECT
         item_hk,
@@ -171,6 +186,7 @@ sedici_creator_person AS (
     WHERE metadatafield_fullname = 'sedici.creator.person'
 ),
 
+-- ¿Qué organizaciones creadoras fueron declaradas para cada ítem?
 sedici_creator_corporate AS (
     SELECT
         item_hk,
@@ -180,6 +196,7 @@ sedici_creator_corporate AS (
     WHERE metadatafield_fullname = 'sedici.creator.corporate'
 ),
 
+-- ¿Qué compiladores fueron declarados para cada ítem?
 sedici_contributor_compiler AS (
     SELECT
         item_hk,
@@ -189,6 +206,7 @@ sedici_contributor_compiler AS (
     WHERE metadatafield_fullname = 'sedici.contributor.compiler'
 ),
 
+-- ¿Qué ISSN fueron declarados para cada ítem?
 issn AS (
     SELECT
         item_hk,
@@ -197,6 +215,7 @@ issn AS (
     WHERE metadatafield_fullname = 'sedici.identifier.issn'
 ),
 
+-- ¿Qué ISBN fueron declarados para cada ítem?
 isbn AS (
     SELECT
         item_hk,
@@ -205,6 +224,7 @@ isbn AS (
     WHERE metadatafield_fullname = 'sedici.identifier.isbn'
 ),
 
+-- ¿Qué valores de metadatos pueden contener un DOI?
 ir_doi_raw AS (
     SELECT
         mu.item_hk,
@@ -215,6 +235,7 @@ ir_doi_raw AS (
       AND BTRIM(value) <> ''
 ),
 
+-- ¿Qué DOI normalizados pueden extraerse de esos valores?
 ir_doi_pid AS (
     SELECT DISTINCT
         item_hk,
@@ -227,6 +248,7 @@ ir_doi_pid AS (
     WHERE SUBSTRING(raw_value FROM '(10\\.[0-9]{4,9}/[^[:space:]<>|\";]+)') IS NOT NULL
 ),
 
+-- ¿Qué Handle normalizado se deriva de la URI institucional?
 ir_handle_pid AS (
     SELECT DISTINCT
         item_hk,
@@ -235,6 +257,7 @@ ir_handle_pid AS (
     WHERE dc_identifier_uri ~* '^https?://[^/]+/handle/'
 ),
 
+-- ¿Qué identificadores persistentes se consolidan para cada ítem?
 ir_pid_agg AS (
     SELECT
         item_hk,
@@ -250,6 +273,7 @@ ir_pid_agg AS (
     GROUP BY item_hk
 ),
 
+-- ¿Qué atributos institucionales describen cada publicación SEDICI elegible?
 final_raw AS (
     SELECT
         b.item_hk,
@@ -354,6 +378,7 @@ final_raw AS (
       AND b.withdrawn = FALSE
 ),
 
+-- ¿Qué observación se prioriza cuando más de un ítem comparte el mismo Handle?
 final_ranked AS (
     SELECT
         final_raw.*,
@@ -365,63 +390,68 @@ final_ranked AS (
                 final_raw.item_id DESC
         ) AS handle_rn
     FROM final_raw
+),
+
+-- ¿Qué contrato expone la representación institucional derivada de Data Vault?
+final AS (
+    SELECT
+        item_hk,
+        item_id,
+        source_label,
+        institution_ror,
+        submitter_id,
+        owning_collection,
+        collections_count,
+        last_modified,
+        first_extract_datetime,
+        last_extract_datetime,
+        first_load_datetime,
+        last_load_datetime,
+        dc_identifier_uri,
+        dc_identifier_uri_raw,
+        date_accessioned_raw,
+        date_accessioned,
+        dc_date_available_raw,
+        dc_date_available,
+        date_issued_raw,
+        date_issued,
+        dc_date_issued,
+        dc_date_issued_raw,
+        title,
+        subtitle,
+        type,
+        description,
+        subject,
+        subtype,
+        sedici_creator_person,
+        sedici_creator_person_count,
+        sedici_creator_corporate,
+        sedici_creator_corporate_count,
+        sedici_contributor_compiler,
+        sedici_contributor_compiler_count,
+        issn,
+        isbn,
+        doi_count,
+        handle_count,
+        has_doi,
+        has_handle,
+        doi,
+        handle,
+        owningcollection_hk,
+        owning_collection_title,
+        owning_community_hk,
+        owning_community_id,
+        owning_community_title,
+        owning_root_community_hk,
+        owning_root_community_id,
+        owning_root_community_title,
+        owning_community_path_ids,
+        owning_community_path_titles,
+        in_archive,
+        withdrawn,
+        discoverable
+    FROM final_ranked
+    WHERE handle_rn = 1
 )
 
-SELECT
-    item_hk,
-    item_id,
-    source_label,
-    institution_ror,
-    submitter_id,
-    owning_collection,
-    collections_count,
-    last_modified,
-    first_extract_datetime,
-    last_extract_datetime,
-    first_load_datetime,
-    last_load_datetime,
-    dc_identifier_uri,
-    dc_identifier_uri_raw,
-    date_accessioned_raw,
-    date_accessioned,
-    dc_date_available_raw,
-    dc_date_available,
-    date_issued_raw,
-    date_issued,
-    dc_date_issued,
-    dc_date_issued_raw,
-    title,
-    subtitle,
-    type,
-    description,
-    subject,
-    subtype,
-    sedici_creator_person,
-    sedici_creator_person_count,
-    sedici_creator_corporate,
-    sedici_creator_corporate_count,
-    sedici_contributor_compiler,
-    sedici_contributor_compiler_count,
-    issn,
-    isbn,
-    doi_count,
-    handle_count,
-    has_doi,
-    has_handle,
-    doi,
-    handle,
-    owningcollection_hk,
-    owning_collection_title,
-    owning_community_hk,
-    owning_community_id,
-    owning_community_title,
-    owning_root_community_hk,
-    owning_root_community_id,
-    owning_root_community_title,
-    owning_community_path_ids,
-    owning_community_path_titles,
-    in_archive,
-    withdrawn,
-    discoverable
-FROM final_ranked
-WHERE handle_rn = 1
+SELECT * FROM final

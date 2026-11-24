@@ -10,7 +10,7 @@
     ]
 ) }}
 
--- ¿Qué ítems se representan?
+-- ¿Qué ítems contiene el snapshot directo vigente del dump SEDICIDB?
 WITH item AS (
     SELECT
         item_id,
@@ -26,7 +26,7 @@ WITH item AS (
     FROM {{ source('sedicidb', 'item') }}
 ),
 
--- ¿Qué handle tiene cada ítem?
+-- ¿Qué Handle vigente tiene cada ítem en el dump directo?
 item_handle AS (
     SELECT
         handle.resource_id AS item_id,
@@ -38,7 +38,7 @@ item_handle AS (
     GROUP BY handle.resource_id
 ),
 
--- ¿Qué título, tipo y subtipo usa cada ítem?
+-- ¿Qué título, tipo y subtipo vigentes usa cada ítem del snapshot?
 item_metadatafield AS (
     SELECT *
     FROM {{ ref('int_unlp_sedicidb_item_metadatafield') }}
@@ -49,13 +49,13 @@ item_metadatafield AS (
     )
 ),
 
--- ¿Qué fechas usa cada ítem?
+-- ¿Qué fechas vigentes usa cada ítem del snapshot?
 item_date_metadatafield AS (
     SELECT *
     FROM {{ ref('int_unlp_sedicidb_item_date_metadatafield') }}
 ),
 
--- ¿Cómo se representa cada publicación?
+-- ¿Qué contrato expone el snapshot directo de ítems SEDICIDB?
 final AS (
     SELECT
         item.item_id,

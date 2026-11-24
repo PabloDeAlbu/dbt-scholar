@@ -1,10 +1,14 @@
 version: 2
 
+# Familia institucional derivada de la rama historizada dspacedb5:
+# ldg_dspacedb5 -> dv_dspacedb5 -> dm_dspacedb5 -> dm_unlp_sedici.
+# No representa el dump vigente directo, modelado por la familia sedicidb.
 models:
   - name: dim_unlp_sedici_item_type
     description: >
-      Dimensión tipológica para los ítems de publicación UNLP en el contexto de
-      SEDICI. Conserva `type` y `subtype` observados en la fuente y concentra
+      Dimensión tipológica derivada de la rama historizada dspacedb5/Data Vault
+      para los ítems de publicación UNLP en el contexto de SEDICI. Conserva
+      `type` y `subtype` observados en la fuente y concentra
       en `type_dedup` la clasificación reducida usada por la capa de
       deduplicación, incluyendo el mapeo equivalente para OpenAlex.
     columns:
@@ -26,8 +30,9 @@ models:
 
   - name: dim_unlp_sedici_author
     description: >
-      Dimensión de autores observados en los ítems SEDICI/UNLP. Consolida
-      variantes textuales y control de autoridades a nivel de autor lógico.
+      Dimensión de autores observados mediante la rama historizada
+      dspacedb5/Data Vault en los ítems SEDICI/UNLP. Consolida variantes
+      textuales y control de autoridades a nivel de autor lógico.
     columns:
       - name: sedici_author_hk
         description: Hash key estable del autor lógico dentro del scope UNLP.
@@ -55,8 +60,9 @@ models:
 
   - name: dim_unlp_sedici_metadatafield
     description: >
-      Dimensión resumida de metadatafields efectivamente usados por el universo
-      institucional SEDICI/UNLP, restringido a ítems publicables y con handle.
+      Dimensión resumida, derivada de la rama historizada dspacedb5/Data Vault,
+      de metadatafields efectivamente usados por el universo institucional
+      SEDICI/UNLP, restringido a ítems publicables y con handle.
     columns:
       - name: metadatafield_hk
         description: Hash key del metadatafield.
@@ -79,8 +85,9 @@ models:
 
   - name: brg_unlp_sedici_item_author
     description: >
-      Bridge a grano una fila por observación de autor dentro de un ítem
-      SEDICI/UNLP. Vincula cada valor de metadato autoral con
+      Bridge derivado de la rama historizada dspacedb5/Data Vault, a grano una
+      fila por observación de autor dentro de un ítem SEDICI/UNLP. Vincula cada
+      valor de metadato autoral con
       `dim_unlp_sedici_author`.
     columns:
       - name: item_hk
@@ -106,13 +113,14 @@ models:
 
   - name: brg_unlp_sedici_item_community
     description: >
-      Bridge fuente-específico entre ítems SEDICI/UNLP y su árbol de
-      comunidades y colecciones dentro de DSpace 5.
+      Bridge derivado de la rama historizada dspacedb5/Data Vault entre ítems
+      SEDICI/UNLP y su árbol de comunidades y colecciones dentro de DSpace 5.
 
   - name: brg_unlp_sedici_item_metadatafield
     description: >
-      Bridge a grano una fila por valor de metadato observado dentro del
-      universo institucional SEDICI/UNLP.
+      Bridge derivado de la rama historizada dspacedb5/Data Vault, a grano una
+      fila por valor de metadato observado dentro del universo institucional
+      SEDICI/UNLP.
     columns:
       - name: item_hk
         description: Hash key del ítem SEDICI.
@@ -143,7 +151,10 @@ models:
   - name: fct_unlp_sedici_item_publication
     description: >
       Una fila por ítem de SEDICI observado mediante la rama historizada
-      `dspacedb5` y delimitado para UNLP.
+      `dspacedb5` y delimitado para UNLP. Consume la última observación
+      disponible en Data Vault; no equivale al snapshot directo vigente de
+      `sedicidb`. La representación de bajas entre extracciones debe validarse
+      antes de tratar esta rama como estado corriente autoritativo.
     config:
       meta:
         organization: unlp
@@ -153,6 +164,9 @@ models:
         business_process: item_publication
         grain: item_hk
         temporal_scope: latest_historical_observation
+        ingestion_mode: data_vault
+        history_strategy: satellite_hashdiff
+        source_family: dspacedb5
     columns:
       - name: item_hk
         description: Clave hash del ítem institucional.
@@ -222,7 +236,8 @@ models:
       metadatafield_hk` para el universo institucional SEDICI/UNLP. Filtra
       `fct_dspacedb5_item_metadatafield_usage` al subconjunto UNLP publicado y
       descubrible para desacoplar los consumos SEDICI de la tabla genérica de
-      `dspacedb5`.
+      `dspacedb5`. Pertenece a la rama historizada dspacedb5/Data Vault, no al
+      dump directo `sedicidb`.
     data_tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns: [item_hk, metadatafield_hk]
