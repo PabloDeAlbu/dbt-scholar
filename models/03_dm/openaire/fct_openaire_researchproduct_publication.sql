@@ -27,7 +27,8 @@ pid_profile AS (
     GROUP BY researchproduct_hk
 ),
 
--- ¿Qué atributos, métricas y cobertura de PIDs se exponen por researchproduct de OpenAIRE?
+-- ¿Qué atributos, métricas y cobertura de PIDs describen el hecho de publicación
+-- de cada researchproduct de OpenAIRE?
 final AS (
     SELECT
         dim_rp.researchproduct_id,

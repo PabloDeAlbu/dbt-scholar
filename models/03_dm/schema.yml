@@ -39,11 +39,12 @@ models:
 
   - name: fct_entity_publication
     description: >
-      Hecho analítico transversal de publicaciones. Unifica las publicaciones
-      modeladas en `core` para OpenAlex, OpenAIRE, OAI, dspacedb y dspacedb5
-      bajo una estructura común orientada a análisis por institución, fuente y
-      fecha de publicación, sin deduplicación entre fuentes. En OpenAlex y
-      OpenAIRE, la asignación institucional se resuelve desde
+      Hecho analítico transversal del proceso de publicación.
+      `publication` nombra el proceso representado y no una tipología documental.
+      Unifica entidades de OpenAlex, OpenAIRE, OAI, dspacedb y dspacedb5 bajo
+      una estructura común orientada a análisis por institución, fuente y fecha
+      de publicación, sin deduplicación entre fuentes.
+      En OpenAlex y OpenAIRE, la asignación institucional se resuelve desde
       `fct_entity_extract`, preservando el contexto operativo del ROR utilizado
       en la extracción y no una afiliación bibliográfica intrínseca de la entidad.
     config:
@@ -74,7 +75,9 @@ models:
           - accepted_values:
               values: ['Repositorio Institucional', 'OpenAIRE', 'OpenAlex']
       - name: entity_type
-        description: Tipo analítico de entidad unificada; en este modelo toma el valor `publication`.
+        description: >
+          Proceso analítico unificado.
+          Toma el valor `publication` con independencia de la tipología documental de la fuente.
         data_tests: [not_null]
       - name: entity_hk
         description: Clave hash de la entidad en su sistema fuente.

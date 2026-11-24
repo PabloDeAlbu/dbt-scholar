@@ -60,7 +60,7 @@ models:
 
   - name: dim_openaire_researchproduct_type
     description: >
-      Dimensión del tipo principal de research product según el vocabulario
+      Dimensión del tipo principal de researchproduct según el vocabulario
       `dnet:result_typologies` de OpenAIRE.
     config:
       tags: [dm]
@@ -74,8 +74,10 @@ models:
 
   - name: fct_openaire_researchproduct_publication
     description: >
-      Representa el estado más reciente de cada researchproduct de OpenAIRE.
-      Cada fila expone sus atributos, métricas y relaciones PID observadas.
+      Representa el hecho de publicación de cada researchproduct de OpenAIRE.
+      `publication` nombra el proceso y no restringe la tipología del researchproduct.
+      Expone los atributos más recientes disponibles para cada researchproduct.
+      Cada fila incorpora métricas y relaciones PID observadas.
     config:
       tags: [dm]
       meta:
@@ -102,7 +104,9 @@ models:
       - name: publication_date
         description: Fecha de publicación provista por OpenAIRE (si está disponible).
       - name: type
-        description: Tipo principal del research product según `dnet:result_typologies`.
+        description: >
+          Tipo principal del researchproduct según `dnet:result_typologies`.
+          Esta clasificación es independiente del proceso `publication` representado por el hecho.
         data_tests:
           - not_null
           - relationships:
