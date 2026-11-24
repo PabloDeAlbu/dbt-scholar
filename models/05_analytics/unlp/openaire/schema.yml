@@ -1,0 +1,37 @@
+version: 2
+
+models:
+  - name: unlp_openaire_researchproduct_subject_sdg
+    description: >
+      Producción atribuida a la UNLP por OpenAIRE con sus Objetivos de
+      Desarrollo Sostenible, a grano producto de investigación por ODS. Es un
+      contrato analítico institucional y no representa el universo de SEDICI.
+    config:
+      meta:
+        organization: unlp
+        source_system: openaire
+        model_role: analytics
+        grain: researchproduct_hk + subject_hk
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [researchproduct_hk, subject_hk]
+    columns:
+      - name: researchproduct_hk
+        description: Clave hash del producto de investigación OpenAIRE.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('fct_unlp_openaire_researchproduct')
+              field: researchproduct_hk
+      - name: researchproduct_id
+        description: Identificador canónico del producto en OpenAIRE.
+        data_tests: [not_null]
+      - name: organization_ror
+        description: ROR utilizado para atribuir el producto a la UNLP.
+        data_tests: [not_null]
+      - name: subject_hk
+        description: Clave hash de la asignación temática ODS.
+        data_tests: [not_null]
+      - name: sdg
+        description: Valor textual del Objetivo de Desarrollo Sostenible.
+        data_tests: [not_null]

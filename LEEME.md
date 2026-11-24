@@ -11,8 +11,7 @@ modelos reutilizables y salidas analíticas.
 - `models/02_dv`: historización mediante Data Vault cuando la fuente lo requiere.
 - `models/03_dm`: modelos dimensionales compartidos.
 - `models/04_org`: hechos, dimensiones y bridges propios de una organización o fuente institucional.
-- `models/04_viz`: vistas orientadas a visualización.
-- `models/05_analytics`: modelos y resultados de un análisis o proyecto específico.
+- `models/05_analytics`: modelos y resultados de un análisis, proyecto o visualización específicos.
 
 Los esquemas físicos son generados según la capa. Por ejemplo:
 

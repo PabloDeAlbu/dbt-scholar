@@ -159,15 +159,17 @@ Qué debería quedar en `custom/<org>`:
 - selección de atributos relevantes para una institución
 - bridges o aplanados que sólo tienen sentido en ese subconjunto institucional
 
-Qué evitar en `viz`:
+Qué evitar en `analytics`:
 
 - redefinir el subconjunto institucional
 - volver a cruzar contra metadata cruda si eso ya fue resuelto en `dm`
 - duplicar lógica de parseo o reconciliación que debería vivir en `core` o `custom`
 
-### `models/04_viz`
+### `models/05_analytics`
 
-Salidas orientadas a consumo analítico o visualización. En general esta capa debería depender de `dm` y evitar reimplementar lógica de negocio pesada.
+Salidas orientadas a un análisis, proyecto o visualización concretos. En
+general esta capa debería depender de `dm` y `org`, y evitar reimplementar
+lógica de negocio reutilizable.
 
 ## Convenciones de nombres
 

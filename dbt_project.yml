@@ -187,27 +187,6 @@ models:
         integration:
           +schema: unlp
           +tags: [unlp, integration]
-    04_viz:
-      core:
-        audit:
-          +schema: audit
-        dspacedb:
-          +schema: dspacedb
-          +tags: [dspacedb]
-      custom:
-        unlp:
-          +schema: unlp
-          +tags: [unlp]
-          00_base:
-            +schema: unlp_base
-          conicet_center_candidate:
-            +schema: unlp_conicet_center_candidate
-          dspace5db:
-            +schema: unlp_dspace5db
-          openaire:
-            +schema: unlp_openaire
-          sedici:
-            +schema: unlp_sedici
     05_analytics:
       cendie:
         +schema: cendie
@@ -240,6 +219,9 @@ models:
         organizaciones:
           +schema: unlp_organizaciones
           +tags: [organizaciones]
+        openaire:
+          +schema: unlp_openaire
+          +tags: [openaire]
         vocsedici:
           +schema: unlp_vocsedici
           +tags: [vocsedici]

@@ -11,8 +11,7 @@ reusable models and analytical outputs.
 - `models/02_dv`: history tracking through Data Vault when required by the source.
 - `models/03_dm`: shared dimensional models.
 - `models/04_org`: facts, dimensions, and bridges specific to an organization or institutional source.
-- `models/04_viz`: views intended for visualization.
-- `models/05_analytics`: models and results for a specific analysis or project.
+- `models/05_analytics`: models and results for a specific analysis, project, or visualization.
 
 Physical schemas are generated according to the layer. For example:
 
