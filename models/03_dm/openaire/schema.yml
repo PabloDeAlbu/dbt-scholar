@@ -74,10 +74,15 @@ models:
 
   - name: fct_openaire_researchproduct_publication
     description: >
-      Hecho de publicaciones OpenAIRE en su estado más reciente (1 fila por researchproduct_hk),
-      con metadatos bibliográficos, métricas de uso/citación y atributos de acceso abierto.
+      Representa el estado más reciente de cada researchproduct de OpenAIRE.
+      Cada fila expone sus atributos, métricas y relaciones PID observadas.
     config:
       tags: [dm]
+      meta:
+        source_system: openaire
+        model_role: fact
+        grain: researchproduct_hk
+        temporal_scope: latest_attributes_and_observed_pid_relations
     columns:
       - name: researchproduct_hk
         description: Clave hash del research product (grano del hecho).
@@ -107,6 +112,98 @@ models:
         description: URI del término de tipo principal en el vocabulario de OpenAIRE.
       - name: best_access_right_uri
         description: URI de la mejor clasificación de derechos de acceso (si está disponible).
+
+      - name: arxiv_count
+        description: Cantidad de PIDs arXiv distintos observados para el researchproduct.
+        data_tests: [not_null]
+      - name: has_arxiv
+        description: Indica si se observó al menos un PID arXiv.
+        data_tests: [not_null]
+      - name: has_single_arxiv
+        description: Indica si se observó exactamente un PID arXiv.
+        data_tests: [not_null]
+
+      - name: doi_count
+        description: Cantidad de DOI distintos observados para el researchproduct.
+        data_tests: [not_null]
+      - name: has_doi
+        description: Indica si se observó al menos un DOI.
+        data_tests: [not_null]
+      - name: has_single_doi
+        description: Indica si se observó exactamente un DOI.
+        data_tests: [not_null]
+
+      - name: handle_count
+        description: Cantidad de PIDs Handle distintos observados para el researchproduct.
+        data_tests: [not_null]
+      - name: has_handle
+        description: Indica si se observó al menos un PID Handle.
+        data_tests: [not_null]
+      - name: has_single_handle
+        description: Indica si se observó exactamente un PID Handle.
+        data_tests: [not_null]
+
+      - name: mag_count
+        description: Cantidad de PIDs MAG distintos observados para el researchproduct.
+        data_tests: [not_null]
+      - name: has_mag
+        description: Indica si se observó al menos un PID MAG.
+        data_tests: [not_null]
+      - name: has_single_mag
+        description: Indica si se observó exactamente un PID MAG.
+        data_tests: [not_null]
+
+      - name: pmb_count
+        description: Cantidad de PIDs PMB distintos observados para el researchproduct.
+        data_tests: [not_null]
+      - name: has_pmb
+        description: Indica si se observó al menos un PID PMB.
+        data_tests: [not_null]
+      - name: has_single_pmb
+        description: Indica si se observó exactamente un PID PMB.
+        data_tests: [not_null]
+
+      - name: pmc_count
+        description: Cantidad de PIDs PMC distintos observados para el researchproduct.
+        data_tests: [not_null]
+      - name: has_pmc
+        description: Indica si se observó al menos un PID PMC.
+        data_tests: [not_null]
+      - name: has_single_pmc
+        description: Indica si se observó exactamente un PID PMC.
+        data_tests: [not_null]
+
+      - name: pmid_count
+        description: Cantidad de PIDs PMID distintos observados para el researchproduct.
+        data_tests: [not_null]
+      - name: has_pmid
+        description: Indica si se observó al menos un PID PMID.
+        data_tests: [not_null]
+      - name: has_single_pmid
+        description: Indica si se observó exactamente un PID PMID.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: openaire_researchproduct_arxiv_flags_match_count
+          expression: "has_arxiv = (arxiv_count > 0) and has_single_arxiv = (arxiv_count = 1)"
+      - dbt_utils.expression_is_true:
+          name: openaire_researchproduct_doi_flags_match_count
+          expression: "has_doi = (doi_count > 0) and has_single_doi = (doi_count = 1)"
+      - dbt_utils.expression_is_true:
+          name: openaire_researchproduct_handle_flags_match_count
+          expression: "has_handle = (handle_count > 0) and has_single_handle = (handle_count = 1)"
+      - dbt_utils.expression_is_true:
+          name: openaire_researchproduct_mag_flags_match_count
+          expression: "has_mag = (mag_count > 0) and has_single_mag = (mag_count = 1)"
+      - dbt_utils.expression_is_true:
+          name: openaire_researchproduct_pmb_flags_match_count
+          expression: "has_pmb = (pmb_count > 0) and has_single_pmb = (pmb_count = 1)"
+      - dbt_utils.expression_is_true:
+          name: openaire_researchproduct_pmc_flags_match_count
+          expression: "has_pmc = (pmc_count > 0) and has_single_pmc = (pmc_count = 1)"
+      - dbt_utils.expression_is_true:
+          name: openaire_researchproduct_pmid_flags_match_count
+          expression: "has_pmid = (pmid_count > 0) and has_single_pmid = (pmid_count = 1)"
 
   - name: dim_openaire_datasource
     description: Dimensión de datasource OpenAIRE (collectedFrom).
@@ -205,20 +302,6 @@ models:
         data_tests: [not_null]
       - name: observation_count
         description: Cantidad de claves PID originales agrupadas en la relación normalizada.
-        data_tests: [not_null]
-
-  - name: brg_openaire_researchproduct_pid_stats
-    description: Estadísticos de PIDs por research product (conteos y flags por esquema).
-    config:
-      tags: [dm]
-    columns:
-      - name: researchproduct_hk
-        data_tests: [not_null, unique]
-      - name: doi_count
-        description: Cantidad de DOIs asociados.
-        data_tests: [not_null]
-      - name: has_doi
-        description: Flag que indica presencia de DOI (doi_count > 0).
         data_tests: [not_null]
 
   - name: dim_openaire_subject

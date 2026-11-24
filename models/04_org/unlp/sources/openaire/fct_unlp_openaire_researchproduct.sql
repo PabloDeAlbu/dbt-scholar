@@ -90,7 +90,6 @@ final AS (
         sdg.sdg_values
     FROM {{ ref('fct_openaire_researchproduct_publication') }} fct
     INNER JOIN unlp_extract USING (researchproduct_hk)
-    INNER JOIN {{ ref('brg_openaire_researchproduct_pid_stats') }} USING (researchproduct_hk)
     LEFT JOIN sdg USING (researchproduct_hk)
 )
 

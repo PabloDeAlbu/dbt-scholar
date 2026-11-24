@@ -1,3 +1,4 @@
+-- ¿Qué researchproducts fueron observados en extracciones por el ROR de CONICET?
 WITH conicet_extract AS (
     SELECT
         researchproduct_hk,
@@ -11,7 +12,9 @@ WITH conicet_extract AS (
     GROUP BY researchproduct_hk
 ),
 
-base AS (
+-- ¿Qué atributos de los researchproducts recuperados de OpenAIRE mediante
+-- el ROR de CONICET se exponen para su análisis?
+final AS (
     SELECT 
         fct.researchproduct_hk,
         fct.researchproduct_id,
@@ -79,8 +82,8 @@ base AS (
 
     FROM {{ ref('fct_openaire_researchproduct_publication') }} fct
     INNER JOIN conicet_extract USING (researchproduct_hk)
-    INNER JOIN {{ ref('brg_openaire_researchproduct_pid_stats') }} USING (researchproduct_hk)
 )
 
-SELECT * FROM base
+SELECT *
+FROM final
 -- WHERE has_arxiv = false AND has_doi = false AND has_handle = false AND has_mag = false AND has_pmb = false AND has_pmc = false AND has_pmid = false
