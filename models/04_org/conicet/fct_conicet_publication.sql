@@ -10,43 +10,22 @@ WITH base AS (
         valid_date_issued,
         repository_identifier,
         institution_ror,
-        dc_type,
         dc_identifier_uri,
         dc_relation_doi,
         doi_audit_string,
         has_doi,
         has_multiple_doi,
         doi_count_check,
+        resource_type,
+        resource_type_uri,
+        resource_type_count,
+        has_multiple_resource_types,
         subject_area,
         subject_subarea,
         fos_code_level_1,
+        fos_assignment_count,
         mult_fos_flag
     FROM {{ ref('fct_conicet_oai_record_publication') }}
-),
-
--- ¿Qué valores de tipo documental declara cada registro?
-record_dc_type AS (
-    SELECT DISTINCT
-        base.record_hk,
-        NULLIF(dc_type_value, '') AS dc_type
-    FROM base
-    CROSS JOIN LATERAL REGEXP_SPLIT_TO_TABLE(COALESCE(base.dc_type, ''), '[|]') AS dc_type_value
-    WHERE NULLIF(dc_type_value, '') IS NOT NULL
-),
-
--- ¿Qué tipos documentales resuelve la representación OAI de CONICET?
-dim_publication_type AS (
-    SELECT
-        record_dc_type.record_hk,
-        MIN(dim.publication_type) AS publication_type,
-        MIN(dim.publication_type_uri) AS publication_type_uri,
-        COUNT(DISTINCT dim.publication_type_uri) AS publication_type_count,
-        (COUNT(DISTINCT dim.publication_type_uri) > 1) AS has_multiple_publication_type
-    FROM record_dc_type
-    INNER JOIN {{ ref('dim_conicet_oai_record_type') }} AS dim
-        USING (dc_type)
-    WHERE dim.is_publication_type
-    GROUP BY record_dc_type.record_hk
 ),
 
 -- ¿Qué condición de acceso canónica tiene cada registro?
@@ -162,10 +141,10 @@ final AS (
         CASE
             WHEN base.valid_date_issued THEN EXTRACT(YEAR FROM base.date_issued)::integer
         END AS publication_year,
-        dim_publication_type.publication_type,
-        dim_publication_type.publication_type_uri,
-        COALESCE(dim_publication_type.publication_type_count, 0) AS publication_type_count,
-        COALESCE(dim_publication_type.has_multiple_publication_type, false) AS has_multiple_publication_type,
+        base.resource_type,
+        base.resource_type_uri,
+        base.resource_type_count,
+        base.has_multiple_resource_types,
         dim_access_right.access_right,
         dim_access_right.access_right_uri,
         base.repository_identifier,
@@ -180,6 +159,7 @@ final AS (
         base.subject_area,
         base.subject_subarea,
         base.fos_code_level_1 AS subject_code,
+        base.fos_assignment_count AS subject_assignment_count,
         base.mult_fos_flag AS has_multiple_subject_assignments,
         COALESCE(fil_enrichment.has_fil, false) AS has_fil,
         COALESCE(fil_enrichment.fil_count, 0) AS fil_count,
@@ -233,7 +213,6 @@ final AS (
         openaire_enrichment.openaire_has_single_pmid,
         openaire_enrichment.openaire_pmid_count
     FROM base
-    LEFT JOIN dim_publication_type USING (record_hk)
     LEFT JOIN dim_access_right USING (record_hk)
     LEFT JOIN record_set USING (record_hk)
     LEFT JOIN fil_enrichment USING (record_hk)

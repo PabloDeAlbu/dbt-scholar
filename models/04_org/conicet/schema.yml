@@ -28,15 +28,19 @@ models:
       - name: source_system
         description: Source system desde el cual se resuelve la publicación canónica.
         data_tests: [not_null]
-      - name: publication_type
-        description: Tipo de publicación normalizado desde los valores `dc.type` mediante la dimensión OAI de CONICET.
-      - name: publication_type_uri
-        description: URI COAR asociada al tipo de publicación normalizado.
-      - name: publication_type_count
-        description: Cantidad de tipos canónicos distintos resueltos desde los valores raw de `dc.type`.
+      - name: resource_type
+        description: Tipo de recurso normalizado desde `dc.type` mediante la dimensión canónica COAR.
+      - name: resource_type_uri
+        description: URI canónica del tipo de recurso en `dim_resource_type`.
+        data_tests:
+          - relationships:
+              to: ref('dim_resource_type')
+              field: resource_type_uri
+      - name: resource_type_count
+        description: Cantidad de tipos de recurso canónicos resueltos desde los valores raw de `dc.type`.
         data_tests: [not_null]
-      - name: has_multiple_publication_type
-        description: Flag que indica multiplicidad de tipos canónicos para la publicación.
+      - name: has_multiple_resource_types
+        description: Indica si se resolvió más de un tipo de recurso canónico para la publicación.
         data_tests: [not_null]
       - name: access_right
         description: Access right canónico resuelto fuera de OAI desde dimensiones core.
@@ -73,13 +77,18 @@ models:
         description: Cantidad de DOIs detectados en la fuente actual.
         data_tests: [not_null]
       - name: subject_area
-        description: Área temática principal normalizada desde FOS/FORD.
+        description: >
+          Área de la asignación FOS seleccionada de forma determinística.
+          La selección no implica prioridad informada por la fuente.
       - name: subject_subarea
-        description: Subárea temática normalizada desde FOS/FORD.
+        description: Subárea perteneciente a la misma asignación FOS que `subject_area`.
       - name: subject_code
-        description: Código del área temática principal.
+        description: Código del área perteneciente a la asignación FOS seleccionada.
+      - name: subject_assignment_count
+        description: Cantidad de asignaciones FOS efectivas conservadas para la publicación.
+        data_tests: [not_null]
       - name: has_multiple_subject_assignments
-        description: Flag de auditoría para publicaciones con múltiples subjects FOS antes del aplanado.
+        description: Indica si la publicación conserva más de una asignación FOS efectiva.
         data_tests: [not_null]
       - name: has_fil
         description: Flag que indica presencia de al menos una descripción `Fil:` asociada al registro.
@@ -343,15 +352,67 @@ models:
         description: Cantidad de DOIs detectados para el registro.
         data_tests: [not_null]
 
-  - name: brg_conicet_item_fos_flattened
-    description: Bridge de subjects FOS aplanado (1 fila por record_hk) con flags de auditoría por multiplicidad.
+  - name: brg_conicet_item_fos
+    description: >
+      Relación entre registros CONICET y asignaciones FOS efectivas.
+      Excluye el nivel padre cuando el mismo registro posee una subárea de esa rama.
     config:
       tags: [conicet, dm]
+      meta:
+        organization: conicet
+        source_system: oai
+        model_role: bridge
+        grain: record_hk + dc_subject_hk
+    columns:
+      - name: record_hk
+        data_tests: [not_null]
+      - name: dc_subject_hk
+        data_tests: [not_null]
+      - name: uri
+        description: URI BECyT/FORD de la asignación conservada.
+        data_tests: [not_null]
+      - name: code_level_1
+        description: Código del área FOS.
+        data_tests: [not_null]
+      - name: code_level_2
+        description: Código de la subárea FOS cuando la asignación posee ese nivel.
+      - name: label_level_1
+        description: Etiqueta del área FOS.
+      - name: label_level_2
+        description: Etiqueta de la subárea FOS cuando corresponde.
+      - name: resolution_level
+        description: Nivel jerárquico resuelto por el diccionario FOS.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [record_hk, dc_subject_hk]
+
+  - name: int_conicet_item_fos_selected
+    description: >
+      Selección determinística de una asignación FOS coherente por registro.
+      Prioriza subáreas y luego ordena por código sin inferir una clasificación principal.
+    config:
+      tags: [conicet, dm]
+      meta:
+        organization: conicet
+        source_system: oai
+        model_role: intermediate
+        grain: record_hk
     columns:
       - name: record_hk
         data_tests: [not_null, unique]
+      - name: dc_subject_hk
+        data_tests: [not_null]
+      - name: fos_uri
+        data_tests: [not_null]
+      - name: fos_code_level_1
+        data_tests: [not_null]
+      - name: fos_assignment_count
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 1"
       - name: has_multiple_fos_assignments
-        description: Flag que indica múltiples asignaciones FOS antes del aplanado.
         data_tests: [not_null]
 
   - name: brg_conicet_publication_doi

@@ -8,19 +8,19 @@ models:
       calculada sobre la participación de cada tipo en el corpus completo.
     data_tests:
       - dbt_utils.expression_is_true:
-          name: conicet_oai_publication_type_group_is_consistent
+          name: conicet_oai_resource_type_group_is_consistent
           expression: >
-            (publication_type_uri is null
-              and publication_type_group = 'SIN TIPO NORMALIZADO'
-              and not is_main_publication_type)
-            or (publication_type_uri is not null
-              and publication_type_share_pct >= 0.5
-              and publication_type_group = publication_type
-              and is_main_publication_type)
-            or (publication_type_uri is not null
-              and publication_type_share_pct < 0.5
-              and publication_type_group = 'OTRAS TIPOLOGÍAS'
-              and not is_main_publication_type)
+            (resource_type_uri is null
+              and resource_type_group = 'SIN TIPO NORMALIZADO'
+              and not is_main_resource_type)
+            or (resource_type_uri is not null
+              and resource_type_share_pct >= 0.5
+              and resource_type_group = resource_type
+              and is_main_resource_type)
+            or (resource_type_uri is not null
+              and resource_type_share_pct < 0.5
+              and resource_type_group = 'OTRAS TIPOLOGÍAS'
+              and not is_main_resource_type)
     columns:
       - name: record_hk
         description: Clave técnica del registro OAI, conservada para integrar otras fuentes.
@@ -34,21 +34,21 @@ models:
       - name: extract_date
         description: Fecha en que el registro fue recuperado mediante OAI-PMH.
         data_tests: [not_null]
-      - name: publication_type
-        description: Tipo documental normalizado en español.
-      - name: publication_type_uri
-        description: URI del tipo documental normalizado mediante COAR Resource Types.
-      - name: publication_type_share_pct
-        description: Porcentaje del corpus completo correspondiente al tipo documental.
+      - name: resource_type
+        description: Tipo de recurso normalizado en español mediante COAR Resource Types.
+      - name: resource_type_uri
+        description: URI COAR del tipo de recurso normalizado.
+      - name: resource_type_share_pct
+        description: Porcentaje del corpus completo correspondiente al tipo de recurso.
         data_tests: [not_null]
-      - name: publication_type_group
+      - name: resource_type_group
         description: >
           Etiqueta estable para la presentación. Conserva individualmente los tipos
           con al menos 0,5 % del corpus, agrupa los restantes como OTRAS TIPOLOGÍAS
           y mantiene separados los registros sin tipo normalizado.
         data_tests: [not_null]
-      - name: is_main_publication_type
-        description: Indica si el tipo representa al menos el 0,5 % del corpus completo.
+      - name: is_main_resource_type
+        description: Indica si el tipo de recurso representa al menos el 0,5 % del corpus completo.
         data_tests: [not_null]
       - name: access_right
         description: Condición de acceso normalizada en español.

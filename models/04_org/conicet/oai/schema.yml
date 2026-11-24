@@ -4,8 +4,9 @@ models:
   - name: dim_conicet_oai_record_type
     description: >
       Mapeo curado de valores `dc.type` observados en el OAI de CONICET hacia
-      tipos documentales COAR. Prioriza el vocabulario `ar-repo` sobre
-      `eu-repo` y excluye valores no tipológicos como `publishedVersion`.
+      tipos de recurso COAR expuestos por `dim_resource_type`. Conserva el
+      vocabulario de origen sin establecer prioridad entre `ar-repo` y
+      `eu-repo`, y excluye valores no tipológicos como `publishedVersion`.
     columns:
       - name: dc_type
         description: Valor raw observado en `dc.type`.
@@ -16,16 +17,113 @@ models:
           - not_null
           - accepted_values:
               values: ['ar-repo', 'eu-repo']
-      - name: publication_type
-        description: Etiqueta canónica del tipo documental cuando existe mapeo.
-      - name: publication_type_uri
-        description: URI COAR del tipo documental cuando existe mapeo.
-      - name: resolution_priority
-        description: Prioridad usada al resolver múltiples vocabularios; `ar-repo` precede a `eu-repo`.
+      - name: resource_type
+        description: Etiqueta canónica COAR del tipo de recurso cuando existe mapeo.
+      - name: resource_type_uri
+        description: URI canónica del tipo de recurso en `dim_resource_type`.
+        data_tests:
+          - relationships:
+              to: ref('dim_resource_type')
+              field: resource_type_uri
+      - name: resource_type_label_es
+        description: Etiqueta canónica en español provista por `dim_resource_type`.
+      - name: is_resource_type
+        description: Indica si el valor representa un tipo de recurso resoluble mediante COAR.
         data_tests: [not_null]
-      - name: is_publication_type
-        description: Indica si el valor representa un tipo documental resoluble.
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: conicet_oai_resolvable_resource_type_has_canonical_dimension
+          expression: >
+            not is_resource_type
+            or (resource_type_uri is not null and resource_type is not null)
+
+  - name: brg_conicet_oai_record_resource_type
+    description: >
+      Relación canónica entre cada `record` del corpus OAI de CONICET y los
+      tipos de recurso COAR derivados de sus valores `dc.type`. Conserva una
+      fila por `record_hk` y `resource_type_uri`, junto con la evidencia fuente.
+    config:
+      tags: [conicet, dm]
+      meta:
+        organization: conicet
+        source_system: oai
+        model_role: bridge
+        grain: record_hk + resource_type_uri
+    columns:
+      - name: record_hk
+        description: Clave hash de la entidad OAI `record`.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('fct_oai_record_publication')
+              field: record_hk
+      - name: resource_type_uri
+        description: URI del tipo de recurso canónico COAR relacionado con el record.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_resource_type')
+              field: resource_type_uri
+      - name: resource_type
+        description: Etiqueta canónica en inglés provista por `dim_resource_type`.
         data_tests: [not_null]
+      - name: resource_type_label_es
+        description: Etiqueta canónica en español provista por `dim_resource_type`.
+      - name: type_vocabularies
+        description: Vocabularios de origen que convergen en la relación, concatenados con `|`.
+        data_tests: [not_null]
+      - name: source_dc_types
+        description: Valores `dc.type` que sustentan la relación, concatenados con `|`.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [record_hk, resource_type_uri]
+
+  - name: int_conicet_oai_record_resource_type_selected
+    description: >
+      Resolución de un tipo de recurso representativo por entidad OAI `record`.
+      Prefiere un único tipo específico frente a `OTHER`, sin priorizar el
+      vocabulario `ar-repo` o `eu-repo`, y conserva la multiplicidad candidata.
+    config:
+      tags: [conicet, dm]
+      meta:
+        organization: conicet
+        source_system: oai
+        model_role: intermediate
+        grain: record_hk
+    columns:
+      - name: record_hk
+        description: Clave hash de la entidad OAI `record`.
+        data_tests: [not_null, unique]
+      - name: resource_type_uri
+        description: URI COAR seleccionada; queda nula ante candidatos específicos incompatibles.
+        data_tests:
+          - relationships:
+              to: ref('dim_resource_type')
+              field: resource_type_uri
+      - name: resource_type
+        description: Etiqueta canónica del tipo de recurso seleccionado.
+      - name: resource_type_label_es
+        description: Etiqueta canónica en español del tipo seleccionado.
+      - name: resource_type_source
+        description: Vocabulario o vocabularios que sustentan el tipo seleccionado.
+      - name: resource_type_source_dc_types
+        description: Valores `dc.type` que sustentan el tipo seleccionado.
+      - name: resource_type_count
+        description: Cantidad de URI COAR candidatas distintas para el record.
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 1"
+      - name: has_multiple_resource_types
+        description: Indica si el record posee más de una URI COAR candidata distinta.
+        data_tests: [not_null]
+      - name: has_resource_type
+        description: Indica si la regla pudo seleccionar un tipo de recurso representativo.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: "has_resource_type = (resource_type_uri is not null)"
 
   - name: dim_conicet_oai_record_accessright
     description: >
@@ -51,16 +149,10 @@ models:
     description: >
       Hecho institucional CONICET a nivel de record OAI. Conserva el grano 1 fila
       por `record_hk` de `fct_oai_record_publication`, filtra el subset institucional
-      configurado por variables y agrega enrichment 1:1 de identifier, DOI y subject.
+      configurado por variables y agrega enrichment 1:1 de tipo de recurso,
+      condición de acceso, identifier, DOI y subject.
     config:
       tags: [conicet, dm]
-    data_tests:
-      - dbt_utils.expression_is_true:
-          expression: "dc_identifier_uri ~ '^http://hdl\\.handle\\.net/11336/'"
-      - dbt_utils.expression_is_true:
-          expression: "dc_relation_doi is null OR dc_relation_doi ~* '^10\\.[0-9]{4,9}/[^[:space:]]+$'"
-          config:
-            severity: warn
     columns:
       - name: record_hk
         description: Clave hash del registro OAI.
@@ -81,20 +173,32 @@ models:
       - name: has_multiple_dc_type
         description: Flag que indica multiplicidad de `dc.type` en el record.
         data_tests: [not_null]
-      - name: publication_type
-        description: Tipo documental canónico resuelto con prioridad `ar-repo` y fallback `eu-repo`.
-      - name: publication_type_uri
-        description: URI COAR del tipo documental resuelto.
-      - name: publication_type_source
-        description: Vocabulario que aportó el tipo elegido (`ar-repo` o `eu-repo`).
-      - name: publication_type_count
-        description: Cantidad de tipos documentales canónicos distintos resueltos para el record.
+      - name: resource_type
+        description: >
+          Tipo de recurso canónico del record. Cuando coexisten un tipo específico
+          y `OTHER`, conserva el específico; no impone prioridad entre vocabularios.
+      - name: resource_type_uri
+        description: URI COAR del tipo de recurso resuelto.
+        data_tests:
+          - relationships:
+              to: ref('dim_resource_type')
+              field: resource_type_uri
+      - name: resource_type_label_es
+        description: Etiqueta canónica en español del tipo de recurso resuelto.
+      - name: resource_type_source
+        description: >
+          Vocabulario o vocabularios que aportaron el tipo COAR elegido, concatenados
+          con `|` cuando ambos convergen en la misma URI.
+      - name: resource_type_source_dc_types
+        description: Valores `dc.type` que sustentan el tipo de recurso elegido.
+      - name: resource_type_count
+        description: Cantidad de URI COAR candidatas distintas observadas para el record.
         data_tests: [not_null]
-      - name: has_multiple_publication_type
-        description: Indica si el record resuelve a más de un tipo documental canónico.
+      - name: has_multiple_resource_types
+        description: Indica si el record posee más de una URI COAR candidata distinta.
         data_tests: [not_null]
-      - name: has_publication_type
-        description: Indica si el record pudo resolverse a un tipo documental canónico.
+      - name: has_resource_type
+        description: Indica si el record pudo resolverse a un tipo de recurso canónico.
         data_tests: [not_null]
       - name: dc_right
         description: Valores raw de `dc.right` heredados del hecho OAI genérico.
@@ -137,6 +241,25 @@ models:
           - unique:
               config:
                 severity: warn
+      - name: subject_area
+        description: Área de la asignación FOS seleccionada de forma determinística.
+      - name: subject_subarea
+        description: Subárea de la misma asignación FOS seleccionada.
+      - name: fos_code_level_1
+        description: Código del área de la asignación FOS seleccionada.
+      - name: fos_assignment_count
+        description: Cantidad de asignaciones FOS efectivas del registro.
+        data_tests: [not_null]
+      - name: mult_fos_flag
+        description: Indica si el registro conserva más de una asignación FOS efectiva.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: "dc_identifier_uri ~ '^http://hdl\\.handle\\.net/11336/'"
+      - dbt_utils.expression_is_true:
+          expression: "dc_relation_doi is null OR dc_relation_doi ~* '^10\\.[0-9]{4,9}/[^[:space:]]+$'"
+          config:
+            severity: warn
 
   - name: fct_conicet_oai_record_pid_profile
     description: >

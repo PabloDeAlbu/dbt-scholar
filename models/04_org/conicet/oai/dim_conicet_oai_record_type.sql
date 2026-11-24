@@ -1,5 +1,6 @@
 {{ config(materialized = 'table') }}
 
+-- ¿Qué valores dc.type institucionales y vocabularios de origen deben mapearse?
 WITH base AS (
     SELECT
         dc_type,
@@ -10,38 +11,41 @@ WITH base AS (
     FROM {{ ref('seed_oai_record_type') }}
 ),
 
-final AS (
+-- ¿A qué URI COAR se mapea cada valor institucional de dc.type?
+institutional_mapping AS (
     SELECT
         base.dc_type,
         base.type_vocabulary,
-        COALESCE(
-            NULLIF(mapping.label, '#N/A'),
-            CASE WHEN base.dc_type = 'info:eu-repo/semantics/other' THEN 'OTHER' END
-        ) AS publication_type,
         COALESCE(
             NULLIF(mapping.coar_uri, '#N/A'),
             CASE WHEN base.dc_type = 'info:eu-repo/semantics/other'
                 THEN 'http://purl.org/coar/resource_type/c_1843'
             END
-        ) AS publication_type_uri,
-        COALESCE(
-            NULLIF(mapping.label_es, '#N/A'),
-            CASE WHEN base.dc_type = 'info:eu-repo/semantics/other' THEN 'OTROS' END
-        ) AS publication_type_label_es,
-        CASE base.type_vocabulary
-            WHEN 'ar-repo' THEN 10
-            WHEN 'eu-repo' THEN 20
-        END AS resolution_priority,
+        ) AS resource_type_uri,
         (
             base.dc_type <> 'info:eu-repo/semantics/publishedVersion'
             AND (
                 NULLIF(mapping.coar_uri, '#N/A') IS NOT NULL
                 OR base.dc_type = 'info:eu-repo/semantics/other'
             )
-        ) AS is_publication_type
+        ) AS is_resource_type
     FROM base
     LEFT JOIN {{ ref('seed_coar_resource_types2conicet_oai_dc_types') }} AS mapping
         ON base.dc_type = mapping.record_type
+),
+
+-- ¿Qué atributos canónicos de COAR corresponden al mapeo institucional?
+final AS (
+    SELECT
+        mapping.dc_type,
+        mapping.type_vocabulary,
+        resource_type.resource_type_label AS resource_type,
+        mapping.resource_type_uri,
+        resource_type.resource_type_label_es,
+        mapping.is_resource_type
+    FROM institutional_mapping AS mapping
+    LEFT JOIN {{ ref('dim_resource_type') }} AS resource_type
+        USING (resource_type_uri)
 )
 
 SELECT * FROM final

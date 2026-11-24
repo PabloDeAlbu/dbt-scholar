@@ -66,10 +66,10 @@ models:
         description: URI de la publicación en CONICET Digital.
       - name: publication_date
         description: Fecha de publicación cuando cumple las reglas de validez del modelo OAI.
-      - name: publication_type
-        description: Tipo documental normalizado a partir del registro OAI institucional.
-      - name: publication_type_group
-        description: Agrupación analítica del tipo documental para su presentación.
+      - name: resource_type
+        description: Tipo de recurso normalizado a partir del registro OAI institucional.
+      - name: resource_type_group
+        description: Agrupación analítica del tipo de recurso para su presentación.
         data_tests: [not_null]
       - name: subject_area
         description: Área temática informada por el registro OAI de CONICET Digital.
