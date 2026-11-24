@@ -7,12 +7,6 @@ models:
       utilizada en la extracción para construir un subconjunto reproducible.
     config:
       tags: [cic, dm]
-    data_tests:
-      - dbt_utils.expression_is_true:
-          name: cic_openaire_organization_ror_format
-          expression: "trim(organization_ror) ~ '^https?://ror[.]org/[0-9a-z]{9}/?$'"
-          config:
-            alias: cic_openaire_organization_ror_format
     columns:
       - name: researchproduct_hk
         description: Clave hash del research product (PK del hub).
@@ -29,7 +23,19 @@ models:
           - unique
       - name: organization_ror
         description: Identificador ROR (URL) utilizado para filtrar el subconjunto institucional CIC.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['https://ror.org/02s7sax82']
+      - name: cic_first_load_datetime
+        description: Primera carga en la que el researchproduct fue observado en el subconjunto CIC.
         data_tests: [not_null]
-      - name: unlp_last_extract_datetime
-        description: Última fecha/hora en la que el research product fue observado en el subconjunto institucional (timestamp del extractor).
+      - name: cic_last_load_datetime
+        description: Última carga en la que el researchproduct fue observado en el subconjunto CIC.
         data_tests: [not_null]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          name: cic_openaire_organization_ror_format
+          expression: "trim(organization_ror) ~ '^https?://ror[.]org/[0-9a-z]{9}/?$'"
+          config:
+            alias: cic_openaire_organization_ror_format

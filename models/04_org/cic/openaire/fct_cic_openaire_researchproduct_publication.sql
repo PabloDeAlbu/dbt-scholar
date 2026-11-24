@@ -1,22 +1,23 @@
-{%- set unlp_ror = 'https://ror.org/01tjs6929' -%}
-
-WITH unlp_extract AS (
+-- ¿Qué researchproducts fueron observados en extracciones por el ROR de la CIC?
+WITH cic_extract AS (
     SELECT
         researchproduct_hk,
-        MIN(load_datetime) AS unlp_first_extract_datetime,
-        MAX(load_datetime) AS unlp_last_extract_datetime
+        MIN(load_datetime) AS cic_first_load_datetime,
+        MAX(load_datetime) AS cic_last_load_datetime
     FROM {{ ref('fct_openaire_researchproduct_extraction_fby_relorgid') }}
-    WHERE organization_ror = 'https://ror.org/01tjs6929'
+    WHERE organization_ror = 'https://ror.org/02s7sax82'
     GROUP BY researchproduct_hk
 ),
 
-base AS (
+-- ¿Qué atributos de los researchproducts recuperados de OpenAIRE mediante
+-- el ROR de la CIC se exponen para su análisis?
+final AS (
     SELECT
         fct.researchproduct_hk,
         fct.researchproduct_id,
-        unlp_first_extract_datetime,
-        unlp_last_extract_datetime,
-        'https://ror.org/01tjs6929' AS organization_ror,
+        cic_first_load_datetime,
+        cic_last_load_datetime,
+        'https://ror.org/02s7sax82' AS organization_ror,
 
         publication_date,
         embargo_end_date,
@@ -74,7 +75,8 @@ base AS (
         has_single_pmid,
         pmid_count
     FROM {{ ref('fct_openaire_researchproduct_publication') }} fct
-    INNER JOIN unlp_extract USING (researchproduct_hk)
+    INNER JOIN cic_extract USING (researchproduct_hk)
 )
 
-SELECT * FROM base
+SELECT *
+FROM final
