@@ -13,7 +13,7 @@ models:
         organization: unlp
         source_systems: [koha, sedici]
         model_role: title_match_candidate
-        grain: seed_row_id + item_hk
+        grain: seed_row_id + item_id
         temporal_scope: current_snapshot
     columns:
       - name: seed_row_id
@@ -44,10 +44,8 @@ models:
         description: Clave de texto normalizada usada para comparar el título del seed.
       - name: seed_title_base_match_key
         description: Clave de texto normalizada del título base del seed antes de `:` o `/`.
-      - name: item_hk
-        description: Hash key del ítem SEDICI candidato al match.
       - name: item_id
-        description: ID original del ítem candidato en DSpace 5.
+        description: ID original del ítem candidato en el snapshot directo SEDICIDB.
       - name: institutional_uri
         description: Handle/URI institucional del ítem candidato.
       - name: ir_title
@@ -88,7 +86,7 @@ models:
         data_tests: [not_null]
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [seed_row_id, item_hk]
+          combination_of_columns: [seed_row_id, item_id]
 
   - name: unlp_sedici_00_match_thesis_title_candidate
     description: >
@@ -102,7 +100,7 @@ models:
         organization: unlp
         source_systems: [koha, sedici]
         model_role: title_match_candidate
-        grain: seed_row_id + item_hk
+        grain: seed_row_id + item_id
         temporal_scope: current_snapshot
     columns:
       - name: seed_row_id
@@ -133,10 +131,8 @@ models:
         description: Clave de texto normalizada usada para comparar el título del seed.
       - name: seed_title_base_match_key
         description: Clave de texto normalizada del título base del seed antes de `:` o `/`.
-      - name: item_hk
-        description: Hash key del ítem SEDICI candidato al match.
       - name: item_id
-        description: ID original del ítem candidato en DSpace 5.
+        description: ID original del ítem candidato en el snapshot directo SEDICIDB.
       - name: institutional_uri
         description: Handle/URI institucional del ítem candidato.
       - name: ir_title
@@ -177,4 +173,4 @@ models:
         data_tests: [not_null]
     data_tests:
       - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [seed_row_id, item_hk]
+          combination_of_columns: [seed_row_id, item_id]

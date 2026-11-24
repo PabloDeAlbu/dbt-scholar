@@ -46,27 +46,26 @@ WITH seed_base AS (
     FROM {{ ref('tesis_fda_koha_sedici_cruce_2026') }}
 ),
 
--- ¿Qué publicaciones de SEDICI pueden corresponder a tesis por su tipo?
+-- ¿Qué publicaciones del snapshot directo SEDICIDB pueden corresponder a tesis por su tipo?
 ir_base AS (
     SELECT
-        item_hk,
-        item_id,
-        dc_identifier_uri AS institutional_uri,
-        title AS ir_title,
-        author AS ir_author,
-        type AS ir_type,
-        subtype AS ir_subtype,
-        date_issued,
-        date_accessioned,
-        isbn,
-        doi,
-        owning_collection_title,
-        owning_community_title,
-        owning_root_community_title,
+        item.item_id,
+        item.dc_identifier_uri AS institutional_uri,
+        publication.title AS ir_title,
+        publication.author AS ir_author,
+        publication.type_raw AS ir_type,
+        publication.subtype AS ir_subtype,
+        item.dc_date_issued AS date_issued,
+        item.dc_date_accessioned AS date_accessioned,
+        publication.isbn,
+        publication.doi,
+        item.owning_collection_title,
+        item.owning_community_title,
+        item.owning_root_community_title,
         NULLIF(
             BTRIM(
                 REGEXP_REPLACE(
-                    LOWER(REGEXP_REPLACE(title::text, '[^[:alnum:]]+', ' ', 'g')),
+                    LOWER(REGEXP_REPLACE(publication.title::text, '[^[:alnum:]]+', ' ', 'g')),
                     '\s+',
                     ' ',
                     'g'
@@ -79,7 +78,7 @@ ir_base AS (
                 REGEXP_REPLACE(
                     LOWER(
                         REGEXP_REPLACE(
-                            SPLIT_PART(SPLIT_PART(title::text, ':', 1), '/', 1),
+                            SPLIT_PART(SPLIT_PART(publication.title::text, ':', 1), '/', 1),
                             '[^[:alnum:]]+',
                             ' ',
                             'g'
@@ -92,9 +91,33 @@ ir_base AS (
             ),
             ''
         ) AS ir_title_base_match_key
-    FROM {{ ref('fct_unlp_sedici_item_publication') }}
-    WHERE title IS NOT NULL
-      AND LOWER(COALESCE(type, '')) LIKE '%tesis%'
+    FROM {{ ref('fct_unlp_sedicidb_dedup_publication') }} AS publication
+    INNER JOIN {{ ref('fct_unlp_sedicidb_item_publication') }} AS item
+        ON item.handle = publication.id
+    WHERE publication.title IS NOT NULL
+      AND LOWER(COALESCE(publication.type_raw, '')) LIKE '%tesis%'
+),
+
+-- ¿Qué estrategia de igualdad de título vincula cada tesis con un ítem SEDICIDB?
+title_match AS (
+    SELECT
+        sb.seed_row_id,
+        ir.item_id,
+        'full'::text AS title_match_strategy
+    FROM seed_base AS sb
+    INNER JOIN ir_base AS ir
+        ON sb.seed_title_match_key = ir.ir_title_match_key
+
+    UNION ALL
+
+    SELECT
+        sb.seed_row_id,
+        ir.item_id,
+        'base'::text AS title_match_strategy
+    FROM seed_base AS sb
+    INNER JOIN ir_base AS ir
+        ON sb.seed_title_base_match_key = ir.ir_title_base_match_key
+    WHERE sb.seed_title_match_key IS DISTINCT FROM ir.ir_title_match_key
 ),
 
 -- ¿Qué candidatos de SEDICI comparten el título completo o base con cada tesis de Koha?
@@ -113,7 +136,6 @@ candidate AS (
         sb.anio_titulo,
         sb.seed_title_match_key,
         sb.seed_title_base_match_key,
-        ir.item_hk,
         ir.item_id,
         ir.institutional_uri,
         ir.ir_title,
@@ -129,19 +151,16 @@ candidate AS (
         ir.owning_root_community_title,
         ir.ir_title_match_key,
         ir.ir_title_base_match_key,
+        title_match.title_match_strategy,
+        COUNT(ir.item_id) OVER (PARTITION BY sb.seed_row_id) AS title_match_count,
         CASE
-            WHEN sb.seed_title_match_key = ir.ir_title_match_key THEN 'full'
-            WHEN sb.seed_title_base_match_key = ir.ir_title_base_match_key THEN 'base'
-        END AS title_match_strategy,
-        COUNT(ir.item_hk) OVER (PARTITION BY sb.seed_row_id) AS title_match_count,
-        CASE
-            WHEN ir.item_hk IS NOT NULL THEN
+            WHEN ir.item_id IS NOT NULL THEN
                 ROW_NUMBER() OVER (
                     PARTITION BY sb.seed_row_id
                     ORDER BY
                         CASE
-                            WHEN sb.seed_title_match_key = ir.ir_title_match_key THEN 1
-                            WHEN sb.seed_title_base_match_key = ir.ir_title_base_match_key THEN 2
+                            WHEN title_match.title_match_strategy = 'full' THEN 1
+                            WHEN title_match.title_match_strategy = 'base' THEN 2
                             ELSE 3
                         END,
                         ir.date_issued DESC NULLS LAST,
@@ -149,11 +168,10 @@ candidate AS (
                 )
         END AS title_match_rank
     FROM seed_base AS sb
+    LEFT JOIN title_match
+        USING (seed_row_id)
     LEFT JOIN ir_base AS ir
-      ON (
-            sb.seed_title_match_key = ir.ir_title_match_key
-         OR sb.seed_title_base_match_key = ir.ir_title_base_match_key
-      )
+        USING (item_id)
 ),
 
 -- ¿Qué evidencia de correspondencia se expone para revisar cada tesis de Koha?
@@ -172,7 +190,6 @@ final AS (
         anio_titulo,
         seed_title_match_key,
         seed_title_base_match_key,
-        item_hk,
         item_id,
         institutional_uri,
         ir_title,
