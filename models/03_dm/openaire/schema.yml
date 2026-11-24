@@ -357,27 +357,35 @@ models:
       - name: subject_value
         data_tests: [not_null]
 
-  - name: dim_openaire_url
-    description: Dimensión de URLs asociadas a research products.
-    config:
-      tags: [dm]
-    columns:
-      - name: url_hk
-        data_tests: [not_null, unique]
-      - name: url
-        data_tests: [not_null]
-
   - name: brg_openaire_researchproduct_url
-    description: Bridge research product–URL (landing pages, full text, etc.).
+    description: >
+      Relación entre entidades `researchproduct` de OpenAIRE y las URLs
+      informadas por sus instancias. Conserva el valor de URL en el propio
+      bridge porque no existen atributos adicionales que justifiquen una
+      dimensión separada y una misma URL puede relacionarse con varios
+      researchproducts.
     config:
       tags: [dm]
+      meta:
+        source_system: openaire
+        model_role: bridge
+        grain: researchproduct_hk + url_hk
     columns:
       - name: researchproduct_url_hk
+        description: Clave hash de la relación entre researchproduct y URL.
         data_tests: [not_null, unique]
       - name: researchproduct_hk
+        description: Clave hash de la entidad OpenAIRE `researchproduct`.
         data_tests: [not_null]
       - name: url_hk
+        description: Clave hash del valor de URL.
         data_tests: [not_null]
+      - name: url
+        description: URL informada por una instancia del researchproduct.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [researchproduct_hk, url_hk]
 
   - name: dim_openaire_alternateidentifier
     description: Dimensión de identificadores alternativos (scheme/value) con procedencia y timestamp de carga.
