@@ -253,7 +253,7 @@ models:
       tags: [dm]
     data_tests:
       - dbt_utils.expression_is_true:
-          expression: "scheme != 'doi' OR value ~* '^10\\\\.[0-9]{4,9}/\\\\S+$'"
+          expression: "LOWER(scheme) != 'doi' OR value ~* '^10[.][0-9]{4,9}/[^[:space:]]+$'"
     columns:
       - name: pid_hk
         data_tests: [not_null, unique]
