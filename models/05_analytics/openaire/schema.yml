@@ -1,20 +1,23 @@
 version: 2
 
 models:
-  - name: openaire_researchproduct_instancetype
+  - name: openaire_researchproduct_instance_type
     description: >
-      Relaciona cada producto de investigación de OpenAIRE con los tipos de
-      instancia observados en sus manifestaciones.
+      Relaciona cada researchproduct de OpenAIRE con los tipos de instancia observados.
+      Conserva por separado el tipo general informado para el researchproduct.
     config:
       meta:
         source_system: openaire
         model_role: analytics
-        grain: researchproduct_instance_type
+        grain: researchproduct_id + researchproduct_instance_type
     columns:
       - name: researchproduct_id
-        description: Identificador del producto de investigación en OpenAIRE.
+        description: Identificador del researchproduct en OpenAIRE.
         data_tests: [not_null]
-      - name: type
-        description: Tipo del producto de investigación informado por OpenAIRE.
-      - name: instance_type
-        description: Tipo de instancia asociado con el producto de investigación.
+      - name: researchproduct_type
+        description: Tipo general informado para el researchproduct.
+      - name: researchproduct_instance_type
+        description: Tipo de instancia asociado con el researchproduct.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [researchproduct_id, researchproduct_instance_type]

@@ -1,3 +1,4 @@
+-- ¿Qué identificador ROR informa OpenAIRE para cada organización?
 WITH organization_ror AS (
     SELECT DISTINCT
         organization_hk,
@@ -5,7 +6,8 @@ WITH organization_ror AS (
     FROM {{ ref('stg_openaire_organization_pids') }}
     WHERE LOWER(pid_scheme) = 'ror'
 ),
-base AS (
+-- ¿Qué atributos describen el estado vigente de cada organización de OpenAIRE?
+organization AS (
     SELECT
         hub_org.organization_id,
         organization_ror.organization_ror,
@@ -16,6 +18,19 @@ base AS (
     FROM {{ref('hub_openaire_organization')}} hub_org
     INNER JOIN {{ latest_satellite(ref('sat_openaire_organization'), 'organization_hk') }} AS sat_org USING (organization_hk)
     LEFT JOIN organization_ror USING (organization_hk)
+),
+
+-- ¿Qué organizaciones quedan disponibles para relacionarlas con researchproducts?
+final AS (
+    SELECT
+        organization_id,
+        organization_ror,
+        acronym,
+        legalname,
+        organization_name,
+        organization_hk
+    FROM organization
 )
 
-SELECT * FROM base
+SELECT *
+FROM final

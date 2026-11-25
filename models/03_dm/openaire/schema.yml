@@ -4,7 +4,7 @@ models:
   - name: latest_sat_openaire_researchproduct
     description: >
       Estado más reciente de `sat_openaire_researchproduct`, a grano `researchproduct_hk`.
-      Sirve como base reusable para dimensiones y hechos de publicaciones OpenAIRE.
+      Sirve como base reutilizable para dimensiones y hechos de researchproducts de OpenAIRE.
     config:
       tags: [dm]
     columns:
@@ -15,7 +15,7 @@ models:
 
   - name: fct_openaire_researchproduct_extraction
     description: >
-      Hecho base de eventos de extracción de OpenAIRE a nivel research product.
+      Hecho base de eventos de extracción de OpenAIRE a nivel researchproduct.
       Conserva el filtro aplicado y los timestamps técnicos disponibles del
       evento. En batches históricos, la fecha de extracción puede no haber
       sido informada; la fecha de carga conserva la trazabilidad de su ingreso
@@ -43,17 +43,17 @@ models:
         data_tests: [not_null]
 
   - name: dim_openaire_researchproduct
-    description: Dimensión mínima de research products (ID canónico de OpenAIRE y su hash key).
+    description: Dimensión mínima de researchproducts identificados por OpenAIRE.
     config:
       tags: [dm]
     columns:
       - name: researchproduct_hk
-        description: Clave hash del research product (PK del hub).
+        description: Clave hash del researchproduct.
         data_tests:
           - not_null
           - unique
       - name: researchproduct_id
-        description: Identificador canónico de OpenAIRE para el research product.
+        description: Identificador canónico de OpenAIRE para el researchproduct.
         data_tests:
           - not_null
           - unique
@@ -87,7 +87,7 @@ models:
         temporal_scope: latest_attributes_and_observed_pid_relations
     columns:
       - name: researchproduct_hk
-        description: Clave hash del research product (grano del hecho).
+        description: Clave hash del researchproduct y grano del hecho.
         data_tests:
           - not_null
           - unique
@@ -220,7 +220,7 @@ models:
         data_tests: [not_null]
 
   - name: brg_openaire_researchproduct_datasource
-    description: Bridge research product–datasource (múltiples orígenes de recolección por publicación).
+    description: Relación entre cada researchproduct y los datasources que participaron en su recolección.
     config:
       tags: [dm]
     data_tests:
@@ -234,7 +234,8 @@ models:
 
   - name: brg_openaire_researchproduct_filter_applied
     description: >
-      Bridge de filtros aplicados en la extracción (permite cohortes por ROR, openorgs y otros parámetros).
+      Observaciones históricas de los filtros aplicados al extraer cada researchproduct.
+      Se origina en el satélite histórico de filtros y no sustituye al hecho de extracción.
     config:
       tags: [dm]
     data_tests:
@@ -264,7 +265,7 @@ models:
         data_tests: [not_null]
 
   - name: brg_openaire_researchproduct_pid
-    description: Bridge research product–PID (relación N a N entre publicaciones e identificadores).
+    description: Relación entre researchproducts y los PIDs registrados por OpenAIRE.
     config:
       tags: [dm]
     columns:
@@ -277,9 +278,9 @@ models:
 
   - name: brg_openaire_researchproduct_doi
     description: >
-      Relación entre research products y DOI registrados por OpenAIRE, a grano
-      publicación y DOI normalizado. Conserva los valores originales para
-      auditoría y evita que variantes técnicas dupliquen correspondencias.
+      Relación entre researchproducts y DOI registrados por OpenAIRE.
+      Cada fila corresponde a un researchproduct y un DOI normalizado.
+      Conserva los valores originales agrupados para auditar variantes técnicas.
     config:
       tags: [dm]
     data_tests:
@@ -292,7 +293,7 @@ models:
           expression: "observation_count >= 1"
     columns:
       - name: researchproduct_hk
-        description: Clave hash del research product de OpenAIRE.
+        description: Clave hash del researchproduct de OpenAIRE.
         data_tests:
           - not_null
           - relationships:
@@ -309,7 +310,7 @@ models:
         data_tests: [not_null]
 
   - name: dim_openaire_subject
-    description: Dimensión de subjects (scheme/value) excluyendo keywords libres.
+    description: Dimensión de subjects registrados por OpenAIRE, excluyendo los de esquema `keyword`.
     config:
       tags: [dm]
     columns:
@@ -321,7 +322,7 @@ models:
         data_tests: [not_null]
 
   - name: brg_openaire_researchproduct_subject
-    description: Bridge research product–subject (temáticas declaradas y taxonomías).
+    description: Relación entre researchproducts y subjects registrados por OpenAIRE.
     config:
       tags: [dm]
     columns:
@@ -333,7 +334,7 @@ models:
         data_tests: [not_null]
 
   - name: brg_openaire_researchproduct_subject_sdg
-    description: Bridge research product–SDG (subconjunto de subjects OpenAIRE con scheme `SDG`).
+    description: Relación entre researchproducts y el subconjunto de subjects cuyo esquema es `SDG`.
     config:
       tags: [dm]
     data_tests:
@@ -359,7 +360,7 @@ models:
 
   - name: brg_openaire_researchproduct_url
     description: >
-      Relación entre entidades `researchproduct` de OpenAIRE y las URLs
+      Relación entre researchproducts de OpenAIRE y las URLs
       informadas por sus instancias. Conserva el valor de URL en el propio
       bridge porque no existen atributos adicionales que justifiquen una
       dimensión separada y una misma URL puede relacionarse con varios
@@ -387,22 +388,16 @@ models:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns: [researchproduct_hk, url_hk]
 
-  - name: dim_openaire_alternateidentifier
-    description: Dimensión de identificadores alternativos (scheme/value) con procedencia y timestamp de carga.
-    config:
-      tags: [dm]
-    columns:
-      - name: alternateidentifier_hk
-        data_tests: [not_null, unique]
-      - name: scheme
-        data_tests: [not_null]
-      - name: value
-        data_tests: [not_null]
-
   - name: brg_openaire_researchproduct_alternateidentifier
-    description: Bridge research product–alternateidentifier (incluye fuente y timestamp de carga).
+    description: >
+      Relación entre researchproducts e identificadores alternativos registrados por OpenAIRE.
+      Expone el esquema y el valor porque el identificador no aporta otros atributos que requieran una dimensión separada.
     config:
       tags: [dm]
+      meta:
+        source_system: openaire
+        model_role: bridge
+        grain: researchproduct_hk + alternateidentifier_hk
     columns:
       - name: researchproduct_alternateidentifier_hk
         data_tests: [not_null, unique]
@@ -410,9 +405,24 @@ models:
         data_tests: [not_null]
       - name: alternateidentifier_hk
         data_tests: [not_null]
+      - name: scheme
+        description: Esquema informado por OpenAIRE para interpretar el identificador alternativo.
+        data_tests: [not_null]
+      - name: value
+        description: Valor del identificador alternativo informado por OpenAIRE.
+        data_tests: [not_null]
+      - name: source
+        description: Fuente técnica que registró la relación.
+        data_tests: [not_null]
+      - name: load_datetime
+        description: Fecha y hora de incorporación de la relación al Data Warehouse.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [researchproduct_hk, alternateidentifier_hk]
 
   - name: dim_openaire_organization
-    description: Dimensión de organizaciones (acronym/legalname) asociadas a research products.
+    description: Dimensión de organizaciones asociadas con researchproducts de OpenAIRE.
     config:
       tags: [dm]
     columns:
@@ -426,7 +436,7 @@ models:
         description: Nombre legible priorizado para consumo analítico.
 
   - name: brg_openaire_researchproduct_organization
-    description: Bridge research product–organization.
+    description: Relación entre researchproducts y organizaciones registrada por OpenAIRE.
     config:
       tags: [dm]
     columns:
@@ -438,7 +448,7 @@ models:
         data_tests: [not_null]
 
   - name: dim_openaire_orcid
-    description: Dimensión de ORCID asociados a research products.
+    description: Dimensión de identificadores ORCID asociados con researchproducts de OpenAIRE.
     config:
       tags: [dm]
     columns:
@@ -448,7 +458,9 @@ models:
         data_tests: [not_null]
 
   - name: brg_openaire_researchproduct_orcid
-    description: Bridge research product–ORCID.
+    description: >
+      Relación entre researchproducts e identificadores ORCID registrada por OpenAIRE.
+      La relación no determina por sí misma una autoría ni un rol de contribución.
     config:
       tags: [dm]
     columns:
@@ -459,30 +471,50 @@ models:
       - name: orcid_hk
         data_tests: [not_null]
 
-  - name: dim_openaire_instance_type
-    description: Dimensión de tipos de instancia (mapeo de type a instancetype).
+  - name: dim_openaire_researchproduct_instance_type
+    description: Dimensión de tipos de instancia de researchproduct observados por OpenAIRE.
     config:
       tags: [dm]
+      meta:
+        source_system: openaire
+        model_role: dimension
+        grain: researchproduct_instance_type_hk
     columns:
-      - name: instancetype_hk
+      - name: researchproduct_instance_type_hk
+        description: Clave hash del tipo de instancia de researchproduct.
         data_tests: [not_null, unique]
-      - name: instance_type
-        description: Tipo de instancia normalizado (según hub/mapeo).
+      - name: researchproduct_instance_type
+        description: Tipo de instancia de researchproduct informado por OpenAIRE.
+        data_tests: [not_null]
 
-  - name: brg_openaire_researchproduct_instances
-    description: Bridge research product–instance type (tipos de instancias por publicación).
+  - name: brg_openaire_researchproduct_instance_type
+    description: Relación entre researchproducts y los tipos de sus instancias en OpenAIRE.
     config:
       tags: [dm]
+      meta:
+        source_system: openaire
+        model_role: bridge
+        grain: researchproduct_hk + researchproduct_instance_type_hk
     columns:
-      - name: researchproduct_instances_type_hk
+      - name: researchproduct_instance_type_relationship_hk
+        description: Clave hash de la relación entre researchproduct y tipo de instancia.
         data_tests: [not_null, unique]
       - name: researchproduct_hk
+        description: Clave hash del researchproduct.
         data_tests: [not_null]
-      - name: instancetype_hk
-        data_tests: [not_null]
+      - name: researchproduct_instance_type_hk
+        description: Clave hash del tipo de instancia relacionado.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_openaire_researchproduct_instance_type')
+              field: researchproduct_instance_type_hk
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [researchproduct_hk, researchproduct_instance_type_hk]
 
   - name: brg_openaire_researchproduct_originalid
-    description: Bridge research product–originalid (identificadores de origen provistos por fuentes upstream).
+    description: Relación entre researchproducts y los identificadores informados por fuentes upstream de OpenAIRE.
     config:
       tags: [dm]
     columns:
