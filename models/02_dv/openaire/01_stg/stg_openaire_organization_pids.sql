@@ -5,15 +5,17 @@ source_model: "ldg_openaire_map_organization_pid"
 derived_columns:
   source: "!OPENAIRE"
   load_datetime: _load_datetime
+  scheme: pid_scheme
+  value: pid_value
 hashed_columns:
   organization_hk: organization_id
   pid_hk:
-    - pid_scheme
-    - pid_value
+    - scheme
+    - value
   organization_pid_hk:
     - organization_id
-    - pid_scheme
-    - pid_value  
+    - scheme
+    - value
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

@@ -435,6 +435,38 @@ models:
       - name: organization_name
         description: Nombre legible priorizado para consumo analítico.
 
+  - name: brg_openaire_organization_pid
+    description: Relación entre organizaciones y los PIDs registrados por OpenAIRE.
+    config:
+      tags: [dm]
+      meta:
+        source_system: openaire
+        model_role: bridge
+        grain: organization_hk + pid_hk
+    columns:
+      - name: organization_pid_hk
+        description: Clave hash de la relación entre organización y PID.
+        data_tests: [not_null, unique]
+      - name: organization_hk
+        description: Clave hash de la organización.
+        data_tests: [not_null]
+      - name: pid_hk
+        description: Clave hash del PID relacionado.
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_openaire_pid')
+              field: pid_hk
+      - name: scheme
+        description: Esquema del PID informado por OpenAIRE.
+        data_tests: [not_null]
+      - name: value
+        description: Valor del PID informado por OpenAIRE.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [organization_hk, pid_hk]
+
   - name: brg_openaire_researchproduct_organization
     description: Relación entre researchproducts y organizaciones registrada por OpenAIRE.
     config:

@@ -1,7 +1,9 @@
 {{ config(materialized='incremental') }}
 
 {%- set yaml_metadata -%}
-source_model: 'stg_openaire_researchproduct_pid'
+source_model:
+    - stg_openaire_researchproduct_pid
+    - stg_openaire_organization_pids
 src_pk: pid_hk
 src_nk: 
     - value
