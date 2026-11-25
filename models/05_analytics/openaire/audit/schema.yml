@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: audit_openaire_organization_ror_ambiguity
+    description: >
+      Auditoría de organizaciones de OpenAIRE relacionadas con más de un ROR distinto.
+      Conserva una fila por organización y ROR sin seleccionar un identificador canónico.
+    config:
+      tags: [audit, openaire]
+      meta:
+        source_system: openaire
+        model_role: audit
+        grain: organization_hk + organization_ror
+    columns:
+      - name: organization_id
+        description: Identificador de la organización en OpenAIRE.
+        data_tests: [not_null]
+      - name: organization_name
+        description: Nombre disponible para interpretar la organización.
+        data_tests: [not_null]
+      - name: organization_ror
+        description: ROR relacionado con la organización.
+        data_tests: [not_null]
+      - name: organization_ror_count
+        description: Cantidad de ROR distintos relacionados con la organización.
+        data_tests: [not_null]
+      - name: organization_hk
+        description: Clave hash de la organización.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [organization_hk, organization_ror]
+      - dbt_utils.expression_is_true:
+          expression: "organization_ror_count > 1"
+      - dbt_utils.expression_is_true:
+          expression: "organization_ror ~ '^https://ror[.]org/[0-9a-z]{9}$'"
