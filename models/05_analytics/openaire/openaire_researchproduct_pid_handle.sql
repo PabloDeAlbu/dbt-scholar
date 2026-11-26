@@ -1,31 +1,13 @@
-
-WITH handle_per_rp AS (
-    SELECT 
-        hub_rp.researchproduct_id,
-        hub_rp.researchproduct_hk,
-        COUNT(*) AS handle_count
-    FROM {{ ref('hub_openaire_researchproduct') }} hub_rp
-    LEFT JOIN {{ ref('brg_openaire_researchproduct_pid') }} brg USING (researchproduct_hk)
-    LEFT JOIN {{ ref('dim_openaire_pid') }} pid USING (pid_hk)
-    WHERE pid.scheme = 'handle'
-    GROUP BY 1, 2
-),
-
-base AS (
-    SELECT 
-        rp.researchproduct_id,
-        rp.researchproduct_hk,
-        COALESCE(dprp.handle_count, 0) AS handle_count,
-        CASE
-            WHEN COALESCE(dprp.handle_count, 0) > 0 THEN TRUE 
-            ELSE FALSE 
-        END AS has_handle,
-        CASE
-            WHEN COALESCE(dprp.handle_count, 0) = 1 THEN TRUE 
-            ELSE FALSE 
-        END AS has_single_handle
-    FROM {{ ref('hub_openaire_researchproduct') }} rp
-    LEFT JOIN handle_per_rp dprp USING (researchproduct_id)
+-- ¿Qué cobertura de Handle expone cada researchproduct de OpenAIRE?
+WITH final AS (
+    SELECT
+        researchproduct_id,
+        researchproduct_hk,
+        handle_count,
+        has_handle,
+        has_single_handle
+    FROM {{ ref('fct_openaire_researchproduct_publication') }}
 )
 
-SELECT * FROM base
+SELECT *
+FROM final

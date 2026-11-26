@@ -1,32 +1,13 @@
-
-WITH mag_per_rp AS (
-    SELECT 
-        hub_rp.researchproduct_id,
-        hub_rp.researchproduct_hk,
-        COUNT(*) AS mag_count
-    FROM {{ ref('hub_openaire_researchproduct') }} hub_rp
-    LEFT JOIN {{ ref('brg_openaire_researchproduct_pid') }} brg USING (researchproduct_hk)
-    LEFT JOIN {{ ref('dim_openaire_pid') }} pid USING (pid_hk)
-    WHERE pid.scheme = 'mag_id'
-    GROUP BY 1, 2
-),
-
-base AS (
-    SELECT 
-        rp.researchproduct_id,
-        rp.researchproduct_hk,
-        COALESCE(dprp.mag_count, 0) AS mag_count,
-        CASE 
-            WHEN COALESCE(dprp.mag_count, 0) > 0 THEN TRUE 
-            ELSE FALSE 
-        END AS has_mag,
-        CASE 
-            WHEN COALESCE(dprp.mag_count, 0) = 1 THEN TRUE 
-            ELSE FALSE 
-        END AS has_single_mag
-    FROM {{ ref('hub_openaire_researchproduct') }} rp
-    LEFT JOIN mag_per_rp dprp USING (researchproduct_id)
+-- ¿Qué cobertura de MAG expone cada researchproduct de OpenAIRE?
+WITH final AS (
+    SELECT
+        researchproduct_id,
+        researchproduct_hk,
+        mag_count,
+        has_mag,
+        has_single_mag
+    FROM {{ ref('fct_openaire_researchproduct_publication') }}
 )
 
-SELECT * FROM base
- 
+SELECT *
+FROM final

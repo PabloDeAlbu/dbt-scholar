@@ -16,7 +16,6 @@ dim_type AS (
 pid_profile AS (
     SELECT
         researchproduct_hk,
-        COUNT(DISTINCT pid_hk) FILTER (WHERE scheme = 'doi') AS doi_count,
         COUNT(DISTINCT pid_hk) FILTER (WHERE scheme = 'handle') AS handle_count,
         COUNT(DISTINCT pid_hk) FILTER (WHERE scheme = 'arXiv') AS arxiv_count,
         COUNT(DISTINCT pid_hk) FILTER (WHERE scheme = 'mag_id') AS mag_count,
@@ -24,6 +23,15 @@ pid_profile AS (
         COUNT(DISTINCT pid_hk) FILTER (WHERE scheme = 'pmc') AS pmc_count,
         COUNT(DISTINCT pid_hk) FILTER (WHERE scheme = 'pmid') AS pmid_count
     FROM {{ ref('brg_openaire_researchproduct_pid') }}
+    GROUP BY researchproduct_hk
+),
+
+-- ¿Cuántos DOI normalizados distintos se relacionan con cada researchproduct?
+doi_profile AS (
+    SELECT
+        researchproduct_hk,
+        COUNT(*) AS doi_count
+    FROM {{ ref('brg_openaire_researchproduct_doi') }}
     GROUP BY researchproduct_hk
 ),
 
@@ -66,9 +74,9 @@ final AS (
         COALESCE(pid.arxiv_count, 0) > 0 AS has_arxiv,
         COALESCE(pid.arxiv_count, 0) = 1 AS has_single_arxiv,
 
-        COALESCE(pid.doi_count, 0) AS doi_count,
-        COALESCE(pid.doi_count, 0) > 0 AS has_doi,
-        COALESCE(pid.doi_count, 0) = 1 AS has_single_doi,
+        COALESCE(doi.doi_count, 0) AS doi_count,
+        COALESCE(doi.doi_count, 0) > 0 AS has_doi,
+        COALESCE(doi.doi_count, 0) = 1 AS has_single_doi,
 
         COALESCE(pid.handle_count, 0) AS handle_count,
         COALESCE(pid.handle_count, 0) > 0 AS has_handle,
@@ -98,6 +106,8 @@ final AS (
     LEFT JOIN dim_type
         ON sat_rp.type = dim_type.researchproduct_type
     LEFT JOIN pid_profile AS pid
+        USING (researchproduct_hk)
+    LEFT JOIN doi_profile AS doi
         USING (researchproduct_hk)
 )
 

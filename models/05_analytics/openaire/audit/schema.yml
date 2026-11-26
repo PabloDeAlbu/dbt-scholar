@@ -1,6 +1,33 @@
 version: 2
 
 models:
+  - name: audit_openaire_researchproduct_extract_duplicates
+    description: >
+      Auditoría de observaciones repetidas en la fuente cruda de OpenAIRE para
+      el mismo researchproduct, criterio y timestamps técnicos.
+    config:
+      tags: [audit, openaire]
+      meta:
+        source_system: openaire
+        model_role: audit
+        grain: researchproduct_id + extraction_context
+    columns:
+      - name: researchproduct_id
+        data_tests: [not_null]
+      - name: _filter_param
+        data_tests: [not_null]
+      - name: _filter_value
+        data_tests: [not_null]
+      - name: load_datetime
+        data_tests: [not_null]
+      - name: extract_datetime
+        description: Fecha de extracción informada; puede ser nula en cargas históricas.
+      - name: row_count
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: "row_count > 1"
+
   - name: audit_openaire_organization_ror_ambiguity
     description: >
       Auditoría de organizaciones de OpenAIRE relacionadas con más de un ROR distinto.

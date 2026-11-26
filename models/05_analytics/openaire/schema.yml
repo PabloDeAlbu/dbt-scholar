@@ -1,6 +1,133 @@
 version: 2
 
 models:
+  - name: openaire_researchproduct
+    description: >
+      Proyección analítica de los atributos y coberturas de identificadores
+      expuestos por el hecho de publicación de cada researchproduct de OpenAIRE.
+    config:
+      meta:
+        source_system: openaire
+        model_role: analytics
+        grain: researchproduct_id
+    columns:
+      - name: researchproduct_id
+        description: Identificador del researchproduct en OpenAIRE.
+        data_tests: [not_null, unique]
+
+  - name: openaire_researchproduct_pid_doi
+    description: >
+      Cobertura de DOI por researchproduct. Cuenta DOI normalizados distintos y
+      conserva la misma semántica que `fct_openaire_researchproduct_publication`.
+    config:
+      meta:
+        source_system: openaire
+        model_role: analytics
+        grain: researchproduct_hk
+    columns:
+      - name: researchproduct_hk
+        data_tests: [not_null, unique]
+      - name: doi_count
+        data_tests: [not_null]
+      - name: has_doi
+        data_tests: [not_null]
+      - name: has_single_doi
+        data_tests: [not_null]
+
+  - name: openaire_researchproduct_pid_arxiv
+    description: Cobertura de identificadores arXiv por researchproduct de OpenAIRE.
+    config:
+      meta: {source_system: openaire, model_role: analytics, grain: researchproduct_hk}
+    columns:
+      - name: researchproduct_hk
+        data_tests: [not_null, unique]
+
+  - name: openaire_researchproduct_pid_handle
+    description: Cobertura de identificadores Handle por researchproduct de OpenAIRE.
+    config:
+      meta: {source_system: openaire, model_role: analytics, grain: researchproduct_hk}
+    columns:
+      - name: researchproduct_hk
+        data_tests: [not_null, unique]
+
+  - name: openaire_researchproduct_pid_mag
+    description: Cobertura de identificadores MAG por researchproduct de OpenAIRE.
+    config:
+      meta: {source_system: openaire, model_role: analytics, grain: researchproduct_hk}
+    columns:
+      - name: researchproduct_hk
+        data_tests: [not_null, unique]
+
+  - name: openaire_researchproduct_pid_pmb
+    description: Cobertura de identificadores PMB por researchproduct de OpenAIRE.
+    config:
+      meta: {source_system: openaire, model_role: analytics, grain: researchproduct_hk}
+    columns:
+      - name: researchproduct_hk
+        data_tests: [not_null, unique]
+
+  - name: openaire_researchproduct_pid_pmc
+    description: Cobertura de identificadores PMC por researchproduct de OpenAIRE.
+    config:
+      meta: {source_system: openaire, model_role: analytics, grain: researchproduct_hk}
+    columns:
+      - name: researchproduct_hk
+        data_tests: [not_null, unique]
+
+  - name: openaire_researchproduct_pid_pmid
+    description: Cobertura de identificadores PMID por researchproduct de OpenAIRE.
+    config:
+      meta: {source_system: openaire, model_role: analytics, grain: researchproduct_hk}
+    columns:
+      - name: researchproduct_hk
+        data_tests: [not_null, unique]
+
+  - name: openaire_researchproduct_organization
+    description: >
+      Relaciones entre researchproducts y organizaciones informadas por OpenAIRE,
+      enriquecidas con atributos descriptivos sin inferir identidad a partir del nombre.
+    config:
+      meta:
+        source_system: openaire
+        model_role: analytics
+        grain: researchproduct_hk + organization_hk
+    columns:
+      - name: researchproduct_hk
+        data_tests: [not_null]
+      - name: organization_hk
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [researchproduct_hk, organization_hk]
+
+  - name: openaire_researchproduct_extraction_window
+    description: >
+      Ventana temporal observada por researchproduct y criterio de extracción
+      de OpenAIRE. Resume los primeros y últimos timestamps de extracción y carga.
+    config:
+      meta:
+        source_system: openaire
+        model_role: analytics
+        grain: researchproduct_hk + _filter_param + _filter_value
+    columns:
+      - name: researchproduct_hk
+        data_tests: [not_null]
+      - name: _filter_param
+        data_tests: [not_null]
+      - name: _filter_value
+        data_tests: [not_null]
+      - name: first_extract_datetime
+        description: Primera fecha de extracción informada; puede ser nula en cargas históricas.
+      - name: last_extract_datetime
+        description: Última fecha de extracción informada; puede ser nula en cargas históricas.
+      - name: first_load_datetime
+        data_tests: [not_null]
+      - name: last_load_datetime
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [researchproduct_hk, _filter_param, _filter_value]
+
   - name: openaire_researchproduct_instance_type
     description: >
       Relaciona cada researchproduct de OpenAIRE con los tipos de instancia observados.

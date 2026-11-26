@@ -1,31 +1,13 @@
-
-WITH arxiv_per_rp AS (
-    SELECT 
-        hub_rp.researchproduct_id,
-        hub_rp.researchproduct_hk,
-        COUNT(*) AS arxiv_count
-    FROM {{ ref('hub_openaire_researchproduct') }} hub_rp
-    LEFT JOIN {{ ref('brg_openaire_researchproduct_pid') }} brg USING (researchproduct_hk)
-    LEFT JOIN {{ ref('dim_openaire_pid') }} pid USING (pid_hk)
-    WHERE pid.scheme = 'arXiv'
-    GROUP BY 1, 2
-),
-
-base AS (
-    SELECT 
-        rp.researchproduct_id,
-        rp.researchproduct_hk,
-        COALESCE(dprp.arxiv_count, 0) AS arxiv_count,
-        CASE
-            WHEN COALESCE(dprp.arxiv_count, 0) > 0 THEN TRUE 
-            ELSE FALSE 
-        END AS has_arxiv,
-        CASE
-            WHEN COALESCE(dprp.arxiv_count, 0) = 1 THEN TRUE 
-            ELSE FALSE 
-        END AS has_single_arxiv
-    FROM {{ ref('hub_openaire_researchproduct') }} rp
-    LEFT JOIN arxiv_per_rp dprp USING (researchproduct_id)
+-- ¿Qué cobertura de arXiv expone cada researchproduct de OpenAIRE?
+WITH final AS (
+    SELECT
+        researchproduct_id,
+        researchproduct_hk,
+        arxiv_count,
+        has_arxiv,
+        has_single_arxiv
+    FROM {{ ref('fct_openaire_researchproduct_publication') }}
 )
 
-SELECT * FROM base
+SELECT *
+FROM final

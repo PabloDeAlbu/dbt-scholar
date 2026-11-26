@@ -22,6 +22,11 @@ models:
       al Data Warehouse sin sustituir ese dato ausente.
     config:
       tags: [dm]
+      meta:
+        source_system: openaire
+        model_role: fact
+        grain: extract_cdk
+        temporal_scope: extraction_events
     columns:
       - name: extract_cdk
         data_tests: [not_null, unique]
@@ -128,13 +133,13 @@ models:
         data_tests: [not_null]
 
       - name: doi_count
-        description: Cantidad de DOI distintos observados para el researchproduct.
+        description: Cantidad de DOI normalizados distintos relacionados con el researchproduct.
         data_tests: [not_null]
       - name: has_doi
-        description: Indica si se observó al menos un DOI.
+        description: Indica si el researchproduct se relaciona con al menos un DOI normalizado.
         data_tests: [not_null]
       - name: has_single_doi
-        description: Indica si se observó exactamente un DOI.
+        description: Indica si el researchproduct se relaciona con exactamente un DOI normalizado.
         data_tests: [not_null]
 
       - name: handle_count
@@ -422,18 +427,22 @@ models:
           combination_of_columns: [researchproduct_hk, alternateidentifier_hk]
 
   - name: dim_openaire_organization
-    description: Dimensión de organizaciones asociadas con researchproducts de OpenAIRE.
+    description: >
+      Dimensión de organizaciones asociadas con researchproducts de OpenAIRE.
+      Los identificadores se conservan por separado en `brg_openaire_organization_pid`.
     config:
       tags: [dm]
+      meta:
+        source_system: openaire
+        model_role: dimension
+        grain: organization_hk
     columns:
       - name: organization_hk
         data_tests: [not_null, unique]
       - name: organization_id
         data_tests: [not_null]
-      - name: organization_ror
-        description: Identificador ROR de la organización, cuando OpenAIRE lo expone como PID.
       - name: organization_name
-        description: Nombre legible priorizado para consumo analítico.
+        description: Nombre legible informado por OpenAIRE, priorizando la denominación legal y luego el acrónimo.
 
   - name: brg_openaire_organization_pid
     description: Relación entre organizaciones y los PIDs registrados por OpenAIRE.

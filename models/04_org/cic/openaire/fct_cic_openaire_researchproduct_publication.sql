@@ -4,8 +4,9 @@ WITH cic_extract AS (
         researchproduct_hk,
         MIN(load_datetime) AS cic_first_load_datetime,
         MAX(load_datetime) AS cic_last_load_datetime
-    FROM {{ ref('fct_openaire_researchproduct_extraction_fby_relorgid') }}
-    WHERE organization_ror = 'https://ror.org/02s7sax82'
+    FROM {{ ref('fct_openaire_researchproduct_extraction') }}
+    WHERE _filter_param = 'relOrganizationId'
+      AND _filter_value = 'https://ror.org/02s7sax82'
     GROUP BY researchproduct_hk
 ),
 

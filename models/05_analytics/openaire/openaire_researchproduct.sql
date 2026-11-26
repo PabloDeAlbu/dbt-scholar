@@ -1,4 +1,5 @@
-WITH base AS (
+-- ¿Qué atributos y coberturas de identificadores expone cada researchproduct de OpenAIRE?
+WITH final AS (
     SELECT 
         fct.researchproduct_id,
 
@@ -58,15 +59,8 @@ WITH base AS (
         has_single_pmid,
         pmid_count
 
-    FROM {{ref('fct_openaire_researchproduct_publication')}} fct
-    INNER JOIN {{ref('openaire_researchproduct_pid_doi')}} USING (researchproduct_hk)
-    INNER JOIN {{ref('openaire_researchproduct_pid_handle')}} USING (researchproduct_hk)
-    INNER JOIN {{ref('openaire_researchproduct_pid_arxiv')}} USING (researchproduct_hk)
-    INNER JOIN {{ref('openaire_researchproduct_pid_mag')}} USING (researchproduct_hk)
-    INNER JOIN {{ref('openaire_researchproduct_pid_pmb')}} USING (researchproduct_hk)
-    INNER JOIN {{ref('openaire_researchproduct_pid_pmc')}} USING (researchproduct_hk)
-    INNER JOIN {{ref('openaire_researchproduct_pid_pmid')}} USING (researchproduct_hk)
+    FROM {{ ref('fct_openaire_researchproduct_publication') }} AS fct
 )
 
-SELECT * FROM base
--- WHERE has_arxiv = false AND has_doi = false AND has_handle = false AND has_mag = false AND has_pmb = false AND has_pmc = false AND has_pmid = false
+SELECT *
+FROM final

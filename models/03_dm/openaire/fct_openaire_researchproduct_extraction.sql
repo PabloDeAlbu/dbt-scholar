@@ -5,7 +5,8 @@
     on_schema_change='fail'
 ) }}
 
-WITH base AS (
+-- ¿Qué eventos de extracción de researchproducts conserva el Data Vault de OpenAIRE?
+WITH extraction AS (
     SELECT
         sat.extract_cdk,
         hub.researchproduct_id,
@@ -20,6 +21,21 @@ WITH base AS (
     {% if is_incremental() %}
     WHERE sat.load_datetime > (SELECT COALESCE(MAX(load_datetime), '1900-01-01'::timestamp) FROM {{ this }})
     {% endif %}
+),
+
+-- ¿Qué atributos expone el hecho base de extracción de researchproducts?
+final AS (
+    SELECT
+        extract_cdk,
+        researchproduct_id,
+        _filter_param,
+        _filter_value,
+        extract_datetime,
+        load_datetime,
+        source,
+        researchproduct_hk
+    FROM extraction
 )
 
-SELECT * FROM base
+SELECT *
+FROM final

@@ -1,11 +1,12 @@
--- ¿Qué productos OpenAIRE fueron observados en extracciones por el ROR de la UNLP?
+-- ¿Qué researchproducts fueron observados en extracciones por el ROR de la UNLP?
 WITH unlp_extract AS (
     SELECT
         researchproduct_hk,
         MIN(load_datetime) AS unlp_first_extract_datetime,
         MAX(load_datetime) AS unlp_last_extract_datetime
-    FROM {{ ref('fct_openaire_researchproduct_extraction_fby_relorgid') }}
-    WHERE organization_ror = 'https://ror.org/01tjs6929'
+    FROM {{ ref('fct_openaire_researchproduct_extraction') }}
+    WHERE _filter_param = 'relOrganizationId'
+      AND _filter_value = 'https://ror.org/01tjs6929'
     GROUP BY researchproduct_hk
 ),
 
