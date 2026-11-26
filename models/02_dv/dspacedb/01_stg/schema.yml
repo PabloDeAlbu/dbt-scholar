@@ -43,14 +43,6 @@ models:
       - name: community_community_hk
         description: Hash key estable de la relación parent-child entre comunidades.
 
-  - name: stg_dspacedb_collection__extract
-    description: >
-      Staging model de eventos de extracción de collections DSpace. Construye `extract_cdk` para
-      identificar cada observación de la colección en una extracción determinada.
-    columns:
-      - name: extract_cdk
-        description: Hash key del evento de extracción por colección y fecha de extracción.
-
   - name: stg_dspacedb_item__extract
     description: >
       Staging model de eventos de extracción de items DSpace. Construye `extract_cdk` para

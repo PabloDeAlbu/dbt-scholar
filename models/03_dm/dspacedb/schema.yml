@@ -73,21 +73,6 @@ models:
       - name: load_datetime
         data_tests: [not_null]
 
-  - name: latest_sat_dspacedb_collection__extract
-    description: >
-      Último contexto de extracción por `collection_hk + base_url + institution_ror`
-      a partir de `sat_dspacedb_collection__extract`.
-    config:
-      tags: [dspacedb, dm]
-    data_tests:
-      - dbt_utils.unique_combination_of_columns:
-          combination_of_columns: [collection_hk, base_url, institution_ror]
-    columns:
-      - name: collection_hk
-        data_tests: [not_null]
-      - name: load_datetime
-        data_tests: [not_null]
-
   - name: dim_dspacedb_metadatafield
     description: >
       Dimensión de campos de metadatos contextualizados por repositorio e institución para la rama

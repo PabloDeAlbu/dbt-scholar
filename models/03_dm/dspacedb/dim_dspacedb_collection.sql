@@ -5,12 +5,10 @@ WITH base AS (
         sat.collection_hk,
         sat.collection_id,
         sat.collection_uuid,
-        extract.base_url,
-        extract.source_label,
-        extract.institution_ror
+        sat.base_url,
+        sat.source_label,
+        sat.institution_ror
     FROM {{ ref('latest_sat_dspacedb_collection') }} AS sat
-    INNER JOIN {{ ref('latest_sat_dspacedb_collection__extract') }} AS extract
-        USING (collection_hk)
 ),
 
 collection_community AS (
