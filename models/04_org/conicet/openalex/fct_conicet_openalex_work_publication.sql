@@ -1,5 +1,6 @@
 {%- set conicet_ror = 'https://ror.org/03cqe8w59' -%}
 
+-- ¿Qué works fueron recuperados mediante el ROR de CONICET?
 WITH conicet_extract AS (
     SELECT
         work_hk,
@@ -11,17 +12,21 @@ WITH conicet_extract AS (
     GROUP BY work_hk
 ),
 
+-- ¿Qué instituciones de OpenAlex están relacionadas con el ROR de CONICET?
 conicet_institution AS (
     SELECT
-        institution_hk,
-        institution_id,
-        institution_display_name,
-        ror AS institution_ror
-    FROM {{ ref('dim_openalex_institution') }}
-    WHERE ror = '{{ conicet_ror }}'
+        relationship.institution_hk,
+        institution.institution_id,
+        institution.institution_display_name,
+        relationship.ror AS institution_ror
+    FROM {{ ref('brg_openalex_institution_ror') }} relationship
+    INNER JOIN {{ ref('dim_openalex_institution') }} institution
+        USING (institution_hk)
+    WHERE relationship.ror = '{{ conicet_ror }}'
 ),
 
-base AS (
+-- ¿Qué atributos expone el subconjunto de works recuperado para CONICET?
+final AS (
     SELECT
         conicet_institution.institution_hk,
         conicet_institution.institution_id,
@@ -35,4 +40,5 @@ base AS (
     CROSS JOIN conicet_institution
 )
 
-SELECT * FROM base
+SELECT *
+FROM final

@@ -1,5 +1,6 @@
 {%- set cic_ror = 'https://ror.org/02s7sax82' -%}
 
+-- ¿Qué works fueron recuperados mediante el ROR de CIC?
 WITH cic_extract AS (
     SELECT
         work_hk,
@@ -11,17 +12,21 @@ WITH cic_extract AS (
     GROUP BY work_hk
 ),
 
+-- ¿Qué instituciones de OpenAlex están relacionadas con el ROR de CIC?
 cic_institution AS (
     SELECT
-        institution_hk,
-        institution_id,
-        institution_display_name,
-        ror AS institution_ror
-    FROM {{ ref('dim_openalex_institution') }}
-    WHERE ror = '{{ cic_ror }}'
+        relationship.institution_hk,
+        institution.institution_id,
+        institution.institution_display_name,
+        relationship.ror AS institution_ror
+    FROM {{ ref('brg_openalex_institution_ror') }} relationship
+    INNER JOIN {{ ref('dim_openalex_institution') }} institution
+        USING (institution_hk)
+    WHERE relationship.ror = '{{ cic_ror }}'
 ),
 
-base AS (
+-- ¿Qué atributos expone el subconjunto de works recuperado para CIC?
+final AS (
     SELECT
         cic_institution.institution_hk,
         cic_institution.institution_id,
@@ -35,4 +40,5 @@ base AS (
     CROSS JOIN cic_institution
 )
 
-SELECT * FROM base
+SELECT *
+FROM final

@@ -1,42 +1,90 @@
-WITH work_pid AS (
-    SELECT
-        hub_work.work_hk,
-        MAX(REPLACE(hub_doi.doi, 'https://doi.org/', '')) AS doi,
-        MAX(hub_mag.mag) AS mag,
-        MAX(hub_pmcid.pmcid) AS pmcid,
-        MAX(hub_pmid.pmid) AS pmid
-    FROM {{ ref('hub_openalex_work') }} hub_work
-    LEFT JOIN {{ ref('link_openalex_work_doi') }} link_work_doi
-        ON link_work_doi.work_hk = hub_work.work_hk
-    LEFT JOIN {{ ref('hub_openalex_doi') }} hub_doi
-        ON hub_doi.doi_hk = link_work_doi.doi_hk
-    LEFT JOIN {{ ref('link_openalex_work_mag') }} link_work_mag
-        ON link_work_mag.work_hk = hub_work.work_hk
-    LEFT JOIN {{ ref('hub_openalex_mag') }} hub_mag
-        ON hub_mag.mag_hk = link_work_mag.mag_hk
-    LEFT JOIN {{ ref('link_openalex_work_pmcid') }} link_work_pmcid
-        ON link_work_pmcid.work_hk = hub_work.work_hk
-    LEFT JOIN {{ ref('hub_openalex_pmcid') }} hub_pmcid
-        ON hub_pmcid.pmcid_hk = link_work_pmcid.pmcid_hk
-    LEFT JOIN {{ ref('link_openalex_work_pmid') }} link_work_pmid
-        ON link_work_pmid.work_hk = hub_work.work_hk
-    LEFT JOIN {{ ref('hub_openalex_pmid') }} hub_pmid
-        ON hub_pmid.pmid_hk = link_work_pmid.pmid_hk
-    GROUP BY hub_work.work_hk
-),
-
-dim AS (
+-- ¿Cuántos identificadores distintos de cada esquema conserva cada work de OpenAlex?
+WITH pid_count AS (
     SELECT
         work_hk,
-        COALESCE(NULLIF(doi, ''), '-') AS doi,
-        COALESCE(mag, '-') AS mag,
-        COALESCE(pmcid, '-') AS pmcid,
-        COALESCE(pmid, '-') AS pmid,
-        CASE WHEN COALESCE(NULLIF(doi, ''), '-') <> '-' THEN TRUE ELSE FALSE END AS has_doi,
-        CASE WHEN COALESCE(mag, '-') <> '-' THEN TRUE ELSE FALSE END AS has_mag,
-        CASE WHEN COALESCE(pmcid, '-') <> '-' THEN TRUE ELSE FALSE END AS has_pmcid,
-        CASE WHEN COALESCE(pmid, '-') <> '-' THEN TRUE ELSE FALSE END AS has_pmid
-    FROM work_pid
+        COUNT(DISTINCT pid_value) FILTER (WHERE pid_scheme = 'doi') AS doi_count,
+        COUNT(DISTINCT pid_value) FILTER (WHERE pid_scheme = 'mag') AS mag_count,
+        COUNT(DISTINCT pid_value) FILTER (WHERE pid_scheme = 'pmcid') AS pmcid_count,
+        COUNT(DISTINCT pid_value) FILTER (WHERE pid_scheme = 'pmid') AS pmid_count
+    FROM {{ ref('brg_openalex_work_pid') }}
+    GROUP BY work_hk
+),
+
+-- ¿Qué PIDs pueden atribuirse sin ambigüedad a cada work de OpenAlex?
+pid_unambiguous AS (
+    SELECT DISTINCT
+        relationship.work_hk,
+        relationship.pid_scheme,
+        relationship.pid_value
+    FROM {{ ref('brg_openalex_work_pid') }} relationship
+    INNER JOIN pid_count
+        USING (work_hk)
+    WHERE (relationship.pid_scheme = 'doi' AND pid_count.doi_count = 1)
+       OR (relationship.pid_scheme = 'mag' AND pid_count.mag_count = 1)
+       OR (relationship.pid_scheme = 'pmcid' AND pid_count.pmcid_count = 1)
+       OR (relationship.pid_scheme = 'pmid' AND pid_count.pmid_count = 1)
+),
+
+-- ¿Qué DOI unívoco corresponde a cada work?
+doi AS (
+    SELECT work_hk, pid_value AS doi
+    FROM pid_unambiguous
+    WHERE pid_scheme = 'doi'
+),
+
+-- ¿Qué identificador MAG unívoco corresponde a cada work?
+mag AS (
+    SELECT work_hk, pid_value AS mag
+    FROM pid_unambiguous
+    WHERE pid_scheme = 'mag'
+),
+
+-- ¿Qué PMCID unívoco corresponde a cada work?
+pmcid AS (
+    SELECT work_hk, pid_value AS pmcid
+    FROM pid_unambiguous
+    WHERE pid_scheme = 'pmcid'
+),
+
+-- ¿Qué PMID unívoco corresponde a cada work?
+pmid AS (
+    SELECT work_hk, pid_value AS pmid
+    FROM pid_unambiguous
+    WHERE pid_scheme = 'pmid'
+),
+
+-- ¿Qué atributos de cobertura de PIDs expone cada work de OpenAlex?
+final AS (
+    SELECT
+        work.work_hk,
+        COALESCE(doi.doi, '-') AS doi,
+        COALESCE(pid_count.doi_count, 0) AS doi_count,
+        COALESCE(pid_count.doi_count, 0) > 0 AS has_doi,
+        COALESCE(pid_count.doi_count, 0) = 1 AS has_single_doi,
+        COALESCE(mag.mag, '-') AS mag,
+        COALESCE(pid_count.mag_count, 0) AS mag_count,
+        COALESCE(pid_count.mag_count, 0) > 0 AS has_mag,
+        COALESCE(pid_count.mag_count, 0) = 1 AS has_single_mag,
+        COALESCE(pmcid.pmcid, '-') AS pmcid,
+        COALESCE(pid_count.pmcid_count, 0) AS pmcid_count,
+        COALESCE(pid_count.pmcid_count, 0) > 0 AS has_pmcid,
+        COALESCE(pid_count.pmcid_count, 0) = 1 AS has_single_pmcid,
+        COALESCE(pmid.pmid, '-') AS pmid,
+        COALESCE(pid_count.pmid_count, 0) AS pmid_count,
+        COALESCE(pid_count.pmid_count, 0) > 0 AS has_pmid,
+        COALESCE(pid_count.pmid_count, 0) = 1 AS has_single_pmid
+    FROM {{ ref('hub_openalex_work') }} work
+    LEFT JOIN pid_count
+        USING (work_hk)
+    LEFT JOIN doi
+        USING (work_hk)
+    LEFT JOIN mag
+        USING (work_hk)
+    LEFT JOIN pmcid
+        USING (work_hk)
+    LEFT JOIN pmid
+        USING (work_hk)
 )
 
-SELECT * FROM dim
+SELECT *
+FROM final

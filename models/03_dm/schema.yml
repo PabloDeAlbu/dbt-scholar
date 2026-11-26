@@ -190,27 +190,46 @@ models:
         data_tests: [not_null]
 
   - name: dim_organization
-    description: Dimensión central de organizaciones consolidada entre OpenAIRE y OpenAlex, con cruce por ROR cuando está disponible.
+    description: >
+      Dimensión central de organizaciones consolidada entre OpenAIRE y OpenAlex.
+      El cruce requiere que el ROR sea unívoco para la organización de OpenAIRE y para las entidades de ambas fuentes.
+      Las entidades con relaciones ambiguas se conservan sin fusionarlas.
     config:
       tags: [dm]
+      meta:
+        source_systems: [openaire, openalex]
+        model_role: dimension
+        grain: resolved_organization
     columns:
       - name: organization_ror
-        description: Identificador ROR compartido entre fuentes cuando existe.
+        description: Identificador ROR expuesto solamente cuando identifica una única entidad por fuente y puede usarse como clave de cruce.
+        data_tests:
+          - unique:
+              config:
+                where: "organization_ror is not null"
       - name: organization_name
-        description: Nombre legible de la organización, priorizando OpenAIRE y luego OpenAlex.
+        description: Nombre legible informado por las fuentes, priorizando OpenAIRE y luego OpenAlex sin sustituirlo por un identificador.
       - name: openaire_organization_hk
         description: Clave hash nativa de OpenAIRE para la organización, cuando aplica.
+        data_tests:
+          - unique:
+              config:
+                where: "openaire_organization_hk is not null"
       - name: openaire_organization_id
         description: Identificador canónico de OpenAIRE para la organización, cuando aplica.
       - name: openaire_acronym
         description: Acrónimo de la organización informado por OpenAIRE, cuando existe.
       - name: openalex_institution_hk
         description: Clave hash nativa de OpenAlex para la institución, cuando aplica.
+        data_tests:
+          - unique:
+              config:
+                where: "openalex_institution_hk is not null"
       - name: openalex_institution_id
         description: Identificador canónico de OpenAlex para la institución, cuando aplica.
       - name: has_openaire
-        description: Flag que indica presencia de la organización en OpenAIRE.
+        description: Indica si la fila contiene una organización de OpenAIRE, aunque no tenga un ROR apto para el cruce.
         data_tests: [not_null]
       - name: has_openalex
-        description: Flag que indica presencia de la organización en OpenAlex.
+        description: Indica si la fila contiene una institución de OpenAlex, aunque no tenga un ROR apto para el cruce.
         data_tests: [not_null]

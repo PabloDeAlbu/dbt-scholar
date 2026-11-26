@@ -32,17 +32,50 @@ models:
         description: Parámetro de filtro utilizado en la extracción.
       - name: _filter_value
         description: Valor del filtro utilizado en la extracción.
+      - name: institution_hk
+        description: Clave hash de la institución cuando el ROR del filtro identifica una única institución de OpenAlex.
+      - name: institution_id
+        description: Identificador de la institución cuando el ROR del filtro permite resolverla sin ambigüedad.
       - name: _filter_value_label
         description: >
           Label descriptivo del valor de filtro cuando `_filter_param =
-          institutions.ror`, tomado de `dim_openalex_institution`.
+          institutions.ror` identifica una única institución de OpenAlex.
       - name: extract_datetime
         data_tests: [not_null]
       - name: load_datetime
         data_tests: [not_null]
 
+  - name: brg_openalex_author_orcid
+    description: >
+      Relación entre autores y ORCID conservada por OpenAlex.
+      Expone el valor original y una representación sin la URL de ORCID.
+    config:
+      tags: [dm]
+      meta:
+        source_system: openalex
+        model_role: bridge
+        grain: author_hk + orcid_hk
+    columns:
+      - name: author_orcid_hk
+        data_tests: [not_null, unique]
+      - name: author_hk
+        data_tests: [not_null]
+      - name: orcid_hk
+        data_tests: [not_null]
+      - name: orcid_raw
+        description: Valor de ORCID conservado por el Hub de OpenAlex.
+        data_tests: [not_null]
+      - name: orcid
+        description: ORCID sin el prefijo `https://orcid.org/`.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [author_hk, orcid_hk]
+
   - name: dim_openalex_author
-    description: Dimensión de autores OpenAlex con atributos básicos e identificadores (ORCID si existe).
+    description: >
+      Dimensión de autores de OpenAlex con sus atributos descriptivos.
+      Expone un ORCID escalar solamente cuando el autor se relaciona con un único ORCID.
     config:
       tags: [dm]
     columns:
@@ -63,17 +96,48 @@ models:
       - name: cited_by_count
         description: Total de citas recibidas por el autor (según OpenAlex).
       - name: orcid
-        description: ORCID del autor (si está disponible).
+        description: ORCID cuando la relación es unívoca o `-` cuando no existe o es ambigua.
+      - name: orcid_count
+        description: Cantidad de ORCID distintos relacionados con el autor.
+        data_tests: [not_null]
       - name: has_orcid
-        description: Flag que indica presencia de ORCID.
-
-  - name: dim_openalex_institution
-    description: Dimensión de instituciones OpenAlex con país e identificador ROR (si está disponible).
-    config:
-      tags: [dm]
+        description: Indica si el autor se relaciona con al menos un ORCID.
+        data_tests: [not_null]
+      - name: has_single_orcid
+        description: Indica si el autor se relaciona con exactamente un ORCID.
+        data_tests: [not_null]
     data_tests:
       - dbt_utils.expression_is_true:
-          expression: "ror = '-' OR trim(ror) ~ '^https?://ror[.]org/[0-9a-z]{9}/?$'"
+          expression: "has_orcid = (orcid_count > 0) and has_single_orcid = (orcid_count = 1) and has_single_orcid = (orcid <> '-')"
+
+  - name: brg_openalex_institution_ror
+    description: Relación entre instituciones y ROR conservada por OpenAlex.
+    config:
+      tags: [dm]
+      meta:
+        source_system: openalex
+        model_role: bridge
+        grain: institution_hk + ror_hk
+    columns:
+      - name: institution_ror_hk
+        data_tests: [not_null, unique]
+      - name: institution_hk
+        data_tests: [not_null]
+      - name: ror_hk
+        data_tests: [not_null]
+      - name: ror
+        description: Identificador ROR relacionado con la institución.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [institution_hk, ror_hk]
+
+  - name: dim_openalex_institution
+    description: >
+      Dimensión de instituciones de OpenAlex con sus atributos descriptivos.
+      Expone un ROR escalar solamente cuando la institución se relaciona con un único ROR.
+    config:
+      tags: [dm]
     columns:
       - name: institution_hk
         description: Clave hash de la institución (PK del hub).
@@ -81,8 +145,26 @@ models:
       - name: institution_id
         description: Identificador canónico de OpenAlex para la institución.
         data_tests: [not_null, unique]
+      - name: institution_display_name
+        description: Nombre de la institución informado por OpenAlex sin sustituirlo por un identificador.
+      - name: country_code
+        description: Código de país informado por OpenAlex o `-` cuando no está disponible.
       - name: ror
-        description: Identificador ROR (URL) o '-' si no está disponible.
+        description: Identificador ROR cuando la relación es unívoca o `-` cuando no existe o es ambigua.
+      - name: ror_count
+        description: Cantidad de ROR distintos relacionados con la institución.
+        data_tests: [not_null]
+      - name: has_ror
+        description: Indica si la institución se relaciona con al menos un ROR.
+        data_tests: [not_null]
+      - name: has_single_ror
+        description: Indica si la institución se relaciona con exactamente un ROR y `ror` puede exponerse sin ambigüedad.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: "ror = '-' OR trim(ror) ~ '^https?://ror[.]org/[0-9a-z]{9}/?$'"
+      - dbt_utils.expression_is_true:
+          expression: "has_ror = (ror_count > 0) and has_single_ror = (ror_count = 1) and has_single_ror = (ror <> '-')"
 
   - name: dim_openalex_topic
     description: Dimensión de tópicos OpenAlex (display_name + jerarquías domain/field/subfield).
@@ -152,15 +234,49 @@ models:
         description: DOI normalizado en minúsculas, sin URL ni puntuación final.
         data_tests: [not_null]
 
+  - name: brg_openalex_work_pid
+    description: >
+      Relación entre works y PIDs conservada por OpenAlex.
+      Unifica DOI, MAG, PMCID y PMID sin reducir las relaciones multivaluadas a una sola fila por work.
+    config:
+      tags: [dm]
+      meta:
+        source_system: openalex
+        model_role: bridge
+        grain: work_hk + pid_scheme + pid_hk
+    columns:
+      - name: work_pid_hk
+        description: Clave hash de la relación en el Data Vault de origen.
+        data_tests: [not_null]
+      - name: work_hk
+        description: Clave hash del work de OpenAlex.
+        data_tests: [not_null]
+      - name: pid_hk
+        description: Clave hash del identificador dentro de su esquema de origen.
+        data_tests: [not_null]
+      - name: pid_scheme
+        description: >
+          Esquema del identificador: `doi`, `mag`, `pmcid` o `pmid`.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [doi, mag, pmcid, pmid]
+      - name: pid_raw_value
+        description: Valor conservado por el Hub correspondiente.
+        data_tests: [not_null]
+      - name: pid_value
+        description: Valor utilizado para comparar identificadores dentro de su esquema.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [work_hk, pid_scheme, pid_hk]
+
   - name: dim_openalex_work_pid
     description: >
       Perfil de PIDs por work OpenAlex, con identificadores normalizados y flags
       de presencia para cada esquema soportado.
     config:
       tags: [dm]
-    data_tests:
-      - dbt_utils.expression_is_true:
-          expression: 'doi IN (''-'', ''!UNKNOWN'') OR doi ~* ''^10\.[0-9]{4,9}/.+$'''
     columns:
       - name: work_hk
         description: Clave hash de la obra (PK del hub).
@@ -171,25 +287,60 @@ models:
               to: ref('hub_openalex_work')
               field: work_hk
       - name: doi
-        description: DOI sin prefijo https://doi.org/ o '-' si no hay.
+        description: DOI normalizado cuando es unívoco o `-` cuando no existe o es ambiguo.
+      - name: doi_count
+        description: Cantidad de DOI normalizados distintos relacionados con el work.
+        data_tests: [not_null]
       - name: has_doi
-        description: Flag que indica presencia de DOI.
+        description: Indica si el work se relaciona con al menos un DOI.
+        data_tests: [not_null]
+      - name: has_single_doi
+        description: Indica si el work se relaciona con exactamente un DOI normalizado.
         data_tests: [not_null]
       - name: mag
-        description: Identificador MAG o '-' si no hay.
+        description: Identificador MAG cuando es unívoco o `-` cuando no existe o es ambiguo.
+      - name: mag_count
+        description: Cantidad de identificadores MAG distintos relacionados con el work.
+        data_tests: [not_null]
       - name: has_mag
-        description: Flag que indica presencia de MAG.
+        description: Indica si el work se relaciona con al menos un identificador MAG.
+        data_tests: [not_null]
+      - name: has_single_mag
+        description: Indica si el work se relaciona con exactamente un identificador MAG.
         data_tests: [not_null]
       - name: pmcid
-        description: PMCID o '-' si no hay.
+        description: PMCID cuando es unívoco o `-` cuando no existe o es ambiguo.
+      - name: pmcid_count
+        description: Cantidad de PMCID distintos relacionados con el work.
+        data_tests: [not_null]
       - name: has_pmcid
-        description: Flag que indica presencia de PMCID.
+        description: Indica si el work se relaciona con al menos un PMCID.
+        data_tests: [not_null]
+      - name: has_single_pmcid
+        description: Indica si el work se relaciona con exactamente un PMCID.
         data_tests: [not_null]
       - name: pmid
-        description: PMID o '-' si no hay.
-      - name: has_pmid
-        description: Flag que indica presencia de PMID.
+        description: PMID cuando es unívoco o `-` cuando no existe o es ambiguo.
+      - name: pmid_count
+        description: Cantidad de PMID distintos relacionados con el work.
         data_tests: [not_null]
+      - name: has_pmid
+        description: Indica si el work se relaciona con al menos un PMID.
+        data_tests: [not_null]
+      - name: has_single_pmid
+        description: Indica si el work se relaciona con exactamente un PMID.
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: 'doi = ''-'' OR doi ~* ''^10\.[0-9]{4,9}/.+$'''
+      - dbt_utils.expression_is_true:
+          expression: "has_doi = (doi_count > 0) and has_single_doi = (doi_count = 1) and has_single_doi = (doi <> '-')"
+      - dbt_utils.expression_is_true:
+          expression: "has_mag = (mag_count > 0) and has_single_mag = (mag_count = 1) and has_single_mag = (mag <> '-')"
+      - dbt_utils.expression_is_true:
+          expression: "has_pmcid = (pmcid_count > 0) and has_single_pmcid = (pmcid_count = 1) and has_single_pmcid = (pmcid <> '-')"
+      - dbt_utils.expression_is_true:
+          expression: "has_pmid = (pmid_count > 0) and has_single_pmid = (pmid_count = 1) and has_single_pmid = (pmid <> '-')"
 
   - name: fct_openalex_work_publication
     description: >
@@ -236,21 +387,37 @@ models:
       - name: authors
         description: Autores OpenAlex agregados para el work y concatenados con `|`.
       - name: doi
-        description: DOI normalizado del work o `null` si no está disponible.
+        description: DOI normalizado del work cuando es unívoco o `null` si no existe o es ambiguo.
+      - name: doi_count
+        description: Cantidad de DOI normalizados distintos relacionados con el work.
       - name: has_doi
-        description: Flag que indica presencia de DOI.
+        description: Indica si el work se relaciona con al menos un DOI.
+      - name: has_single_doi
+        description: Indica si el work se relaciona con exactamente un DOI normalizado.
       - name: mag
-        description: Identificador MAG del work o `null` si no está disponible.
+        description: Identificador MAG del work cuando es unívoco o `null` si no existe o es ambiguo.
+      - name: mag_count
+        description: Cantidad de identificadores MAG distintos relacionados con el work.
       - name: has_mag
-        description: Flag que indica presencia de MAG.
+        description: Indica si el work se relaciona con al menos un identificador MAG.
+      - name: has_single_mag
+        description: Indica si el work se relaciona con exactamente un identificador MAG.
       - name: pmcid
-        description: PMCID del work o `null` si no está disponible.
+        description: PMCID del work cuando es unívoco o `null` si no existe o es ambiguo.
+      - name: pmcid_count
+        description: Cantidad de PMCID distintos relacionados con el work.
       - name: has_pmcid
-        description: Flag que indica presencia de PMCID.
+        description: Indica si el work se relaciona con al menos un PMCID.
+      - name: has_single_pmcid
+        description: Indica si el work se relaciona con exactamente un PMCID.
       - name: pmid
-        description: PMID del work o `null` si no está disponible.
+        description: PMID del work cuando es unívoco o `null` si no existe o es ambiguo.
+      - name: pmid_count
+        description: Cantidad de PMID distintos relacionados con el work.
       - name: has_pmid
-        description: Flag que indica presencia de PMID.
+        description: Indica si el work se relaciona con al menos un PMID.
+      - name: has_single_pmid
+        description: Indica si el work se relaciona con exactamente un PMID.
       - name: cited_by_count
         description: Cantidad de citas según OpenAlex.
       - name: fwci

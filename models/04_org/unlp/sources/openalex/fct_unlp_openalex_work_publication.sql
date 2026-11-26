@@ -1,5 +1,6 @@
 {%- set unlp_ror = 'https://ror.org/01tjs6929' -%}
 
+-- ¿Qué works fueron recuperados mediante el ROR de la UNLP?
 WITH unlp_extract AS (
     SELECT
         work_hk,
@@ -11,26 +12,21 @@ WITH unlp_extract AS (
     GROUP BY work_hk
 ),
 
+-- ¿Qué instituciones de OpenAlex están relacionadas con el ROR de la UNLP?
 unlp_institution AS (
     SELECT
-        institution_hk,
-        institution_id,
-        institution_display_name,
-        ror AS institution_ror
-    FROM {{ ref('dim_openalex_institution') }}
-    WHERE ror = '{{ unlp_ror }}'
+        relationship.institution_hk,
+        institution.institution_id,
+        institution.institution_display_name,
+        relationship.ror AS institution_ror
+    FROM {{ ref('brg_openalex_institution_ror') }} relationship
+    INNER JOIN {{ ref('dim_openalex_institution') }} institution
+        USING (institution_hk)
+    WHERE relationship.ror = '{{ unlp_ror }}'
 ),
 
-doi_stats AS (
-    SELECT
-        work_hk,
-        COUNT(DISTINCT doi_hk) AS doi_count,
-        (COUNT(DISTINCT doi_hk) > 1) AS has_multiple_doi
-    FROM {{ ref('link_openalex_work_doi') }}
-    GROUP BY work_hk
-),
-
-base AS (
+-- ¿Qué atributos expone el subconjunto de works recuperado para la UNLP?
+final AS (
     SELECT
         unlp_institution.institution_hk,
         unlp_institution.institution_id,
@@ -38,13 +34,12 @@ base AS (
         unlp_institution.institution_ror,
         unlp_extract.unlp_first_extract_datetime,
         unlp_extract.unlp_last_extract_datetime,
-        COALESCE(doi_stats.doi_count, 0) AS doi_count,
-        COALESCE(doi_stats.has_multiple_doi, FALSE) AS has_multiple_doi,
+        fct.doi_count > 1 AS has_multiple_doi,
         fct.*
     FROM {{ ref('fct_openalex_work_publication') }} AS fct
     INNER JOIN unlp_extract USING (work_hk)
-    LEFT JOIN doi_stats USING (work_hk)
     CROSS JOIN unlp_institution
 )
 
-SELECT * FROM base
+SELECT *
+FROM final

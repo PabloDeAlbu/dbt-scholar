@@ -180,17 +180,6 @@ oai_publication AS (
     FROM {{ ref('fct_oai_record_publication') }} pub
 ),
 
-openaire_researchproduct_doi AS (
-    SELECT
-        researchproduct_hk,
-        MIN(value) AS doi
-    FROM {{ ref('brg_openaire_researchproduct_pid') }}
-    WHERE LOWER(scheme) = 'doi'
-      AND value IS NOT NULL
-      AND value <> ''
-    GROUP BY researchproduct_hk
-),
-
 openaire_extraction_context AS (
     SELECT
         entity_hk::bytea AS entity_hk,
@@ -222,8 +211,9 @@ openaire_publication AS (
     FROM {{ ref('fct_openaire_researchproduct_publication') }} pub
     LEFT JOIN openaire_extraction_context AS extract
         ON pub.researchproduct_hk = extract.entity_hk
-    LEFT JOIN openaire_researchproduct_doi AS doi
-        USING (researchproduct_hk)
+    LEFT JOIN {{ ref('brg_openaire_researchproduct_doi') }} AS doi
+        ON pub.researchproduct_hk = doi.researchproduct_hk
+       AND pub.has_single_doi
 ),
 
 openalex_extraction_context AS (
@@ -254,15 +244,13 @@ openalex_publication AS (
                 WHEN pub.publication_year IS NOT NULL THEN EXTRACT(YEAR FROM pub.publication_year)::integer
             END
         ) AS publication_year,
-        NULLIF(pid.doi, '-')::text AS doi,
+        pub.doi::text AS doi,
         pub.title::text AS title,
         pub.type::text AS publication_type,
         extract.extract_datetime AS extract_datetime,
         sat_work.load_datetime AS load_datetime
     FROM {{ ref('fct_openalex_work_publication') }} pub
     INNER JOIN {{ ref('latest_sat_openalex_work') }} sat_work
-        USING (work_hk)
-    LEFT JOIN {{ ref('dim_openalex_work_pid') }} pid
         USING (work_hk)
     LEFT JOIN openalex_extraction_context AS extract
         ON pub.work_hk = extract.entity_hk

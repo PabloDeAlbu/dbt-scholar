@@ -1,0 +1,85 @@
+version: 2
+
+models:
+  - name: openalex_author
+    description: >
+      Atributos y cobertura de ORCID de cada autor de OpenAlex.
+      El ORCID escalar se expone solamente cuando la relación es unívoca.
+    config:
+      tags: [analytics, openalex]
+      meta:
+        source_system: openalex
+        model_role: analytics
+        grain: author_id
+    columns:
+      - name: author_id
+        data_tests: [not_null, unique]
+      - name: orcid_count
+        data_tests: [not_null]
+      - name: has_orcid
+        data_tests: [not_null]
+      - name: has_single_orcid
+        data_tests: [not_null]
+
+  - name: openalex_work_author
+    description: >
+      Relación entre works y autores de OpenAlex con nombre y ORCID resueltos para la autoría.
+      Prioriza el ORCID unívoco del autor y utiliza la observación de la autoría cuando aquel no está disponible.
+    config:
+      tags: [analytics, openalex]
+      meta:
+        source_system: openalex
+        model_role: analytics
+        grain: work_hk + author_hk
+    columns:
+      - name: work_hk
+        data_tests: [not_null]
+      - name: author_hk
+        data_tests: [not_null]
+      - name: has_orcid
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [work_hk, author_hk]
+
+  - name: openalex_work_institution
+    description: >
+      Relación entre works, instituciones y ROR informada por OpenAlex.
+      Conserva una fila por ROR y mantiene `-` cuando la institución no tiene ROR.
+    config:
+      tags: [analytics, openalex]
+      meta:
+        source_system: openalex
+        model_role: analytics
+        grain: work_hk + institution_hk + ror
+    columns:
+      - name: work_hk
+        data_tests: [not_null]
+      - name: institution_hk
+        data_tests: [not_null]
+      - name: ror
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [work_hk, institution_hk, ror]
+
+  - name: openalex_author_institution
+    description: >
+      Relación entre autores, instituciones y ROR informada por OpenAlex.
+      Conserva una fila por ROR y mantiene `-` cuando la institución no tiene ROR.
+    config:
+      tags: [analytics, openalex]
+      meta:
+        source_system: openalex
+        model_role: analytics
+        grain: author_hk + institution_hk + ror
+    columns:
+      - name: author_hk
+        data_tests: [not_null]
+      - name: institution_hk
+        data_tests: [not_null]
+      - name: ror
+        data_tests: [not_null]
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [author_hk, institution_hk, ror]
