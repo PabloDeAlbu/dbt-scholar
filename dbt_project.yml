@@ -120,12 +120,6 @@ models:
     04_org:
       # Nuevo layout objetivo: vistas institucionales por organización y fuente
       # bajo `models/04_org/<org>/<fuente>/`, materializando en schemas `dm_*`.
-      cendie:
-        +schema: cendie
-        +tags: [cendie]
-        oai:
-          +schema: cendie
-          +tags: [cendie, oai]
       cic:
         +schema: cic
         +tags: [cic]
@@ -156,12 +150,6 @@ models:
         openaire:
           +schema: conicet
           +tags: [conicet, openaire]
-      smn:
-        +schema: smn
-        +tags: [smn]
-        dspace5db:
-          +schema: smn
-          +tags: [smn, dspace5db]
       unlp:
         +schema: unlp
         +tags: [unlp]
@@ -188,12 +176,6 @@ models:
           +schema: unlp
           +tags: [unlp, integration]
     05_analytics:
-      cendie:
-        +schema: cendie
-        +tags: [cendie, analytics]
-        +materialized: table
-        oai:
-          +tags: [oai]
       conicet:
         +schema: conicet
         +tags: [conicet, analytics]
