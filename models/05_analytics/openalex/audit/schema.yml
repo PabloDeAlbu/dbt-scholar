@@ -1,0 +1,74 @@
+version: 2
+
+models:
+  - name: openalex_work_extraction_summary_by_institution_ror
+    description: >
+      Resumen diario de los works recuperados mediante el filtro `institutions.ror` de OpenAlex.
+      Conserva una fila por fecha de extracción y ROR para interpretar el volumen y el rango de años de publicación.
+    config:
+      tags: [audit]
+      meta:
+        source_system: openalex
+        model_role: extraction_monitoring_summary
+        grain: extract_date + institution_ror
+    columns:
+      - name: extract_date
+        description: Fecha calendario de la extracción.
+        data_tests: [not_null]
+      - name: institution_ror
+        description: ROR utilizado como valor del filtro de extracción.
+        data_tests: [not_null]
+      - name: institution_display_name
+        description: Nombre de la institución o, cuando no está disponible, su ROR.
+        data_tests: [not_null]
+      - name: extraction_event_count
+        description: Cantidad de eventos work-extracción observados.
+        data_tests: [not_null]
+      - name: extracted_work_count
+        description: Cantidad de works distintos recuperados.
+        data_tests: [not_null]
+      - name: min_publication_year
+        description: Menor año de publicación entre los works recuperados.
+      - name: max_publication_year
+        description: Mayor año de publicación entre los works recuperados.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [extract_date, institution_ror]
+      - dbt_utils.expression_is_true:
+          expression: "extraction_event_count >= extracted_work_count"
+
+  - name: openalex_work_author_coverage_by_institution_ror
+    description: >
+      Cobertura de autorías para los works recuperados mediante el filtro `institutions.ror` de OpenAlex.
+      Conserva una fila por extracción y ROR para identificar works sin relaciones de autoría.
+    config:
+      tags: [audit]
+      meta:
+        source_system: openalex
+        model_role: extraction_monitoring
+        grain: extract_datetime + institution_ror
+    columns:
+      - name: extract_datetime
+        description: Momento lógico de la extracción.
+        data_tests: [not_null]
+      - name: institution_ror
+        description: ROR utilizado como valor del filtro de extracción.
+        data_tests: [not_null]
+      - name: institution_display_name
+        description: Nombre de la institución informado en el contexto de extracción.
+      - name: extracted_work_count
+        description: Cantidad de works distintos recuperados.
+        data_tests: [not_null]
+      - name: work_with_authors_count
+        description: Cantidad de works con al menos una relación de autoría.
+        data_tests: [not_null]
+      - name: work_without_authors_count
+        description: Cantidad de works sin relaciones de autoría.
+        data_tests: [not_null]
+      - name: author_coverage_ratio
+        description: Proporción de works recuperados que poseen al menos una relación de autoría.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: [extract_datetime, institution_ror]
+      - dbt_utils.expression_is_true:
+          expression: "extracted_work_count = work_with_authors_count + work_without_authors_count"
